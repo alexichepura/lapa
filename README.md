@@ -6,7 +6,9 @@
 ## CSS nesting and custom media
 For now requires fork of cargo-leptos with relevant flags for lightningcss
 https://github.com/leptos-rs/cargo-leptos/commit/da6c7aeec7b062335e6592ca379c175fb82d3c16
+```sh
 cargo install --git https://github.com/leptos-rs/cargo-leptos --locked cargo-leptos --rev da6c7aeec7b062335e6592ca379c175fb82d3c16
+```
 
 ### CSS nesting
 https://caniuse.com/css-nesting
