@@ -32,11 +32,12 @@ Type-safe database access.
 
 ## Includes
 - monorepo with 2 main packages for SEO site and admin dashboard
+- prisma schema for db (user, session, post, image, settings)
 - admin auth and session with 
     - axum_session <https://github.com/AscendingCreations/AxumSessions>
     - axum_session_auth <https://github.com/AscendingCreations/AxumSessionsAuth>
     - custom adapter for DatabasePool to use prisma
-- images preview and upload
+- image preview and upload
 - images resize and convert on backend
 - css based on <https://open-props.style>
 - css processing with <https://lightningcss.dev>
@@ -45,6 +46,27 @@ Type-safe database access.
 - compression and precompression
 - stiched together forms, inputs and response messages
 
+## Run 
+Requires prisma client to be generated
+```sh
+cargo prisma db push # generate client and push schema to db
+# or
+cargo prisma generate # only generate client
+```
+
+### Dev
+```sh
+cargo leptos watch -p lapa_admin
+cargo leptos watch -p lapa_site
+```
+
+### Prod
+See relevant tutorial and demo project.
+<https://github.com/alexichepura/leptos_axum_prisma_sozu>
+<https://www.youtube.com/watch?v=KLg8Hcd3K_U>
+```sh
+cargo leptos build --release
+```
 
 ## Notes on CSS nesting and custom media
 For now requires fork of cargo-leptos with relevant flags for lightningcss
