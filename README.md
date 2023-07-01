@@ -1,5 +1,8 @@
 # LAPA - Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website
 
+<img width="1512" alt="LAPA Admin Screenshot 2023-07-01 at 11 11 33" src="https://github.com/alexichepura/lapa/assets/5582266/21d19e52-8fe1-4497-93e3-49ef488b11df">
+
+
 ## CSS nesting and custom media
 For now requires fork of cargo-leptos with relevant flags for lightningcss
 https://github.com/leptos-rs/cargo-leptos/commit/da6c7aeec7b062335e6592ca379c175fb82d3c16
