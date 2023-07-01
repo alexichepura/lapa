@@ -1,0 +1,134 @@
+use leptos::*;
+use leptos_router::*;
+use serde::{Deserialize, Serialize};
+use thiserror::Error;
+
+use crate::util::Loading;
+
+#[derive(Params, Clone, Debug, PartialEq, Eq)]
+pub struct PostParams {
+    slug: String,
+}
+
+#[derive(Error, Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PostError {
+    #[error("Invalid post ID.")]
+    InvalidId,
+    #[error("Post not found.")]
+    NotFound,
+    #[error("Server error.")]
+    ServerError,
+}
+
+#[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PostImageData {
+    pub id: String,
+    pub alt: String,
+}
+
+#[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PostData {
+    pub id: String,
+    pub slug: String,
+    pub title: String,
+    pub description: String,
+    pub images: Vec<PostImageData>,
+}
+
+#[component]
+pub fn PostPage(cx: Scope) -> impl IntoView {
+    let params = use_params::<PostParams>(cx);
+    let slug = move || {
+        params.with(|q| {
+            q.as_ref()
+                .map(|q| q.slug.clone())
+                .map_err(|_| PostError::InvalidId)
+        })
+    };
+
+    let post = create_blocking_resource(cx, slug, move |slug| async move {
+        match slug {
+            Err(e) => Err(e),
+            Ok(slug) => get_post(cx, slug)
+                .await
+                .map_err(|_| PostError::ServerError)
+                .flatten(),
+        }
+    });
+
+    view! { cx,
+        <Suspense fallback=move || {
+            view! { cx, <Loading/> }
+        }>
+            {move || {
+                post.read(cx)
+                    .map(|post| match post {
+                        Err(e) => view! { cx, <p>{e.to_string()}</p> }.into_view(cx),
+                        Ok(post) => view! { cx, <PostView post=post/> }.into_view(cx),
+                    })
+            }}
+        </Suspense>
+    }
+}
+
+#[component]
+pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
+    view! { cx,
+        <h1>{post.title}</h1>
+        <For
+            each=move || post.images.clone()
+            key=|image| image.id.clone()
+            view=move |cx, image: PostImageData| {
+                let src = format!("/img/{}-s.webp", image.id);
+                view! { cx, <img src=src alt=image.alt/> }
+            }
+        />
+    }
+}
+
+#[server(GetPost, "/api")]
+pub async fn get_post(
+    cx: Scope,
+    slug: String,
+) -> Result<Result<PostData, PostError>, ServerFnError> {
+    use prisma_client::db;
+    let prisma_client = crate::prisma::use_prisma(cx)?;
+
+    let post = prisma_client
+        .post()
+        .find_unique(db::post::UniqueWhereParam::SlugEquals(slug))
+        // .with(db::post::images::fetch(vec![]))
+        .include(db::post::include!({
+            images: select {
+                id
+                alt
+            }
+        }))
+        .exec()
+        .await
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
+
+    Ok(match post {
+        Some(post) => Ok(PostData {
+            id: post.id,
+            slug: post.slug,
+            title: post.title,
+            description: post.description,
+            images: post
+                .images
+                .iter()
+                .map(|img| PostImageData {
+                    id: img.id.clone(),
+                    alt: img.alt.clone(),
+                })
+                .collect(),
+        }),
+        None => {
+            crate::err::serverr_404(cx);
+            Err(PostError::NotFound)
+        }
+    })
+}

@@ -1,0 +1,204 @@
+@import "https://unpkg.com/open-props";
+@import "https://unpkg.com/open-props/normalize.min.css";
+@import "https://unpkg.com/open-props/buttons.min.css";
+
+/* https://caniuse.com/css-nesting */
+
+/* https://drafts.csswg.org/mediaqueries-5/#at-ruledef-custom-media */
+/* @import "https://unpkg.com/open-props/media.min.css"; */
+/* https://open-props.style/#media-queries */
+/* https://github.com/parcel-bundler/lightningcss/issues/49 */
+/* https://github.com/parcel-bundler/lightningcss/pull/60 */
+@custom-media --md-n-above (width >=768px);
+@custom-media --sm-n-above (width >=480px);
+
+body {
+	font-family: var(--font-sans);
+	margin: 0;
+	height: 100%;
+	overflow-x: hidden;
+}
+
+h1 {
+	font-size: var(--font-size-4);
+	margin-block-end: 1rem;
+}
+
+h2 {
+	font-size: var(--font-size-3);
+	margin-block-end: 1rem;
+}
+
+hr {
+	margin-block: var(--size-fluid-2);
+}
+
+.admin {
+	display: grid;
+	height: 100vh;
+	grid-template-rows: 56px 1fr;
+	grid-template-columns: calc(var(--size-fluid-4) * 5) 1fr;
+	grid-template-areas: "logo header" "nav main";
+}
+
+header {
+	grid-area: header;
+	background: var(--surface-2);
+	box-shadow: var(--shadow-3);
+	display: grid;
+	grid-template-columns: 1fr auto auto;
+	gap: var(--size-fluid-2);
+	padding: 0 var(--size-fluid-2);
+	align-items: center;
+}
+
+.logo {
+	grid-area: logo;
+	color: var(--gray-3);
+	display: flex;
+	align-items: center;
+	font-size: var(--font-size-fluid-1);
+	padding: 0 var(--size-fluid-2);
+	box-shadow: var(--shadow-2);
+	background: var(--gradient-1);
+	z-index: 1;
+}
+
+nav {
+	grid-area: nav;
+	background: var(--surface-2);
+
+	&>a {
+		display: flex;
+		align-items: center;
+		height: var(--size-fluid-4);
+		margin: 0;
+		padding: 0 var(--size-fluid-2);
+		text-decoration: none;
+		border-bottom: var(--border-size-1) solid var(--surface-3);
+		color: var(--text-1);
+	}
+
+	&>a:visited {
+		color: var(--text-1);
+	}
+
+	&>a:is(:hover, :focus) {
+		background: var(--surface-4);
+	}
+
+	&>a[aria-current] {
+		background: var(--surface-3);
+	}
+}
+
+main {
+	flex: 1;
+	grid-area: main;
+	padding: var(--size-fluid-1) var(--size-fluid-2);
+	overflow-y: auto;
+	overflow-x: hidden;
+	-webkit-overflow-scrolling: touch;
+
+	& form {
+		container-type: inline-size;
+	}
+}
+
+.RoutingProgress {
+	position: fixed;
+	opacity: 0.5;
+	top: 0;
+	width: 100vw;
+	transform: translateY(-50%);
+}
+
+.Card {
+	background: var(--surface-3);
+	border-radius: var(--radius-2);
+	padding: var(--size-fluid-2);
+	box-shadow: var(--shadow-3);
+	margin-block-end: var(--size-fluid-2);
+}
+
+form footer {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--size-fluid-2);
+	align-items: center;
+	justify-content: start;
+}
+
+
+/* @container (--sm-n-above) { */
+@container (width >=480px) {
+	form footer {
+		grid-template-columns: auto auto;
+	}
+}
+
+fieldset {
+	margin-block-end: var(--size-fluid-2);
+
+	&:disabled {
+		opacity: 0.8;
+	}
+}
+
+label {
+	/* :has(input) {} Firefox https://caniuse.com/css-has */
+	display: block;
+	margin-block-end: var(--size-fluid-1);
+
+	&>div {
+		margin-block-end: 0.3rem;
+	}
+
+	&>input:not([type='checkbox']) {
+		display: block;
+		width: 100%;
+	}
+
+	&>input[type='checkbox']+span {
+		margin-inline-start: 0.5rem;
+	}
+}
+
+.Alert {
+	font-size: initial;
+	font-weight: var(--font-weight-7);
+	border-radius: var(--radius-2);
+	padding-block: .75ch;
+	padding-inline: var(--size-relative-6);
+
+	&.Danger {
+		color: var(--red-1);
+		background: var(--red-6);
+		border: var(--border-size-1) solid var(--red-7);
+	}
+
+	&.Success {
+		color: var(--green-1);
+		background: var(--green-6);
+		border: var(--border-size-1) solid var(--green-7);
+	}
+}
+
+@media (--md-n-above) {
+	.Grid-fluid-2 {
+		display: grid;
+		gap: var(--size-fluid-2);
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+.login-card {
+	width: min(100% - 1rem, 20rem);
+	margin-inline: auto;
+	margin-block-start: 1rem;
+}
+
+.upload-preview {
+	max-width: 100px;
+	max-height: 100px;
+}

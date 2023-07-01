@@ -1,0 +1,59 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:../site.db"
+}
+
+generator client {
+  provider    = "cargo prisma"
+  output      = "../prisma_client/src/db.rs"
+  // https://prisma.brendonovich.dev/reading-data/select-include#setup
+  module_path = "prisma_client::db"
+}
+
+model Ssr {
+  id         String   @id @default(cuid())
+  created_at DateTime @default(now())
+  path       String
+  user_agent String?
+}
+
+model User {
+  id         String   @id @default(cuid())
+  created_at DateTime @default(now())
+  username   String   @unique
+  password   String
+}
+
+model Session {
+  id         String   @id
+  created_at DateTime @default(now())
+  session    String
+  expires    Int?
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  created_at  DateTime @default(now())
+  slug        String   @unique
+  title       String   @default("")
+  description String   @default("")
+  images      Image[]
+}
+
+model Image {
+  id         String   @id @default(cuid())
+  created_at DateTime @default(now())
+  alt        String
+  orig       String
+  post       Post     @relation(fields: [post_id], references: [id])
+  post_id    String
+}
+
+model Settings {
+  id           String   @id @default(cuid())
+  created_at   DateTime @default(now())
+  hero_width   Int
+  hero_height  Int
+  thumb_width  Int
+  thumb_height Int
+}
