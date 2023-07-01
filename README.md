@@ -90,3 +90,9 @@ NOTE Container query doesn't work with custom media yet
 @container (--sm-n-above) {} /* doesn't work */
 @container (width >=480px) {} /* works */
 ```
+
+
+## License
+
+This project is licensed under the terms of the
+[MIT license](/LICENSE-MIT).
