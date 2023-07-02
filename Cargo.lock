@@ -2089,6 +2089,7 @@ dependencies = [
  "console_error_panic_hook",
  "console_log",
  "http",
+ "js-sys",
  "leptos",
  "leptos_axum",
  "leptos_meta",
@@ -2097,6 +2098,7 @@ dependencies = [
  "prisma-client-rust",
  "prisma_client",
  "serde",
+ "serde-wasm-bindgen",
  "serde_json",
  "simple_logger",
  "thiserror",
@@ -2104,6 +2106,7 @@ dependencies = [
  "tower",
  "tower-http",
  "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
