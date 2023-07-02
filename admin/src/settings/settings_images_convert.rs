@@ -78,9 +78,20 @@ pub async fn images_convert(cx: Scope) -> Result<Result<(), SettingsError>, Serv
         .unwrap();
 
     for image_data in images {
-        let path = format!("img/{}.jpg", image_data.id);
-        let dynamic_image = image::open(path).unwrap();
-        crate::image::create_image_variants(&dynamic_image, &convert_settings, image_data.id);
+        let path = format!("upload/{}.jpg", image_data.id);
+        let dynamic_image = image::open(path.clone());
+        match dynamic_image {
+            Ok(dynamic_image) => {
+                crate::image::create_image_variants(
+                    &dynamic_image,
+                    &convert_settings,
+                    image_data.id,
+                );
+            }
+            Err(image_err) => {
+                dbg!((path.clone(), image_err));
+            }
+        }
     }
 
     Ok(Ok(()))

@@ -54,7 +54,18 @@ pub fn create_image_variants(dynamic_image: &DynamicImage, settings: &ConvertSet
             height: settings.hero_height,
         },
         format!("{img_path}/{id}-l.webp"),
-    );
+    )
+    .unwrap();
+    create_image_variant(
+        dynamic_image,
+        ImageSize {
+            width: settings.hero_width * 2,
+            height: settings.hero_height * 2,
+        },
+        format!("{img_path}/{id}-l2.webp"),
+    )
+    .unwrap();
+
     create_image_variant(
         dynamic_image,
         ImageSize {
@@ -62,5 +73,15 @@ pub fn create_image_variants(dynamic_image: &DynamicImage, settings: &ConvertSet
             height: settings.thumb_height,
         },
         format!("{img_path}/{id}-s.webp"),
-    );
+    )
+    .unwrap();
+    create_image_variant(
+        dynamic_image,
+        ImageSize {
+            width: settings.thumb_width * 2,
+            height: settings.thumb_height * 2,
+        },
+        format!("{img_path}/{id}-s2.webp"),
+    )
+    .unwrap();
 }
