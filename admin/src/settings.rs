@@ -9,13 +9,27 @@ use crate::{
     util::{AlertDanger, AlertSuccess, Loading},
 };
 
-#[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SettingsFormData {
     pub id: Option<String>,
+    pub robots_txt: String,
     pub hero_width: i32,
     pub hero_height: i32,
     pub thumb_width: i32,
     pub thumb_height: i32,
+}
+
+impl Default for SettingsFormData {
+    fn default() -> Self {
+        Self {
+            id: None,
+            robots_txt: "".to_string(),
+            hero_width: 720,
+            hero_height: 1280,
+            thumb_width: 360,
+            thumb_height: 640,
+        }
+    }
 }
 
 #[component]
@@ -61,24 +75,19 @@ pub async fn get_settings(cx: Scope) -> Result<SettingsFormData, ServerFnError> 
     Ok(match settings {
         Some(settings) => SettingsFormData {
             id: Some(settings.id),
+            robots_txt: settings.robots_txt,
             hero_width: settings.hero_width,
             hero_height: settings.hero_height,
             thumb_width: settings.thumb_width,
             thumb_height: settings.thumb_height,
         },
-        None => SettingsFormData {
-            id: None,
-            hero_width: 720,
-            hero_height: 1280,
-            thumb_width: 360,
-            thumb_height: 640,
-        },
+        None => SettingsFormData::default(),
     })
 }
 
 #[component]
 pub fn SettingsForm(cx: Scope, settings: SettingsFormData) -> impl IntoView {
-    let settings_upsert = create_server_action::<SettingsUpsert>(cx);
+    let settings_upsert = create_server_action::<SettingsImagesUpdate>(cx);
     let value = settings_upsert.value();
     let pending = settings_upsert.pending();
 
@@ -144,8 +153,17 @@ pub fn SettingsForm(cx: Scope, settings: SettingsFormData) -> impl IntoView {
     }
 }
 
-#[server(SettingsUpsert, "/api")]
-pub async fn settings_upsert(
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SettingsImages {
+    pub id: Option<String>,
+    pub hero_width: i32,
+    pub hero_height: i32,
+    pub thumb_width: i32,
+    pub thumb_height: i32,
+}
+
+#[server(SettingsImagesUpdate, "/api")]
+pub async fn settings_images_update(
     cx: Scope,
     id: Option<String>,
     hero_width: String,
@@ -156,7 +174,7 @@ pub async fn settings_upsert(
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
 
-    let settings_data = SettingsFormData {
+    let settings_data = SettingsImages {
         id: id.clone(),
         hero_width: hero_width.parse::<i32>().unwrap_or(0),
         hero_height: hero_height.parse::<i32>().unwrap_or(0),
