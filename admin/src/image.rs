@@ -1,6 +1,8 @@
 use image::{DynamicImage, ImageError};
 use serde::{Deserialize, Serialize};
 
+use crate::settings::SettingsImages;
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ImageSize {
     height: u32,
@@ -13,6 +15,17 @@ pub struct ConvertSettings {
     pub hero_height: u32,
     pub thumb_width: u32,
     pub thumb_height: u32,
+}
+
+impl From<&SettingsImages> for ConvertSettings {
+    fn from(data: &SettingsImages) -> Self {
+        ConvertSettings {
+            hero_width: data.hero_width as u32,
+            hero_height: data.hero_height as u32,
+            thumb_width: data.thumb_width as u32,
+            thumb_height: data.thumb_height as u32,
+        }
+    }
 }
 
 pub fn create_image_variant(
@@ -29,13 +42,13 @@ pub fn create_image_variant(
     variant.save_with_format(path, image::ImageFormat::WebP)
 }
 
-pub fn create_image_variants(img_decoded: &DynamicImage, settings: ConvertSettings, id: String) {
+pub fn create_image_variants(dynamic_image: &DynamicImage, settings: &ConvertSettings, id: String) {
     let img_path = "img";
 
     // TODO process in threads
 
     create_image_variant(
-        img_decoded,
+        dynamic_image,
         ImageSize {
             width: settings.hero_width,
             height: settings.hero_height,
@@ -43,7 +56,7 @@ pub fn create_image_variants(img_decoded: &DynamicImage, settings: ConvertSettin
         format!("{img_path}/{id}-l.webp"),
     );
     create_image_variant(
-        img_decoded,
+        dynamic_image,
         ImageSize {
             width: settings.thumb_width,
             height: settings.thumb_height,

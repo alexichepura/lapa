@@ -147,7 +147,7 @@ pub async fn upload_img(
     let height = img_decoded.height();
     let width = img_decoded.width();
 
-    crate::image::create_image_variants(&img_decoded, convert_settings, id);
+    crate::image::create_image_variants(&img_decoded, &convert_settings, id);
 
     Ok(Ok(ImageResult {
         format: format_string,

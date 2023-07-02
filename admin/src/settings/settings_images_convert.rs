@@ -2,7 +2,6 @@ use leptos::*;
 use leptos_router::ActionForm;
 
 use crate::{
-    image::ConvertSettings,
     settings::SettingsError,
     util::{AlertDanger, AlertSuccess},
 };
@@ -63,13 +62,26 @@ pub async fn images_convert(cx: Scope) -> Result<Result<(), SettingsError>, Serv
         .await
         .unwrap();
     let settings = settings.unwrap();
-    let convert_settings = ConvertSettings {
+    let convert_settings = crate::image::ConvertSettings {
         hero_height: settings.hero_height as u32,
         hero_width: settings.hero_width as u32,
         thumb_height: settings.thumb_height as u32,
         thumb_width: settings.thumb_width as u32,
     };
-    // TODO
-    // crate::image::create_image_variants(&img_decoded, convert_settings, id);
+
+    let images = prisma_client
+        .image()
+        .find_many(vec![])
+        .select(db::image::select!({ id }))
+        .exec()
+        .await
+        .unwrap();
+
+    for image_data in images {
+        let path = format!("img/{}.jpg", image_data.id);
+        let dynamic_image = image::open(path).unwrap();
+        crate::image::create_image_variants(&dynamic_image, &convert_settings, image_data.id);
+    }
+
     Ok(Ok(()))
 }

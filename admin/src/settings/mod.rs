@@ -79,6 +79,7 @@ pub fn Settings(cx: Scope) -> impl IntoView {
                 }}
             </Suspense>
         </div>
+        <ImagesConvertView/>
     }
 }
 
