@@ -52,6 +52,7 @@ model Image {
 model Settings {
   id           String   @id @default(cuid())
   created_at   DateTime @default(now())
+  robots_txt   String   @default("")
   hero_width   Int
   hero_height  Int
   thumb_width  Int

@@ -3,13 +3,17 @@
 async fn main() {
     use axum::{
         body::Body as AxumBody,
-        extract::{Extension, FromRef, State},
+        extract::{Extension, State},
         http::Request,
         response::{IntoResponse, Response},
         routing::get,
         Router,
     };
-    use lapa_site::{app::App, fileserv::file_and_error_handler};
+    use lapa_site::{
+        app::App,
+        fileserv::file_and_error_handler,
+        server::{robots_txt, AppState},
+    };
     use leptos::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use prisma_client::db;
@@ -30,12 +34,6 @@ async fn main() {
     let leptos_options = conf.leptos_options;
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(|cx| view! { cx, <App/> }).await;
-
-    #[derive(FromRef, Debug, Clone)]
-    pub struct AppState {
-        pub leptos_options: LeptosOptions,
-        pub prisma_client: std::sync::Arc<prisma_client::db::PrismaClient>,
-    }
 
     use axum::extract::{Path, RawQuery};
     use http::HeaderMap;
@@ -106,6 +104,7 @@ async fn main() {
             "/api/*fn_name",
             get(server_fn_handler).post(server_fn_handler),
         )
+        .route("/robots.txt", get(robots_txt))
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .fallback(file_and_error_handler)
         .with_state(app_state)

@@ -1,12 +1,16 @@
 #![feature(result_flattening)]
 
+cfg_if::cfg_if! {if #[cfg(feature = "ssr")] {
+    pub mod fileserv;
+    pub mod prisma;
+    pub mod server;
+}}
+
 pub mod app;
 pub mod err;
-pub mod fileserv;
 pub mod home;
 pub mod post_list;
 pub mod post_page;
-pub mod prisma;
 pub mod routes;
 pub mod util;
 
