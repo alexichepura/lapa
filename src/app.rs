@@ -18,8 +18,8 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
     provide_meta_context(cx);
     provide_context(cx, settings);
 
-    let settins_json = serde_json::to_string(&settings).unwrap();
-    let settings_script = format!("var SETTINGS = {settins_json};");
+    let settings_json = serde_json::to_string(&settings).unwrap();
+    let settings_script = format!("var SETTINGS = {settings_json};");
 
     view! { cx,
         <Stylesheet id="leptos" href="/pkg/lapa_site.css"/>
