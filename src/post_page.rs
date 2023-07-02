@@ -3,7 +3,7 @@ use leptos_router::*;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::util::Loading;
+use crate::{app::SettingsCx, util::Loading};
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
 pub struct PostParams {
@@ -73,26 +73,28 @@ pub fn PostPage(cx: Scope) -> impl IntoView {
 
 #[component]
 pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
+    let settings = use_context::<SettingsCx>(cx).expect("to have found the settings provided");
     view! { cx,
         <h1>{post.title}</h1>
         <For
             each=move || post.images.clone()
             key=|image| image.id.clone()
             view=move |cx, image: PostImageData| {
-                view! { cx, <PostImageView image=image/> }
+                view! { cx, <PostImageView image=image settings=settings/> }
             }
         />
     }
 }
 
 #[component]
-pub fn PostImageView(cx: Scope, image: PostImageData) -> impl IntoView {
+pub fn PostImageView(cx: Scope, image: PostImageData, settings: SettingsCx) -> impl IntoView {
     let src = format!("/img/{}-s.webp", image.id);
     let srcset = format!("/img/{}-s2.webp 2x", image.id);
     view! { cx, <img
         src=src
         srcset=srcset
-        width="250"
+        width=settings.thumb_width
+        height=settings.thumb_height
         alt=image.alt
     /> }
 }
