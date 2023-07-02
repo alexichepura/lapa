@@ -79,11 +79,22 @@ pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
             each=move || post.images.clone()
             key=|image| image.id.clone()
             view=move |cx, image: PostImageData| {
-                let src = format!("/img/{}-s.webp", image.id);
-                view! { cx, <img src=src alt=image.alt/> }
+                view! { cx, <PostImageView image=image/> }
             }
         />
     }
+}
+
+#[component]
+pub fn PostImageView(cx: Scope, image: PostImageData) -> impl IntoView {
+    let src = format!("/img/{}-s.webp", image.id);
+    let srcset = format!("/img/{}-s2.webp 2x", image.id);
+    view! { cx, <img
+        src=src
+        srcset=srcset
+        width="250"
+        alt=image.alt
+    /> }
 }
 
 #[server(GetPost, "/api")]
