@@ -154,6 +154,11 @@ label {
 		margin-block-end: 0.3rem;
 	}
 
+	&>textarea {
+		display: block;
+		width: 100%;
+	}
+
 	&>input:not([type='checkbox']) {
 		display: block;
 		width: 100%;

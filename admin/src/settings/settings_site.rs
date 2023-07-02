@@ -23,7 +23,10 @@ pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
         <fieldset disabled=move || pending()>
             <legend>"Site"</legend>
             <ActionForm action=settings_site_update>
-                <Input label="robots.txt" name="robots_txt" value=settings.robots_txt.to_string()/>
+                <label>
+                    <div>"robots.txt"</div>
+                    <textarea name="robots_txt" prop:value=settings.robots_txt.to_string() />
+                </label>
                 <footer>
                     <input type="submit" value="SUBMIT"/>
                     <Show when=move || pending() fallback=|_| ()>
