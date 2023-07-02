@@ -10,7 +10,7 @@ async fn main() {
         Router,
     };
     use lapa_site::{
-        app::App,
+        app::{App, GenerateRouteList, SettingsCx},
         fileserv::file_and_error_handler,
         server::{robots_txt, AppState},
     };
@@ -33,7 +33,7 @@ async fn main() {
     let conf = get_configuration(None).await.unwrap();
     let leptos_options = conf.leptos_options;
     let addr = leptos_options.site_addr;
-    let routes = generate_route_list(|cx| view! { cx, <App/> }).await;
+    let routes = generate_route_list(|cx| view! { cx, <GenerateRouteList /> }).await;
 
     use axum::extract::{Path, RawQuery};
     use http::HeaderMap;
@@ -83,12 +83,32 @@ async fn main() {
                 dbg!(query_error);
             }
         });
+        let settings = prisma_client
+            .settings()
+            .find_first(vec![])
+            .select(db::settings::select!({
+                hero_height
+                hero_width
+                thumb_height
+                thumb_width
+            }))
+            .exec()
+            .await
+            .unwrap();
+        let settings = settings.unwrap();
+        let settings = SettingsCx {
+            hero_height: settings.hero_height,
+            hero_width: settings.hero_width,
+            thumb_height: settings.thumb_height,
+            thumb_width: settings.thumb_width,
+        };
+
         let handler = leptos_axum::render_app_async_with_context(
             app_state.leptos_options.clone(),
             move |cx| {
                 provide_context(cx, prisma_client.clone());
             },
-            |cx| view! { cx, <App/> },
+            move |cx| view! { cx, <App settings=settings/> },
         );
         handler(req).await.into_response()
     }

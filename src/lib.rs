@@ -23,7 +23,18 @@ pub fn hydrate() {
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
+    let resolved_settings = js_sys::Reflect::get(
+        &web_sys::window().unwrap(),
+        &wasm_bindgen::JsValue::from_str("SETTINGS"),
+    )
+    .unwrap_or(wasm_bindgen::JsValue::NULL);
+
+    let resolved_settings: SettingsCx =
+        serde_wasm_bindgen::from_value(resolved_settings).unwrap_or_default();
+
+    log!("{:?}", resolved_settings);
+
     leptos::mount_to_body(move |cx| {
-        view! { cx, <App/> }
+        view! { cx, <App settings=resolved_settings/> }
     });
 }
