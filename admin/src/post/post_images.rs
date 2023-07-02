@@ -65,9 +65,10 @@ pub fn PostImagesView(cx: Scope, images: Vec<PostImageData>) -> impl IntoView {
 #[component]
 pub fn PostImage(cx: Scope, image: PostImageData) -> impl IntoView {
     let src = format!("/img/{}-s.webp", image.id);
+    let srcset = format!("/img/{}-s2.webp 2x", image.id);
     view! { cx,
         <div class="Card">
-            <img src=src/>
+            <img src=src srcset=srcset width=250/>
             <div>"Alt: " {image.alt}</div>
         </div>
     }

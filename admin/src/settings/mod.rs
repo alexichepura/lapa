@@ -1,8 +1,10 @@
 mod settings_error;
 mod settings_images;
+mod settings_images_convert;
 mod settings_site;
 pub use settings_error::*;
 pub use settings_images::*;
+pub use settings_images_convert::*;
 pub use settings_site::*;
 
 use leptos::*;

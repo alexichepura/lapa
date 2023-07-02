@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     form::Input,
+    image::ConvertSettings,
     settings::SettingsError,
     util::{AlertDanger, AlertSuccess},
 };
@@ -14,6 +15,17 @@ pub struct SettingsImages {
     pub hero_height: i32,
     pub thumb_width: i32,
     pub thumb_height: i32,
+}
+
+impl From<&SettingsImages> for ConvertSettings {
+    fn from(data: &SettingsImages) -> Self {
+        ConvertSettings {
+            hero_width: data.hero_width as u32,
+            hero_height: data.hero_height as u32,
+            thumb_width: data.thumb_width as u32,
+            thumb_height: data.thumb_height as u32,
+        }
+    }
 }
 
 #[component]

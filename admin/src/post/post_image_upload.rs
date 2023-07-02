@@ -93,13 +93,11 @@ pub async fn upload_img(
         })?
         .unwrap();
 
-    let hero_size = ImageSize {
-        width: settings.hero_width.try_into().unwrap(),
-        height: settings.hero_height.try_into().unwrap(),
-    };
-    let thumb_size = ImageSize {
-        width: settings.thumb_width.try_into().unwrap(),
-        height: settings.thumb_height.try_into().unwrap(),
+    let convert_settings = crate::image::ConvertSettings {
+        hero_height: settings.hero_height as u32,
+        hero_width: settings.hero_width as u32,
+        thumb_height: settings.thumb_height as u32,
+        thumb_width: settings.thumb_width as u32,
     };
 
     let image_upload_data = prisma_client
@@ -149,32 +147,7 @@ pub async fn upload_img(
     let height = img_decoded.height();
     let width = img_decoded.width();
 
-    let img_path = "img";
-
-    let hero = img_decoded.resize_to_fill(
-        hero_size.width,
-        hero_size.height,
-        image::imageops::FilterType::Lanczos3,
-    );
-    let hero_path = format!("{img_path}/{id}-l.webp");
-    hero.save_with_format(hero_path, image::ImageFormat::WebP)
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
-        })?;
-
-    let thumb = img_decoded.resize_to_fill(
-        thumb_size.width,
-        thumb_size.height,
-        image::imageops::FilterType::Lanczos3,
-    );
-    let thumb_path = format!("{img_path}/{id}-s.webp");
-    thumb
-        .save_with_format(thumb_path, image::ImageFormat::WebP)
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
-        })?;
+    crate::image::create_image_variants(&img_decoded, convert_settings, id);
 
     Ok(Ok(ImageResult {
         format: format_string,
