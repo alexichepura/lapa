@@ -40,7 +40,7 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
         <Router set_is_routing>
             <header>
                 <section>
-                    <A href="/" exact=true>"LAPA"</A>
+                    <A href="/" exact=true>"Home"</A>
                     <a href="https://github.com/alexichepura/lapa">"GitHub"</a>
                 </section>
             </header>

@@ -21,13 +21,17 @@ body {
 			display: grid;
 			justify-content: space-between;
 			grid-template-columns: auto auto;
-			align-items: center;
+			align-items: stretch;
 		}
 
 		& a {
 			text-decoration: none;
-			padding-block: .75ch;
 			padding-inline: var(--size-relative-6);
+			padding-block: 0;
+			display: block;
+			margin: 0;
+			display: flex;
+			align-items: center;
 
 			&:visited {
 				color: var(--text-1);
