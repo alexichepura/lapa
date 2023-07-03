@@ -101,7 +101,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
     };
 
     view! { cx,
-        <Title text=title/>
+        <Title text=format!("Post: {}", title())/>
         <ActionForm action=post_upsert>
             <fieldset disabled=move || pending()>
                 <legend>{header_view}</legend>
