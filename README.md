@@ -42,11 +42,14 @@ Type-safe database access.
 - image preview and upload
 - images resize and convert on backend
 - css based on <https://open-props.style>
-- css processing with <https://lightningcss.dev>
+- css processing with <https://lightningcss.dev> (forked cargo-leptos for now)
     - nesting
     - custom media
 - compression and precompression
 - stiched together forms, inputs and response messages
+- robots.txt from database
+- RoutingProgress
+- Favicons
 
 ## Run 
 Requires prisma client to be generated
