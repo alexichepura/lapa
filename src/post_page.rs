@@ -1,4 +1,5 @@
 use leptos::*;
+use leptos_meta::{Meta, Title};
 use leptos_router::*;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -75,14 +76,18 @@ pub fn PostPage(cx: Scope) -> impl IntoView {
 pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
     let settings = use_context::<SettingsCx>(cx).expect("to have found the settings provided");
     view! { cx,
+        <Title text=post.title.clone()/>
+        <Meta name="description" content=post.description/>
         <h1>{post.title}</h1>
-        <For
-            each=move || post.images.clone()
-            key=|image| image.id.clone()
-            view=move |cx, image: PostImageData| {
-                view! { cx, <PostImageView image=image settings=settings/> }
-            }
-        />
+        <div class="post-images">
+            <For
+                each=move || post.images.clone()
+                key=|image| image.id.clone()
+                view=move |cx, image: PostImageData| {
+                    view! { cx, <PostImageView image=image settings=settings/> }
+                }
+            />
+        </div>
     }
 }
 

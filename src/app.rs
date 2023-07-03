@@ -21,9 +21,11 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
     let settings_json = serde_json::to_string(&settings).unwrap();
     let settings_script = format!("var SETTINGS = {settings_json};");
 
+    let formatter = |text| format!("{text} - LAPA");
+
     view! { cx,
         <Stylesheet id="leptos" href="/pkg/lapa_site.css"/>
-        <Title text="LAPA"/>
+        <Title formatter/>
         <Script>
             "console.log('Meta rendered twice!!!');"
             {settings_script}

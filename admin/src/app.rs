@@ -13,7 +13,7 @@ pub fn App(cx: Scope, user: Option<User>) -> impl IntoView {
     provide_meta_context(cx);
     let (is_routing, set_is_routing) = create_signal(cx, false);
 
-    let formatter = |text| format!("Admin - {text}");
+    let formatter = |text| format!("{text} - Admin");
     view! { cx,
         <Stylesheet id="leptos" href="/pkg/lapa_admin.css"/>
         <Title formatter/>

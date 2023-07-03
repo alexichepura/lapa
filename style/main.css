@@ -32,7 +32,13 @@ hr {
 	margin-inline: auto;
 }
 
-.gallery {
+.post-images {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 240px);
+	grid-gap: var(--size-fluid-1);
+}
+
+/* .gallery {
 	margin: var(--size-fluid-1) auto;
 	display: grid;
 	max-width: 900px;
@@ -52,10 +58,4 @@ hr {
 	display: block;
 	width: 100%;
 	border-radius: var(--radius-2);
-	;
-}
-
-.upload-preview {
-	max-width: 100px;
-	max-height: 100px;
-}
+} */
