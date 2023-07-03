@@ -98,3 +98,32 @@ hr {
 	width: 100vw;
 	transform: translateY(-50%);
 }
+
+.PostList {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 240px);
+	grid-gap: var(--size-fluid-2);
+	justify-content: space-between;
+
+	& a {
+		text-decoration: none;
+		overflow: hidden;
+		transition: transform 0.3s ease;
+
+		&:visited {
+			color: var(--text-1);
+		}
+
+		&:hover {
+			transform: scale(1.03);
+		}
+
+		>img {
+			border-radius: var(--radius-2);
+		}
+
+		>p {
+			padding-block: calc(var(--size-fluid-1)/2);
+		}
+	}
+}

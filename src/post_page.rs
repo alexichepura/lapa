@@ -4,7 +4,10 @@ use leptos_router::*;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{app::SettingsCx, util::Loading};
+use crate::{
+    img::{ImgData, Thumb},
+    util::Loading,
+};
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
 pub struct PostParams {
@@ -22,18 +25,12 @@ pub enum PostError {
 }
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct PostImageData {
-    pub id: String,
-    pub alt: String,
-}
-
-#[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PostData {
     pub id: String,
     pub slug: String,
     pub title: String,
     pub description: String,
-    pub images: Vec<PostImageData>,
+    pub images: Vec<ImgData>,
 }
 
 #[component]
@@ -74,7 +71,6 @@ pub fn PostPage(cx: Scope) -> impl IntoView {
 
 #[component]
 pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
-    let settings = use_context::<SettingsCx>(cx).expect("to have found the settings provided");
     view! { cx,
         <Title text=post.title.clone()/>
         <Meta name="description" content=post.description/>
@@ -84,25 +80,12 @@ pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
             <For
                 each=move || post.images.clone()
                 key=|image| image.id.clone()
-                view=move |cx, image: PostImageData| {
-                    view! { cx, <PostImageView image=image settings=settings/> }
+                view=move |cx, image: ImgData| {
+                    view! { cx, <Thumb image=image/> }
                 }
             />
         </div>
     }
-}
-
-#[component]
-pub fn PostImageView(cx: Scope, image: PostImageData, settings: SettingsCx) -> impl IntoView {
-    let src = format!("/img/{}-s.webp", image.id);
-    let srcset = format!("/img/{}-s2.webp 2x", image.id);
-    view! { cx, <img
-        src=src
-        srcset=srcset
-        width=settings.thumb_width
-        height=settings.thumb_height
-        alt=image.alt
-    /> }
 }
 
 #[server(GetPost, "/api")]
@@ -139,7 +122,7 @@ pub async fn get_post(
             images: post
                 .images
                 .iter()
-                .map(|img| PostImageData {
+                .map(|img| ImgData {
                     id: img.id.clone(),
                     alt: img.alt.clone(),
                 })
