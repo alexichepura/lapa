@@ -106,18 +106,27 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
             <fieldset disabled=move || pending()>
                 <legend>{header_view}</legend>
                 {id_view}
-                <label>
-                    <span>"Title"</span>
-                    <input
-                        name="title"
-                        value=title
-                        on:input=move |ev| {
-                            set_title(event_target_value(&ev));
-                        }
-                    />
-                </label>
-                <Input name="slug" label="Slug" value=post.slug/>
-                <Input name="description" label="Description" value=post.description/>
+                <div class="Grid-fluid-2">
+                    <div>
+                        <label>
+                            <div>"Title"</div>
+                            <input
+                                name="title"
+                                value=title
+                                on:input=move |ev| {
+                                    set_title(event_target_value(&ev));
+                                }
+                            />
+                        </label>
+                        <Input name="slug" label="Slug" value=post.slug/>
+                    </div>
+                    <div>
+                        <label>
+                            <div>"Description"</div>
+                            <textarea name="description" prop:value=post.description />
+                        </label>
+                    </div>
+                </div>
                 <footer>
                     <input type="submit" value="SUBMIT"/>
                     <Show when=move || pending() fallback=|_| ()>
@@ -125,11 +134,17 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                     </Show>
                     <Suspense fallback=|| ()>
                         {move || match value() {
-                            None => view! { cx, "" }.into_view(cx),
+                            None => {
+                                view! { cx, "" }
+                                    .into_view(cx)
+                            }
                             Some(v) => {
                                 let post_result = v.map_err(|_| PostError::ServerError).flatten();
                                 match post_result {
-                                    Ok(_) => view! { cx, <AlertSuccess/> }.into_view(cx),
+                                    Ok(_) => {
+                                        view! { cx, <AlertSuccess/> }
+                                            .into_view(cx)
+                                    }
                                     Err(e) => {
                                         view! { cx, <AlertDanger text=e.to_string()/> }
                                             .into_view(cx)
