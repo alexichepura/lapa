@@ -26,6 +26,11 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
     view! { cx,
         <Stylesheet id="leptos" href="/pkg/lapa_site.css"/>
         <Title formatter/>
+        <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico"/>
+        <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png"/>
+        <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png"/>
+        <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
+        <Link rel="manifest" href="/site.webmanifest"/>
         <Script>
             "console.log('Meta rendered twice!!!');"
             {settings_script}
