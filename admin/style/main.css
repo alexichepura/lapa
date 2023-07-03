@@ -197,6 +197,12 @@ label {
 	}
 }
 
+.images {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 240px);
+	grid-gap: var(--size-fluid-1);
+}
+
 .login-card {
 	width: min(100% - 1rem, 20rem);
 	margin-inline: auto;

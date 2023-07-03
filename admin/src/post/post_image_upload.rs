@@ -43,23 +43,28 @@ pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
                         )
                     }
                 />
+                <footer>
                 <input type="submit" value="Upload"/>
-                <Suspense fallback=|| ()>
-                    {move || match value() {
-                        None => view! { cx, "" }.into_view(cx),
-                        Some(v) => {
-                            let post_result = v
-                                .map_err(|_| ImageUploadError::ServerError)
-                                .flatten();
-                            match post_result {
-                                Ok(_) => view! { cx, <AlertSuccess/> }.into_view(cx),
-                                Err(e) => {
-                                    view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx)
+                    <Show when=move || pending() fallback=|_| ()>
+                        <progress indeterminate></progress>
+                    </Show>
+                    <Suspense fallback=|| ()>
+                        {move || match value() {
+                            None => view! { cx, "" }.into_view(cx),
+                            Some(v) => {
+                                let post_result = v
+                                    .map_err(|_| ImageUploadError::ServerError)
+                                    .flatten();
+                                match post_result {
+                                    Ok(_) => view! { cx, <AlertSuccess/> }.into_view(cx),
+                                    Err(e) => {
+                                        view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx)
+                                    }
                                 }
                             }
-                        }
-                    }}
-                </Suspense>
+                        }}
+                    </Suspense>
+                </footer>
             </ActionForm>
         </fieldset>
     }
@@ -69,6 +74,7 @@ pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
 pub async fn upload_img(
     cx: Scope,
     img: String,
+    alt: String,
     post_id: String,
 ) -> Result<Result<ImageResult, ImageUploadError>, ServerFnError> {
     let img_bytes = serde_json::from_str::<Vec<u8>>(&img);
@@ -103,7 +109,7 @@ pub async fn upload_img(
     let image_upload_data = prisma_client
         .image()
         .create(
-            "".to_string(),
+            alt,
             "".to_string(),
             db::post::UniqueWhereParam::IdEquals(post_id),
             vec![],

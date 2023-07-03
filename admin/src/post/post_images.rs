@@ -50,7 +50,7 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
 pub fn PostImagesView(cx: Scope, images: Vec<PostImageData>) -> impl IntoView {
     view! { cx,
         <h2>"Images"</h2>
-        <div class="Grid-fluid-2">
+        <div class="images">
             <For
                 each=move || images.clone()
                 key=|image| image.id.clone()
@@ -67,7 +67,7 @@ pub fn PostImage(cx: Scope, image: PostImageData) -> impl IntoView {
     let src = format!("/img/{}-s.webp", image.id);
     let srcset = format!("/img/{}-s2.webp 2x", image.id);
     view! { cx,
-        <div class="Card">
+        <div>
             <img src=src srcset=srcset width=250/>
             <div>"Alt: " {image.alt}</div>
         </div>
