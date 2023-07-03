@@ -87,24 +87,10 @@ hr {
 	grid-gap: var(--size-fluid-1);
 }
 
-/* .gallery {
-	margin: var(--size-fluid-1) auto;
-	display: grid;
-	max-width: 900px;
-	justify-items: center;
-	grid-row-gap: var(--size-fluid-1);
-	grid-column-gap: var(--size-fluid-1);
-	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+.RoutingProgress {
+	position: fixed;
+	opacity: 0.5;
+	top: 0;
+	width: 100vw;
+	transform: translateY(-50%);
 }
-
-@media (min-width: 600px) {
-	.gallery {
-		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-	}
-}
-
-.gallery-item {
-	display: block;
-	width: 100%;
-	border-radius: var(--radius-2);
-} */

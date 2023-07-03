@@ -17,6 +17,7 @@ pub struct SettingsCx {
 pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
     provide_meta_context(cx);
     provide_context(cx, settings);
+    let (is_routing, set_is_routing) = create_signal(cx, false);
 
     let settings_json = serde_json::to_string(&settings).unwrap();
     let settings_script = format!("var SETTINGS = {settings_json};");
@@ -35,7 +36,12 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
             "console.log('Meta rendered twice!!!');"
             {settings_script}
         </Script>
-        <Router>
+        <RoutingProgress
+            is_routing
+            max_time=std::time::Duration::from_millis(250)
+            class="RoutingProgress"
+        />
+        <Router set_is_routing>
             <header>
                 <section>
                     <A href="/" exact=true>"LAPA"</A>
