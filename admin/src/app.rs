@@ -17,11 +17,7 @@ pub fn App(cx: Scope, user: Option<User>) -> impl IntoView {
     view! { cx,
         <Stylesheet id="leptos" href="/pkg/lapa_admin.css"/>
         <Title formatter/>
-        <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico"/>
-        <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png"/>
-        <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png"/>
-        <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
-        <Link rel="manifest" href="/site.webmanifest"/>
+        <Favicons/>
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)
@@ -36,6 +32,17 @@ pub fn App(cx: Scope, user: Option<User>) -> impl IntoView {
                 }
             }}
         </Router>
+    }
+}
+
+#[component]
+pub fn Favicons(cx: Scope) -> impl IntoView {
+    view! { cx,
+        <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico"/>
+        <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png"/>
+        <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png"/>
+        <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
+        <Link rel="manifest" href="/site.webmanifest"/>
     }
 }
 
