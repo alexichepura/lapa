@@ -2,12 +2,51 @@
 @import "https://unpkg.com/open-props/normalize.min.css";
 @import "https://unpkg.com/open-props/buttons.min.css";
 
+:root {
+	--inner-width: min(100% - 2rem, 50rem);
+}
+
 body {
 	font-family: var(--font-sans);
+
+	>header {
+		background: var(--surface-2);
+		box-shadow: var(--shadow-3);
+
+		>section {
+			height: var(--size-fluid-4);
+			padding: 0;
+			width: var(--inner-width);
+			margin-inline: auto;
+			display: grid;
+			justify-content: space-between;
+			grid-template-columns: auto auto;
+			align-items: center;
+		}
+
+		& a {
+			text-decoration: none;
+			padding-block: .75ch;
+			padding-inline: var(--size-relative-6);
+
+			&:visited {
+				color: var(--text-1);
+			}
+
+			&:is(:hover, :focus) {
+				background: var(--surface-4);
+			}
+
+			&[aria-current] {
+				background: var(--surface-3);
+			}
+		}
+	}
 }
 
 main {
-	width: min(100% - 2rem, 50rem);
+	padding-block: var(--size-fluid-2);
+	width: var(--inner-width);
 	margin-inline: auto;
 }
 
@@ -20,8 +59,18 @@ p {
 	max-inline-size: var(--size-content-4);
 }
 
+h1 {
+	font-size: var(--font-size-4);
+	margin-block-end: 1rem;
+}
+
+h2 {
+	font-size: var(--font-size-3);
+	margin-block-end: 1rem;
+}
+
 hr {
-	margin-block: var(--size-fluid-3);
+	margin-block: var(--size-fluid-2);
 }
 
 #ava {

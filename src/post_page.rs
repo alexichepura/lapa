@@ -79,6 +79,7 @@ pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
         <Title text=post.title.clone()/>
         <Meta name="description" content=post.description/>
         <h1>{post.title}</h1>
+        <hr/>
         <div class="post-images">
             <For
                 each=move || post.images.clone()

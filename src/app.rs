@@ -36,6 +36,12 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
             {settings_script}
         </Script>
         <Router>
+            <header>
+                <section>
+                    <A href="/" exact=true>"LAPA"</A>
+                    <a href="https://github.com/alexichepura/lapa">"GitHub"</a>
+                </section>
+            </header>
             <main>
                 <FrontRoutes/>
             </main>
