@@ -1,3 +1,5 @@
+<img width="128" alt="LAPA Logo" src="https://github.com/alexichepura/lapa/assets/5582266/d13a532e-dd04-48a5-af49-d5f8e9e75c6e">
+
 # LAPA - Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website
 
 <img width="1512" alt="LAPA Admin Screenshot 2023-07-01" src="https://github.com/alexichepura/lapa/assets/5582266/21d19e52-8fe1-4497-93e3-49ef488b11df">
