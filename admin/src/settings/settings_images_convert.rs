@@ -83,7 +83,7 @@ pub async fn images_convert(cx: Scope) -> Result<Result<(), SettingsError>, Serv
         match dynamic_image {
             Ok(dynamic_image) => {
                 crate::image::create_image_variants(
-                    &dynamic_image,
+                    dynamic_image,
                     &convert_settings,
                     image_data.id,
                 );
