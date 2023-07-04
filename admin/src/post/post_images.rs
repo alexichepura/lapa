@@ -28,7 +28,7 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
 
     view! { cx,
         <ImageUpload post_id=post_id/>
-        <Suspense fallback=move || {
+        <Transition fallback=move || {
             view! { cx, <Loading/> }
         }>
             {move || {
@@ -45,7 +45,7 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
                         }
                     })
             }}
-        </Suspense>
+        </Transition>
     }
 }
 
