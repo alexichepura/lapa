@@ -53,7 +53,7 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
 pub fn PostImagesView(
     cx: Scope,
     images: Vec<PostImageData>,
-    delete_image: Action<DeleteImage, Result<(), ServerFnError>>,
+    delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
 ) -> impl IntoView {
     view! { cx,
         <h2>"Images"</h2>
@@ -73,7 +73,7 @@ pub fn PostImagesView(
 pub fn PostImage(
     cx: Scope,
     image: PostImageData,
-    delete_image: Action<DeleteImage, Result<(), ServerFnError>>,
+    delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
 ) -> impl IntoView {
     let src = format!("/img/{}-s.webp", image.id);
     let srcset = format!("/img/{}-s2.webp 2x", image.id);
@@ -117,13 +117,20 @@ pub async fn get_images(cx: Scope, post_id: String) -> Result<Vec<PostImageData>
     Ok(images)
 }
 
+type ResultDeleteImage = Result<(), crate::image::ImageError>;
+
 #[server(DeleteImage, "/api")]
-pub async fn delete_image(cx: Scope, id: String) -> Result<(), ServerFnError> {
+pub async fn delete_image(
+    cx: Scope,
+    id: String,
+) -> Result<Result<(), crate::image::ImageError>, ServerFnError> {
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
-    prisma_client
+
+    let found_image = prisma_client
         .image()
-        .delete(db::image::UniqueWhereParam::IdEquals(id.to_string()))
+        .find_unique(db::image::UniqueWhereParam::IdEquals(id.clone()))
+        .select(db::image::select!({ id }))
         .exec()
         .await
         .map_err(|e| {
@@ -131,5 +138,20 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<(), ServerFnError> {
             ServerFnError::ServerError("Server error".to_string())
         })?;
 
-    Ok(())
+    if found_image.is_none() {
+        crate::err::serverr_404(cx);
+        return Ok(Err(crate::image::ImageError::NotFound));
+    }
+
+    prisma_client
+        .image()
+        .delete(db::image::UniqueWhereParam::IdEquals(id))
+        .exec()
+        .await
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
+
+    Ok(Ok(()))
 }
