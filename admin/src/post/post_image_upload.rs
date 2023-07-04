@@ -12,7 +12,7 @@ pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
     let upload_img = create_server_action::<UploadImg>(cx);
     let value = upload_img.value();
     let pending = upload_img.pending();
-    let (file_name, set_file_name) = create_signal(cx, None::<String>);
+    let (_file_name, set_file_name) = create_signal(cx, None::<String>);
     let (save_byte_vec, set_save_byte_vec) = create_signal(cx, None::<Vec<u8>>);
     let (_save_file, set_save_file) = create_signal(cx, None::<String>);
     let (obj_url, set_obj_url) = create_signal(cx, None::<String>);

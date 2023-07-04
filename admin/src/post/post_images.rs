@@ -12,11 +12,14 @@ pub struct PostImageData {
 #[component]
 pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
     let post_id_clone = post_id.clone();
+
+    let delete_image = create_server_action::<DeleteImage>(cx);
     let images = create_blocking_resource(
         cx,
-        move || (post_id_clone.clone()),
-        move |post_id| get_images(cx, post_id),
+        move || (post_id_clone.clone(), delete_image.version().get()),
+        move |(post_id, _)| get_images(cx, post_id),
     );
+
     // let images = create_blocking_resource(
     //     cx,
     //     move || (post_id.clone()),
@@ -37,7 +40,7 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
                             if images.is_empty() {
                                 view! { cx, <p>"No images were found."</p> }.into_view(cx)
                             } else {
-                                view! { cx, <PostImagesView images=images/> }.into_view(cx)
+                                view! { cx, <PostImagesView images delete_image/> }.into_view(cx)
                             }
                         }
                     })
@@ -47,7 +50,11 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
 }
 
 #[component]
-pub fn PostImagesView(cx: Scope, images: Vec<PostImageData>) -> impl IntoView {
+pub fn PostImagesView(
+    cx: Scope,
+    images: Vec<PostImageData>,
+    delete_image: Action<DeleteImage, Result<(), ServerFnError>>,
+) -> impl IntoView {
     view! { cx,
         <h2>"Images"</h2>
         <div class="images">
@@ -55,7 +62,7 @@ pub fn PostImagesView(cx: Scope, images: Vec<PostImageData>) -> impl IntoView {
                 each=move || images.clone()
                 key=|image| image.id.clone()
                 view=move |cx, image: PostImageData| {
-                    view! { cx, <PostImage image=image/> }
+                    view! { cx, <PostImage image delete_image/> }
                 }
             />
         </div>
@@ -63,13 +70,23 @@ pub fn PostImagesView(cx: Scope, images: Vec<PostImageData>) -> impl IntoView {
 }
 
 #[component]
-pub fn PostImage(cx: Scope, image: PostImageData) -> impl IntoView {
+pub fn PostImage(
+    cx: Scope,
+    image: PostImageData,
+    delete_image: Action<DeleteImage, Result<(), ServerFnError>>,
+) -> impl IntoView {
     let src = format!("/img/{}-s.webp", image.id);
     let srcset = format!("/img/{}-s2.webp 2x", image.id);
+    let on_delete = move |_| {
+        delete_image.dispatch(DeleteImage {
+            id: image.id.clone(),
+        })
+    };
     view! { cx,
         <div>
             <img src=src srcset=srcset width=250/>
             <div>"Alt: " {image.alt}</div>
+            <button on:click=on_delete>"Delete"</button>
         </div>
     }
 }
@@ -98,4 +115,21 @@ pub async fn get_images(cx: Scope, post_id: String) -> Result<Vec<PostImageData>
         })
         .collect();
     Ok(images)
+}
+
+#[server(DeleteImage, "/api")]
+pub async fn delete_image(cx: Scope, id: String) -> Result<(), ServerFnError> {
+    use prisma_client::db;
+    let prisma_client = crate::prisma::use_prisma(cx)?;
+    prisma_client
+        .image()
+        .delete(db::image::UniqueWhereParam::IdEquals(id.to_string()))
+        .exec()
+        .await
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
+
+    Ok(())
 }
