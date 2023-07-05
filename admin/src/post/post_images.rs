@@ -2,7 +2,7 @@ use leptos::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    image::{self, img_path_small, img_path_small_retina},
+    image::{self, img_url_small, img_url_small_retina},
     post::ImageUpload,
     util::Loading,
 };
@@ -79,8 +79,8 @@ pub fn PostImage(
     image: PostImageData,
     delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
 ) -> impl IntoView {
-    let src = img_path_small(&image.id);
-    let small_retina = img_path_small_retina(&image.id);
+    let src = img_url_small(&image.id);
+    let small_retina = img_url_small_retina(&image.id);
     let srcset = format!("{small_retina} 2x");
     let on_delete = move |_| {
         delete_image.dispatch(DeleteImage {
@@ -144,6 +144,30 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, Se
         crate::err::serverr_404(cx);
         return Ok(Err(image::ImageError::NotFound));
     }
+
+    std::fs::remove_file(crate::image::img_path_small(&id)).map_err(|e| {
+        dbg!(e);
+        ServerFnError::ServerError("Server error".to_string())
+    })?;
+    std::fs::remove_file(crate::image::img_path_small_retina(&id)).map_err(|e| {
+        dbg!(e);
+        ServerFnError::ServerError("Server error".to_string())
+    })?;
+    std::fs::remove_file(crate::image::img_path_large(&id)).map_err(|e| {
+        dbg!(e);
+        ServerFnError::ServerError("Server error".to_string())
+    })?;
+    std::fs::remove_file(crate::image::img_path_large_retina(&id)).map_err(|e| {
+        dbg!(e);
+        ServerFnError::ServerError("Server error".to_string())
+    })?;
+
+    std::fs::remove_file(crate::image::img_path_upload_ext(&id, &"jpg".to_string())).map_err(
+        |e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        },
+    )?;
 
     prisma_client
         .image()
