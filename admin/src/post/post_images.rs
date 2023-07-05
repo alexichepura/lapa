@@ -1,7 +1,11 @@
 use leptos::*;
 use serde::{Deserialize, Serialize};
 
-use crate::{image, post::ImageUpload, util::Loading};
+use crate::{
+    image::{self, img_path_small, img_path_small_retina},
+    post::ImageUpload,
+    util::Loading,
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PostImageData {
@@ -75,8 +79,9 @@ pub fn PostImage(
     image: PostImageData,
     delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
 ) -> impl IntoView {
-    let src = format!("/img/{}-s.webp", image.id);
-    let srcset = format!("/img/{}-s2.webp 2x", image.id);
+    let src = img_path_small(&image.id);
+    let small_retina = img_path_small_retina(&image.id);
+    let srcset = format!("{small_retina} 2x");
     let on_delete = move |_| {
         delete_image.dispatch(DeleteImage {
             id: image.id.clone(),
