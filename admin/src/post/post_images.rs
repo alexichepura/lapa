@@ -1,7 +1,7 @@
 use leptos::*;
 use serde::{Deserialize, Serialize};
 
-use crate::{post::ImageUpload, util::Loading};
+use crate::{image, post::ImageUpload, util::Loading};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PostImageData {
@@ -117,13 +117,10 @@ pub async fn get_images(cx: Scope, post_id: String) -> Result<Vec<PostImageData>
     Ok(images)
 }
 
-type ResultDeleteImage = Result<(), crate::image::ImageError>;
+type ResultDeleteImage = Result<(), image::ImageError>;
 
 #[server(DeleteImage, "/api")]
-pub async fn delete_image(
-    cx: Scope,
-    id: String,
-) -> Result<Result<(), crate::image::ImageError>, ServerFnError> {
+pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, ServerFnError> {
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
 
@@ -140,7 +137,7 @@ pub async fn delete_image(
 
     if found_image.is_none() {
         crate::err::serverr_404(cx);
-        return Ok(Err(crate::image::ImageError::NotFound));
+        return Ok(Err(image::ImageError::NotFound));
     }
 
     prisma_client

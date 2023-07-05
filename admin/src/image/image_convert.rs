@@ -1,14 +1,9 @@
-use image::{DynamicImage, ImageError};
+use image::{imageops::FilterType, DynamicImage, ImageError, ImageFormat};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 use crate::settings::SettingsImages;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct ImageSize {
-    height: u32,
-    width: u32,
-}
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ImageConvertConfig {
     // img: DynamicImage,
@@ -42,13 +37,9 @@ pub fn create_image_variant(
     img_decoded: ArcDynamicImage,
     conf: ImageConvertConfig,
 ) -> Result<(), ImageError> {
-    let variant = img_decoded.resize_to_fill(
-        conf.width,
-        conf.height,
-        image::imageops::FilterType::Lanczos3,
-    );
+    let variant = img_decoded.resize_to_fill(conf.width, conf.height, FilterType::Lanczos3);
 
-    variant.save_with_format(conf.path, image::ImageFormat::WebP)
+    variant.save_with_format(conf.path, ImageFormat::WebP)
 }
 
 pub fn create_image_variants(dynamic_image: DynamicImage, settings: &ConvertSettings, id: String) {

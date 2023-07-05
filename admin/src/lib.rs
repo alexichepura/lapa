@@ -2,7 +2,6 @@
 
 cfg_if::cfg_if! {if #[cfg(feature = "ssr")] {
     pub mod axum_session_prisma;
-    pub mod image;
     pub mod fileserv;
     pub mod prisma;
 }}
@@ -12,6 +11,7 @@ pub mod auth;
 pub mod err;
 pub mod form;
 pub mod home;
+pub mod image;
 pub mod layout;
 pub mod post;
 pub mod routes;
