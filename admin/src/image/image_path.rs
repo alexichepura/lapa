@@ -1,3 +1,9 @@
+pub fn img_path_upload(name: &String) -> String {
+    format!("/upload/{}", name)
+}
+pub fn img_path_upload_ext(name: &String, ext: &String) -> String {
+    format!("/upload/{}.{}", name, ext)
+}
 pub fn img_path_small(id: &String) -> String {
     format!("/img/{}-s.webp", id)
 }

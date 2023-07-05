@@ -3,6 +3,8 @@ use std::sync::Arc;
 
 use crate::settings::SettingsImages;
 
+use super::{img_path_large, img_path_large_retina, img_path_small, img_path_small_retina};
+
 #[derive(Clone, Debug)]
 pub struct ImageConvertConfig {
     img: Arc<DynamicImage>,
@@ -39,29 +41,28 @@ pub fn create_image_variant(conf: ImageConvertConfig) -> Result<(), ImageError> 
 }
 
 pub fn create_image_variants(dynamic_image: DynamicImage, settings: &ConvertSettings, id: String) {
-    let img_path = "img";
     let arc = Arc::new(dynamic_image);
     let conf_large = ImageConvertConfig {
         img: arc.clone(),
-        path: format!("{img_path}/{id}-l.webp"),
+        path: img_path_large(&id),
         width: settings.hero_width,
         height: settings.hero_height,
     };
     let conf_large_retina = ImageConvertConfig {
         img: arc.clone(),
-        path: format!("{img_path}/{id}-l2.webp"),
+        path: img_path_large_retina(&id),
         width: settings.hero_width * 2,
         height: settings.hero_height * 2,
     };
     let conf_small = ImageConvertConfig {
         img: arc.clone(),
-        path: format!("{img_path}/{id}-s.webp"),
+        path: img_path_small(&id),
         width: settings.thumb_width,
         height: settings.thumb_height,
     };
     let conf_small_retina = ImageConvertConfig {
         img: arc.clone(),
-        path: format!("{img_path}/{id}-s2.webp"),
+        path: img_path_small_retina(&id),
         width: settings.thumb_width * 2,
         height: settings.thumb_height * 2,
     };

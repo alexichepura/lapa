@@ -156,9 +156,7 @@ pub async fn upload_img(
     let format_string = format!("{:?}", img_format);
     let ext = img_format.extensions_str().first().unwrap();
     let id = image_upload_data.id;
-    let name = format!("{id}.{ext}");
-    let upload_path = "upload";
-    let file_path = format!("{upload_path}/{name}");
+    let file_path = crate::image::img_path_upload_ext(&id, &ext.to_string());
     std::fs::write(file_path.clone(), img_bytes).map_err(|e| {
         dbg!(e);
         ServerFnError::ServerError("Server error".to_string())
