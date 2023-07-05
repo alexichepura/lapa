@@ -101,7 +101,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
     };
 
     view! { cx,
-        <Title text=format!("Post: {}", title())/>
+        <Title text=move || format!("Post: {}", title())/>
         <ActionForm action=post_upsert>
             <fieldset disabled=move || pending()>
                 <legend>{header_view}</legend>
@@ -159,8 +159,6 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
         {gallery_view}
     }
 }
-
-// .map(|n| view! { cx, <ComponentA/> })
 
 #[server(PostUpsert, "/api")]
 pub async fn post_upsert(

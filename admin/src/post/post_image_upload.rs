@@ -12,7 +12,7 @@ pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
     let upload_img = create_server_action::<UploadImg>(cx);
     let value = upload_img.value();
     let pending = upload_img.pending();
-    let (file_name, set_file_name) = create_signal(cx, None::<String>);
+    let (_file_name, set_file_name) = create_signal(cx, None::<String>);
     let (save_byte_vec, set_save_byte_vec) = create_signal(cx, None::<Vec<u8>>);
     let (_save_file, set_save_file) = create_signal(cx, None::<String>);
     let (obj_url, set_obj_url) = create_signal(cx, None::<String>);
@@ -156,9 +156,7 @@ pub async fn upload_img(
     let format_string = format!("{:?}", img_format);
     let ext = img_format.extensions_str().first().unwrap();
     let id = image_upload_data.id;
-    let name = format!("{id}.{ext}");
-    let upload_path = "upload";
-    let file_path = format!("{upload_path}/{name}");
+    let file_path = crate::image::img_path_upload_ext(&id, &ext.to_string());
     std::fs::write(file_path.clone(), img_bytes).map_err(|e| {
         dbg!(e);
         ServerFnError::ServerError("Server error".to_string())
