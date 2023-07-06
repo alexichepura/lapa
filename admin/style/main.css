@@ -201,6 +201,28 @@ label {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, 240px);
 	grid-gap: var(--size-fluid-1);
+
+	>section {
+		box-shadow: var(--shadow-3);
+		background: var(--surface-2);
+		border-radius: var(--radius-2);
+		overflow: hidden;
+
+		>figcaption {
+			padding: calc(var(--size-fluid-1) / 2);
+		}
+
+		>footer {
+			display: flex;
+			justify-content: space-between;
+			padding: calc(var(--size-fluid-1) / 2);
+
+			>button {
+				padding-block: .25ch;
+				padding-inline: var(--size-relative-2);
+			}
+		}
+	}
 }
 
 .login-card {

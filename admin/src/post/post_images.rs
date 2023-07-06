@@ -185,12 +185,14 @@ pub fn PostImage(
         }));
     };
     view! { cx,
-        <div>
+        <section>
             <img src=src srcset=srcset width=250/>
-            <div>{image.alt}</div>
-            <button on:click=on_delete>"Delete"</button>
-            <button on:click=on_edit>"Edit"</button>
-        </div>
+            <figcaption>{image.alt}</figcaption>
+            <footer>
+                <button on:click=on_delete>"Delete"</button>
+                <button on:click=on_edit>"Edit"</button>
+            </footer>
+        </section>
     }
 }
 
