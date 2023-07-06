@@ -18,7 +18,7 @@ pub fn PostList(cx: Scope) -> impl IntoView {
                 <A href="/posts/new">"Create"</A>
             </small>
         </h1>
-        <div class="Card">
+        <ul class="Card">
             <Suspense fallback=move || {
                 view! { cx, <Loading/> }
             }>
@@ -35,9 +35,7 @@ pub fn PostList(cx: Scope) -> impl IntoView {
                                         .into_iter()
                                         .map(|post| {
                                             view! { cx,
-                                                <li>
-                                                    <A href=format!("/posts/{}", post.id)>{&post.title}</A>
-                                                </li>
+                                                <PostListItem post/>
                                             }
                                         })
                                         .collect_view(cx)
@@ -46,7 +44,19 @@ pub fn PostList(cx: Scope) -> impl IntoView {
                         })
                 }}
             </Suspense>
-        </div>
+        </ul>
+    }
+}
+
+#[component]
+pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
+    view! { cx,
+        <li>
+            <A href=format!("/posts/{}", post.id)>
+                <span>{&post.published_at}</span>
+                <span>{&post.title}</span>
+            </A>
+        </li>
     }
 }
 
@@ -68,6 +78,7 @@ pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
         .map(|data| PostListItem {
             id: data.id.clone(),
             title: data.title.clone(),
+            published_at: data.created_at.to_string(),
         })
         .collect();
     Ok(posts)
@@ -77,4 +88,5 @@ pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
 pub struct PostListItem {
     pub id: String,
     pub title: String,
+    pub published_at: String,
 }

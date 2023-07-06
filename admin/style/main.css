@@ -114,11 +114,43 @@ main {
 }
 
 .Card {
-	background: var(--surface-3);
+	background: var(--surface-2);
 	border-radius: var(--radius-2);
 	padding: var(--size-fluid-2);
 	box-shadow: var(--shadow-3);
 	margin-block-end: var(--size-fluid-2);
+}
+
+ul.Card {
+	padding: 0;
+	overflow: hidden;
+
+	>li {
+		display: block;
+		width: 100%;
+		list-style: none;
+		padding: 0;
+		height: var(--size-fluid-4);
+		max-inline-size: inherit;
+		display: flex;
+		align-items: center;
+
+		&:hover {
+			background: var(--surface-3);
+		}
+
+		>a {
+			width: 100%;
+			padding: var(--size-fluid-2);
+			text-decoration: none;
+			display: grid;
+			grid-template-columns: 300px auto;
+
+			&:visited {
+				color: var(--text-1);
+			}
+		}
+	}
 }
 
 form footer {
