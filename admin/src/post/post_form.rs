@@ -135,7 +135,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                             None => ().into_view(cx),
                             Some(v) => {
                                 let post_result = v.map_err(|_| PostError::ServerError).flatten();
-                                view! { cx, <ResultAlert result=post_result/>}.into_view(cx)
+                                view! { cx, <ResultAlert result=post_result/> }.into_view(cx)
                             }
                         }}
                     </Suspense>

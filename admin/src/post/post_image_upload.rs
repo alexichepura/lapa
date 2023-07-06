@@ -35,7 +35,12 @@ pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
                             type="hidden"
                             name="img"
                             value=move || {
-                                Some(serde_json::to_string(&save_byte_vec().unwrap_or_default().to_vec()).unwrap())
+                                Some(
+                                    serde_json::to_string(
+                                            &save_byte_vec().unwrap_or_default().to_vec(),
+                                        )
+                                        .unwrap(),
+                                )
                             }
                         />
                         <footer>
@@ -45,8 +50,11 @@ pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
                                 {move || match value() {
                                     None => ().into_view(cx),
                                     Some(v) => {
-                                        let post_result = v.map_err(|_| ImageUploadError::ServerError).flatten();
-                                        view! { cx, <ResultAlert result=post_result/>}.into_view(cx)
+                                        let post_result = v
+                                            .map_err(|_| ImageUploadError::ServerError)
+                                            .flatten();
+                                        view! { cx, <ResultAlert result=post_result/> }
+                                            .into_view(cx)
                                     }
                                 }}
                             </Suspense>
@@ -62,14 +70,10 @@ pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
 #[component]
 pub fn ImageUploadPreview(cx: Scope, obj_url: ReadSignal<Option<String>>) -> impl IntoView {
     let view = move || match obj_url.get() {
-        Some(url) => view! { cx, <img src=url/>}.into_view(cx),
-        None => view! { cx, <p>"Upload preview"</p>}.into_view(cx),
+        Some(url) => view! { cx, <img src=url/> }.into_view(cx),
+        None => view! { cx, <p>"Upload preview"</p> }.into_view(cx),
     };
-    view! { cx,
-        <div class="ImageUploadPreview">
-            {view}
-        </div>
-    }
+    view! { cx, <div class="ImageUploadPreview">{view}</div> }
 }
 
 #[server(UploadImg, "/api")]

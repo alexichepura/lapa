@@ -26,7 +26,7 @@ pub fn ImagesConvertView(cx: Scope) -> impl IntoView {
                                 let post_result = v
                                     .map_err(|_| SettingsError::ServerError)
                                     .flatten();
-                                view! { cx, <ResultAlert result=post_result/>}.into_view(cx)
+                                view! { cx, <ResultAlert result=post_result/> }.into_view(cx)
                             }
                         }}
                     </Suspense>

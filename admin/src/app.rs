@@ -21,7 +21,6 @@ pub fn App(cx: Scope, user: Option<User>) -> impl IntoView {
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)
-            // before_hiding=std::time::Duration::from_millis(25000)
             class="RoutingProgress"
         />
         <Router set_is_routing>

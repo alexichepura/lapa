@@ -56,12 +56,7 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
         None => ().into_view(cx),
     };
     let href = format!("/post/{}", post.slug);
-    view! { cx,
-        <A href>
-            {image_view}
-            <p>{&post.title}</p>
-        </A>
-    }
+    view! { cx, <A href>{image_view} <p>{&post.title}</p></A> }
 }
 
 #[server(GetPosts, "/api")]

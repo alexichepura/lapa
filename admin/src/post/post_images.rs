@@ -41,17 +41,12 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
                 images
                     .read(cx)
                     .map(|images| match images {
-                        Err(e) => {
-                            view! { cx, <p>"error" {e.to_string()}</p> }
-                                .into_view(cx)
-                        }
+                        Err(e) => view! { cx, <p>"error" {e.to_string()}</p> }.into_view(cx),
                         Ok(images) => {
                             if images.is_empty() {
-                                view! { cx, <p>"No images were found."</p> }
-                                    .into_view(cx)
+                                view! { cx, <p>"No images were found."</p> }.into_view(cx)
                             } else {
-                                view! { cx, <PostImagesView images delete_image/> }
-                                    .into_view(cx)
+                                view! { cx, <PostImagesView images delete_image/> }.into_view(cx)
                             }
                         }
                     })
@@ -153,8 +148,10 @@ pub fn PostImageModalForm(
                             {move || match value() {
                                 None => ().into_view(cx),
                                 Some(v) => {
-                                    let post_result = v.map_err(|_| ImageError::ServerError).flatten();
-                                    view! { cx, <ResultAlert result=post_result/>}.into_view(cx)
+                                    let post_result = v
+                                        .map_err(|_| ImageError::ServerError)
+                                        .flatten();
+                                    view! { cx, <ResultAlert result=post_result/> }.into_view(cx)
                                 }
                             }}
                         </Suspense>
