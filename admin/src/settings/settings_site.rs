@@ -2,10 +2,7 @@ use leptos::*;
 use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    settings::SettingsError,
-    util::{AlertDanger, AlertSuccess},
-};
+use crate::{settings::SettingsError, util::ResultAlert};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SettingsSite {
@@ -38,13 +35,7 @@ pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
                                 let post_result = v
                                     .map_err(|_| SettingsError::ServerError)
                                     .flatten();
-                                match post_result {
-                                    Ok(_) => view! { cx, <AlertSuccess/> }.into_view(cx),
-                                    Err(e) => {
-                                        view! { cx, <AlertDanger text=e.to_string()/> }
-                                            .into_view(cx)
-                                    }
-                                }
+                                view! { cx, <ResultAlert result=post_result/>}.into_view(cx)
                             }
                         }}
                     </Suspense>

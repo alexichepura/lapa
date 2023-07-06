@@ -2,10 +2,7 @@ use leptos::*;
 use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    upload::InputImage,
-    util::{AlertDanger, AlertSuccess},
-};
+use crate::{upload::InputImage, util::ResultAlert};
 
 #[component]
 pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
@@ -51,16 +48,7 @@ pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
                                     }
                                     Some(v) => {
                                         let post_result = v.map_err(|_| ImageUploadError::ServerError).flatten();
-                                        match post_result {
-                                            Ok(_) => {
-                                                view! { cx, <AlertSuccess/> }
-                                                    .into_view(cx)
-                                            }
-                                            Err(e) => {
-                                                view! { cx, <AlertDanger text=e.to_string()/> }
-                                                    .into_view(cx)
-                                            }
-                                        }
+                                        view! { cx, <ResultAlert result=post_result/>}.into_view(cx)
                                     }
                                 }}
                             </Suspense>
