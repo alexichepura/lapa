@@ -1,9 +1,9 @@
-use leptos::*;
+use leptos::{html::Dialog, *};
 use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    image::{self, img_url_small, img_url_small_retina},
+    image::{self, img_url_large, img_url_small, srcset_large, srcset_small},
     post::ImageUpload,
     util::Loading,
 };
@@ -40,12 +40,17 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
                 images
                     .read(cx)
                     .map(|images| match images {
-                        Err(e) => view! { cx, <p>"error" {e.to_string()}</p> }.into_view(cx),
+                        Err(e) => {
+                            view! { cx, <p>"error" {e.to_string()}</p> }
+                                .into_view(cx)
+                        }
                         Ok(images) => {
                             if images.is_empty() {
-                                view! { cx, <p>"No images were found."</p> }.into_view(cx)
+                                view! { cx, <p>"No images were found."</p> }
+                                    .into_view(cx)
                             } else {
-                                view! { cx, <PostImagesView images delete_image/> }.into_view(cx)
+                                view! { cx, <PostImagesView images delete_image/> }
+                                    .into_view(cx)
                             }
                         }
                     })
@@ -54,12 +59,53 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
     }
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct EditImageData {
+    id: String,
+    alt: String,
+}
+type EditImageSignal = Option<EditImageData>;
+
 #[component]
 pub fn PostImagesView(
     cx: Scope,
     images: Vec<PostImageData>,
     delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
 ) -> impl IntoView {
+    let dialog_element: NodeRef<Dialog> = create_node_ref(cx);
+    let (editing, set_editing) = create_signal::<EditImageSignal>(cx, None);
+    let image_update_alt = create_server_action::<ImageUpdateAlt>(cx);
+    // let value = image_update_alt.value();
+    let pending = image_update_alt.pending();
+
+    create_effect(cx, move |_| {
+        let some_id = editing();
+        if let Some(_id) = some_id {
+            let el = dialog_element().expect("<dialog> to exist");
+            let _modal_result = el.show_modal();
+        }
+    });
+
+    let edit_view = move || match editing() {
+        Some(image) => view! { cx,
+            <div>
+                <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) width=500/>
+                <ActionForm action=image_update_alt>
+                    <input type="hidden" name="id" value=image.id.clone()/>
+                    <input name="alt" value=image.alt.clone() prop:value=image.alt.clone()/>
+                    <footer>
+                        <input type="submit" value="Update"/>
+                        <Show when=move || pending() fallback=|_| ()>
+                            <progress indeterminate></progress>
+                        </Show>
+                    </footer>
+                </ActionForm>
+            </div>
+        }
+        .into_view(cx),
+        None => ().into_view(cx),
+    };
+
     view! { cx,
         <h2>"Images"</h2>
         <div class="images">
@@ -67,10 +113,13 @@ pub fn PostImagesView(
                 each=move || images.clone()
                 key=|image| image.id.clone()
                 view=move |cx, image: PostImageData| {
-                    view! { cx, <PostImage image delete_image/> }
+                    view! { cx, <PostImage image delete_image set_editing/> }
                 }
             />
         </div>
+        <dialog id="dialog" node_ref=dialog_element>
+            {edit_view}
+        </dialog>
     }
 }
 
@@ -79,31 +128,30 @@ pub fn PostImage(
     cx: Scope,
     image: PostImageData,
     delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
+    set_editing: WriteSignal<EditImageSignal>,
 ) -> impl IntoView {
     let id = image.id.clone();
+    let alt_clone = image.alt.clone();
+    let id_clone1 = image.id.clone();
     let src = img_url_small(&id);
-    let small_retina = img_url_small_retina(&id);
-    let srcset = format!("{small_retina} 2x");
+    let srcset = srcset_small(&id);
     let on_delete = move |_| delete_image.dispatch(DeleteImage { id: id.clone() });
 
-    let image_update_alt = create_server_action::<ImageUpdateAlt>(cx);
-    // let value = image_update_alt.value();
-    let pending = image_update_alt.pending();
+    let on_edit = move |_| {
+        let data = EditImageData {
+            id: id_clone1.clone(),
+            alt: alt_clone.clone(),
+        };
+        set_editing(Some(data));
+        // set_editing(Some(id_clone1.clone()));
+    };
     view! { cx,
-        <fieldset disabled=move || pending()>
+        <div>
             <img src=src srcset=srcset width=250/>
-            <ActionForm action=image_update_alt>
-                <input type="hidden" name="id" value=image.id.clone()/>
-                <input name="alt" value=image.alt.clone() prop:value=image.alt.clone()/>
-                <footer>
-                    <input type="submit" value="Update"/>
-                    <Show when=move || pending() fallback=|_| ()>
-                        <progress indeterminate></progress>
-                    </Show>
-                </footer>
-                </ActionForm>
-                <button on:click=on_delete>"Delete"</button>
-        </fieldset>
+            <div>{image.alt}</div>
+            <button on:click=on_delete>"Delete"</button>
+            <button on:click=on_edit>"Edit"</button>
+        </div>
     }
 }
 
