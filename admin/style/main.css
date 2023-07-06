@@ -131,7 +131,7 @@ form footer {
 
 
 /* @container (--sm-n-above) { */
-@container (width >=480px) {
+@container (width >=360px) {
 	form footer {
 		grid-template-columns: auto auto;
 	}
@@ -201,6 +201,33 @@ label {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, 240px);
 	grid-gap: var(--size-fluid-1);
+
+	>section {
+		box-shadow: var(--shadow-3);
+		background: var(--surface-2);
+		border-radius: var(--radius-2);
+		overflow: hidden;
+		cursor: pointer;
+
+		&:hover {
+			box-shadow: var(--shadow-6);
+		}
+
+		>figcaption {
+			padding: calc(var(--size-fluid-1) / 2);
+		}
+
+		>footer {
+			display: flex;
+			justify-content: space-between;
+			padding: calc(var(--size-fluid-1) / 2);
+
+			>button {
+				padding-block: .25ch;
+				padding-inline: var(--size-relative-2);
+			}
+		}
+	}
 }
 
 .login-card {
@@ -222,5 +249,18 @@ label {
 	>p {
 		font-size: var(--font-size-3);
 		color: var(--text-2);
+	}
+}
+
+dialog {
+	max-inline-size: var(--size-content-4);
+
+	&:not([open]) {
+		display: none;
+	}
+
+	>img {
+		max-height: calc(100vh - 70px);
+		width: auto;
 	}
 }

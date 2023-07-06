@@ -43,7 +43,7 @@ pub fn FileField(
 
     let label = match label {
         Some(label) => view! { cx, <span>{label.get()}</span> }.into_view(cx),
-        None => view! { cx, || () }.into_view(cx),
+        None => ().into_view(cx),
     };
 
     view! { cx, <label>{label} {inner}</label> }

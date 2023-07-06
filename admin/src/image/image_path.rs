@@ -28,3 +28,11 @@ pub fn img_url_large(id: &String) -> String {
 pub fn img_url_large_retina(id: &String) -> String {
     format!("/img/{}-l2.webp", id)
 }
+pub fn srcset_small(id: &String) -> String {
+    let small_retina = img_url_small_retina(&id);
+    format!("{small_retina} 2x")
+}
+pub fn srcset_large(id: &String) -> String {
+    let large_retina = img_url_large_retina(&id);
+    format!("{large_retina} 2x")
+}

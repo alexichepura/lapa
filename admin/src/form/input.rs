@@ -47,7 +47,7 @@ pub fn Input(
 
     let label = match label {
         Some(label) => view! { cx, <div>{label.get()}</div> }.into_view(cx),
-        None => view! { cx, || () }.into_view(cx),
+        None => ().into_view(cx),
     };
 
     view! { cx, <label>{label} {inner}</label> }
