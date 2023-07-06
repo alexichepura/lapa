@@ -207,6 +207,11 @@ label {
 		background: var(--surface-2);
 		border-radius: var(--radius-2);
 		overflow: hidden;
+		cursor: pointer;
+
+		&:hover {
+			box-shadow: var(--shadow-6);
+		}
 
 		>figcaption {
 			padding: calc(var(--size-fluid-1) / 2);

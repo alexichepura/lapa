@@ -186,11 +186,10 @@ pub fn PostImage(
     };
     view! { cx,
         <section>
-            <img src=src srcset=srcset width=250/>
+            <img src=src srcset=srcset width=250 on:click=on_edit/>
             <figcaption>{image.alt}</figcaption>
             <footer>
                 <button on:click=on_delete>"Delete"</button>
-                <button on:click=on_edit>"Edit"</button>
             </footer>
         </section>
     }
