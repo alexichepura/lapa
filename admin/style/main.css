@@ -250,6 +250,10 @@ label {
 dialog {
 	max-inline-size: var(--size-content-4);
 
+	&:not([open]) {
+		display: none;
+	}
+
 	>img {
 		max-height: calc(100vh - 70px);
 		width: auto;
