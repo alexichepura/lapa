@@ -14,10 +14,13 @@ pub fn AlertSuccess(cx: Scope) -> impl IntoView {
     view! { cx, <div class="Alert Success">"Success"</div> }
 }
 
-// #[component]
-// pub fn ResultAlert<T>(cx: Scope, result: Result<T, PostError>) -> impl IntoView {
-//     match result {
-//         Ok(_) => view! { cx, <AlertSuccess/> }.into_view(cx),
-//         Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx),
-//     }
-// }
+#[component]
+pub fn ResultAlert<T, E>(cx: Scope, result: Result<T, E>) -> impl IntoView
+where
+    E: std::error::Error,
+{
+    match result {
+        Ok(_) => view! { cx, <AlertSuccess/> }.into_view(cx),
+        Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx),
+    }
+}

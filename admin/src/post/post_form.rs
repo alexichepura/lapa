@@ -1,16 +1,10 @@
-use std::any::Any;
-
 use leptos::*;
 use leptos_meta::Title;
 use leptos_router::{use_navigate, ActionForm};
 use serde::{Deserialize, Serialize};
 
 use super::PostError;
-use crate::{
-    form::Input,
-    post::PostImages,
-    util::{AlertDanger, AlertSuccess},
-};
+use crate::{form::Input, post::PostImages, util::ResultAlert};
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PostFormData {
@@ -147,13 +141,6 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
             </fieldset>
         </ActionForm>
         {gallery_view}
-    }
-}
-#[component]
-pub fn ResultAlert<T>(cx: Scope, result: Result<T, PostError>) -> impl IntoView {
-    match result {
-        Ok(_) => view! { cx, <AlertSuccess/> }.into_view(cx),
-        Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx),
     }
 }
 

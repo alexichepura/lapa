@@ -6,7 +6,7 @@ use crate::{
     form::Input,
     image::{self, img_url_large, img_url_small, srcset_large, srcset_small, ImageError},
     post::ImageUpload,
-    util::{AlertDanger, AlertSuccess, Loading},
+    util::{Loading, ResultAlert},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -159,16 +159,7 @@ pub fn PostImageModalForm(
                                 }
                                 Some(v) => {
                                     let post_result = v.map_err(|_| ImageError::ServerError).flatten();
-                                    match post_result {
-                                        Ok(_) => {
-                                            view! { cx, <AlertSuccess/> }
-                                                .into_view(cx)
-                                        }
-                                        Err(e) => {
-                                            view! { cx, <AlertDanger text=e.to_string()/> }
-                                                .into_view(cx)
-                                        }
-                                    }
+                                    view! { cx, <ResultAlert result=post_result/>}.into_view(cx)
                                 }
                             }}
                         </Suspense>
