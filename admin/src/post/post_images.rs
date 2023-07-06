@@ -153,10 +153,7 @@ pub fn PostImageModalForm(
                         </Show>
                         <Suspense fallback=|| ()>
                             {move || match value() {
-                                None => {
-                                    view! { cx, "" }
-                                        .into_view(cx)
-                                }
+                                None => ().into_view(cx),
                                 Some(v) => {
                                     let post_result = v.map_err(|_| ImageError::ServerError).flatten();
                                     view! { cx, <ResultAlert result=post_result/>}.into_view(cx)

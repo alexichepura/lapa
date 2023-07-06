@@ -27,11 +27,11 @@ pub fn Login(cx: Scope, children: Children) -> impl IntoView {
             <button type="submit">"Log In"</button>
             <Suspense fallback=|| ()>
                 {move || match value() {
-                    None => view! { cx, "" }.into_view(cx),
+                    None => ().into_view(cx),
                     Some(v) => {
                         let auth_result = v.map_err(|_| AuthError::ServerError).flatten();
                         match auth_result {
-                            Ok(_) => view! { cx, "" }.into_view(cx),
+                            Ok(_) => ().into_view(cx),
                             Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx),
                         }
                     }

@@ -57,7 +57,7 @@ pub fn SettingsImagesForm(cx: Scope, settings: SettingsImages) -> impl IntoView 
                     </Show>
                     <Suspense fallback=|| ()>
                         {move || match value() {
-                            None => view! { cx, "" }.into_view(cx),
+                            None => ().into_view(cx),
                             Some(v) => {
                                 let post_result = v
                                     .map_err(|_| SettingsError::ServerError)
