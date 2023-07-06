@@ -2,7 +2,10 @@ use leptos::*;
 use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
-use crate::{upload::InputImage, util::ResultAlert};
+use crate::{
+    upload::InputImage,
+    util::{Pending, ResultAlert},
+};
 
 #[component]
 pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
@@ -37,9 +40,7 @@ pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
                         />
                         <footer>
                             <input type="submit" value="Upload"/>
-                            <Show when=move || pending() fallback=|_| ()>
-                                <progress indeterminate></progress>
-                            </Show>
+                            <Pending pending/>
                             <Suspense fallback=|| ()>
                                 {move || match value() {
                                     None => ().into_view(cx),

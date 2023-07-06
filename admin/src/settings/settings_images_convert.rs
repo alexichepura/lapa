@@ -1,7 +1,10 @@
 use leptos::*;
 use leptos_router::ActionForm;
 
-use crate::{settings::SettingsError, util::ResultAlert};
+use crate::{
+    settings::SettingsError,
+    util::{Pending, ResultAlert},
+};
 
 #[component]
 pub fn ImagesConvertView(cx: Scope) -> impl IntoView {
@@ -15,9 +18,7 @@ pub fn ImagesConvertView(cx: Scope) -> impl IntoView {
             <ActionForm action=images_convert>
                 <footer>
                     <input type="submit" value="START CONVERSION"/>
-                    <Show when=move || pending() fallback=|_| ()>
-                        <progress indeterminate></progress>
-                    </Show>
+                    <Pending pending/>
                     <Suspense fallback=|| ()>
                         {move || match value() {
                             None => ().into_view(cx),

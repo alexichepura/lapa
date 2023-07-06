@@ -24,3 +24,12 @@ where
         Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx),
     }
 }
+
+#[component]
+pub fn Pending(cx: Scope, pending: ReadSignal<bool>) -> impl IntoView {
+    view! { cx,
+        <Show when=move || pending() fallback=|_| ()>
+            <progress indeterminate></progress>
+        </Show>
+    }
+}

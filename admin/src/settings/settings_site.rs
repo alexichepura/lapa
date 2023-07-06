@@ -2,7 +2,10 @@ use leptos::*;
 use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
-use crate::{settings::SettingsError, util::ResultAlert};
+use crate::{
+    settings::SettingsError,
+    util::{Pending, ResultAlert},
+};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SettingsSite {
@@ -25,9 +28,7 @@ pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
                 </label>
                 <footer>
                     <input type="submit" value="SUBMIT"/>
-                    <Show when=move || pending() fallback=|_| ()>
-                        <progress indeterminate></progress>
-                    </Show>
+                    <Pending pending/>
                     <Suspense fallback=|| ()>
                         {move || match value() {
                             None => ().into_view(cx),

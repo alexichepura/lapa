@@ -6,7 +6,7 @@ use crate::{
     form::Input,
     image::{self, img_url_large, img_url_small, srcset_large, srcset_small, ImageError},
     post::ImageUpload,
-    util::{Loading, ResultAlert},
+    util::{Loading, Pending, ResultAlert},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -148,9 +148,7 @@ pub fn PostImageModalForm(
                     <Input name="alt" label="Alt" value=image.alt.clone()/>
                     <footer>
                         <input type="submit" value="Update"/>
-                        <Show when=move || pending() fallback=|_| ()>
-                            <progress indeterminate></progress>
-                        </Show>
+                        <Pending pending/>
                         <Suspense fallback=|| ()>
                             {move || match value() {
                                 None => ().into_view(cx),

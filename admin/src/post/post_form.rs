@@ -4,7 +4,11 @@ use leptos_router::{use_navigate, ActionForm};
 use serde::{Deserialize, Serialize};
 
 use super::PostError;
-use crate::{form::Input, post::PostImages, util::ResultAlert};
+use crate::{
+    form::Input,
+    post::PostImages,
+    util::{Pending, ResultAlert},
+};
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PostFormData {
@@ -125,9 +129,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                 </div>
                 <footer>
                     <input type="submit" value="SUBMIT"/>
-                    <Show when=move || pending() fallback=|_| ()>
-                        <progress indeterminate></progress>
-                    </Show>
+                    <Pending pending/>
                     <Suspense fallback=|| ()>
                         {move || match value() {
                             None => ().into_view(cx),
