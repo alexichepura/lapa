@@ -201,21 +201,6 @@ label {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, 240px);
 	grid-gap: var(--size-fluid-1);
-
-	>fieldset {
-		padding: 0;
-		box-shadow: var(--shadow-3);
-	}
-
-	>input {
-		width: 100%;
-	}
-
-	& button,
-	& input[type="submit"] {
-		padding-block: .25ch;
-		padding-inline: var(--size-relative-2);
-	}
 }
 
 .login-card {
@@ -237,5 +222,12 @@ label {
 	>p {
 		font-size: var(--font-size-3);
 		color: var(--text-2);
+	}
+}
+
+dialog {
+	& img {
+		max-height: calc(100vh - 240px);
+		width: auto;
 	}
 }
