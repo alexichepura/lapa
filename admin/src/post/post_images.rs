@@ -1,4 +1,5 @@
 use leptos::*;
+use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -79,20 +80,30 @@ pub fn PostImage(
     image: PostImageData,
     delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
 ) -> impl IntoView {
-    let src = img_url_small(&image.id);
-    let small_retina = img_url_small_retina(&image.id);
+    let id = image.id.clone();
+    let src = img_url_small(&id);
+    let small_retina = img_url_small_retina(&id);
     let srcset = format!("{small_retina} 2x");
-    let on_delete = move |_| {
-        delete_image.dispatch(DeleteImage {
-            id: image.id.clone(),
-        })
-    };
+    let on_delete = move |_| delete_image.dispatch(DeleteImage { id: id.clone() });
+
+    let image_update_alt = create_server_action::<ImageUpdateAlt>(cx);
+    // let value = image_update_alt.value();
+    let pending = image_update_alt.pending();
     view! { cx,
-        <div>
+        <fieldset disabled=move || pending()>
             <img src=src srcset=srcset width=250/>
-            <div>"Alt: " {image.alt}</div>
-            <button on:click=on_delete>"Delete"</button>
-        </div>
+            <ActionForm action=image_update_alt>
+                <input type="hidden" name="id" value=image.id.clone()/>
+                <input name="alt" value=image.alt.clone() prop:value=image.alt.clone()/>
+                <footer>
+                    <input type="submit" value="Update"/>
+                    <Show when=move || pending() fallback=|_| ()>
+                        <progress indeterminate></progress>
+                    </Show>
+                </footer>
+                </ActionForm>
+                <button on:click=on_delete>"Delete"</button>
+        </fieldset>
     }
 }
 
@@ -172,6 +183,49 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, Se
     prisma_client
         .image()
         .delete(db::image::UniqueWhereParam::IdEquals(id))
+        .exec()
+        .await
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
+
+    Ok(Ok(()))
+}
+
+type ResultImageUpdateAlt = Result<(), image::ImageError>;
+
+#[server(ImageUpdateAlt, "/api")]
+pub async fn image_update_alt(
+    cx: Scope,
+    id: String,
+    alt: String,
+) -> Result<ResultImageUpdateAlt, ServerFnError> {
+    use prisma_client::db;
+    let prisma_client = crate::prisma::use_prisma(cx)?;
+
+    let found_image = prisma_client
+        .image()
+        .find_unique(db::image::UniqueWhereParam::IdEquals(id.clone()))
+        .select(db::image::select!({ id }))
+        .exec()
+        .await
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
+
+    if found_image.is_none() {
+        crate::err::serverr_404(cx);
+        return Ok(Err(image::ImageError::NotFound));
+    }
+
+    prisma_client
+        .image()
+        .update(
+            db::image::UniqueWhereParam::IdEquals(id),
+            vec![db::image::alt::set(alt)],
+        )
         .exec()
         .await
         .map_err(|e| {
