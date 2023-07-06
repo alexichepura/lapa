@@ -89,7 +89,9 @@ pub fn PostImagesView(
     });
 
     let edit_view = move || match editing() {
-        Some(image) => view! { cx, <PostImageModalForm image set_editing/> }.into_view(cx),
+        Some(image) => {
+            view! { cx, <PostImageModalForm image set_editing delete_image/> }.into_view(cx)
+        }
         None => ().into_view(cx),
     };
 
@@ -100,7 +102,7 @@ pub fn PostImagesView(
                 each=move || images.clone()
                 key=|image| image.id.clone()
                 view=move |cx, image: PostImageData| {
-                    view! { cx, <PostImage image delete_image set_editing/> }
+                    view! { cx, <PostImage image set_editing/> }
                 }
             />
         </div>
@@ -115,17 +117,33 @@ pub fn PostImageModalForm(
     cx: Scope,
     image: EditImageData,
     set_editing: WriteSignal<EditImageSignal>,
+    delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
 ) -> impl IntoView {
     let image_update_alt = create_server_action::<ImageUpdateAlt>(cx);
     let value = image_update_alt.value();
     let pending = image_update_alt.pending();
+    let delete_rw = delete_image.value();
+
+    create_effect(cx, move |_| {
+        if let Some(_delete_value) = delete_rw.get() {
+            set_editing(None);
+        };
+    });
+
+    let id_delete = image.id.clone();
+    let on_delete = move |_| {
+        delete_image.dispatch(DeleteImage {
+            id: id_delete.clone(),
+        })
+    };
 
     view! { cx,
         <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) width=500/>
         <div>
+            <button on:click=on_delete>"Delete"</button>
+            <hr/>
             <ActionForm action=image_update_alt>
                 <fieldset disabled=move || pending()>
-                    <legend>"Image update"</legend>
                     <input type="hidden" name="id" value=image.id.clone()/>
                     <Input name="alt" label="Alt" value=image.alt.clone()/>
                     <footer>
@@ -160,7 +178,7 @@ pub fn PostImageModalForm(
             <button on:click=move |ev| {
                 ev.prevent_default();
                 set_editing(None);
-            }>"Cancel"</button>
+            }>"Close"</button>
         </div>
     }
 }
@@ -168,29 +186,23 @@ pub fn PostImageModalForm(
 pub fn PostImage(
     cx: Scope,
     image: PostImageData,
-    delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
     set_editing: WriteSignal<EditImageSignal>,
 ) -> impl IntoView {
     let id = image.id.clone();
     let alt_clone = image.alt.clone();
-    let id_clone1 = image.id.clone();
     let src = img_url_small(&id);
     let srcset = srcset_small(&id);
-    let on_delete = move |_| delete_image.dispatch(DeleteImage { id: id.clone() });
 
     let on_edit = move |_| {
         set_editing(Some(EditImageData {
-            id: id_clone1.clone(),
+            id: id.clone(),
             alt: alt_clone.clone(),
         }));
     };
     view! { cx,
-        <section>
-            <img src=src srcset=srcset width=250 on:click=on_edit/>
+        <section on:click=on_edit>
+            <img src=src srcset=srcset width=250/>
             <figcaption>{image.alt}</figcaption>
-            <footer>
-                <button on:click=on_delete>"Delete"</button>
-            </footer>
         </section>
     }
 }
@@ -244,29 +256,23 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, Se
         return Ok(Err(image::ImageError::NotFound));
     }
 
-    std::fs::remove_file(crate::image::img_path_small(&id)).map_err(|e| {
+    // TODO iterate
+    if let Err(e) = std::fs::remove_file(crate::image::img_path_small(&id)) {
         dbg!(e);
-        ServerFnError::ServerError("Server error".to_string())
-    })?;
-    std::fs::remove_file(crate::image::img_path_small_retina(&id)).map_err(|e| {
+    };
+    if let Err(e) = std::fs::remove_file(crate::image::img_path_small_retina(&id)) {
         dbg!(e);
-        ServerFnError::ServerError("Server error".to_string())
-    })?;
-    std::fs::remove_file(crate::image::img_path_large(&id)).map_err(|e| {
+    };
+    if let Err(e) = std::fs::remove_file(crate::image::img_path_large(&id)) {
         dbg!(e);
-        ServerFnError::ServerError("Server error".to_string())
-    })?;
-    std::fs::remove_file(crate::image::img_path_large_retina(&id)).map_err(|e| {
+    };
+    if let Err(e) = std::fs::remove_file(crate::image::img_path_large_retina(&id)) {
         dbg!(e);
-        ServerFnError::ServerError("Server error".to_string())
-    })?;
-
-    std::fs::remove_file(crate::image::img_path_upload_ext(&id, &"jpg".to_string())).map_err(
-        |e| {
-            dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
-        },
-    )?;
+    };
+    if let Err(e) = std::fs::remove_file(crate::image::img_path_upload_ext(&id, &"jpg".to_string()))
+    {
+        dbg!(e);
+    };
 
     prisma_client
         .image()
