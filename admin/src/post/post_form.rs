@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use leptos::*;
 use leptos_meta::Title;
 use leptos_router::{use_navigate, ActionForm};
@@ -123,7 +125,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                     <div>
                         <label>
                             <div>"Description"</div>
-                            <textarea name="description" prop:value=post.description />
+                            <textarea name="description" prop:value=post.description></textarea>
                         </label>
                     </div>
                 </div>
@@ -134,22 +136,10 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                     </Show>
                     <Suspense fallback=|| ()>
                         {move || match value() {
-                            None => {
-                                view! { cx, "" }
-                                    .into_view(cx)
-                            }
+                            None => ().into_view(cx),
                             Some(v) => {
                                 let post_result = v.map_err(|_| PostError::ServerError).flatten();
-                                match post_result {
-                                    Ok(_) => {
-                                        view! { cx, <AlertSuccess/> }
-                                            .into_view(cx)
-                                    }
-                                    Err(e) => {
-                                        view! { cx, <AlertDanger text=e.to_string()/> }
-                                            .into_view(cx)
-                                    }
-                                }
+                                view! { cx, <ResultAlert result=post_result/>}.into_view(cx)
                             }
                         }}
                     </Suspense>
@@ -157,6 +147,13 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
             </fieldset>
         </ActionForm>
         {gallery_view}
+    }
+}
+#[component]
+pub fn ResultAlert<T>(cx: Scope, result: Result<T, PostError>) -> impl IntoView {
+    match result {
+        Ok(_) => view! { cx, <AlertSuccess/> }.into_view(cx),
+        Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx),
     }
 }
 
