@@ -89,7 +89,7 @@ pub fn PostImagesView(
     });
 
     let edit_view = move || match editing() {
-        Some(image) => view! { cx,  <PostImageModalForm image set_editing/>}.into_view(cx),
+        Some(image) => view! { cx, <PostImageModalForm image set_editing/> }.into_view(cx),
         None => ().into_view(cx),
     };
 
@@ -104,7 +104,9 @@ pub fn PostImagesView(
                 }
             />
         </div>
-        <dialog node_ref=dialog_element>{edit_view}</dialog>
+        <dialog class="Grid-fluid-2" node_ref=dialog_element>
+            {edit_view}
+        </dialog>
     }
 }
 
@@ -119,10 +121,11 @@ pub fn PostImageModalForm(
     let pending = image_update_alt.pending();
 
     view! { cx,
+        <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) width=500/>
         <div>
-            <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) width=500/>
             <ActionForm action=image_update_alt>
                 <fieldset disabled=move || pending()>
+                    <legend>"Image update"</legend>
                     <input type="hidden" name="id" value=image.id.clone()/>
                     <Input name="alt" label="Alt" value=image.alt.clone()/>
                     <footer>

@@ -131,7 +131,7 @@ form footer {
 
 
 /* @container (--sm-n-above) { */
-@container (width >=480px) {
+@container (width >=360px) {
 	form footer {
 		grid-template-columns: auto auto;
 	}
@@ -226,8 +226,10 @@ label {
 }
 
 dialog {
-	& img {
-		max-height: calc(100vh - 240px);
+	max-inline-size: var(--size-content-4);
+
+	>img {
+		max-height: calc(100vh - 70px);
 		width: auto;
 	}
 }
