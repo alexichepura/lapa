@@ -47,6 +47,7 @@ Type-safe database access.
     - custom media
 - compression and precompression
 - stiched together forms, inputs and response messages
+- input datetime-local usage with chrono library
 - robots.txt from database
 - RoutingProgress
 - Favicons
