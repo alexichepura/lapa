@@ -1,3 +1,4 @@
+use chrono::{DateTime, FixedOffset, Local};
 use leptos::*;
 
 #[component]
@@ -32,4 +33,19 @@ pub fn Pending(cx: Scope, pending: ReadSignal<bool>) -> impl IntoView {
             <progress indeterminate></progress>
         </Show>
     }
+}
+
+pub fn datetime_to_string(datetime: DateTime<FixedOffset>) -> String {
+    datetime.format("%Y-%m-%d %H:%M").to_string()
+}
+
+pub struct DateTimeStrings {
+    pub utc: String,
+    pub local: String,
+}
+pub fn datetime_to_strings(datetime: DateTime<FixedOffset>) -> DateTimeStrings {
+    let utc = datetime.format("%Y-%m-%d %H:%M").to_string();
+    let local: DateTime<Local> = DateTime::from(datetime);
+    let local: String = local.format("%Y-%m-%d %H:%M").to_string();
+    DateTimeStrings { utc, local }
 }

@@ -3,7 +3,7 @@ use leptos_meta::Title;
 use leptos_router::A;
 use serde::{Deserialize, Serialize};
 
-use crate::util::Loading;
+use crate::util::{datetime_to_strings, Loading};
 
 #[component]
 pub fn PostList(cx: Scope) -> impl IntoView {
@@ -50,10 +50,11 @@ pub fn PostList(cx: Scope) -> impl IntoView {
 
 #[component]
 pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
+    let created = datetime_to_strings(post.created_at);
     view! { cx,
         <li>
             <A href=format!("/posts/{}", post.id)>
-                <span>{&post.published_at}</span>
+                <div>{created.local}</div>
                 <span>{&post.title}</span>
             </A>
         </li>
@@ -78,7 +79,7 @@ pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
         .map(|data| PostListItem {
             id: data.id.clone(),
             title: data.title.clone(),
-            published_at: data.created_at.to_string(),
+            created_at: data.created_at,
         })
         .collect();
     Ok(posts)
@@ -88,5 +89,5 @@ pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
 pub struct PostListItem {
     pub id: String,
     pub title: String,
-    pub published_at: String,
+    pub created_at: chrono::DateTime<chrono::FixedOffset>,
 }
