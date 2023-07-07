@@ -1,0 +1,4 @@
+[lapce-rust]
+serverPath = "rust-analyzer"
+cargo.features = "all"
+# server.extraEnv.RUSTUP_TOOLCHAIN = "nightly"
