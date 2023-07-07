@@ -7,7 +7,7 @@ use super::PostError;
 use crate::{
     form::Input,
     post::PostImages,
-    util::{datetime_to_string, Pending, ResultAlert},
+    util::{datetime_to_strings, Pending, ResultAlert},
 };
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -101,7 +101,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
         view! { cx, <p>"Gallery is not available for not saved post"</p> }.into_view(cx)
     };
 
-    let created = datetime_to_string(post.created_at);
+    let created = datetime_to_strings(post.created_at);
 
     view! { cx,
         <Title text=move || format!("Post: {}", title())/>
@@ -124,10 +124,16 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                         <Input name="slug" label="Slug" value=post.slug/>
                     </div>
                     <div>
-                        <label>
-                            <div>"Created at"</div>
-                            <input value=created disabled/>
-                        </label>
+                        <div class="Grid-fluid-2">
+                            <label>
+                                <div>"Created at "<small>"(Local)"</small></div>
+                                <input value=created.local disabled/>
+                            </label>
+                            <label>
+                                <div>"Created at "<small>"(UTC)"</small></div>
+                                <input value=created.utc disabled/>
+                            </label>
+                        </div>
                         <label>
                             <div>"Description"</div>
                             <textarea name="description" prop:value=post.description></textarea>

@@ -3,7 +3,7 @@ use leptos_meta::Title;
 use leptos_router::A;
 use serde::{Deserialize, Serialize};
 
-use crate::util::{datetime_to_string, Loading};
+use crate::util::{datetime_to_strings, Loading};
 
 #[component]
 pub fn PostList(cx: Scope) -> impl IntoView {
@@ -50,11 +50,11 @@ pub fn PostList(cx: Scope) -> impl IntoView {
 
 #[component]
 pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
-    let created = datetime_to_string(post.created_at);
+    let created = datetime_to_strings(post.created_at);
     view! { cx,
         <li>
             <A href=format!("/posts/{}", post.id)>
-                <span>{created}</span>
+                <div>{created.local}</div>
                 <span>{&post.title}</span>
             </A>
         </li>
