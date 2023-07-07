@@ -8,7 +8,10 @@ use super::PostError;
 use crate::{
     form::Input,
     post::PostImages,
-    util::{datetime_to_html, datetime_to_strings, html_to_datetime, Pending, ResultAlert},
+    util::{
+        datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
+        Pending, ResultAlert,
+    },
 };
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -83,21 +86,9 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
         |state, published_at| state.published_at = published_at,
     );
 
-    // let (published_at, set_published_at) =
-    //     create_signal::<DateTime<FixedOffset>>(cx, DateTime::from(DateTime::MIN_UTC));
+    let html_published_at = create_memo(cx, move |_| datetime_to_local_html(published_at()));
+    let published_at_utc_string = create_memo(cx, move |_| datetime_to_string(published_at()));
 
-    let html_published_at = create_memo(cx, move |_| datetime_to_html(published_at()));
-
-    // let header_view = if let Some(id) = &post.id {
-    //     view! { cx, <h2>"ID: " <small>{id}</small></h2> }.into_view(cx)
-    // } else {
-    //     ().into_view(cx)
-    // };
-    // let header_view = if let Some(id) = &post.id {
-    //     view! { cx, "ID: "{id} }.into_view(cx)
-    // } else {
-    //     ().into_view(cx)
-    // };
     let header_view = if let Some(id) = &post.id {
         format!("update {}", id.clone())
     } else {
@@ -160,26 +151,25 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                                     type="datetime-local"
                                     on:input=move |ev| {
                                         let val = event_target_value(&ev);
-                                        log!("{}", val);
-                                        let dt = html_to_datetime(val);
-                                        log!("{}", dt.to_string());
+                                        log!("in raw:{}", val);
+                                        let dt = html_local_to_datetime(val);
+                                        log!("dt: {}", dt.to_string());
                                         set_published_at(dt);
                                     }
                                 />
                                 <input
-                                    name="published_at_rfc3339"
+                                    name="published_at"
                                     type="hidden"
                                     prop:value=move || published_at().to_rfc3339()
                                 />
-                                // <input
-                                //     name="published_at"
-                                //     type="hidden"
-                                //     prop:value=html_published_at().to_string()
-                                // />
                             </label>
                             <label>
                                 <div>"Published at "<small>"(UTC)"</small></div>
-                                <input value="" disabled/>
+                                <input
+                                    disabled
+                                    value=published_at_utc_string
+                                    prop:value=published_at_utc_string
+                                />
                             </label>
                         </div>
                     </div>
@@ -210,10 +200,8 @@ pub async fn post_upsert(
     title: String,
     slug: String,
     description: String,
-    published_at_rfc3339: DateTime<FixedOffset>,
+    published_at: DateTime<FixedOffset>,
 ) -> Result<Result<PostFormData, PostError>, ServerFnError> {
-    dbg!(published_at_rfc3339);
-
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
 
@@ -243,7 +231,7 @@ pub async fn post_upsert(
                     db::post::slug::set(slug),
                     db::post::title::set(title),
                     db::post::description::set(description),
-                    db::post::published_at::set(published_at_rfc3339),
+                    db::post::published_at::set(published_at),
                 ],
             )
             .exec()
@@ -272,7 +260,7 @@ pub async fn post_upsert(
                 vec![
                     db::post::title::set(title),
                     db::post::description::set(description),
-                    db::post::published_at::set(published_at_rfc3339),
+                    db::post::published_at::set(published_at),
                 ],
             )
             .exec()
