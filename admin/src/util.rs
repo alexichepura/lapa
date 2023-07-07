@@ -33,3 +33,7 @@ pub fn Pending(cx: Scope, pending: ReadSignal<bool>) -> impl IntoView {
         </Show>
     }
 }
+
+pub fn datetime_to_string(datetime: chrono::DateTime<chrono::FixedOffset>) -> String {
+    datetime.format("%Y-%m-%d %H:%M").to_string()
+}
