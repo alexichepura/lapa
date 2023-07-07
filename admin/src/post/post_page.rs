@@ -72,6 +72,7 @@ pub async fn get_post(
             title: post.title,
             description: post.description,
             created_at: post.created_at,
+            published_at: post.published_at,
         }),
         None => {
             crate::err::serverr_404(cx);

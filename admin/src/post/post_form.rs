@@ -1,3 +1,4 @@
+use chrono::{DateTime, FixedOffset};
 use leptos::*;
 use leptos_meta::Title;
 use leptos_router::{use_navigate, ActionForm};
@@ -7,7 +8,10 @@ use super::PostError;
 use crate::{
     form::Input,
     post::PostImages,
-    util::{datetime_to_strings, Pending, ResultAlert},
+    util::{
+        datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
+        Pending, ResultAlert,
+    },
 };
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -16,7 +20,8 @@ pub struct PostFormData {
     pub slug: String,
     pub title: String,
     pub description: String,
-    pub created_at: chrono::DateTime<chrono::FixedOffset>,
+    pub created_at: DateTime<FixedOffset>,
+    pub published_at: DateTime<FixedOffset>,
 }
 
 // impl Default for PostFormData {
@@ -74,17 +79,16 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
         |state| state.title.clone(),
         |state, title| state.title = title,
     );
+    let (published_at, set_published_at) = create_slice(
+        cx,
+        post_rw,
+        |state| state.published_at.clone(),
+        |state, published_at| state.published_at = published_at,
+    );
 
-    // let header_view = if let Some(id) = &post.id {
-    //     view! { cx, <h2>"ID: " <small>{id}</small></h2> }.into_view(cx)
-    // } else {
-    //     ().into_view(cx)
-    // };
-    // let header_view = if let Some(id) = &post.id {
-    //     view! { cx, "ID: "{id} }.into_view(cx)
-    // } else {
-    //     ().into_view(cx)
-    // };
+    let html_published_at = create_memo(cx, move |_| datetime_to_local_html(published_at()));
+    let published_at_utc_string = create_memo(cx, move |_| datetime_to_string(published_at()));
+
     let header_view = if let Some(id) = &post.id {
         format!("update {}", id.clone())
     } else {
@@ -122,6 +126,10 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                             />
                         </label>
                         <Input name="slug" label="Slug" value=post.slug/>
+                        <label>
+                            <div>"Description"</div>
+                            <textarea name="description" prop:value=post.description></textarea>
+                        </label>
                     </div>
                     <div>
                         <div class="Grid-fluid-2">
@@ -134,10 +142,36 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                                 <input value=created.utc disabled/>
                             </label>
                         </div>
-                        <label>
-                            <div>"Description"</div>
-                            <textarea name="description" prop:value=post.description></textarea>
-                        </label>
+                        <div class="Grid-fluid-2">
+                            <label>
+                                <div>"Published at "<small>"(Local)"</small></div>
+                                <input
+                                    value=html_published_at
+                                    prop:value=html_published_at
+                                    type="datetime-local"
+                                    on:input=move |ev| {
+                                        let val = event_target_value(&ev);
+                                        log!("in raw:{}", val);
+                                        let dt = html_local_to_datetime(val);
+                                        log!("dt: {}", dt.to_string());
+                                        set_published_at(dt);
+                                    }
+                                />
+                                <input
+                                    name="published_at"
+                                    type="hidden"
+                                    prop:value=move || published_at().to_rfc3339()
+                                />
+                            </label>
+                            <label>
+                                <div>"Published at "<small>"(UTC)"</small></div>
+                                <input
+                                    disabled
+                                    value=published_at_utc_string
+                                    prop:value=published_at_utc_string
+                                />
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <footer>
@@ -166,8 +200,8 @@ pub async fn post_upsert(
     title: String,
     slug: String,
     description: String,
+    published_at: DateTime<FixedOffset>,
 ) -> Result<Result<PostFormData, PostError>, ServerFnError> {
-    dbg!((title.clone(), slug.clone(), description.clone()));
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
 
@@ -197,6 +231,7 @@ pub async fn post_upsert(
                     db::post::slug::set(slug),
                     db::post::title::set(title),
                     db::post::description::set(description),
+                    db::post::published_at::set(published_at),
                 ],
             )
             .exec()
@@ -211,6 +246,7 @@ pub async fn post_upsert(
             title: post.title,
             description: post.description,
             created_at: post.created_at,
+            published_at: post.published_at,
         }));
     } else {
         if let Some(_post_by_slug) = post_by_slug {
@@ -224,6 +260,7 @@ pub async fn post_upsert(
                 vec![
                     db::post::title::set(title),
                     db::post::description::set(description),
+                    db::post::published_at::set(published_at),
                 ],
             )
             .exec()
@@ -238,6 +275,7 @@ pub async fn post_upsert(
             title: post.title,
             description: post.description,
             created_at: post.created_at,
+            published_at: post.published_at,
         }));
     }
 }
