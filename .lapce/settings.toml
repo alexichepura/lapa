@@ -1,9 +1,4 @@
 [lapce-rust]
 serverPath = "rust-analyzer"
-# server.path = "rust-analyzer"
-check.allTargets = false
 cargo.features = "all"
-cargo.buildScripts.enable = true
-server.extraEnv.RUSTUP_TOOLCHAIN = "nightly"
-procMacro.enable = true
-procMacro.attributes.enable = true
+# server.extraEnv.RUSTUP_TOOLCHAIN = "nightly"
