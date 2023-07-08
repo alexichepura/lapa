@@ -1,10 +1,7 @@
 use crate::prisma::ArcPrisma;
 use async_trait::async_trait;
 use axum_session::{DatabasePool, Session, SessionError, SessionStore};
-use prisma_client::db::{
-    read_filters::{IntNullableFilter, StringFilter},
-    session,
-};
+use prisma_client::db::session;
 use prisma_client_rust::chrono::Utc;
 use std::vec;
 
