@@ -57,7 +57,7 @@ pub async fn get_post(
 
     let post = prisma_client
         .post()
-        .find_unique(prisma_client::db::post::UniqueWhereParam::IdEquals(id))
+        .find_unique(prisma_client::db::post::id::equals(id))
         .exec()
         .await
         .map_err(|e| {

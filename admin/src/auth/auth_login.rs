@@ -52,9 +52,7 @@ pub async fn login(
     let prisma_client = crate::prisma::use_prisma(cx)?;
     let user = prisma_client
         .user()
-        .find_unique(prisma_client::db::user::UniqueWhereParam::UsernameEquals(
-            username,
-        ))
+        .find_unique(prisma_client::db::user::username::equals(username))
         .exec()
         .await
         .map_err(|e| {

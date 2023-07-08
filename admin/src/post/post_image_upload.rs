@@ -114,12 +114,7 @@ pub async fn upload_img(
 
     let image_upload_data = prisma_client
         .image()
-        .create(
-            alt,
-            "".to_string(),
-            db::post::UniqueWhereParam::IdEquals(post_id),
-            vec![],
-        )
+        .create(alt, "".to_string(), db::post::id::equals(post_id), vec![])
         .exec()
         .await
         .map_err(|e| {

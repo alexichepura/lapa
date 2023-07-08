@@ -1,7 +1,7 @@
+mod auth_data;
 mod auth_login;
 mod auth_logout;
 mod auth_signup;
-mod auth_data;
 pub use auth_login::Login;
 pub use auth_logout::Logout;
 use leptos::*;
@@ -43,7 +43,7 @@ impl Authentication<User, String, ArcPrisma> for User {
 
         let db_user = prisma_client
             .user()
-            .find_unique(prisma_client::db::user::UniqueWhereParam::IdEquals(userid))
+            .find_unique(prisma_client::db::user::id::equals(userid))
             .exec()
             .await
             .map_err(|e| anyhow::anyhow!(e.to_string()))?

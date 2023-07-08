@@ -33,9 +33,7 @@ impl DatabasePool for SessionPrismaPool {
         dbg!("delete_by_expiry");
         self.pool
             .session()
-            .delete_many(vec![session::WhereParam::Expires(IntNullableFilter::Lt(
-                Utc::now().timestamp() as i32,
-            ))])
+            .delete_many(vec![session::expires::lt(Utc::now().timestamp() as i32)])
             .exec()
             .await
             .map_err(|e| SessionError::GenericDeleteError(e.to_string()))?;
@@ -82,12 +80,10 @@ impl DatabasePool for SessionPrismaPool {
             .pool
             .session()
             .find_first(vec![
-                session::WhereParam::Id(StringFilter::Equals(id.to_string())),
+                session::id::equals(id.to_string()),
                 prisma_client_rust::or!(
-                    session::WhereParam::Expires(IntNullableFilter::Equals(None)),
-                    session::WhereParam::Expires(IntNullableFilter::Gt(
-                        Utc::now().timestamp() as i32
-                    ))
+                    session::expires::equals(None),
+                    session::expires::gt(Utc::now().timestamp() as i32)
                 ),
             ])
             .exec()
@@ -105,7 +101,7 @@ impl DatabasePool for SessionPrismaPool {
         dbg!(("delete_one_by_id", id));
         self.pool
             .session()
-            .delete(session::UniqueWhereParam::IdEquals(id.to_string()))
+            .delete(session::id::equals(id.to_string()))
             .exec()
             .await
             .map_err(|e| SessionError::GenericDeleteError(e.to_string()))?;
@@ -118,12 +114,10 @@ impl DatabasePool for SessionPrismaPool {
             .pool
             .session()
             .count(vec![
-                session::WhereParam::Id(StringFilter::Equals(id.to_string())),
+                session::id::equals(id.to_string()),
                 prisma_client_rust::or!(
-                    session::WhereParam::Expires(IntNullableFilter::Equals(None)),
-                    session::WhereParam::Expires(IntNullableFilter::Gt(
-                        Utc::now().timestamp() as i32
-                    ))
+                    session::expires::equals(None),
+                    session::expires::gt(Utc::now().timestamp() as i32)
                 ),
             ])
             .exec()
