@@ -98,7 +98,7 @@ pub async fn get_post(
 
     let post = prisma_client
         .post()
-        .find_unique(db::post::UniqueWhereParam::SlugEquals(slug))
+        .find_unique(db::post::slug::equals(slug))
         .include(db::post::include!({
             images: select {
                 id

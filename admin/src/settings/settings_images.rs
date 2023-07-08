@@ -113,7 +113,7 @@ pub async fn settings_images_update(
     prisma_client
         .settings()
         .update(
-            db::settings::UniqueWhereParam::IdEquals(id),
+            db::settings::id::equals(id),
             vec![
                 db::settings::hero_width::set(settings_data.hero_width),
                 db::settings::hero_height::set(settings_data.hero_height),

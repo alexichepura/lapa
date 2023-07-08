@@ -235,7 +235,7 @@ pub async fn post_upsert(
 
     let post_by_slug = prisma_client
         .post()
-        .find_unique(db::post::UniqueWhereParam::SlugEquals(slug.clone()))
+        .find_unique(db::post::slug::equals(slug.clone()))
         .select(db::post::select!({ id }))
         .exec()
         .await
@@ -254,7 +254,7 @@ pub async fn post_upsert(
         let post = prisma_client
             .post()
             .update(
-                db::post::UniqueWhereParam::IdEquals(id),
+                db::post::id::equals(id),
                 vec![
                     db::post::slug::set(slug),
                     db::post::title::set(title),

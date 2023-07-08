@@ -77,7 +77,7 @@ pub async fn settings_site_update(
     prisma_client
         .settings()
         .update(
-            db::settings::UniqueWhereParam::IdEquals(id),
+            db::settings::id::equals(id),
             vec![db::settings::robots_txt::set(settings_data.robots_txt)],
         )
         .exec()

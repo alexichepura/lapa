@@ -196,9 +196,7 @@ pub async fn get_images(cx: Scope, post_id: String) -> Result<Vec<PostImageData>
     let prisma_client = crate::prisma::use_prisma(cx)?;
     let images = prisma_client
         .image()
-        .find_many(vec![db::image::WhereParam::PostId(
-            db::read_filters::StringFilter::Equals(post_id),
-        )])
+        .find_many(vec![db::image::post_id::equals(post_id)])
         .exec()
         .await
         .map_err(|e| {
@@ -225,7 +223,7 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, Se
 
     let found_image = prisma_client
         .image()
-        .find_unique(db::image::UniqueWhereParam::IdEquals(id.clone()))
+        .find_unique(db::image::id::equals(id.clone()))
         .select(db::image::select!({ id }))
         .exec()
         .await
@@ -259,7 +257,7 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, Se
 
     prisma_client
         .image()
-        .delete(db::image::UniqueWhereParam::IdEquals(id))
+        .delete(db::image::id::equals(id))
         .exec()
         .await
         .map_err(|e| {
@@ -283,7 +281,7 @@ pub async fn image_update_alt(
 
     let found_image = prisma_client
         .image()
-        .find_unique(db::image::UniqueWhereParam::IdEquals(id.clone()))
+        .find_unique(db::image::id::equals(id.clone()))
         .select(db::image::select!({ id }))
         .exec()
         .await
@@ -299,10 +297,7 @@ pub async fn image_update_alt(
 
     prisma_client
         .image()
-        .update(
-            db::image::UniqueWhereParam::IdEquals(id),
-            vec![db::image::alt::set(alt)],
-        )
+        .update(db::image::id::equals(id), vec![db::image::alt::set(alt)])
         .exec()
         .await
         .map_err(|e| {

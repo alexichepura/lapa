@@ -66,9 +66,7 @@ pub async fn signup(
 
     let user = prisma_client
         .user()
-        .find_unique(prisma_client::db::user::UniqueWhereParam::UsernameEquals(
-            username,
-        ))
+        .find_unique(prisma_client::db::user::username::equals(username))
         .exec()
         .await
         .map_err(|e| {
