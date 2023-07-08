@@ -121,7 +121,7 @@ main {
 	margin-block-end: var(--size-fluid-2);
 }
 
-ul.Card {
+.Listing {
 	padding: 0;
 	overflow: hidden;
 
@@ -144,7 +144,6 @@ ul.Card {
 			padding: var(--size-fluid-2);
 			text-decoration: none;
 			display: grid;
-			grid-template-columns: 300px auto;
 
 			&:visited {
 				color: var(--text-1);
@@ -300,5 +299,21 @@ dialog {
 	>img {
 		max-height: calc(100vh - 70px);
 		width: auto;
+	}
+}
+
+.PostListItem {
+	>a {
+		grid-template-columns: 170px 170px auto;
+	}
+}
+
+.PostListItem-status {
+	&.published {
+		color: var(--green-6);
+	}
+
+	&.not-published {
+		color: var(--blue-6);
 	}
 }

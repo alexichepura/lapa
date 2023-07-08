@@ -18,7 +18,7 @@ pub fn PostList(cx: Scope) -> impl IntoView {
                 <A href="/posts/new">"Create"</A>
             </small>
         </h1>
-        <ul class="Card">
+        <ul class="Card Listing">
             <Suspense fallback=move || {
                 view! { cx, <Loading/> }
             }>
@@ -51,10 +51,16 @@ pub fn PostList(cx: Scope) -> impl IntoView {
 #[component]
 pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
     let created = datetime_to_strings(post.created_at);
+    let published = datetime_to_strings(post.published_at);
+    let class = match post.is_published {
+        true => "published",
+        false => "not-published",
+    };
     view! { cx,
-        <li>
+        <li class="PostListItem">
             <A href=format!("/posts/{}", post.id)>
                 <div>{created.local}</div>
+                <div class=format!("PostListItem-status {}", class)>{published.local}</div>
                 <span>{&post.title}</span>
             </A>
         </li>
@@ -76,10 +82,15 @@ pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
 
     let posts: Vec<PostListItem> = posts
         .iter()
-        .map(|data| PostListItem {
-            id: data.id.clone(),
-            title: data.title.clone(),
-            created_at: data.created_at,
+        .map(|data| {
+            let is_published: bool = chrono::Utc::now().fixed_offset() > data.published_at;
+            PostListItem {
+                id: data.id.clone(),
+                title: data.title.clone(),
+                created_at: data.created_at,
+                published_at: data.published_at,
+                is_published,
+            }
         })
         .collect();
     Ok(posts)
@@ -90,4 +101,6 @@ pub struct PostListItem {
     pub id: String,
     pub title: String,
     pub created_at: chrono::DateTime<chrono::FixedOffset>,
+    pub published_at: chrono::DateTime<chrono::FixedOffset>,
+    pub is_published: bool,
 }

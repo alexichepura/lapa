@@ -108,7 +108,12 @@ hr {
 	& a {
 		text-decoration: none;
 		overflow: hidden;
-		transition: transform 0.3s ease;
+		box-shadow: var(--shadow-3);
+
+		/* transition: transform 0.3s ease; */
+		transition-property: transform, box-shadow;
+		transition-duration: 0.3s;
+		transition-timing-function: ease;
 
 		&:visited {
 			color: var(--text-1);
@@ -116,6 +121,7 @@ hr {
 
 		&:hover {
 			transform: scale(1.03);
+			box-shadow: var(--shadow-4);
 		}
 
 		>img {

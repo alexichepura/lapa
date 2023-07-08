@@ -4,6 +4,7 @@ cfg_if::cfg_if! {if #[cfg(feature = "ssr")] {
     pub mod axum_session_prisma;
     pub mod fileserv;
     pub mod prisma;
+    pub mod server;
 }}
 
 pub mod app;

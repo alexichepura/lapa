@@ -151,10 +151,8 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                                     type="datetime-local"
                                     on:input=move |ev| {
                                         let val = event_target_value(&ev);
-                                        log!("in raw:{}", val);
-                                        let dt = html_local_to_datetime(val);
-                                        log!("dt: {}", dt.to_string());
-                                        set_published_at(dt);
+                                        let datetime = html_local_to_datetime(val);
+                                        set_published_at(datetime);
                                     }
                                 />
                                 <input
