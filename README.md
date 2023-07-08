@@ -78,7 +78,7 @@ cargo leptos build --release
 For now requires fork of cargo-leptos with relevant flags for lightningcss
 https://github.com/leptos-rs/cargo-leptos/commit/da6c7aeec7b062335e6592ca379c175fb82d3c16
 ```sh
-cargo install --git https://github.com/leptos-rs/cargo-leptos --locked cargo-leptos --rev da6c7aeec7b062335e6592ca379c175fb82d3c16
+cargo install --git https://github.com/leptos-rs/cargo-leptos --locked cargo-leptos --rev 7d141f13eca0a401d030f2e038192eb71ecfebe8
 ```
 
 ### CSS nesting

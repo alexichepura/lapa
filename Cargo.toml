@@ -18,10 +18,10 @@ console_error_panic_hook = "0.1"
 console_log = "1"
 http = "0.2"
 js-sys = { version = "0.3" }
-leptos = { version = "0.4", features = ["nightly"] }
-leptos_axum = { version = "0.4" }
-leptos_meta = { version = "0.4", features = ["nightly"] }
-leptos_router = { version = "0.4", features = ["nightly"] }
+leptos = { version = "0.4.2", features = ["nightly"] }
+leptos_axum = { version = "0.4.2" }
+leptos_meta = { version = "0.4.2", features = ["nightly"] }
+leptos_router = { version = "0.4.2", features = ["nightly"] }
 log = "0.4"
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e0af632", default-features = false, features = [
     "sqlite",
