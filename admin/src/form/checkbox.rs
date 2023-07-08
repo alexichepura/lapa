@@ -5,8 +5,8 @@ pub fn Checkbox(
     cx: Scope,
     #[prop(optional, into)] name: Option<TextProp>,
     #[prop(optional, into)] label: Option<TextProp>,
-    #[prop(optional)] set: Option<SignalSetter<String>>,
-    #[prop(optional)] value: Option<Signal<String>>,
+    #[prop(optional, into)] set: Option<SignalSetter<bool>>,
+    #[prop(optional, into)] checked: Option<MaybeSignal<bool>>,
     #[prop(optional, into)] attributes: Option<MaybeSignal<AdditionalAttributes>>,
 ) -> impl IntoView {
     let mut inner = html::input(cx).attr("type", "checkbox");
@@ -15,13 +15,14 @@ pub fn Checkbox(
         inner = inner.attr("name", name.get());
     }
 
-    if let Some(value) = value {
-        inner = inner.prop("value", value);
+    if let Some(checked) = checked {
+        inner = inner.prop("checked", checked);
     }
 
     if let Some(set) = set {
-        inner = inner.on(ev::input, move |ev| {
-            set(event_target_value(&ev));
+        inner = inner.on(ev::change, move |ev| {
+            let val = event_target_checked(&ev);
+            set(val);
         })
     };
 

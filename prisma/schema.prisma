@@ -32,12 +32,12 @@ model Session {
 }
 
 model Post {
-  id           String   @id @default(cuid())
-  created_at   DateTime @default(now())
-  published_at DateTime @default(now())
-  slug         String   @unique
-  title        String   @default("")
-  description  String   @default("")
+  id           String    @id @default(cuid())
+  created_at   DateTime  @default(now())
+  published_at DateTime?
+  slug         String    @unique
+  title        String    @default("")
+  description  String    @default("")
   images       Image[]
 }
 

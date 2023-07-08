@@ -1,4 +1,4 @@
-use chrono::{DateTime, FixedOffset};
+use chrono::{DateTime, FixedOffset, Utc};
 use leptos::*;
 use leptos_meta::Title;
 use leptos_router::{use_navigate, ActionForm};
@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use super::PostError;
 use crate::{
-    form::Input,
+    form::{Checkbox, Input},
     post::PostImages,
     util::{
         datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
@@ -21,19 +21,8 @@ pub struct PostFormData {
     pub title: String,
     pub description: String,
     pub created_at: DateTime<FixedOffset>,
-    pub published_at: DateTime<FixedOffset>,
+    pub published_at: Option<DateTime<FixedOffset>>,
 }
-
-// impl Default for PostFormData {
-//     fn default() -> Self {
-//         Self {
-//             id: None,
-//             slug: None,
-//             title: None,
-//             description: None,
-//         }
-//     }
-// }
 
 #[component]
 pub fn PostNew(cx: Scope) -> impl IntoView {
@@ -85,9 +74,6 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
         |state| state.published_at.clone(),
         |state, published_at| state.published_at = published_at,
     );
-
-    let html_published_at = create_memo(cx, move |_| datetime_to_local_html(published_at()));
-    let published_at_utc_string = create_memo(cx, move |_| datetime_to_string(published_at()));
 
     let header_view = if let Some(id) = &post.id {
         format!("update {}", id.clone())
@@ -142,34 +128,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                                 <input value=created.utc disabled/>
                             </label>
                         </div>
-                        <div class="Grid-fluid-2">
-                            <label>
-                                <div>"Published at "<small>"(Local)"</small></div>
-                                <input
-                                    value=html_published_at
-                                    prop:value=html_published_at
-                                    type="datetime-local"
-                                    on:input=move |ev| {
-                                        let val = event_target_value(&ev);
-                                        let datetime = html_local_to_datetime(val);
-                                        set_published_at(datetime);
-                                    }
-                                />
-                                <input
-                                    name="published_at"
-                                    type="hidden"
-                                    prop:value=move || published_at().to_rfc3339()
-                                />
-                            </label>
-                            <label>
-                                <div>"Published at "<small>"(UTC)"</small></div>
-                                <input
-                                    disabled
-                                    value=published_at_utc_string
-                                    prop:value=published_at_utc_string
-                                />
-                            </label>
-                        </div>
+                        <PublishedAt published_at set_published_at/>
                     </div>
                 </div>
                 <footer>
@@ -191,6 +150,77 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
     }
 }
 
+#[component]
+pub fn PublishedAt(
+    cx: Scope,
+    published_at: Signal<Option<DateTime<FixedOffset>>>,
+    set_published_at: SignalSetter<Option<DateTime<FixedOffset>>>,
+) -> impl IntoView {
+    let is_published = create_memo(cx, move |_| published_at.with(|p| p.is_some()));
+
+    let (is_published_signal, set_is_published) =
+        create_signal(cx, published_at.get_untracked().is_some());
+
+    create_effect(cx, move |_| {
+        if is_published_signal() {
+            set_published_at(Some(Utc::now().fixed_offset()));
+        } else {
+            set_published_at(None);
+        }
+    });
+
+    let html_published_at = create_memo(cx, move |_| match published_at() {
+        Some(published_at) => datetime_to_local_html(published_at),
+        None => String::default(),
+    });
+    let published_at_utc_string = create_memo(cx, move |_| match published_at() {
+        Some(published_at) => datetime_to_string(published_at),
+        None => String::default(),
+    });
+
+    let inputs_view = move || match published_at() {
+        Some(published_at) => view! { cx,
+            <div class="Grid-fluid-2">
+                <label>
+                    <div>"Published at "<small>"(Local)"</small></div>
+                    <input
+                        value=html_published_at
+                        prop:value=html_published_at
+                        type="datetime-local"
+                        on:input=move |ev| {
+                            let val = event_target_value(&ev);
+                            let datetime = html_local_to_datetime(val);
+                            set_published_at(Some(datetime));
+                        }
+                    />
+                    <input
+                        name="published_at"
+                        type="hidden"
+                        prop:value=move || published_at.to_rfc3339()
+                    />
+                </label>
+                <label>
+                    <div>"Published at "<small>"(UTC)"</small></div>
+                    <input
+                        disabled
+                        value=published_at_utc_string
+                        prop:value=published_at_utc_string
+                    />
+                </label>
+            </div>
+        }
+        .into_view(cx),
+        None => ().into_view(cx),
+    };
+
+    view! { cx,
+        <div>
+            <Checkbox label="Publish" checked=is_published set=set_is_published/>
+            {inputs_view}
+        </div>
+    }
+}
+
 #[server(PostUpsert, "/api")]
 pub async fn post_upsert(
     cx: Scope,
@@ -198,7 +228,7 @@ pub async fn post_upsert(
     title: String,
     slug: String,
     description: String,
-    published_at: DateTime<FixedOffset>,
+    published_at: Option<DateTime<FixedOffset>>,
 ) -> Result<Result<PostFormData, PostError>, ServerFnError> {
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
