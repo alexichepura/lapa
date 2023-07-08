@@ -50,6 +50,14 @@ web-sys = { version = "0.3", features = [
     "Url",
 ] }
 
+[profile.dev.package.image]
+opt-level = 3
+debug = false
+debug-assertions = false
+overflow-checks = false
+incremental = false
+codegen-units = 16
+
 [dependencies]
 axum = { workspace = true, optional = true }
 js-sys = { workspace = true, optional = true }
