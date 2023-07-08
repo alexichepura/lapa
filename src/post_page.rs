@@ -99,7 +99,6 @@ pub async fn get_post(
     let post = prisma_client
         .post()
         .find_unique(db::post::UniqueWhereParam::SlugEquals(slug))
-        // .with(db::post::images::fetch(vec![]))
         .include(db::post::include!({
             images: select {
                 id
@@ -113,24 +112,41 @@ pub async fn get_post(
             ServerFnError::ServerError("Server error".to_string())
         })?;
 
-    Ok(match post {
-        Some(post) => Ok(PostData {
-            id: post.id,
-            slug: post.slug,
-            title: post.title,
-            description: post.description,
-            images: post
-                .images
-                .iter()
-                .map(|img| ImgData {
-                    id: img.id.clone(),
-                    alt: img.alt.clone(),
-                })
-                .collect(),
-        }),
+    let result: Option<PostData> = match post {
+        Some(post) => {
+            let published = match post.published_at {
+                Some(published_at) => {
+                    let now = chrono::Utc::now().fixed_offset();
+                    published_at < now
+                }
+                None => false,
+            };
+            match published {
+                true => Some(PostData {
+                    id: post.id,
+                    slug: post.slug,
+                    title: post.title,
+                    description: post.description,
+                    images: post
+                        .images
+                        .iter()
+                        .map(|img| ImgData {
+                            id: img.id.clone(),
+                            alt: img.alt.clone(),
+                        })
+                        .collect(),
+                }),
+                false => None,
+            }
+        }
+        None => None,
+    };
+
+    match result {
+        Some(post) => Ok(Ok(post)),
         None => {
             crate::err::serverr_404(cx);
-            Err(PostError::NotFound)
+            Ok(Err(PostError::NotFound))
         }
-    })
+    }
 }

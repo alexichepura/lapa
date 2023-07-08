@@ -6,7 +6,7 @@ pub fn Input(
     #[prop(optional, into)] type_: Option<TextProp>,
     #[prop(optional, into)] name: Option<TextProp>,
     #[prop(optional, into)] label: Option<TextProp>,
-    #[prop(optional)] set: Option<SignalSetter<String>>,
+    #[prop(optional)] set: Option<WriteSignal<String>>,
     #[prop(optional, into)] value: Option<MaybeSignal<String>>,
     #[prop(optional, into)] attributes: Option<MaybeSignal<AdditionalAttributes>>,
 ) -> impl IntoView {

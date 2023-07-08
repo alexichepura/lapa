@@ -53,6 +53,7 @@ web-sys = { version = "0.3", features = [
 [dependencies]
 axum = { workspace = true, optional = true }
 js-sys = { workspace = true, optional = true }
+chrono = { workspace = true }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 cfg-if = { workspace = true }

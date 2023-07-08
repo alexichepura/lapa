@@ -60,6 +60,15 @@ pub struct DateTimeStrings {
     pub utc: String,
     pub local: String,
 }
+impl DateTimeStrings {
+    pub fn dashes() -> Self {
+        Self {
+            local: "---".to_string(),
+            utc: "---".to_string(),
+        }
+    }
+}
+
 pub fn datetime_to_strings(datetime: DateTime<FixedOffset>) -> DateTimeStrings {
     let utc = datetime.format("%Y-%m-%d %H:%M").to_string();
     let local: DateTime<Local> = DateTime::from(datetime);

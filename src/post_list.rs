@@ -63,9 +63,10 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
 pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
+    let now = prisma_client_rust::chrono::Utc::now().fixed_offset();
     let posts = prisma_client
         .post()
-        .find_many(vec![])
+        .find_many(vec![db::post::published_at::lt(now)])
         .include(db::post::include!({ images(vec![]).take(1): select {
             id
             alt
