@@ -3,6 +3,7 @@ use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    image::ImageUploadError,
     upload::InputImage,
     util::{Pending, ResultAlert},
 };
@@ -122,8 +123,8 @@ pub async fn upload_img(
             ServerFnError::ServerError("Server error".to_string())
         })?;
 
-    let img_reader =
-        image::io::Reader::new(std::io::Cursor::new(img_bytes.clone())).with_guessed_format();
+    let cursor = std::io::Cursor::new(img_bytes.clone());
+    let img_reader = image::io::Reader::new(cursor.clone()).with_guessed_format();
 
     if let Err(e) = img_reader {
         dbg!(e);
@@ -147,31 +148,22 @@ pub async fn upload_img(
         ServerFnError::ServerError("Server error".to_string())
     })?;
 
-    // dbg!(img_format);
     let img_decoded = img_reader.decode().unwrap();
     let height = img_decoded.height();
     let width = img_decoded.width();
 
-    crate::image::create_image_variants(img_decoded, &convert_settings, id);
+    let buffered_read = std::io::BufReader::new(cursor);
+    crate::image::create_image_variants_from_buf(buffered_read, img_decoded, &convert_settings, id)
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
 
     Ok(Ok(ImageResult {
         format: format_string,
         height,
         width,
     }))
-}
-
-use thiserror::Error;
-#[derive(Error, Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ImageUploadError {
-    #[error("Image server error")]
-    ServerError,
-    #[error("Image deserialization error")]
-    Deserialization,
-    #[error("Image read error.")]
-    Read,
-    #[error("Image format error.")]
-    Format,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

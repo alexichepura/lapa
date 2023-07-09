@@ -71,17 +71,20 @@ pub async fn images_convert(cx: Scope) -> Result<Result<(), SettingsError>, Serv
 
     for image_data in images {
         let path = format!("upload/{}.jpg", image_data.id);
-        let dynamic_image = image::open(path.clone());
-        match dynamic_image {
-            Ok(dynamic_image) => {
-                crate::image::create_image_variants(
+        let file = std::fs::File::open(&path);
+        match file {
+            Ok(file) => {
+                let dynamic_image = image::open(path.clone()).unwrap();
+                let buffered_read = std::io::BufReader::new(file);
+                let _convert_result = crate::image::create_image_variants_from_buf(
+                    buffered_read,
                     dynamic_image,
                     &convert_settings,
                     image_data.id,
                 );
             }
-            Err(image_err) => {
-                dbg!((path.clone(), image_err));
+            Err(err) => {
+                dbg!((&path, err));
             }
         }
     }
