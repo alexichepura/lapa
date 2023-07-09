@@ -122,8 +122,8 @@ pub async fn upload_img(
             ServerFnError::ServerError("Server error".to_string())
         })?;
 
-    let img_reader =
-        image::io::Reader::new(std::io::Cursor::new(img_bytes.clone())).with_guessed_format();
+    let cursor = std::io::Cursor::new(img_bytes.clone());
+    let img_reader = image::io::Reader::new(cursor.clone()).with_guessed_format();
 
     if let Err(e) = img_reader {
         dbg!(e);
@@ -147,12 +147,12 @@ pub async fn upload_img(
         ServerFnError::ServerError("Server error".to_string())
     })?;
 
-    // dbg!(img_format);
     let img_decoded = img_reader.decode().unwrap();
     let height = img_decoded.height();
     let width = img_decoded.width();
 
-    crate::image::create_image_variants(img_decoded, &convert_settings, id);
+    let buffered_read = std::io::BufReader::new(cursor);
+    crate::image::create_image_variants_from_buf(buffered_read, img_decoded, &convert_settings, id);
 
     Ok(Ok(ImageResult {
         format: format_string,
@@ -170,6 +170,8 @@ pub enum ImageUploadError {
     Deserialization,
     #[error("Image read error.")]
     Read,
+    #[error("Image exif read error.")]
+    ExifRead,
     #[error("Image format error.")]
     Format,
 }

@@ -1,7 +1,10 @@
 use image::{imageops::FilterType, DynamicImage, ImageError, ImageFormat};
-use std::sync::Arc;
+use std::{
+    io::{BufReader, Read, Seek},
+    sync::Arc,
+};
 
-use crate::settings::SettingsImages;
+use crate::{post::ImageUploadError, settings::SettingsImages};
 
 use super::{img_path_large, img_path_large_retina, img_path_small, img_path_small_retina};
 
@@ -40,6 +43,45 @@ pub fn create_image_variant(conf: ImageConvertConfig) -> Result<(), ImageError> 
     variant.save_with_format(conf.path, ImageFormat::WebP)
 }
 
+pub fn create_image_variants_from_buf<R: Read + Seek>(
+    mut bufreader: BufReader<R>,
+    dynamic_image: DynamicImage,
+    settings: &ConvertSettings,
+    id: String,
+) -> Result<(), ImageUploadError> {
+    let exifreader = exif::Reader::new();
+    let exif = exifreader
+        .read_from_container(&mut bufreader.by_ref())
+        .map_err(|e| {
+            dbg!(e);
+            ImageUploadError::ExifRead
+        })?;
+
+    let mut orientation: u32 = 1;
+    match exif.get_field(exif::Tag::Orientation, exif::In::PRIMARY) {
+        Some(field) => match field.value.get_uint(0) {
+            Some(v @ 1..=8) => {
+                orientation = v;
+                // println!("Orientation {}", v)
+            }
+            _ => eprintln!("Orientation value is broken"),
+        },
+        None => eprintln!("Orientation tag is missing"),
+    }
+
+    println!("Orientation {}", orientation);
+    // https://magnushoff.com/articles/jpeg-orientation/
+    let dynamic_image = match orientation {
+        3 => dynamic_image.flipv().fliph(),
+        _ => dynamic_image,
+    };
+    // let dynamic_image = dynamic_image.rotate90();
+    // let dynamic_image = dynamic_image.fliph();
+    // let dynamic_image = dynamic_image.flipv();
+
+    create_image_variants(dynamic_image, settings, id);
+    Ok(())
+}
 pub fn create_image_variants(dynamic_image: DynamicImage, settings: &ConvertSettings, id: String) {
     let arc = Arc::new(dynamic_image);
     let conf_large = ImageConvertConfig {
