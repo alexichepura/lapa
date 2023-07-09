@@ -55,7 +55,7 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
 
     let published = match post.published_at {
         Some(published_at) => datetime_to_strings(published_at),
-        None => DateTimeStrings::dashes(),
+        None => DateTimeStrings::draft(),
     };
     let class = match post.is_published {
         true => "published",

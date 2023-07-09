@@ -61,10 +61,10 @@ pub struct DateTimeStrings {
     pub local: String,
 }
 impl DateTimeStrings {
-    pub fn dashes() -> Self {
+    pub fn draft() -> Self {
         Self {
-            local: "---".to_string(),
-            utc: "---".to_string(),
+            local: "draft".to_string(),
+            utc: "draft".to_string(),
         }
     }
 }

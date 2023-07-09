@@ -246,8 +246,13 @@ input:disabled {
 		overflow: hidden;
 		cursor: pointer;
 
+		transition-property: transform, box-shadow;
+		transition-duration: 0.3s;
+		transition-timing-function: ease;
+
 		&:hover {
 			box-shadow: var(--shadow-6);
+			transform: scale(1.03);
 		}
 
 		>figcaption {
