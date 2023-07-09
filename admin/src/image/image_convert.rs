@@ -58,7 +58,7 @@ pub fn create_image_variants_from_buf<R: Read + Seek>(
     mut bufreader: BufReader<R>,
     dynamic_image: DynamicImage,
     settings: &ConvertSettings,
-    id: String,
+    id: &String,
 ) -> Result<(), ImageProcessError> {
     let exifreader = exif::Reader::new();
     let exif = exifreader.read_from_container(&mut bufreader.by_ref())?;
@@ -92,29 +92,29 @@ pub fn create_image_variants_from_buf<R: Read + Seek>(
     create_image_variants(dynamic_image, settings, id);
     Ok(())
 }
-pub fn create_image_variants(dynamic_image: DynamicImage, settings: &ConvertSettings, id: String) {
+pub fn create_image_variants(dynamic_image: DynamicImage, settings: &ConvertSettings, id: &String) {
     let arc = Arc::new(dynamic_image);
     let conf_large = ImageConvertConfig {
         img: arc.clone(),
-        path: img_path_large(&id),
+        path: img_path_large(id),
         width: settings.hero_width,
         height: settings.hero_height,
     };
     let conf_large_retina = ImageConvertConfig {
         img: arc.clone(),
-        path: img_path_large_retina(&id),
+        path: img_path_large_retina(id),
         width: settings.hero_width * 2,
         height: settings.hero_height * 2,
     };
     let conf_small = ImageConvertConfig {
         img: arc.clone(),
-        path: img_path_small(&id),
+        path: img_path_small(id),
         width: settings.thumb_width,
         height: settings.thumb_height,
     };
     let conf_small_retina = ImageConvertConfig {
         img: arc.clone(),
-        path: img_path_small_retina(&id),
+        path: img_path_small_retina(id),
         width: settings.thumb_width * 2,
         height: settings.thumb_height * 2,
     };
