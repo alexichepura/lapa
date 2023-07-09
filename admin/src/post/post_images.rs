@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     form::Input,
     image::{img_url_large, img_url_small, srcset_large, srcset_small, ImageLoadError},
-    post::ImageUpload,
+    post::{ImageUpload, UploadImg},
     util::{Loading, Pending, ResultAlert},
 };
 
@@ -20,20 +20,22 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
     let post_id_clone = post_id.clone();
 
     let delete_image = create_server_action::<DeleteImage>(cx);
+    let upload_img = create_server_action::<UploadImg>(cx);
+
     let images = create_blocking_resource(
         cx,
-        move || (post_id_clone.clone(), delete_image.version().get()),
-        move |(post_id, _)| get_images(cx, post_id),
+        move || {
+            (
+                post_id_clone.clone(),
+                delete_image.version().get(),
+                upload_img.version().get(),
+            )
+        },
+        move |(post_id, _, _)| get_images(cx, post_id),
     );
 
-    // let images = create_blocking_resource(
-    //     cx,
-    //     move || (post_id.clone()),
-    //     move |post_id| get_images(cx, post_id),
-    // );
-
     view! { cx,
-        <ImageUpload post_id=post_id/>
+        <ImageUpload post_id upload_img/>
         <Transition fallback=move || {
             view! { cx, <Loading/> }
         }>
@@ -66,7 +68,7 @@ type EditImageSignal = Option<EditImageData>;
 pub fn PostImagesView(
     cx: Scope,
     images: Vec<PostImageData>,
-    delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
+    delete_image: DeleteImageAction,
 ) -> impl IntoView {
     let dialog_element: NodeRef<Dialog> = create_node_ref(cx);
     let (editing, set_editing) = create_signal::<EditImageSignal>(cx, None);
@@ -107,12 +109,13 @@ pub fn PostImagesView(
     }
 }
 
+type DeleteImageAction = Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>;
 #[component]
 pub fn PostImageModalForm(
     cx: Scope,
     image: EditImageData,
     set_editing: WriteSignal<EditImageSignal>,
-    delete_image: Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>,
+    delete_image: DeleteImageAction,
 ) -> impl IntoView {
     let image_update_alt = create_server_action::<ImageUpdateAlt>(cx);
     let value = image_update_alt.value();

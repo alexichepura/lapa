@@ -8,9 +8,10 @@ use crate::{
     util::{Pending, ResultAlert},
 };
 
+pub type UploadImageAction = Action<UploadImg, Result<UploadImgResult, ServerFnError>>;
+
 #[component]
-pub fn ImageUpload(cx: Scope, post_id: String) -> impl IntoView {
-    let upload_img = create_server_action::<UploadImg>(cx);
+pub fn ImageUpload(cx: Scope, post_id: String, upload_img: UploadImageAction) -> impl IntoView {
     let value = upload_img.value();
     let pending = upload_img.pending();
     let (_file_name, set_file_name) = create_signal(cx, None::<String>);
@@ -77,13 +78,15 @@ pub fn ImageUploadPreview(cx: Scope, obj_url: ReadSignal<Option<String>>) -> imp
     view! { cx, <div class="ImageUploadPreview">{view}</div> }
 }
 
+type UploadImgResult = Result<ImageResult, ImageUploadError>;
+
 #[server(UploadImg, "/api")]
 pub async fn upload_img(
     cx: Scope,
     img: String,
     alt: String,
     post_id: String,
-) -> Result<Result<ImageResult, ImageUploadError>, ServerFnError> {
+) -> Result<UploadImgResult, ServerFnError> {
     let img_bytes = serde_json::from_str::<Vec<u8>>(&img);
     if let Err(e) = img_bytes {
         dbg!(e);
