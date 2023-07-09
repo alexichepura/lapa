@@ -52,7 +52,10 @@ pub async fn images_convert(cx: Scope) -> Result<Result<(), SettingsError>, Serv
         }))
         .exec()
         .await
-        .unwrap();
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
     let settings = settings.unwrap();
     let convert_settings = crate::image::ConvertSettings {
         hero_height: settings.hero_height as u32,
@@ -64,13 +67,16 @@ pub async fn images_convert(cx: Scope) -> Result<Result<(), SettingsError>, Serv
     let images = prisma_client
         .image()
         .find_many(vec![])
-        .select(db::image::select!({ id }))
+        .select(db::image::select!({ id ext }))
         .exec()
         .await
-        .unwrap();
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
 
     for image_data in images {
-        let path = format!("upload/{}.jpg", image_data.id);
+        let path = crate::image::img_path_upload_ext(&image_data.id, &image_data.ext);
         let file = std::fs::File::open(&path);
         match file {
             Ok(file) => {
@@ -80,7 +86,7 @@ pub async fn images_convert(cx: Scope) -> Result<Result<(), SettingsError>, Serv
                     buffered_read,
                     dynamic_image,
                     &convert_settings,
-                    image_data.id,
+                    &image_data.id,
                 );
             }
             Err(err) => {

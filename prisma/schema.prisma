@@ -45,7 +45,7 @@ model Image {
   id         String   @id @default(cuid())
   created_at DateTime @default(now())
   alt        String
-  orig       String
+  ext        String
   post       Post     @relation(fields: [post_id], references: [id])
   post_id    String
 }

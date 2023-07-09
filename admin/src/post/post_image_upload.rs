@@ -84,6 +84,7 @@ pub async fn upload_img(
     alt: String,
     post_id: String,
 ) -> Result<Result<ImageResult, ImageUploadError>, ServerFnError> {
+    // let img: String = String::from("fail");
     let img_bytes = serde_json::from_str::<Vec<u8>>(&img);
     if let Err(e) = img_bytes {
         dbg!(e);
@@ -94,6 +95,43 @@ pub async fn upload_img(
 
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
+
+    let cursor = std::io::Cursor::new(img_bytes.clone());
+    let img_reader = image::io::Reader::new(cursor.clone()).with_guessed_format();
+
+    if let Err(e) = img_reader {
+        dbg!(e);
+        crate::err::serverr_400(cx);
+        return Ok(Err(ImageUploadError::Read));
+    }
+    let img_reader = img_reader.unwrap();
+
+    let img_format = img_reader.format();
+    if let None = img_format {
+        crate::err::serverr_400(cx);
+        return Ok(Err(ImageUploadError::Format));
+    }
+    let img_format = img_format.unwrap();
+    let ext = img_format.extensions_str().first().unwrap();
+
+    let image_upload_data = prisma_client
+        .image()
+        .create(alt, ext.to_string(), db::post::id::equals(post_id), vec![])
+        .exec()
+        .await
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
+
+    let id = image_upload_data.id;
+    let file_path = crate::image::img_path_upload_ext(&id, &ext.to_string());
+    std::fs::write(file_path.clone(), img_bytes).map_err(|e| {
+        dbg!(e);
+        ServerFnError::ServerError("Server error".to_string())
+    })?;
+
+    let img_decoded = img_reader.decode().unwrap();
 
     let settings = prisma_client
         .settings()
@@ -113,68 +151,22 @@ pub async fn upload_img(
         thumb_width: settings.thumb_width as u32,
     };
 
-    let image_upload_data = prisma_client
-        .image()
-        .create(alt, "".to_string(), db::post::id::equals(post_id), vec![])
-        .exec()
-        .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
-        })?;
-
-    let cursor = std::io::Cursor::new(img_bytes.clone());
-    let img_reader = image::io::Reader::new(cursor.clone()).with_guessed_format();
-
-    if let Err(e) = img_reader {
-        dbg!(e);
-        crate::err::serverr_400(cx);
-        return Ok(Err(ImageUploadError::Read));
-    }
-    let img_reader = img_reader.unwrap();
-
-    let img_format = img_reader.format();
-    if let None = img_format {
-        crate::err::serverr_400(cx);
-        return Ok(Err(ImageUploadError::Format));
-    }
-    let img_format = img_format.unwrap();
-    let format_string = format!("{:?}", img_format);
-    let ext = img_format.extensions_str().first().unwrap();
-    let id = image_upload_data.id;
-    let file_path = crate::image::img_path_upload_ext(&id, &ext.to_string());
-    std::fs::write(file_path.clone(), img_bytes).map_err(|e| {
+    let buffered_read = std::io::BufReader::new(cursor);
+    crate::image::create_image_variants_from_buf(
+        buffered_read,
+        img_decoded,
+        &convert_settings,
+        &id,
+    )
+    .map_err(|e| {
         dbg!(e);
         ServerFnError::ServerError("Server error".to_string())
     })?;
 
-    let img_decoded = img_reader.decode().unwrap();
-    let height = img_decoded.height();
-    let width = img_decoded.width();
-
-    let buffered_read = std::io::BufReader::new(cursor);
-    crate::image::create_image_variants_from_buf(buffered_read, img_decoded, &convert_settings, id)
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
-        })?;
-
-    Ok(Ok(ImageResult {
-        format: format_string,
-        height,
-        width,
-    }))
+    Ok(Ok(ImageResult { id }))
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ImageResult {
-    format: String,
-    height: u32,
-    width: u32,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct ImageSize {
-    height: u32,
-    width: u32,
+    id: String,
 }
