@@ -21,7 +21,8 @@ pub fn AdminRoutes(cx: Scope) -> impl IntoView {
 }
 
 #[component]
-pub fn AdminRoutesList(cx: Scope) -> impl IntoView {
+pub fn GenerateRouteList(cx: Scope) -> impl IntoView {
+    leptos_meta::provide_meta_context(cx);
     view! { cx,
         <Router>
             <AdminRoutes/>

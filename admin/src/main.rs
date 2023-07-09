@@ -18,7 +18,7 @@ async fn main() {
         axum_session_prisma::SessionPrismaPool,
         fileserv::file_and_error_handler,
         prisma::ArcPrisma,
-        routes::AdminRoutesList,
+        routes::GenerateRouteList,
     };
     use leptos::*;
     use leptos_axum::handle_server_fns_with_context;
@@ -48,7 +48,7 @@ async fn main() {
     let conf = get_configuration(None).await.unwrap();
     let leptos_options = conf.leptos_options;
     let addr = leptos_options.site_addr;
-    let routes = generate_route_list(|cx| view! { cx, <AdminRoutesList/> }).await;
+    let routes = generate_route_list(|cx| view! { cx, <GenerateRouteList/> }).await;
 
     #[derive(FromRef, Debug, Clone)]
     pub struct AppState {
@@ -119,7 +119,7 @@ async fn main() {
             )
         };
 
-        let handler = leptos_axum::render_app_async_with_context(
+        let handler = leptos_axum::render_app_to_stream_in_order_with_context(
             app_state.leptos_options.clone(),
             move |cx| {
                 provide_context(cx, app_state.prisma_client.clone());

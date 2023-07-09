@@ -22,3 +22,13 @@ pub fn FrontRoutes(cx: Scope) -> impl IntoView {
         </Routes>
     }
 }
+
+#[component]
+pub fn GenerateRouteList(cx: Scope) -> impl IntoView {
+    leptos_meta::provide_meta_context(cx);
+    view! { cx,
+        <Router>
+            <FrontRoutes/>
+        </Router>
+    }
+}

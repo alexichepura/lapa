@@ -10,8 +10,9 @@ async fn main() {
         Router,
     };
     use lapa_site::{
-        app::{App, GenerateRouteList, SettingsCx},
+        app::{App, SettingsCx},
         fileserv::file_and_error_handler,
+        routes::GenerateRouteList,
         server::{robots_txt, AppState},
     };
     use leptos::*;
@@ -103,7 +104,7 @@ async fn main() {
             thumb_width: settings.thumb_width,
         };
 
-        let handler = leptos_axum::render_app_async_with_context(
+        let handler = leptos_axum::render_app_to_stream_in_order_with_context(
             app_state.leptos_options.clone(),
             move |cx| {
                 provide_context(cx, prisma_client.clone());

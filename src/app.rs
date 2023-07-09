@@ -29,7 +29,6 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
         <Title formatter/>
         <Favicons/>
         <Script>
-            "console.log('Meta rendered twice!!!');"
             {settings_script}
         </Script>
         <RoutingProgress
@@ -59,14 +58,5 @@ pub fn Favicons(cx: Scope) -> impl IntoView {
         <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png"/>
         <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
         <Link rel="manifest" href="/site.webmanifest"/>
-    }
-}
-
-#[component]
-pub fn GenerateRouteList(cx: Scope) -> impl IntoView {
-    view! { cx,
-        <Router>
-            <FrontRoutes/>
-        </Router>
     }
 }
