@@ -8,12 +8,12 @@ use crate::{
     util::{Pending, ResultAlert},
 };
 
-pub type UploadImageAction = Action<UploadImg, Result<UploadImgResult, ServerFnError>>;
+pub type UploadImageAction = Action<ImageUpload, Result<ImageUploadResult, ServerFnError>>;
 
 #[component]
-pub fn ImageUpload(cx: Scope, post_id: String, upload_img: UploadImageAction) -> impl IntoView {
-    let value = upload_img.value();
-    let pending = upload_img.pending();
+pub fn ImageUpload(cx: Scope, post_id: String, image_upload: UploadImageAction) -> impl IntoView {
+    let value = image_upload.value();
+    let pending = image_upload.pending();
     let (_file_name, set_file_name) = create_signal(cx, None::<String>);
     let (save_byte_vec, set_save_byte_vec) = create_signal(cx, None::<Vec<u8>>);
     let (_save_file, set_save_file) = create_signal(cx, None::<String>);
@@ -27,7 +27,7 @@ pub fn ImageUpload(cx: Scope, post_id: String, upload_img: UploadImageAction) ->
                         <div>"Select image"</div>
                         <InputImage set_file_name set_save_file set_obj_url set_save_byte_vec/>
                     </label>
-                    <ActionForm action=upload_img>
+                    <ActionForm action=image_upload>
                         <input type="hidden" name="post_id" value=post_id/>
                         <label>
                             <span>"Alt"</span>
@@ -78,15 +78,15 @@ pub fn ImageUploadPreview(cx: Scope, obj_url: ReadSignal<Option<String>>) -> imp
     view! { cx, <div class="ImageUploadPreview">{view}</div> }
 }
 
-type UploadImgResult = Result<ImageResult, ImageUploadError>;
+type ImageUploadResult = Result<ImageResult, ImageUploadError>;
 
-#[server(UploadImg, "/api")]
+#[server(ImageUpload, "/api")]
 pub async fn upload_img(
     cx: Scope,
     img: String,
     alt: String,
     post_id: String,
-) -> Result<UploadImgResult, ServerFnError> {
+) -> Result<ImageUploadResult, ServerFnError> {
     let img_bytes = serde_json::from_str::<Vec<u8>>(&img);
     if let Err(e) = img_bytes {
         dbg!(e);

@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     form::Input,
     image::{img_url_large, img_url_small, srcset_large, srcset_small, ImageLoadError},
-    post::{ImageUpload, UploadImg},
+    post::ImageUpload,
     util::{Loading, Pending, ResultAlert},
 };
 
@@ -19,23 +19,25 @@ pub struct PostImageData {
 pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
     let post_id_clone = post_id.clone();
 
-    let delete_image = create_server_action::<DeleteImage>(cx);
-    let upload_img = create_server_action::<UploadImg>(cx);
+    let image_delete = create_server_action::<ImageDelete>(cx);
+    let image_upload = create_server_action::<ImageUpload>(cx);
+    let image_update = create_server_action::<ImageUpdate>(cx);
 
     let images = create_blocking_resource(
         cx,
         move || {
             (
                 post_id_clone.clone(),
-                delete_image.version().get(),
-                upload_img.version().get(),
+                image_delete.version().get(),
+                image_upload.version().get(),
+                image_update.version().get(),
             )
         },
-        move |(post_id, _, _)| get_images(cx, post_id),
+        move |(post_id, _, _, _)| get_images(cx, post_id),
     );
 
     view! { cx,
-        <ImageUpload post_id upload_img/>
+        <ImageUpload post_id image_upload/>
         <Transition fallback=move || {
             view! { cx, <Loading/> }
         }>
@@ -48,7 +50,7 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
                             if images.is_empty() {
                                 view! { cx, <p>"No images were found."</p> }.into_view(cx)
                             } else {
-                                view! { cx, <PostImagesView images delete_image/> }.into_view(cx)
+                                view! { cx, <PostImagesView images image_delete image_update/> }.into_view(cx)
                             }
                         }
                     })
@@ -58,20 +60,21 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
 }
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct EditImageData {
+pub struct ImageEditData {
     id: String,
     alt: String,
 }
-type EditImageSignal = Option<EditImageData>;
+type ImageEditSignal = Option<ImageEditData>;
 
 #[component]
 pub fn PostImagesView(
     cx: Scope,
     images: Vec<PostImageData>,
-    delete_image: DeleteImageAction,
+    image_delete: ImageDeleteAction,
+    image_update: ImageUpdateAction,
 ) -> impl IntoView {
     let dialog_element: NodeRef<Dialog> = create_node_ref(cx);
-    let (editing, set_editing) = create_signal::<EditImageSignal>(cx, None);
+    let (editing, set_editing) = create_signal::<ImageEditSignal>(cx, None);
 
     create_effect(cx, move |_| {
         if let Some(_id) = editing() {
@@ -87,7 +90,8 @@ pub fn PostImagesView(
 
     let edit_view = move || match editing() {
         Some(image) => {
-            view! { cx, <PostImageModalForm image set_editing delete_image/> }.into_view(cx)
+            view! { cx, <PostImageModalForm image set_editing image_delete image_update/> }
+                .into_view(cx)
         }
         None => ().into_view(cx),
     };
@@ -109,18 +113,19 @@ pub fn PostImagesView(
     }
 }
 
-type DeleteImageAction = Action<DeleteImage, Result<ResultDeleteImage, ServerFnError>>;
+type ImageDeleteAction = Action<ImageDelete, Result<ImageDeleteResult, ServerFnError>>;
+type ImageUpdateAction = Action<ImageUpdate, Result<ImageUpdateResult, ServerFnError>>;
 #[component]
 pub fn PostImageModalForm(
     cx: Scope,
-    image: EditImageData,
-    set_editing: WriteSignal<EditImageSignal>,
-    delete_image: DeleteImageAction,
+    image: ImageEditData,
+    set_editing: WriteSignal<ImageEditSignal>,
+    image_delete: ImageDeleteAction,
+    image_update: ImageUpdateAction,
 ) -> impl IntoView {
-    let image_update_alt = create_server_action::<ImageUpdateAlt>(cx);
-    let value = image_update_alt.value();
-    let pending = image_update_alt.pending();
-    let delete_rw = delete_image.value();
+    let value = image_update.value();
+    let pending = image_update.pending();
+    let delete_rw = image_delete.value();
 
     create_effect(cx, move |_| {
         if let Some(_delete_value) = delete_rw.get() {
@@ -130,7 +135,7 @@ pub fn PostImageModalForm(
 
     let id_delete = image.id.clone();
     let on_delete = move |_| {
-        delete_image.dispatch(DeleteImage {
+        image_delete.dispatch(ImageDelete {
             id: id_delete.clone(),
         })
     };
@@ -140,7 +145,7 @@ pub fn PostImageModalForm(
         <div>
             <button on:click=on_delete>"Delete"</button>
             <hr/>
-            <ActionForm action=image_update_alt>
+            <ActionForm action=image_update>
                 <fieldset disabled=move || pending()>
                     <input type="hidden" name="id" value=image.id.clone()/>
                     <Input name="alt" label="Alt" value=image.alt.clone()/>
@@ -172,7 +177,7 @@ pub fn PostImageModalForm(
 pub fn PostImage(
     cx: Scope,
     image: PostImageData,
-    set_editing: WriteSignal<EditImageSignal>,
+    set_editing: WriteSignal<ImageEditSignal>,
 ) -> impl IntoView {
     let id = image.id.clone();
     let alt_clone = image.alt.clone();
@@ -180,7 +185,7 @@ pub fn PostImage(
     let srcset = srcset_small(&id);
 
     let on_edit = move |_| {
-        set_editing(Some(EditImageData {
+        set_editing(Some(ImageEditData {
             id: id.clone(),
             alt: alt_clone.clone(),
         }));
@@ -217,10 +222,10 @@ pub async fn get_images(cx: Scope, post_id: String) -> Result<Vec<PostImageData>
     Ok(images)
 }
 
-type ResultDeleteImage = Result<(), ImageLoadError>;
+type ImageDeleteResult = Result<(), ImageLoadError>;
 
-#[server(DeleteImage, "/api")]
-pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, ServerFnError> {
+#[server(ImageDelete, "/api")]
+pub async fn delete_image(cx: Scope, id: String) -> Result<ImageDeleteResult, ServerFnError> {
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
 
@@ -271,14 +276,13 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, Se
     Ok(Ok(()))
 }
 
-type ResultImageUpdateAlt = Result<(), ImageLoadError>;
-
-#[server(ImageUpdateAlt, "/api")]
+type ImageUpdateResult = Result<(), ImageLoadError>;
+#[server(ImageUpdate, "/api")]
 pub async fn image_update_alt(
     cx: Scope,
     id: String,
     alt: String,
-) -> Result<ResultImageUpdateAlt, ServerFnError> {
+) -> Result<ImageUpdateResult, ServerFnError> {
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
 
