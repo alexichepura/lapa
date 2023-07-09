@@ -84,7 +84,6 @@ pub async fn upload_img(
     alt: String,
     post_id: String,
 ) -> Result<Result<ImageResult, ImageUploadError>, ServerFnError> {
-    // let img: String = String::from("fail");
     let img_bytes = serde_json::from_str::<Vec<u8>>(&img);
     if let Err(e) = img_bytes {
         dbg!(e);
