@@ -61,9 +61,8 @@ pub fn create_image_variants_from_buf<R: Read + Seek>(
     id: String,
 ) -> Result<(), ImageProcessError> {
     let exifreader = exif::Reader::new();
-    let exif = exifreader
-        .read_from_container(&mut bufreader.by_ref())
-        .map_err(ImageProcessError::ExifRead)?;
+    let exif = exifreader.read_from_container(&mut bufreader.by_ref())?;
+    // .map_err(ImageProcessError::ExifRead)?;
 
     let mut orientation: u32 = 1;
     match exif.get_field(exif::Tag::Orientation, exif::In::PRIMARY) {
