@@ -3,10 +3,19 @@ use std::{
     io::{BufReader, Read, Seek},
     sync::Arc,
 };
-
-use crate::{post::ImageUploadError, settings::SettingsImages};
+use thiserror::Error;
 
 use super::{img_path_large, img_path_large_retina, img_path_small, img_path_small_retina};
+use crate::settings::SettingsImages;
+
+#[derive(Error, Debug)]
+pub enum ImageProcessError {
+    #[error("Image exif read error.")]
+    ExifRead(#[from] exif::Error),
+
+    #[error("failed to save image variant")]
+    SaveVariant(#[from] ImageError),
+}
 
 #[derive(Clone, Debug)]
 pub struct ImageConvertConfig {
@@ -35,12 +44,14 @@ impl From<&SettingsImages> for ConvertSettings {
     }
 }
 
-pub fn create_image_variant(conf: ImageConvertConfig) -> Result<(), ImageError> {
+pub fn create_image_variant(conf: ImageConvertConfig) -> Result<(), ImageProcessError> {
     let variant = conf
         .img
         .resize_to_fill(conf.width, conf.height, FilterType::Lanczos3);
 
-    variant.save_with_format(conf.path, ImageFormat::WebP)
+    variant
+        .save_with_format(conf.path, ImageFormat::WebP)
+        .map_err(ImageProcessError::SaveVariant)
 }
 
 pub fn create_image_variants_from_buf<R: Read + Seek>(
@@ -48,28 +59,24 @@ pub fn create_image_variants_from_buf<R: Read + Seek>(
     dynamic_image: DynamicImage,
     settings: &ConvertSettings,
     id: String,
-) -> Result<(), ImageUploadError> {
+) -> Result<(), ImageProcessError> {
     let exifreader = exif::Reader::new();
     let exif = exifreader
         .read_from_container(&mut bufreader.by_ref())
-        .map_err(|e| {
-            dbg!(e);
-            ImageUploadError::ExifRead
-        })?;
+        .map_err(ImageProcessError::ExifRead)?;
 
     let mut orientation: u32 = 1;
     match exif.get_field(exif::Tag::Orientation, exif::In::PRIMARY) {
         Some(field) => match field.value.get_uint(0) {
             Some(v @ 1..=8) => {
                 orientation = v;
-                // println!("Orientation {}", v)
             }
             _ => eprintln!("Orientation value is broken"),
         },
         None => eprintln!("Orientation tag is missing"),
     }
 
-    println!("Orientation {}", orientation);
+    println!("Orientation:{} {}", &id, &orientation);
     // https://magnushoff.com/articles/jpeg-orientation/
     // https://jpegclub.org/exif_orientation.html
     let dynamic_image = match orientation {

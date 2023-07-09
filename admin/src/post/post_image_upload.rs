@@ -152,7 +152,11 @@ pub async fn upload_img(
     let width = img_decoded.width();
 
     let buffered_read = std::io::BufReader::new(cursor);
-    crate::image::create_image_variants_from_buf(buffered_read, img_decoded, &convert_settings, id);
+    crate::image::create_image_variants_from_buf(buffered_read, img_decoded, &convert_settings, id)
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
 
     Ok(Ok(ImageResult {
         format: format_string,
@@ -170,8 +174,6 @@ pub enum ImageUploadError {
     Deserialization,
     #[error("Image read error.")]
     Read,
-    #[error("Image exif read error.")]
-    ExifRead,
     #[error("Image format error.")]
     Format,
 }
