@@ -3,6 +3,7 @@ use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    image::ImageUploadError,
     upload::InputImage,
     util::{Pending, ResultAlert},
 };
@@ -163,19 +164,6 @@ pub async fn upload_img(
         height,
         width,
     }))
-}
-
-use thiserror::Error;
-#[derive(Error, Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ImageUploadError {
-    #[error("Image server error")]
-    ServerError,
-    #[error("Image deserialization error")]
-    Deserialization,
-    #[error("Image read error.")]
-    Read,
-    #[error("Image format error.")]
-    Format,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

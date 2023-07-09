@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     form::Input,
-    image::{self, img_url_large, img_url_small, srcset_large, srcset_small, ImageError},
+    image::{img_url_large, img_url_small, srcset_large, srcset_small, ImageLoadError},
     post::ImageUpload,
     util::{Loading, Pending, ResultAlert},
 };
@@ -148,10 +148,10 @@ pub fn PostImageModalForm(
                             {move || match value() {
                                 None => ().into_view(cx),
                                 Some(v) => {
-                                    let post_result = v
-                                        .map_err(|_| ImageError::ServerError)
+                                    let image_update_result = v
+                                        .map_err(|_| ImageLoadError::ServerError)
                                         .flatten();
-                                    view! { cx, <ResultAlert result=post_result/> }.into_view(cx)
+                                    view! { cx, <ResultAlert result=image_update_result/> }.into_view(cx)
                                 }
                             }}
                         </Suspense>
@@ -214,7 +214,7 @@ pub async fn get_images(cx: Scope, post_id: String) -> Result<Vec<PostImageData>
     Ok(images)
 }
 
-type ResultDeleteImage = Result<(), image::ImageError>;
+type ResultDeleteImage = Result<(), ImageLoadError>;
 
 #[server(DeleteImage, "/api")]
 pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, ServerFnError> {
@@ -234,7 +234,7 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, Se
 
     if found_image.is_none() {
         crate::err::serverr_404(cx);
-        return Ok(Err(image::ImageError::NotFound));
+        return Ok(Err(ImageLoadError::NotFound));
     }
 
     // TODO iterate
@@ -268,7 +268,7 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ResultDeleteImage, Se
     Ok(Ok(()))
 }
 
-type ResultImageUpdateAlt = Result<(), image::ImageError>;
+type ResultImageUpdateAlt = Result<(), ImageLoadError>;
 
 #[server(ImageUpdateAlt, "/api")]
 pub async fn image_update_alt(
@@ -292,7 +292,7 @@ pub async fn image_update_alt(
 
     if found_image.is_none() {
         crate::err::serverr_404(cx);
-        return Ok(Err(image::ImageError::NotFound));
+        return Ok(Err(ImageLoadError::NotFound));
     }
 
     prisma_client
