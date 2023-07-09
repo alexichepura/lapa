@@ -71,13 +71,13 @@ pub fn create_image_variants_from_buf<R: Read + Seek>(
 
     println!("Orientation {}", orientation);
     // https://magnushoff.com/articles/jpeg-orientation/
+    // https://jpegclub.org/exif_orientation.html
     let dynamic_image = match orientation {
-        3 => dynamic_image.flipv().fliph(),
+        // 3 => dynamic_image.flipv().fliph(),
+        3 => dynamic_image.rotate180(),
+        6 => dynamic_image.rotate90(),
         _ => dynamic_image,
     };
-    // let dynamic_image = dynamic_image.rotate90();
-    // let dynamic_image = dynamic_image.fliph();
-    // let dynamic_image = dynamic_image.flipv();
 
     create_image_variants(dynamic_image, settings, id);
     Ok(())
