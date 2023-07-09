@@ -20,22 +20,20 @@ pub mod util;
 pub fn hydrate() {
     use crate::app::*;
     use leptos::*;
+    use wasm_bindgen::JsValue;
 
     _ = console_log::init_with_level(log::Level::Debug);
     console_error_panic_hook::set_once();
 
-    let resolved_settings = js_sys::Reflect::get(
-        &web_sys::window().unwrap(),
-        &wasm_bindgen::JsValue::from_str("SETTINGS"),
-    )
-    .unwrap_or(wasm_bindgen::JsValue::NULL);
+    let settings: JsValue =
+        js_sys::Reflect::get(&web_sys::window().unwrap(), &JsValue::from_str("SETTINGS"))
+            .unwrap_or(JsValue::NULL);
 
-    let resolved_settings: SettingsCx =
-        serde_wasm_bindgen::from_value(resolved_settings).unwrap_or_default();
+    let settings: SettingsCx = serde_wasm_bindgen::from_value(settings).unwrap_or_default();
 
-    log!("{:?}", resolved_settings);
+    log!("SETTINGS: {:?}", settings);
 
     leptos::mount_to_body(move |cx| {
-        view! { cx, <App settings=resolved_settings/> }
+        view! { cx, <App settings/> }
     });
 }

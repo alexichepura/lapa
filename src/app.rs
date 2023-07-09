@@ -20,7 +20,7 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
     let (is_routing, set_is_routing) = create_signal(cx, false);
 
     let settings_json = serde_json::to_string(&settings).unwrap();
-    let settings_script = format!("var SETTINGS = {settings_json};");
+    let settings_script = format!("window.SETTINGS = {settings_json};");
 
     let formatter = |text| format!("{text} - LAPA");
 

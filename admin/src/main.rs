@@ -107,18 +107,6 @@ async fn main() {
         req: Request<AxumBody>,
     ) -> Response {
         let user: Option<User> = auth_session.current_user.clone();
-        let (userid_cookie, username_cookie) = if let Some(user) = user.clone() {
-            (
-                format!("userid={};Path=/;", user.id),
-                format!("username={};Path=/;", user.username),
-            )
-        } else {
-            (
-                format!("userid=;Max-Age=-1;Path=/;"),
-                format!("username=;Max-Age=-1;Path=/;"),
-            )
-        };
-
         let handler = leptos_axum::render_app_to_stream_in_order_with_context(
             app_state.leptos_options.clone(),
             move |cx| {
@@ -128,15 +116,7 @@ async fn main() {
             move |cx| view! { cx, <App user=user.clone()/> },
         );
 
-        let mut leptos_res = handler(req).await.into_response();
-        leptos_res.headers_mut().append(
-            http::header::SET_COOKIE,
-            http::HeaderValue::from_str(&userid_cookie).unwrap(),
-        );
-        leptos_res.headers_mut().append(
-            http::header::SET_COOKIE,
-            http::HeaderValue::from_str(&username_cookie).unwrap(),
-        );
+        let leptos_res = handler(req).await.into_response();
         leptos_res
     }
 

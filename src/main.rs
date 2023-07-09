@@ -70,9 +70,6 @@ async fn main() {
         };
         let prisma_client = app_state.prisma_client.clone();
         tokio::spawn(async move {
-            // println!("path: {path}, ua: {}", user_agent.clone().unwrap());
-            // microdelay to prevent ssr number get race condition
-            std::thread::sleep(std::time::Duration::from_millis(20));
             let result = app_state
                 .prisma_client
                 .clone()
@@ -109,7 +106,7 @@ async fn main() {
             move |cx| {
                 provide_context(cx, prisma_client.clone());
             },
-            move |cx| view! { cx, <App settings=settings/> },
+            move |cx| view! { cx, <App settings/> },
         );
         handler(req).await.into_response()
     }

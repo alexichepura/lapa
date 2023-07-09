@@ -13,11 +13,17 @@ pub fn App(cx: Scope, user: Option<User>) -> impl IntoView {
     provide_meta_context(cx);
     let (is_routing, set_is_routing) = create_signal(cx, false);
 
+    let user_json = serde_json::to_string(&user).unwrap();
+    let user_script = format!("window.USER = {user_json};");
+
     let formatter = |text| format!("{text} - Admin");
     view! { cx,
         <Stylesheet id="leptos" href="/pkg/lapa_admin.css"/>
         <Title formatter/>
         <Favicons/>
+        <Script>
+            {user_script}
+        </Script>
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)
@@ -25,7 +31,7 @@ pub fn App(cx: Scope, user: Option<User>) -> impl IntoView {
         />
         <Router set_is_routing>
             {match user {
-                Some(user) => view! { cx, <Layout user=user/> }.into_view(cx),
+                Some(user) => view! { cx, <Layout user/> }.into_view(cx),
                 None => {
                     view! { cx, <AsyncUserRoutes/> }
                 }
@@ -73,7 +79,7 @@ pub fn AsyncUserRoutes(cx: Scope) -> impl IntoView {
                             }
                                 .into_view(cx)
                         }
-                        Ok(Some(user)) => view! { cx, <Layout user=user/> }.into_view(cx),
+                        Ok(Some(user)) => view! { cx, <Layout user/> }.into_view(cx),
                     }
                 }
             }}
