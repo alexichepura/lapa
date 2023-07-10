@@ -3,9 +3,8 @@ use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    form::Input,
+    form::{FormFooter, Input},
     settings::SettingsError,
-    util::{Pending, ResultAlert},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -19,7 +18,6 @@ pub struct SettingsImages {
 #[component]
 pub fn SettingsImagesForm(cx: Scope, settings: SettingsImages) -> impl IntoView {
     let settings_upsert = create_server_action::<SettingsImagesUpdate>(cx);
-    let value = settings_upsert.value();
     let pending = settings_upsert.pending();
 
     view! { cx,
@@ -54,21 +52,7 @@ pub fn SettingsImagesForm(cx: Scope, settings: SettingsImages) -> impl IntoView 
                         value=settings.thumb_height.to_string()
                     />
                 </div>
-                <footer>
-                    <input type="submit" value="SUBMIT"/>
-                    <Pending pending/>
-                    <Suspense fallback=|| ()>
-                        {move || match value() {
-                            None => ().into_view(cx),
-                            Some(v) => {
-                                let post_result = v
-                                    .map_err(|_| SettingsError::ServerError)
-                                    .flatten();
-                                view! { cx, <ResultAlert result=post_result/> }.into_view(cx)
-                            }
-                        }}
-                    </Suspense>
-                </footer>
+                <FormFooter action=settings_upsert/>
             </ActionForm>
         </fieldset>
     }

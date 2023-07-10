@@ -3,10 +3,10 @@ use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    form::Input,
+    form::{FormFooter, Input},
     image::{img_url_large, img_url_small, srcset_large, srcset_small, ImageLoadError},
     post::ImageUpload,
-    util::{Loading, Pending, ResultAlert},
+    util::Loading,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -123,7 +123,6 @@ pub fn PostImageModalForm(
     image_delete: ImageDeleteAction,
     image_update: ImageUpdateAction,
 ) -> impl IntoView {
-    let value = image_update.value();
     let pending = image_update.pending();
     let delete_rw = image_delete.value();
 
@@ -149,21 +148,7 @@ pub fn PostImageModalForm(
                 <fieldset disabled=move || pending()>
                     <input type="hidden" name="id" value=image.id.clone()/>
                     <Input name="alt" label="Alt" value=image.alt.clone()/>
-                    <footer>
-                        <input type="submit" value="Update"/>
-                        <Pending pending/>
-                        <Suspense fallback=|| ()>
-                            {move || match value() {
-                                None => ().into_view(cx),
-                                Some(v) => {
-                                    let image_update_result = v
-                                        .map_err(|_| ImageLoadError::ServerError)
-                                        .flatten();
-                                    view! { cx, <ResultAlert result=image_update_result/> }.into_view(cx)
-                                }
-                            }}
-                        </Suspense>
-                    </footer>
+                    <FormFooter action=image_update/>
                 </fieldset>
             </ActionForm>
             <button on:click=move |ev| {

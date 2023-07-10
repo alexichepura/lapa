@@ -2,17 +2,12 @@ use leptos::*;
 use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    image::ImageUploadError,
-    upload::InputImage,
-    util::{Pending, ResultAlert},
-};
+use crate::{form::FormFooter, image::ImageUploadError, upload::InputImage};
 
-pub type UploadImageAction = Action<ImageUpload, Result<ImageUploadResult, ServerFnError>>;
+pub type ImageUploadAction = Action<ImageUpload, Result<ImageUploadResult, ServerFnError>>;
 
 #[component]
-pub fn ImageUpload(cx: Scope, post_id: String, image_upload: UploadImageAction) -> impl IntoView {
-    let value = image_upload.value();
+pub fn ImageUpload(cx: Scope, post_id: String, image_upload: ImageUploadAction) -> impl IntoView {
     let pending = image_upload.pending();
     let (_file_name, set_file_name) = create_signal(cx, None::<String>);
     let (save_byte_vec, set_save_byte_vec) = create_signal(cx, None::<Vec<u8>>);
@@ -45,22 +40,7 @@ pub fn ImageUpload(cx: Scope, post_id: String, image_upload: UploadImageAction) 
                                 )
                             }
                         />
-                        <footer>
-                            <input type="submit" value="Upload"/>
-                            <Pending pending/>
-                            <Suspense fallback=|| ()>
-                                {move || match value() {
-                                    None => ().into_view(cx),
-                                    Some(v) => {
-                                        let post_result = v
-                                            .map_err(|_| ImageUploadError::ServerError)
-                                            .flatten();
-                                        view! { cx, <ResultAlert result=post_result/> }
-                                            .into_view(cx)
-                                    }
-                                }}
-                            </Suspense>
-                        </footer>
+                        <FormFooter action=image_upload/>
                     </ActionForm>
                 </div>
                 <ImageUploadPreview obj_url/>

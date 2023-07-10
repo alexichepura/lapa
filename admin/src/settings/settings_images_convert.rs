@@ -1,36 +1,18 @@
 use leptos::*;
 use leptos_router::ActionForm;
 
-use crate::{
-    settings::SettingsError,
-    util::{Pending, ResultAlert},
-};
+use crate::{form::FormFooter, settings::SettingsError};
 
 #[component]
 pub fn ImagesConvertView(cx: Scope) -> impl IntoView {
     let images_convert = create_server_action::<ImagesConvert>(cx);
-    let value = images_convert.value();
     let pending = images_convert.pending();
 
     view! { cx,
         <fieldset disabled=move || pending()>
-            <legend>"Images"</legend>
+            <legend>"Images convert"</legend>
             <ActionForm action=images_convert>
-                <footer>
-                    <input type="submit" value="START CONVERSION"/>
-                    <Pending pending/>
-                    <Suspense fallback=|| ()>
-                        {move || match value() {
-                            None => ().into_view(cx),
-                            Some(v) => {
-                                let post_result = v
-                                    .map_err(|_| SettingsError::ServerError)
-                                    .flatten();
-                                view! { cx, <ResultAlert result=post_result/> }.into_view(cx)
-                            }
-                        }}
-                    </Suspense>
-                </footer>
+                <FormFooter action=images_convert/>
             </ActionForm>
         </fieldset>
     }
