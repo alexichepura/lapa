@@ -26,7 +26,7 @@ where
 #[component]
 pub fn FormFooter<I, O, E>(
     cx: Scope,
-    action: Action<I, Result<Result<O, E>, ServerFnError>>, // first result for 500, second for 400
+    action: Action<I, Result<Result<O, E>, ServerFnError>>, // first result for 5xx, second for 4xx
 ) -> impl IntoView
 where
     I: Clone + ServerFn + 'static,
@@ -40,14 +40,19 @@ where
             <input type="submit" value="SUBMIT"/>
             <Pending pending/>
             <Suspense fallback=|| ()>
-                {move || match value() {
-                    None => ().into_view(cx),
-                    Some(result) => {
-                        match result {
-                            Ok(result) => view! { cx, <ResultAlert result/> }
-                            .into_view(cx),
-                            Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }
-                            .into_view(cx)
+                {move || {
+                    if pending() {
+                        return ().into_view(cx);
+                    }
+                    match value() {
+                        None => ().into_view(cx),
+                        Some(result) => {
+                            match result {
+                                Ok(result) => view! { cx, <ResultAlert result/> }
+                                .into_view(cx),
+                                Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }
+                                .into_view(cx)
+                            }
                         }
                     }
                 }}
