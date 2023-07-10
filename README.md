@@ -2,7 +2,7 @@
 
 # LAPA - Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website
 
-<img width="1512" alt="LAPA Admin Screenshot 2023-07-01" src="https://github.com/alexichepura/lapa/assets/5582266/21d19e52-8fe1-4497-93e3-49ef488b11df">
+![LAPA Admin screenshot 2023-07-10](https://github.com/alexichepura/lapa/assets/5582266/753ba3ff-1911-4d00-80cc-90888252f54f)
 
 ## Motivation
 I want to have practical full-stack setup to build websites and services. \
