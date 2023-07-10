@@ -6,11 +6,10 @@ use serde::{Deserialize, Serialize};
 
 use super::PostError;
 use crate::{
-    form::{Checkbox, Input},
+    form::{Checkbox, FormFooter, Input},
     post::PostImages,
     util::{
         datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
-        Pending, ResultAlert,
     },
 };
 
@@ -131,19 +130,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                         <PublishedAt published_at set_published_at/>
                     </div>
                 </div>
-                <footer>
-                    <input type="submit" value="SUBMIT"/>
-                    <Pending pending/>
-                    <Suspense fallback=|| ()>
-                        {move || match value() {
-                            None => ().into_view(cx),
-                            Some(v) => {
-                                let post_result = v.map_err(|_| PostError::ServerError).flatten();
-                                view! { cx, <ResultAlert result=post_result/> }.into_view(cx)
-                            }
-                        }}
-                    </Suspense>
-                </footer>
+                <FormFooter action=post_upsert/>
             </fieldset>
         </ActionForm>
         {gallery_view}

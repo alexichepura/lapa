@@ -1,8 +1,10 @@
 pub mod checkbox;
+pub mod footer;
 pub mod form_error;
 pub mod input;
 pub mod input_file;
 pub use checkbox::Checkbox;
+pub use footer::{FormFooter, Pending, ResultAlert};
 pub use form_error::FormError;
 pub use input::Input;
 pub use input_file::FileField;

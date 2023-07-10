@@ -2,10 +2,7 @@ use leptos::*;
 use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    settings::SettingsError,
-    util::{Pending, ResultAlert},
-};
+use crate::{form::FormFooter, settings::SettingsError};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SettingsSite {
@@ -15,7 +12,6 @@ pub struct SettingsSite {
 #[component]
 pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
     let settings_site_update = create_server_action::<SettingsSiteUpdate>(cx);
-    let value = settings_site_update.value();
     let pending = settings_site_update.pending();
 
     view! { cx,
@@ -26,21 +22,7 @@ pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
                     <div>"robots.txt"</div>
                     <textarea name="robots_txt" prop:value=settings.robots_txt.to_string() />
                 </label>
-                <footer>
-                    <input type="submit" value="SUBMIT"/>
-                    <Pending pending/>
-                    <Suspense fallback=|| ()>
-                        {move || match value() {
-                            None => ().into_view(cx),
-                            Some(v) => {
-                                let post_result = v
-                                    .map_err(|_| SettingsError::ServerError)
-                                    .flatten();
-                                view! { cx, <ResultAlert result=post_result/>}.into_view(cx)
-                            }
-                        }}
-                    </Suspense>
-                </footer>
+                <FormFooter action=settings_site_update/>
             </ActionForm>
         </fieldset>
     }

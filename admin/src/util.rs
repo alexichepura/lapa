@@ -15,26 +15,6 @@ pub fn AlertSuccess(cx: Scope) -> impl IntoView {
     view! { cx, <div class="Alert Success">"Success"</div> }
 }
 
-#[component]
-pub fn ResultAlert<T, E>(cx: Scope, result: Result<T, E>) -> impl IntoView
-where
-    E: std::error::Error,
-{
-    match result {
-        Ok(_) => view! { cx, <AlertSuccess/> }.into_view(cx),
-        Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx),
-    }
-}
-
-#[component]
-pub fn Pending(cx: Scope, pending: ReadSignal<bool>) -> impl IntoView {
-    view! { cx,
-        <Show when=move || pending() fallback=|_| ()>
-            <progress indeterminate></progress>
-        </Show>
-    }
-}
-
 pub fn datetime_to_string(datetime: DateTime<FixedOffset>) -> String {
     datetime.format("%Y-%m-%d %H:%M").to_string()
 }
