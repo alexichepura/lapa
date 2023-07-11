@@ -8,7 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [workspace]
 resolver = "2"
-members = ["admin", "prisma_cli", "prisma_client"]
+members = ["admin", "cli", "prisma_cli", "prisma_client"]
 
 [workspace.dependencies]
 axum = { version = "0.6.18" }
