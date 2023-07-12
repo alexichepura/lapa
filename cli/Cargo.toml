@@ -1,0 +1,12 @@
+[package]
+name = "lapa_cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bcrypt = { version = "0.14" }
+clap = { version = "4.3", features = ["derive"] }
+prisma_client = { workspace = true }
+prisma-client-rust = { workspace = true }
+serde = { workspace = true }
+tokio = { workspace = true }

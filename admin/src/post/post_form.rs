@@ -144,16 +144,21 @@ pub fn PublishedAt(
     set_published_at: SignalSetter<Option<DateTime<FixedOffset>>>,
 ) -> impl IntoView {
     let is_published = create_memo(cx, move |_| published_at.with(|p| p.is_some()));
+    let disabled = create_memo(cx, move |_| !is_published());
 
     let (is_published_signal, set_is_published) =
         create_signal(cx, published_at.get_untracked().is_some());
 
-    create_effect(cx, move |_| {
-        if is_published_signal() {
-            set_published_at(Some(Utc::now().fixed_offset()));
-        } else {
-            set_published_at(None);
+    create_effect(cx, move |old| {
+        let is = is_published_signal();
+        if old.is_some() {
+            if is {
+                set_published_at(Some(Utc::now().fixed_offset()));
+            } else {
+                set_published_at(None);
+            }
         }
+        is
     });
 
     let html_published_at = create_memo(cx, move |_| match published_at() {
@@ -164,26 +169,34 @@ pub fn PublishedAt(
         Some(published_at) => datetime_to_string(published_at),
         None => String::default(),
     });
+    let published_at_rfc3339 = create_memo(cx, move |_| match published_at() {
+        Some(published_at) => published_at.to_rfc3339(),
+        None => String::default(),
+    });
 
-    let inputs_view = move || match published_at() {
-        Some(published_at) => view! { cx,
+    view! { cx,
+        <div>
+            <Checkbox label="Publish" checked=is_published set=set_is_published/>
             <div class="Grid-fluid-2">
                 <label>
                     <div>"Published at "<small>"(Local)"</small></div>
                     <input
+                        disabled=disabled
+                        prop:disabled=disabled
                         value=html_published_at
                         prop:value=html_published_at
                         type="datetime-local"
                         on:input=move |ev| {
                             let val = event_target_value(&ev);
-                            let datetime = html_local_to_datetime(val);
+                            let datetime = html_local_to_datetime(&val);
                             set_published_at(Some(datetime));
                         }
                     />
                     <input
                         name="published_at"
                         type="hidden"
-                        prop:value=move || published_at.to_rfc3339()
+                        value=published_at_rfc3339
+                        prop:value=published_at_rfc3339
                     />
                 </label>
                 <label>
@@ -195,15 +208,6 @@ pub fn PublishedAt(
                     />
                 </label>
             </div>
-        }
-        .into_view(cx),
-        None => ().into_view(cx),
-    };
-
-    view! { cx,
-        <div>
-            <Checkbox label="Publish" checked=is_published set=set_is_published/>
-            {inputs_view}
         </div>
     }
 }

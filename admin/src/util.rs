@@ -25,9 +25,9 @@ pub fn datetime_to_local_html(datetime: DateTime<FixedOffset>) -> String {
     let local: DateTime<Local> = DateTime::from(datetime);
     local.format("%Y-%m-%dT%H:%M").to_string()
 }
-pub fn html_local_to_datetime(datetime: String) -> DateTime<FixedOffset> {
+pub fn html_local_to_datetime(datetime: &String) -> DateTime<FixedOffset> {
     // "2023-07-08T03:43" to "2023-07-08T03:43:00+03:00"
-    let dt = datetime + ":00+00:00";
+    let dt = format!("{}:00+00:00", datetime);
     let fixed = DateTime::parse_from_rfc3339(dt.as_str()).unwrap();
     let local = Local::now();
     let offset = local.offset();

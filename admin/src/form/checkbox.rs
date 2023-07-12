@@ -17,6 +17,7 @@ pub fn Checkbox(
 
     if let Some(checked) = checked {
         inner = inner.prop("checked", checked);
+        inner = inner.attr("checked", checked);
     }
 
     if let Some(set) = set {
