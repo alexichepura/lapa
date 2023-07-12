@@ -75,7 +75,7 @@ denylist = ["axum", "tokio", "tower", "tower-http", "leptos_axum"]
 skip_feature_sets = [["ssr", "hydrate"]]
 
 [package.metadata.leptos]
-utput-name = "lapa_admin"
+# output-name = "lapa_admin"
 site-root = "target/admin"
 site-pkg-dir = "pkg"
 style-file = "style/main.css"
