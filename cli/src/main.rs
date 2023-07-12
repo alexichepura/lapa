@@ -1,7 +1,6 @@
-use std::sync::Arc;
-
 use clap::{Args, Parser, Subcommand};
 use prisma_client::db;
+use std::sync::Arc;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -14,6 +13,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     UserAdd(UserAddArgs),
+    SettingsInit,
 }
 
 #[derive(Args)]
@@ -27,8 +27,10 @@ async fn main() {
     let cli = Cli::parse();
 
     let client = if let Ok(db_url) = std::env::var("DATABASE_URL") {
+        dbg!(&db_url);
         db::new_client_with_url(db_url.as_str()).await
     } else {
+        println!("DATABASE_URL not set");
         db::new_client().await
     };
     let prisma_client = Arc::new(client.unwrap());
@@ -44,14 +46,47 @@ async fn main() {
 
             let password_hashed = bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap();
 
-            let result = prisma_client
+            let user_created = prisma_client
                 .clone()
                 .user()
                 .create(username.clone(), password_hashed, vec![])
                 .exec()
                 .await;
 
-            dbg!(result);
+            println!("User created: {:?}", user_created);
+        }
+        Commands::SettingsInit => {
+            let settings_found = prisma_client
+                .settings()
+                .find_first(vec![])
+                .select(db::settings::select!({
+                    hero_height
+                    hero_width
+                    thumb_height
+                    thumb_width
+                }))
+                .exec()
+                .await;
+
+            if let Ok(Some(settings_found)) = settings_found {
+                panic!("Settings found {:?}", settings_found);
+            }
+
+            let settings_created = prisma_client
+                .settings()
+                .create(
+                    480,
+                    640,
+                    240,
+                    320,
+                    vec![db::settings::robots_txt::set(
+                        "User-agent: * \nDisallow: /pkg/".to_string(),
+                    )],
+                )
+                .exec()
+                .await;
+
+            println!("Settings created: {:?}", settings_created);
         }
     }
 }
