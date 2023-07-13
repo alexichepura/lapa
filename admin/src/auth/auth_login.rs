@@ -1,8 +1,5 @@
 use super::auth_data::AuthError;
-use crate::{
-    form::{Checkbox, Input},
-    util::AlertDanger,
-};
+use crate::form::{Checkbox, FormFooter, Input};
 use leptos::*;
 use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
@@ -16,29 +13,20 @@ pub struct LoginFormData {
 #[component]
 pub fn Login(cx: Scope, children: Children) -> impl IntoView {
     let login = create_server_action::<Login>(cx);
-    let value = login.value();
+    let pending = login.pending();
 
     view! { cx,
-        <ActionForm action=login class="Card login-card">
-            <h1>"Log In"</h1>
-            <Input name="username" label="User"/>
-            <Input name="password" label="Password" type_="password"/>
-            <Checkbox name="remember" label="Remember me?"/>
-            <button type="submit">"Log In"</button>
-            <Suspense fallback=|| ()>
-                {move || match value() {
-                    None => ().into_view(cx),
-                    Some(v) => {
-                        let auth_result = v.map_err(|_| AuthError::ServerError).flatten();
-                        match auth_result {
-                            Ok(_) => ().into_view(cx),
-                            Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx),
-                        }
-                    }
-                }}
-            </Suspense>
-            <div>{children(cx)}</div>
-        </ActionForm>
+        <fieldset disabled=move || pending() class="login-card">
+            <legend>"Log in"</legend>
+            <ActionForm action=login>
+                <Input name="username" label="User"/>
+                <Input name="password" label="Password" type_="password"/>
+                <Checkbox name="remember" label="Remember me?"/>
+                <FormFooter action=login/>
+                <hr/>
+                <div>{children(cx)}</div>
+            </ActionForm>
+        </fieldset>
     }
 }
 
