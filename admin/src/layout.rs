@@ -10,23 +10,21 @@ use crate::{
 pub fn Layout(cx: Scope, user: User) -> impl IntoView {
     view! { cx,
         <div class="admin">
-            <div class="logo">"Admin"</div>
             <header>
-                <div>
-                    <button>
-                        <A href="/posts/new">"Create post"</A>
-                    </button>
-                </div>
+                <div class="logo">"Admin"</div>
                 <span>{user.username}</span>
                 <Logout/>
             </header>
-            <nav>
-                <A href="/" exact=true>
-                    "Dashboard"
-                </A>
-                <A href="/posts">"Posts"</A>
-                <A href="/settings">"Settings"</A>
-            </nav>
+            <div class="menu">
+                <a class="toggle" href="#">"Menu"</a>
+                <nav>
+                    <A href="/" exact=true>
+                        "Dashboard"
+                    </A>
+                    <A href="/posts">"Posts"</A>
+                    <A href="/settings">"Settings"</A>
+                </nav>
+            </div>
             <main>
                 <AdminRoutes/>
             </main>

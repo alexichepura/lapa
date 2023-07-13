@@ -64,7 +64,7 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
     view! { cx,
         <li class="PostListItem">
             <A href=format!("/posts/{}", post.id)>
-                <div>{created.local}</div>
+                <div class="PostListItem-created">{created.local}</div>
                 <div class=format!("PostListItem-status {}", class)>{published.local}</div>
                 <span>{&post.title}</span>
             </A>

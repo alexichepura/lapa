@@ -33,40 +33,107 @@ hr {
 	margin-block: var(--size-fluid-2);
 }
 
+button {
+	border-width: 1px;
+	font-weight: normal;
+}
+
+:where(:not(:active):focus-visible) {
+	outline-offset: 2px;
+	outline-style: solid;
+}
+
 .admin {
 	display: grid;
 	height: 100vh;
-	grid-template-rows: 56px 1fr;
-	grid-template-columns: calc(var(--size-fluid-4) * 5) 1fr;
-	grid-template-areas: "logo header" "nav main";
+	grid-template-rows: 36px 1fr;
+	grid-template-areas: "header" "main";
+
+	@media (--md-n-above) {
+		grid-template-rows: 48px 1fr;
+		grid-template-areas: "header header" "nav main";
+		grid-template-columns: calc(var(--size-fluid-4) * 4) 1fr;
+	}
 }
 
 header {
 	grid-area: header;
-	background: var(--surface-2);
+	background: var(--surface-1);
 	box-shadow: var(--shadow-3);
 	display: grid;
 	grid-template-columns: 1fr auto auto;
 	gap: var(--size-fluid-2);
 	padding: 0 var(--size-fluid-2);
 	align-items: center;
+
+	& button {
+		padding: 1px 4px;
+	}
 }
 
 .logo {
-	grid-area: logo;
-	color: var(--gray-3);
-	display: flex;
-	align-items: center;
+	color: var(--text-2);
 	font-size: var(--font-size-fluid-1);
-	padding: 0 var(--size-fluid-2);
-	box-shadow: var(--shadow-2);
-	background: var(--gradient-1);
+	visibility: hidden;
+
+	@media (--md-n-above) {
+		visibility: visible;
+	}
+}
+
+.menu {
+	grid-area: nav;
+	position: absolute;
+	top: 0;
+	left: 0;
 	z-index: 1;
+
+	@media (--md-n-above) {
+		position: relative;
+	}
+
+	&:focus-within {
+		& nav {
+			display: block;
+		}
+	}
+
+	& .toggle {
+		color: var(--text-2);
+		font-weight: normal;
+		font-size: var(--font-size-fluid-1);
+		text-decoration: none;
+		white-space: nowrap;
+		height: 36px;
+		padding: 0 var(--size-fluid-2);
+		margin: 0;
+		display: flex;
+		align-items: center;
+
+		/* text-decoration: none; */
+		@media (--md-n-above) {
+			display: none;
+		}
+
+		&:hover,
+		&:focus-visible {
+			background: var(--surface-3);
+		}
+	}
 }
 
 nav {
-	grid-area: nav;
 	background: var(--surface-2);
+	position: absolute;
+	top: 40px;
+	left: 0;
+	display: none;
+
+	@media (--md-n-above) {
+		display: block;
+		position: relative;
+		top: 0;
+	}
 
 	>a {
 		display: flex;
@@ -123,7 +190,6 @@ main {
 
 .Listing {
 	padding: 0;
-	overflow: hidden;
 
 	>li {
 		display: block;
@@ -133,20 +199,24 @@ main {
 		height: var(--size-fluid-4);
 		max-inline-size: inherit;
 		display: flex;
-		align-items: center;
-
-		&:hover {
-			background: var(--surface-3);
-		}
+		align-items: stretch;
 
 		>a {
 			width: 100%;
-			padding: var(--size-fluid-2);
+			padding: 0 var(--size-fluid-1);
+			margin: 0;
 			text-decoration: none;
 			display: grid;
+			align-items: center;
+			font-size: calc(var(--font-size-fluid-1)*0.7);
 
 			&:visited {
 				color: var(--text-1);
+			}
+
+			&:hover,
+			&:focus-visible {
+				background: var(--surface-3);
 			}
 		}
 	}
@@ -307,9 +377,22 @@ dialog {
 	}
 }
 
+/* POSTS LISTING PAGE */
 .PostListItem {
 	>a {
-		grid-template-columns: 170px 170px auto;
+		grid-template-columns: 125 auto;
+
+		@media (--sm-n-above) {
+			grid-template-columns: 170px 170px auto;
+		}
+	}
+}
+
+.PostListItem-created {
+	display: none;
+
+	@media (--sm-n-above) {
+		display: block;
 	}
 }
 
