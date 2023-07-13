@@ -38,6 +38,7 @@ model Post {
   slug         String    @unique
   title        String    @default("")
   description  String    @default("")
+  text         String    @default("")
   images       Image[]
 }
 

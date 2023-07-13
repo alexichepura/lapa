@@ -7,7 +7,7 @@ use thiserror::Error;
 use crate::{
     app::SettingsCx,
     img::{img_url_large, srcset_large},
-    util::Loading,
+    util::{Loading, ParagraphsByMultiline},
 };
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
@@ -31,6 +31,7 @@ pub struct PostData {
     pub slug: String,
     pub title: String,
     pub description: String,
+    pub text: String,
     pub images: Vec<ImgData>,
 }
 
@@ -100,6 +101,7 @@ pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
         <Title text=post.title.clone()/>
         <Meta name="description" content=post.description/>
         <h1>{post.title}</h1>
+        <section><ParagraphsByMultiline text=post.text/></section>
         <hr/>
         <div class="post-images">
             <For
@@ -213,6 +215,7 @@ pub async fn get_post(
                     slug: post.slug,
                     title: post.title,
                     description: post.description,
+                    text: post.text,
                     images: post
                         .images
                         .iter()

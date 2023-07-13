@@ -68,11 +68,12 @@ pub async fn get_post(
     Ok(match post {
         Some(post) => Ok(PostFormData {
             id: Some(post.id),
+            created_at: post.created_at,
+            published_at: post.published_at,
             slug: post.slug,
             title: post.title,
             description: post.description,
-            created_at: post.created_at,
-            published_at: post.published_at,
+            text: post.text,
         }),
         None => {
             crate::err::serverr_404(cx);

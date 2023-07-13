@@ -16,11 +16,12 @@ use crate::{
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PostFormData {
     pub id: Option<String>,
+    pub created_at: DateTime<FixedOffset>,
+    pub published_at: Option<DateTime<FixedOffset>>,
     pub slug: String,
     pub title: String,
     pub description: String,
-    pub created_at: DateTime<FixedOffset>,
-    pub published_at: Option<DateTime<FixedOffset>>,
+    pub text: String,
 }
 
 #[component]
@@ -114,6 +115,10 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                         <label>
                             <div>"Description"</div>
                             <textarea name="description" prop:value=post.description></textarea>
+                        </label>
+                        <label>
+                            <div>"Text"</div>
+                            <textarea name="text" value=&post.text prop:value=post.text rows="6"></textarea>
                         </label>
                     </div>
                     <div>
@@ -216,10 +221,11 @@ pub fn PublishedAt(
 pub async fn post_upsert(
     cx: Scope,
     id: Option<String>,
+    published_at: Option<DateTime<FixedOffset>>,
     title: String,
     slug: String,
     description: String,
-    published_at: Option<DateTime<FixedOffset>>,
+    text: String,
 ) -> Result<Result<PostFormData, PostError>, ServerFnError> {
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
@@ -247,10 +253,11 @@ pub async fn post_upsert(
             .update(
                 db::post::id::equals(id),
                 vec![
+                    db::post::published_at::set(published_at),
                     db::post::slug::set(slug),
                     db::post::title::set(title),
                     db::post::description::set(description),
-                    db::post::published_at::set(published_at),
+                    db::post::text::set(text),
                 ],
             )
             .exec()
@@ -261,11 +268,12 @@ pub async fn post_upsert(
             })?;
         return Ok(Ok(PostFormData {
             id: Some(post.id),
+            created_at: post.created_at,
+            published_at: post.published_at,
             slug: post.slug,
             title: post.title,
             description: post.description,
-            created_at: post.created_at,
-            published_at: post.published_at,
+            text: post.text,
         }));
     } else {
         if let Some(_post_by_slug) = post_by_slug {
@@ -277,9 +285,10 @@ pub async fn post_upsert(
             .create(
                 slug,
                 vec![
+                    db::post::published_at::set(published_at),
                     db::post::title::set(title),
                     db::post::description::set(description),
-                    db::post::published_at::set(published_at),
+                    db::post::text::set(text),
                 ],
             )
             .exec()
@@ -295,6 +304,7 @@ pub async fn post_upsert(
             description: post.description,
             created_at: post.created_at,
             published_at: post.published_at,
+            text: post.text,
         }));
     }
 }
