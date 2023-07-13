@@ -1,8 +1,10 @@
 mod settings_error;
+mod settings_home;
 mod settings_images;
 mod settings_images_convert;
 mod settings_site;
 pub use settings_error::*;
+pub use settings_home::*;
 pub use settings_images::*;
 pub use settings_images_convert::*;
 pub use settings_site::*;
@@ -16,20 +18,17 @@ use crate::util::Loading;
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SettingsData {
     pub robots_txt: String,
+    pub home_text: String,
     pub hero_width: i32,
     pub hero_height: i32,
     pub thumb_width: i32,
     pub thumb_height: i32,
 }
 
-impl Default for SettingsData {
-    fn default() -> Self {
-        Self {
-            robots_txt: "".to_string(),
-            hero_width: 720,
-            hero_height: 1280,
-            thumb_width: 360,
-            thumb_height: 640,
+impl From<&SettingsData> for SettingsHome {
+    fn from(data: &SettingsData) -> Self {
+        SettingsHome {
+            home_text: data.home_text.clone(),
         }
     }
 }
@@ -54,37 +53,50 @@ impl From<&SettingsData> for SettingsSite {
 
 #[component]
 pub fn Settings(cx: Scope) -> impl IntoView {
-    let settings = create_blocking_resource(cx, || (), move |_| get_settings(cx));
+    let settings = create_blocking_resource(
+        cx,
+        || (),
+        move |_| async move {
+            get_settings(cx)
+                .await
+                .map_err(|_| SettingsError::ServerError)
+                .flatten()
+        },
+    );
 
     view! { cx,
         <Title text="Settings"/>
         <h1>"Settings"</h1>
-        <div class="Grid-fluid-2">
-            <Suspense fallback=move || {
-                view! { cx, <Loading/> }
-            }>
-                {move || {
-                    settings
-                        .read(cx)
-                        .map(|settings| match settings {
-                            Err(e) => view! { cx, <p>{e.to_string()}</p> }.into_view(cx),
-                            Ok(settings) => {
-                                view! { cx,
-                                    <SettingsImagesForm settings=SettingsImages::from(&settings)/>
+        <Suspense fallback=move || {
+            view! { cx, <Loading/> }
+        }>
+            {move || {
+                settings
+                    .read(cx)
+                    .map(|settings| match settings {
+                        Err(e) => view! { cx, <p>{e.to_string()}</p> }.into_view(cx),
+                        Ok(settings) => {
+                            view! { cx,
+                                <div class="Grid-fluid-2">
+                                    <SettingsHomeForm settings=SettingsHome::from(&settings)/>
                                     <SettingsSiteForm settings=SettingsSite::from(&settings)/>
-                                }
-                                    .into_view(cx)
+                                </div>
+                                <div class="Grid-fluid-2">
+                                    <SettingsImagesForm settings=SettingsImages::from(&settings)/>
+                                    <ImagesConvertView/>
+                                </div>
                             }
-                        })
-                }}
-            </Suspense>
-        </div>
-        <ImagesConvertView/>
+                                .into_view(cx)
+                        }
+                    })
+            }}
+        </Suspense>
     }
 }
 
+type SettingsResult = Result<SettingsData, SettingsError>;
 #[server(GetSettings, "/api")]
-pub async fn get_settings(cx: Scope) -> Result<SettingsData, ServerFnError> {
+pub async fn get_settings(cx: Scope) -> Result<SettingsResult, ServerFnError> {
     let prisma_client = crate::prisma::use_prisma(cx)?;
 
     let settings = prisma_client
@@ -98,13 +110,17 @@ pub async fn get_settings(cx: Scope) -> Result<SettingsData, ServerFnError> {
         })?;
 
     Ok(match settings {
-        Some(settings) => SettingsData {
+        Some(settings) => Ok(SettingsData {
             robots_txt: settings.robots_txt,
             hero_width: settings.hero_width,
             hero_height: settings.hero_height,
             thumb_width: settings.thumb_width,
             thumb_height: settings.thumb_height,
-        },
-        None => SettingsData::default(),
+            home_text: settings.home_text,
+        }),
+        None => {
+            crate::err::serverr_404(cx);
+            Err(SettingsError::NotFound)
+        }
     })
 }

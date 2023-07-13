@@ -5,22 +5,22 @@ use serde::{Deserialize, Serialize};
 use crate::{form::FormFooter, settings::SettingsError};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct SettingsSite {
-    pub robots_txt: String,
+pub struct SettingsHome {
+    pub home_text: String,
 }
 
 #[component]
-pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
-    let settings_site_update = create_server_action::<SettingsSiteUpdate>(cx);
+pub fn SettingsHomeForm(cx: Scope, settings: SettingsHome) -> impl IntoView {
+    let settings_site_update = create_server_action::<SettingsHomeUpdate>(cx);
     let pending = settings_site_update.pending();
 
     view! { cx,
         <fieldset disabled=move || pending()>
-            <legend>"Site"</legend>
+            <legend>"Home"</legend>
             <ActionForm action=settings_site_update>
                 <label>
-                    <div>"robots.txt"</div>
-                    <textarea name="robots_txt" prop:value=settings.robots_txt.to_string() rows="5"/>
+                    <div>"Text"</div>
+                    <textarea name="home_text" prop:value=settings.home_text.to_string() rows="5" />
                 </label>
                 <FormFooter action=settings_site_update/>
             </ActionForm>
@@ -28,10 +28,10 @@ pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
     }
 }
 
-#[server(SettingsSiteUpdate, "/api")]
-pub async fn settings_site_update(
+#[server(SettingsHomeUpdate, "/api")]
+pub async fn settings_home_update(
     cx: Scope,
-    robots_txt: String,
+    home_text: String,
 ) -> Result<Result<(), SettingsError>, ServerFnError> {
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
@@ -54,13 +54,11 @@ pub async fn settings_site_update(
         return Ok(Err(SettingsError::NotFound));
     }
 
-    let settings_data = SettingsSite { robots_txt };
-
     prisma_client
         .settings()
         .update(
             db::settings::id::equals(id),
-            vec![db::settings::robots_txt::set(settings_data.robots_txt)],
+            vec![db::settings::home_text::set(home_text)],
         )
         .exec()
         .await

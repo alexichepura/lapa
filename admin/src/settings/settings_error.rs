@@ -8,6 +8,6 @@ pub enum SettingsError {
     ServerError,
     #[error("Settings update error.")]
     UpdateError,
-    #[error("Settings don't exist.")]
-    NotExist,
+    #[error("Settings not found.")]
+    NotFound,
 }

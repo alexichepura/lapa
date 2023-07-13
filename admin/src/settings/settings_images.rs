@@ -84,7 +84,7 @@ pub async fn settings_images_update(
     if let Some(settings_saved) = settings_saved {
         id = settings_saved.id;
     } else {
-        return Ok(Err(SettingsError::NotExist));
+        return Ok(Err(SettingsError::NotFound));
     }
 
     let settings_data = SettingsImages {

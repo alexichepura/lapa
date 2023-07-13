@@ -58,4 +58,5 @@ model Settings {
   hero_height  Int
   thumb_width  Int
   thumb_height Int
+  home_text    String   @default("")
 }
