@@ -152,7 +152,7 @@ dialog {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, 240px);
 	grid-gap: var(--size-fluid-2);
-	justify-content: space-between;
+	justify-content: center;
 
 	& a {
 		text-decoration: none;
