@@ -1,11 +1,12 @@
-use leptos::*;
+use leptos::{html::Dialog, *};
 use leptos_meta::{Meta, Title};
 use leptos_router::*;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
-    img::{ImgData, Thumb},
+    app::SettingsCx,
+    img::{img_url_large, srcset_large},
     util::Loading,
 };
 
@@ -71,6 +72,30 @@ pub fn PostPage(cx: Scope) -> impl IntoView {
 
 #[component]
 pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
+    let dialog_element: NodeRef<Dialog> = create_node_ref(cx);
+    let (dialog_open, set_dialog_open) = create_signal::<DialogSignal>(cx, None);
+
+    create_effect(cx, move |old| {
+        let current = dialog_open();
+        if let Some(_id) = current.clone() {
+            let el = dialog_element().expect("<dialog> to exist");
+            let _modal_result = el.show_modal();
+        } else {
+            if old.is_some() {
+                // calling ref reruns effect, so need to check old value
+                let el = dialog_element();
+                if let Some(el) = el {
+                    let _modal_result = el.close();
+                }
+            }
+        }
+        current
+    });
+
+    let dialog_view = move || match dialog_open() {
+        Some(image) => view! { cx, <PostImageModal image set_dialog_open/> }.into_view(cx),
+        None => ().into_view(cx),
+    };
     view! { cx,
         <Title text=post.title.clone()/>
         <Meta name="description" content=post.description/>
@@ -81,10 +106,71 @@ pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
                 each=move || post.images.clone()
                 key=|image| image.id.clone()
                 view=move |cx, image: ImgData| {
-                    view! { cx, <Thumb image=image/> }
+                    view! { cx, <Thumb image=image set_dialog_open/> }
                 }
             />
         </div>
+        <dialog node_ref=dialog_element>
+            {dialog_view}
+        </dialog>
+    }
+}
+
+#[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ImgData {
+    pub id: String,
+    pub alt: String,
+}
+
+type DialogSignal = Option<ImgData>;
+#[component]
+pub fn Thumb(
+    cx: Scope,
+    image: ImgData,
+    set_dialog_open: WriteSignal<DialogSignal>,
+) -> impl IntoView {
+    let settings = use_context::<SettingsCx>(cx).expect("to have found the settings provided");
+    let id = image.id.clone();
+    let alt = image.alt.clone();
+
+    let on_edit = move |_| {
+        set_dialog_open(Some(ImgData {
+            id: id.clone(),
+            alt: alt.clone(),
+        }));
+    };
+
+    let src = format!("/img/{}-s.webp", image.id);
+    let srcset = format!("/img/{}-s2.webp 2x", image.id);
+    view! { cx,
+        <figure>
+            <img
+                on:click=on_edit
+                src=src
+                srcset=srcset
+                width=settings.thumb_width
+                height=settings.thumb_height
+            />
+            <figcaption>{&image.alt}</figcaption>
+        </figure>
+    }
+}
+
+#[component]
+pub fn PostImageModal(
+    cx: Scope,
+    image: ImgData,
+    set_dialog_open: WriteSignal<DialogSignal>,
+) -> impl IntoView {
+    view! { cx,
+        <figure>
+            <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) />
+            <figcaption>{&image.alt}</figcaption>
+            <button on:click=move |ev| {
+                ev.prevent_default();
+                set_dialog_open(None);
+            }>"Close"</button>
+        </figure>
     }
 }
 

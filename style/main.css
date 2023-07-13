@@ -2,6 +2,16 @@
 @import "https://unpkg.com/open-props/normalize.min.css";
 @import "https://unpkg.com/open-props/buttons.min.css";
 
+/* https://caniuse.com/css-nesting */
+
+/* https://drafts.csswg.org/mediaqueries-5/#at-ruledef-custom-media */
+/* @import "https://unpkg.com/open-props/media.min.css"; */
+/* https://open-props.style/#media-queries */
+/* https://github.com/parcel-bundler/lightningcss/issues/49 */
+/* https://github.com/parcel-bundler/lightningcss/pull/60 */
+@custom-media --md-n-above (width >=768px);
+@custom-media --sm-n-above (width >=480px);
+
 :root {
 	--inner-width: min(100% - 2rem, 50rem);
 }
@@ -77,18 +87,47 @@ hr {
 	margin-block: var(--size-fluid-2);
 }
 
-#ava {
-	width: 200px;
-	height: 200px;
-	border-radius: 50%;
-	margin-top: var(--size-fluid-2);
-	margin-inline: auto;
+figure {
+	justify-items: center;
+	align-items: start;
 }
 
-.post-images {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, 240px);
-	grid-gap: var(--size-fluid-1);
+dialog {
+	max-inline-size: var(--size-content-4);
+	padding: calc(var(--size-fluid-1)/2);
+	border-radius: var(--radius-2);
+	max-height: 100vh;
+
+	&:not([open]) {
+		padding: 0;
+		display: none;
+	}
+
+	& figure {
+		grid-template-areas: "img" "text" "btn";
+
+		@media (--sm-n-above) {
+			grid-template-areas: "img img" "text btn";
+		}
+	}
+
+	& img {
+		grid-area: img;
+		width: auto;
+		border-radius: var(--radius-2);
+	}
+
+	& figcaption {
+		grid-area: text;
+	}
+
+	& button {
+		grid-area: btn;
+
+		@media (--sm-n-above) {
+			justify-self: end;
+		}
+	}
 }
 
 .RoutingProgress {
@@ -97,6 +136,16 @@ hr {
 	top: 0;
 	width: 100vw;
 	transform: translateY(-50%);
+}
+
+
+/* HOME PAGE */
+#ava {
+	width: 200px;
+	height: 200px;
+	border-radius: 50%;
+	margin-top: var(--size-fluid-2);
+	margin-inline: auto;
 }
 
 .PostList {
@@ -130,6 +179,30 @@ hr {
 
 		>p {
 			padding-block: calc(var(--size-fluid-1)/2);
+		}
+	}
+}
+
+/* POST PAGE */
+.post-images {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 240px);
+	grid-gap: var(--size-fluid-2);
+	justify-content: center;
+
+	& img {
+		/* background: var(--surface-2); */
+		border-radius: var(--radius-2);
+		overflow: hidden;
+		cursor: pointer;
+		box-shadow: var(--shadow-3);
+		transition-property: transform, box-shadow;
+		transition-duration: 0.3s;
+		transition-timing-function: ease;
+
+		&:hover {
+			transform: scale(1.03);
+			box-shadow: var(--shadow-4);
 		}
 	}
 }
