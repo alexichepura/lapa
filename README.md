@@ -119,6 +119,14 @@ NOTE Container query doesn't work with custom media yet
 @container (width >=480px) {} /* works */
 ```
 
+## Notes on prisma
+How initial migration created
+<https://www.prisma.io/docs/guides/migrate/developing-with-prisma-migrate/add-prisma-migrate-to-a-project>
+```sh
+mkdir -p prisma/migrations/0_init
+cargo prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql
+cargo prisma migrate resolve --applied 0_init
+```
 
 ## License
 

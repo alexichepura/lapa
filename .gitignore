@@ -13,6 +13,7 @@ end2end/playwright-report/
 playwright/.cache/
 
 site.db
+site.db-journal
 ops/cert
 ops/sozu.toml
 .env
