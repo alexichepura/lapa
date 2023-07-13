@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::{html::Nav, *};
 use leptos_router::A;
 
 use crate::{
@@ -8,6 +8,11 @@ use crate::{
 
 #[component]
 pub fn Layout(cx: Scope, user: User) -> impl IntoView {
+    let el_blur: NodeRef<Nav> = create_node_ref(cx);
+
+    let blur = move |_| {
+        let _ = el_blur().expect("<nav> to exist").blur();
+    };
     view! { cx,
         <div class="admin">
             <header>
@@ -15,9 +20,9 @@ pub fn Layout(cx: Scope, user: User) -> impl IntoView {
                 <span>{user.username}</span>
                 <Logout/>
             </header>
-            <div class="menu">
-                <a class="toggle" href="#">"Menu"</a>
-                <nav>
+            <div class="menu" tabindex="0">
+                <a class="toggle" href="#" tabindex="0">"Menu"</a>
+                <nav tabindex="1" on:click=blur node_ref=el_blur>
                     <A href="/" exact=true>
                         "Dashboard"
                     </A>
