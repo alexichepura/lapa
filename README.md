@@ -53,11 +53,16 @@ Type-safe database access.
 - Favicons
 
 ## Run 
-Requires prisma client to be generated
+### Generate prisma client
 ```sh
 cargo prisma db push # generate client and push schema to db
 # or
 cargo prisma generate # only generate client
+```
+### Init 
+```sh
+cargo lapa settings-init
+cargo lapa user-add
 ```
 
 ### Dev
