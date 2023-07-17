@@ -51,7 +51,7 @@ pub fn PostListView(cx: Scope, posts: Vec<PostListItem>) -> impl IntoView {
 
 #[component]
 pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
-    let image_view = match post.image {
+    let image_view = match post.hero {
         Some(image) => view! { cx, <Thumb image/> }.into_view(cx),
         None => ().into_view(cx),
     };
@@ -67,10 +67,11 @@ pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
     let posts = prisma_client
         .post()
         .find_many(vec![db::post::published_at::lt(now)])
-        .include(db::post::include!({ images(vec![]).take(1): select {
-            id
-            alt
-        } }))
+        .include(db::post::include!({
+            images(vec![db::image::is_hero::equals(true)]).take(1): select {
+                id alt
+            }
+        }))
         .exec()
         .await
         .map_err(|e| {
@@ -81,20 +82,15 @@ pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
     let posts: Vec<PostListItem> = posts
         .iter()
         .map(|data| {
-            let image = data.images.first();
-            let image = match image {
-                Some(image) => Some(ImgData {
-                    id: image.id.clone(),
-                    alt: image.alt.clone(),
-                }),
-                None => None,
-            };
-            // let (image_id, image_alt): (String, String) = match image
+            let hero = data.images.first().map(|image| ImgData {
+                id: image.id.clone(),
+                alt: image.alt.clone(),
+            });
             PostListItem {
                 id: data.id.clone(),
                 title: data.title.clone(),
                 slug: data.slug.clone(),
-                image,
+                hero,
             }
         })
         .collect();
@@ -106,5 +102,5 @@ pub struct PostListItem {
     pub id: String,
     pub title: String,
     pub slug: String,
-    pub image: Option<ImgData>,
+    pub hero: Option<ImgData>,
 }

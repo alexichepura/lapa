@@ -4,7 +4,10 @@ use leptos_meta::Title;
 use leptos_router::A;
 use serde::{Deserialize, Serialize};
 
-use crate::util::{datetime_to_strings, DateTimeStrings, Loading};
+use crate::{
+    image::img_url_small,
+    util::{datetime_to_strings, DateTimeStrings, Loading},
+};
 
 #[component]
 pub fn PostList(cx: Scope) -> impl IntoView {
@@ -61,11 +64,16 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
         true => "published",
         false => "not-published",
     };
+    let hero_view = match post.hero {
+        Some(id) => view! { cx, <img src=img_url_small(&id) width="36"/> }.into_view(cx),
+        None => view! { cx, <div>"?"</div> }.into_view(cx),
+    };
     view! { cx,
         <li class="PostListItem">
             <A href=format!("/posts/{}", post.id)>
                 <div class="PostListItem-created">{created.local}</div>
                 <div class=format!("PostListItem-status {}", class)>{published.local}</div>
+                {hero_view}
                 <span>{&post.title}</span>
             </A>
         </li>
@@ -74,10 +82,16 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
 
 #[server(GetPosts, "/api")]
 pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
+    use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
     let posts = prisma_client
         .post()
         .find_many(vec![])
+        .include(db::post::include!({
+            images(vec![db::image::is_hero::equals(true)]).take(1): select {
+                id
+            }
+        }))
         .exec()
         .await
         .map_err(|e| {
@@ -92,12 +106,14 @@ pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
                 Some(published_at) => chrono::Utc::now().fixed_offset() > published_at,
                 None => false,
             };
+            let hero = data.images.first().map(|image| image.id.clone());
             PostListItem {
                 id: data.id.clone(),
                 title: data.title.clone(),
                 created_at: data.created_at,
                 published_at: data.published_at,
                 is_published,
+                hero,
             }
         })
         .collect();
@@ -111,4 +127,5 @@ pub struct PostListItem {
     pub created_at: DateTime<FixedOffset>,
     pub published_at: Option<DateTime<FixedOffset>>,
     pub is_published: bool,
+    pub hero: Option<String>,
 }

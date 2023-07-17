@@ -47,6 +47,8 @@ model Image {
   created_at DateTime @default(now())
   alt        String
   ext        String
+  is_hero    Boolean  @default(false)
+  order      Int      @default(0)
   post_id    String
   post       Post     @relation(fields: [post_id], references: [id])
 }

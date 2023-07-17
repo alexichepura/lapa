@@ -1,11 +1,13 @@
 mod post_error;
 mod post_form;
+mod post_image_edit;
 mod post_image_upload;
 mod post_images;
 mod post_list;
 mod post_page;
 pub use post_error::*;
 pub use post_form::*;
+pub use post_image_edit::*;
 pub use post_image_upload::*;
 pub use post_images::*;
 pub use post_list::*;

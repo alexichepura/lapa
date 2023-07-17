@@ -33,6 +33,7 @@ pub struct PostData {
     pub description: String,
     pub text: String,
     pub images: Vec<ImgData>,
+    pub hero: Option<String>,
 }
 
 #[component]
@@ -188,9 +189,10 @@ pub async fn get_post(
         .post()
         .find_unique(db::post::slug::equals(slug))
         .include(db::post::include!({
-            images: select {
+            images(vec![]).order_by(db::image::order::order(db::SortOrder::Asc)): select {
                 id
                 alt
+                is_hero
             }
         }))
         .exec()
@@ -210,21 +212,30 @@ pub async fn get_post(
                 None => false,
             };
             match published {
-                true => Some(PostData {
-                    id: post.id,
-                    slug: post.slug,
-                    title: post.title,
-                    description: post.description,
-                    text: post.text,
-                    images: post
+                true => {
+                    let hero = post
                         .images
-                        .iter()
-                        .map(|img| ImgData {
-                            id: img.id.clone(),
-                            alt: img.alt.clone(),
-                        })
-                        .collect(),
-                }),
+                        .clone()
+                        .into_iter()
+                        .find(|img| img.is_hero)
+                        .map(|img| img.id);
+                    Some(PostData {
+                        id: post.id,
+                        slug: post.slug,
+                        title: post.title,
+                        description: post.description,
+                        text: post.text,
+                        hero,
+                        images: post
+                            .images
+                            .iter()
+                            .map(|img| ImgData {
+                                id: img.id.clone(),
+                                alt: img.alt.clone(),
+                            })
+                            .collect(),
+                    })
+                }
                 false => None,
             }
         }
