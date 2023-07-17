@@ -15,17 +15,15 @@ pub fn App(cx: Scope, user: Option<User>, settings: SettingsCx) -> impl IntoView
 
     let user_json = serde_json::to_string(&user).unwrap();
     let user_script = format!("window.USER = {user_json};");
-
-    let settings_json = serde_json::to_string(&settings).unwrap();
-    let settings_script = format!("window.SETTINGS = {settings_json};");
-
-    let formatter = |text| format!("{text} - Admin");
-
     let user_signal = create_rw_signal(cx, user.clone());
     provide_context(cx, user_signal);
 
+    let settings_json = serde_json::to_string(&settings).unwrap();
+    let settings_script = format!("window.SETTINGS = {settings_json};");
     let settings_signal = create_rw_signal(cx, settings);
     provide_context(cx, settings_signal);
+
+    let formatter = |text| format!("{text} - Admin");
 
     view! { cx,
         <Stylesheet id="leptos" href="/pkg/lapa_admin.css"/>
