@@ -1,9 +1,20 @@
 use leptos::*;
-use leptos_router::ActionForm;
+use leptos_router::{use_navigate, ActionForm};
+
+use crate::auth::use_user_signal;
 
 #[component]
 pub fn Logout(cx: Scope) -> impl IntoView {
     let logout = create_server_action::<Logout>(cx);
+    let value = logout.value();
+    let user_signal = use_user_signal(cx);
+    create_effect(cx, move |_| {
+        if let Some(_) = value() {
+            user_signal.set(None);
+            let navigate = use_navigate(cx);
+            navigate(&"/", Default::default()).expect("home route");
+        }
+    });
     view! { cx,
         <ActionForm action=logout>
             <button type="submit">"Log Out"</button>

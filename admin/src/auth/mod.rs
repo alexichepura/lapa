@@ -13,6 +13,11 @@ pub struct User {
     pub username: String,
 }
 
+pub fn use_user_signal(cx: Scope) -> RwSignal<Option<User>> {
+    let user = use_context::<RwSignal<Option<User>>>(cx).expect("RwSignal<Option<User>>");
+    return user;
+}
+
 #[server(GetUser, "/api")]
 pub async fn get_user(cx: Scope) -> Result<Option<User>, ServerFnError> {
     let auth = ssr_auth(cx)?;
