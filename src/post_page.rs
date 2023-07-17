@@ -6,7 +6,7 @@ use thiserror::Error;
 
 use crate::{
     app::SettingsCx,
-    img::{img_url_large, srcset_large},
+    img::{img_url_large, img_url_large_retina, srcset_large},
     util::{Loading, ParagraphsByMultiline},
 };
 
@@ -98,9 +98,21 @@ pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
         Some(image) => view! { cx, <PostImageModal image set_dialog_open/> }.into_view(cx),
         None => ().into_view(cx),
     };
+
+    let hero_og = match post.hero {
+        Some(hero) => {
+            let og = format!("https://leptos.dev{}", img_url_large_retina(&hero)); // TODO domain from DB
+            view! { cx, <Meta property="og:image" content=og/> }.into_view(cx)
+        }
+        None => ().into_view(cx),
+    };
+
     view! { cx,
         <Title text=post.title.clone()/>
-        <Meta name="description" content=post.description/>
+        <Meta name="description" content=post.description.clone()/>
+        <Meta property="og:title" content=post.title.clone()/>
+        <Meta property="og:description" content=post.description.clone()/>
+        {hero_og}
         <h1>{post.title}</h1>
         <section><ParagraphsByMultiline text=post.text/></section>
         <hr/>
