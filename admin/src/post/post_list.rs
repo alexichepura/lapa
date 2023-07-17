@@ -65,16 +65,18 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
         false => "not-published",
     };
     let hero_view = match post.hero {
-        Some(id) => view! { cx, <img src=img_url_small(&id) width="36"/> }.into_view(cx),
-        None => view! { cx, <div>"?"</div> }.into_view(cx),
+        Some(id) => {
+            view! { cx, <img title="Post hero" src=img_url_small(&id) width="36"/> }.into_view(cx)
+        }
+        None => view! { cx, <div title="No post hero">"?"</div> }.into_view(cx),
     };
     view! { cx,
         <li class="PostListItem">
             <A href=format!("/posts/{}", post.id)>
-                <div class="PostListItem-created">{created.local}</div>
-                <div class=format!("PostListItem-status {}", class)>{published.local}</div>
+                <div title="Published at" class=format!("PostListItem-status {}", class)>{published.local}</div>
                 {hero_view}
-                <span>{&post.title}</span>
+                <span title="Post title">{&post.title}</span>
+                <div title="Created at" class="PostListItem-created">{created.local}</div>
             </A>
         </li>
     }

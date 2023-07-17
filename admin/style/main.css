@@ -196,7 +196,6 @@ main {
 		width: 100%;
 		list-style: none;
 		padding: 0;
-		height: var(--size-fluid-4);
 		max-inline-size: inherit;
 		display: flex;
 		align-items: stretch;
@@ -384,11 +383,13 @@ dialog {
 
 /* POSTS LISTING PAGE */
 .PostListItem {
+	height: 48px;
+
 	>a {
 		grid-template-columns: 125px 50px auto;
 
 		@media (--sm-n-above) {
-			grid-template-columns: 170px 170px 50px auto;
+			grid-template-columns: 170px 50px auto 170px;
 		}
 	}
 }
