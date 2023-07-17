@@ -196,7 +196,6 @@ main {
 		width: 100%;
 		list-style: none;
 		padding: 0;
-		height: var(--size-fluid-4);
 		max-inline-size: inherit;
 		display: flex;
 		align-items: stretch;
@@ -309,12 +308,13 @@ input:disabled {
 	grid-template-columns: repeat(auto-fill, 240px);
 	grid-gap: var(--size-fluid-1);
 
-	>section {
+	>figure {
 		box-shadow: var(--shadow-3);
 		background: var(--surface-2);
 		border-radius: var(--radius-2);
-		overflow: hidden;
-		cursor: pointer;
+		gap: 0;
+		justify-items: stretch;
+		align-content: space-between;
 
 		transition-property: transform, box-shadow;
 		transition-duration: 0.3s;
@@ -325,6 +325,10 @@ input:disabled {
 			transform: scale(1.03);
 		}
 
+		>img {
+			cursor: pointer;
+		}
+
 		>figcaption {
 			padding: calc(var(--size-fluid-1) / 2);
 		}
@@ -332,11 +336,11 @@ input:disabled {
 		>footer {
 			display: flex;
 			justify-content: space-between;
-			padding: calc(var(--size-fluid-1) / 2);
+			/* padding: calc(var(--size-fluid-1) / 2); */
 
 			>button {
-				padding-block: .25ch;
-				padding-inline: var(--size-relative-2);
+				/* padding-block: .25ch;
+				padding-inline: var(--size-relative-2); */
 			}
 		}
 	}
@@ -379,11 +383,13 @@ dialog {
 
 /* POSTS LISTING PAGE */
 .PostListItem {
+	height: 48px;
+
 	>a {
-		grid-template-columns: 125 auto;
+		grid-template-columns: 125px 50px auto;
 
 		@media (--sm-n-above) {
-			grid-template-columns: 170px 170px auto;
+			grid-template-columns: 170px 50px auto 170px;
 		}
 	}
 }
