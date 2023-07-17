@@ -1,3 +1,7 @@
+cfg_if::cfg_if! { if #[cfg(feature = "ssr")] {
+    mod settings_db;
+    pub use settings_db::*;
+}}
 mod settings_error;
 mod settings_home;
 mod settings_images;
@@ -15,9 +19,27 @@ use serde::{Deserialize, Serialize};
 
 use crate::util::Loading;
 
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct SettingsCx {
+    pub site_url: String,
+    pub hero_width: i32,
+    pub hero_height: i32,
+    pub thumb_width: i32,
+    pub thumb_height: i32,
+}
+pub type SettingsSignal = RwSignal<SettingsCx>;
+pub fn use_settings(cx: Scope) -> SettingsSignal {
+    use_context::<SettingsSignal>(cx).expect("settings signal")
+}
+pub fn use_site_url(cx: Scope) -> Signal<String> {
+    let settings = use_settings(cx);
+    create_read_slice(cx, settings, |state| state.site_url.clone())
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SettingsData {
     pub robots_txt: String,
+    pub site_url: String,
     pub home_text: String,
     pub hero_width: i32,
     pub hero_height: i32,
@@ -47,12 +69,12 @@ impl From<&SettingsData> for SettingsSite {
     fn from(data: &SettingsData) -> Self {
         SettingsSite {
             robots_txt: data.robots_txt.clone(),
+            site_url: data.site_url.clone(),
         }
     }
 }
 
-#[component]
-pub fn Settings(cx: Scope) -> impl IntoView {
+pub fn create_settings_resource(cx: Scope) -> Resource<(), Result<SettingsData, SettingsError>> {
     let settings = create_blocking_resource(
         cx,
         || (),
@@ -63,6 +85,12 @@ pub fn Settings(cx: Scope) -> impl IntoView {
                 .flatten()
         },
     );
+    settings
+}
+
+#[component]
+pub fn Settings(cx: Scope) -> impl IntoView {
+    let settings = create_settings_resource(cx);
 
     view! { cx,
         <Title text="Settings"/>
@@ -112,6 +140,7 @@ pub async fn get_settings(cx: Scope) -> Result<SettingsResult, ServerFnError> {
     Ok(match settings {
         Some(settings) => Ok(SettingsData {
             robots_txt: settings.robots_txt,
+            site_url: settings.site_url,
             hero_width: settings.hero_width,
             hero_height: settings.hero_height,
             thumb_width: settings.thumb_width,
