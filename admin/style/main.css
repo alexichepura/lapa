@@ -414,16 +414,25 @@ dialog {
 	}
 }
 
+/* POST PAGE */
 .PostPage {
 	>header {
 		@media (--sm-n-above) {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
+			display: grid;
+			grid-template-columns: 1fr auto;
 		}
 
-		>h1 {
+		& h1 {
 			margin-block-end: 0;
 		}
+
+		& dl {
+
+			& dt,
+			& dd {
+				display: inline;
+			}
+		}
 	}
+
 }

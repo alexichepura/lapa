@@ -28,9 +28,7 @@ pub struct PostFormData {
 #[component]
 pub fn PostNew(cx: Scope) -> impl IntoView {
     let post = PostFormData::default();
-    view! { cx,
-        <PostForm post=post/>
-    }
+    view! { cx, <PostForm post=post/> }
 }
 
 #[component]
@@ -81,15 +79,10 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
         |state, published_at| state.published_at = published_at,
     );
 
-    let header_view = if let Some(id) = &post.id {
-        format!("update {}", id.clone())
+    let id_view = if let Some(id) = post.id.clone() {
+        id
     } else {
-        "create new".to_string()
-    };
-    let id_view = if let Some(id) = &post.id {
-        view! { cx, <input type="hidden" name="id" value=id/> }.into_view(cx)
-    } else {
-        ().into_view(cx)
+        "".to_string()
     };
     let gallery_view = if let Some(id) = post.id {
         view! { cx, <PostImages post_id=id/> }.into_view(cx)
@@ -100,16 +93,37 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
     let created = datetime_to_strings(post.created_at);
     let site_url = use_site_url(cx);
     let href = move || format!("{}/post/{}", &site_url(), &slug());
+
+    let published_at_utc_string = create_memo(cx, move |_| match published_at() {
+        Some(published_at) => datetime_to_string(published_at),
+        None => String::default(),
+    });
     view! { cx,
         <Title text=move || format!("Post: {}", title())/>
         <header>
-            <h1>"Post edit"</h1>
-            <a href=move || href() target="_blank">{move || href()}</a>
+            <div>
+                <h1>"Post edit"</h1>
+                <a href=move || href() target="_blank">
+                    {move || href()}
+                </a>
+            </div>
+            <dl>
+                <dt>"ID: "</dt>
+                <dd>{id_view}</dd>
+                <br/>
+                <dt>"Created at " <small>"(Local): "</small></dt>
+                <dd>{created.local}</dd>
+                <br/>
+                <dt>"Created at " <small>"(UTC): "</small></dt>
+                <dd>{created.utc}</dd>
+                <br/>
+                <dt>"Published at " <small>"(UTC): "</small></dt>
+                <dd>{published_at_utc_string}</dd>
+            </dl>
         </header>
         <ActionForm action=post_upsert>
             <fieldset disabled=move || pending()>
-                <legend>{header_view}</legend>
-                {id_view}
+                <legend>"Data"</legend>
                 <div class="Grid-fluid-2">
                     <div>
                         <label>
@@ -137,23 +151,18 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                             <div>"Description"</div>
                             <textarea name="description" prop:value=post.description></textarea>
                         </label>
-                        <label>
-                            <div>"Text"</div>
-                            <textarea name="text" value=&post.text prop:value=post.text rows="6"></textarea>
-                        </label>
                     </div>
                     <div>
-                        <div class="Grid-fluid-2">
-                            <label>
-                                <div>"Created at "<small>"(Local)"</small></div>
-                                <input value=created.local disabled/>
-                            </label>
-                            <label>
-                                <div>"Created at "<small>"(UTC)"</small></div>
-                                <input value=created.utc disabled/>
-                            </label>
-                        </div>
                         <PublishedAt published_at set_published_at/>
+                        <label>
+                            <div>"Text"</div>
+                            <textarea
+                                name="text"
+                                value=&post.text
+                                prop:value=post.text
+                                rows="6"
+                            ></textarea>
+                        </label>
                     </div>
                 </div>
                 <FormFooter action=post_upsert/>
@@ -191,49 +200,35 @@ pub fn PublishedAt(
         Some(published_at) => datetime_to_local_html(published_at),
         None => String::default(),
     });
-    let published_at_utc_string = create_memo(cx, move |_| match published_at() {
-        Some(published_at) => datetime_to_string(published_at),
-        None => String::default(),
-    });
     let published_at_rfc3339 = create_memo(cx, move |_| match published_at() {
         Some(published_at) => published_at.to_rfc3339(),
         None => String::default(),
     });
 
     view! { cx,
-        <div>
+        <div class="Grid-fluid-2">
             <Checkbox label="Publish" checked=is_published set=set_is_published/>
-            <div class="Grid-fluid-2">
-                <label>
-                    <div>"Published at "<small>"(Local)"</small></div>
-                    <input
-                        disabled=disabled
-                        prop:disabled=disabled
-                        value=html_published_at
-                        prop:value=html_published_at
-                        type="datetime-local"
-                        on:input=move |ev| {
-                            let val = event_target_value(&ev);
-                            let datetime = html_local_to_datetime(&val);
-                            set_published_at(Some(datetime));
-                        }
-                    />
-                    <input
-                        name="published_at"
-                        type="hidden"
-                        value=published_at_rfc3339
-                        prop:value=published_at_rfc3339
-                    />
-                </label>
-                <label>
-                    <div>"Published at "<small>"(UTC)"</small></div>
-                    <input
-                        disabled
-                        value=published_at_utc_string
-                        prop:value=published_at_utc_string
-                    />
-                </label>
-            </div>
+            <label>
+                <div>"Published at " <small>"(Local)"</small></div>
+                <input
+                    disabled=disabled
+                    prop:disabled=disabled
+                    value=html_published_at
+                    prop:value=html_published_at
+                    type="datetime-local"
+                    on:input=move |ev| {
+                        let val = event_target_value(&ev);
+                        let datetime = html_local_to_datetime(&val);
+                        set_published_at(Some(datetime));
+                    }
+                />
+                <input
+                    name="published_at"
+                    type="hidden"
+                    value=published_at_rfc3339
+                    prop:value=published_at_rfc3339
+                />
+            </label>
         </div>
     }
 }
