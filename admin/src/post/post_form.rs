@@ -62,6 +62,12 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
     }
 
     let post_rw = create_rw_signal(cx, post.clone());
+    let (slug, set_slug) = create_slice(
+        cx,
+        post_rw,
+        |state| state.slug.clone(),
+        |state, slug| state.slug = slug,
+    );
     let (title, set_title) = create_slice(
         cx,
         post_rw,
@@ -93,8 +99,13 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
 
     let created = datetime_to_strings(post.created_at);
 
+    let public_link = move || format!("/post/{}", slug());
     view! { cx,
         <Title text=move || format!("Post: {}", title())/>
+        <header>
+            <h1>"Post edit"</h1>
+            <a href=public_link target="_blank">{public_link}</a>
+        </header>
         <ActionForm action=post_upsert>
             <fieldset disabled=move || pending()>
                 <legend>{header_view}</legend>
@@ -108,6 +119,16 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                                 value=title
                                 on:input=move |ev| {
                                     set_title(event_target_value(&ev));
+                                }
+                            />
+                        </label>
+                        <label>
+                            <div>"Slug"</div>
+                            <input
+                                name="slug"
+                                value=slug
+                                on:input=move |ev| {
+                                    set_slug(event_target_value(&ev));
                                 }
                             />
                         </label>

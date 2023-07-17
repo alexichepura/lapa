@@ -18,6 +18,7 @@ use crate::util::Loading;
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SettingsData {
     pub robots_txt: String,
+    pub site_url: String,
     pub home_text: String,
     pub hero_width: i32,
     pub hero_height: i32,
@@ -47,6 +48,7 @@ impl From<&SettingsData> for SettingsSite {
     fn from(data: &SettingsData) -> Self {
         SettingsSite {
             robots_txt: data.robots_txt.clone(),
+            site_url: data.site_url.clone(),
         }
     }
 }
@@ -112,6 +114,7 @@ pub async fn get_settings(cx: Scope) -> Result<SettingsResult, ServerFnError> {
     Ok(match settings {
         Some(settings) => Ok(SettingsData {
             robots_txt: settings.robots_txt,
+            site_url: settings.site_url,
             hero_width: settings.hero_width,
             hero_height: settings.hero_height,
             thumb_width: settings.thumb_width,

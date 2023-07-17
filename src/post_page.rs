@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
-    app::SettingsCx,
     img::{img_url_large, img_url_large_retina, srcset_large},
+    settings::{use_settings, use_site_url},
     util::{Loading, ParagraphsByMultiline},
 };
 
@@ -99,9 +99,11 @@ pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
         None => ().into_view(cx),
     };
 
+    let site_url = use_site_url(cx);
+
     let hero_og = match post.hero {
         Some(hero) => {
-            let og = format!("https://leptos.dev{}", img_url_large_retina(&hero)); // TODO domain from DB
+            let og = format!("{site_url}{}", img_url_large_retina(&hero)); // TODO domain from DB
             view! { cx, <Meta property="og:image" content=og/> }.into_view(cx)
         }
         None => ().into_view(cx),
@@ -144,7 +146,7 @@ pub fn Thumb(
     image: ImgData,
     set_dialog_open: WriteSignal<DialogSignal>,
 ) -> impl IntoView {
-    let settings = use_context::<SettingsCx>(cx).expect("to have found the settings provided");
+    let settings = use_settings(cx);
     let id = image.id.clone();
     let alt = image.alt.clone();
 

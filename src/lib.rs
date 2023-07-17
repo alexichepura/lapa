@@ -13,6 +13,7 @@ pub mod img;
 pub mod post_list;
 pub mod post_page;
 pub mod routes;
+pub mod settings;
 pub mod util;
 
 #[cfg(feature = "hydrate")]
@@ -29,7 +30,8 @@ pub fn hydrate() {
         js_sys::Reflect::get(&web_sys::window().unwrap(), &JsValue::from_str("SETTINGS"))
             .unwrap_or(JsValue::NULL);
 
-    let settings: SettingsCx = serde_wasm_bindgen::from_value(settings).unwrap_or_default();
+    let settings: settings::SettingsCx =
+        serde_wasm_bindgen::from_value(settings).unwrap_or_default();
 
     log!("SETTINGS: {:?}", settings);
 

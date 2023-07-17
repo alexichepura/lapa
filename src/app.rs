@@ -1,22 +1,13 @@
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
-use serde::{Deserialize, Serialize};
 
-use crate::routes::FrontRoutes;
-
-#[derive(Debug, Copy, Clone, Serialize, Deserialize, Default)]
-pub struct SettingsCx {
-    pub hero_width: i32,
-    pub hero_height: i32,
-    pub thumb_width: i32,
-    pub thumb_height: i32,
-}
+use crate::{routes::FrontRoutes, settings::SettingsCx};
 
 #[component]
 pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
     provide_meta_context(cx);
-    provide_context(cx, settings);
+    provide_context(cx, settings.clone());
     let (is_routing, set_is_routing) = create_signal(cx, false);
 
     let settings_json = serde_json::to_string(&settings).unwrap();

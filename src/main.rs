@@ -10,10 +10,11 @@ async fn main() {
         Router,
     };
     use lapa_site::{
-        app::{App, SettingsCx},
+        app::App,
         fileserv::file_and_error_handler,
         routes::GenerateRouteList,
         server::{robots_txt, AppState},
+        settings::SettingsCx,
     };
     use leptos::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
@@ -85,6 +86,7 @@ async fn main() {
             .settings()
             .find_first(vec![])
             .select(db::settings::select!({
+                site_url
                 hero_height
                 hero_width
                 thumb_height
@@ -95,6 +97,7 @@ async fn main() {
             .unwrap();
         let settings = settings.unwrap();
         let settings = SettingsCx {
+            site_url: settings.site_url,
             hero_height: settings.hero_height,
             hero_width: settings.hero_width,
             thumb_height: settings.thumb_height,
@@ -106,7 +109,7 @@ async fn main() {
             move |cx| {
                 provide_context(cx, prisma_client.clone());
             },
-            move |cx| view! { cx, <App settings/> },
+            move |cx| view! { cx, <App settings=settings.clone()/> },
         );
         handler(req).await.into_response()
     }
