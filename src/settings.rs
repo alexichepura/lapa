@@ -11,7 +11,7 @@ pub struct SettingsCx {
 }
 
 pub fn use_settings(cx: Scope) -> SettingsCx {
-    let settings = use_context::<SettingsCx>(cx).expect("to have found the settings provided");
+    let settings = use_context::<SettingsCx>(cx).expect("SettingsCx");
     settings
 }
 pub fn use_site_url(cx: Scope) -> String {
