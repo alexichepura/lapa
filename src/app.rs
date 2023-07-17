@@ -19,9 +19,7 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
         <Stylesheet id="leptos" href="/pkg/lapa_site.css"/>
         <Title formatter/>
         <Favicons/>
-        <Script>
-            {settings_script}
-        </Script>
+        <Script>{settings_script}</Script>
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)
@@ -30,7 +28,9 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
         <Router set_is_routing>
             <header>
                 <section>
-                    <A href="/" exact=true>"Home"</A>
+                    <A href="/" exact=true>
+                        "Home"
+                    </A>
                     <a href="https://github.com/alexichepura/lapa">"GitHub"</a>
                 </section>
             </header>

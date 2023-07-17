@@ -33,12 +33,17 @@ pub fn hydrate() {
     let user: JsValue =
         js_sys::Reflect::get(&web_sys::window().unwrap(), &JsValue::from_str("USER"))
             .unwrap_or(JsValue::NULL);
-
     let user: Option<User> = serde_wasm_bindgen::from_value(user).ok();
-
     log!("USER: {:?}", user);
 
+    let settings: JsValue =
+        js_sys::Reflect::get(&web_sys::window().unwrap(), &JsValue::from_str("SETTINGS"))
+            .unwrap_or(JsValue::NULL);
+    let settings: settings::SettingsCx =
+        serde_wasm_bindgen::from_value(settings).unwrap_or_default();
+    log!("SETTINGS: {:?}", settings);
+
     leptos::mount_to_body(move |cx| {
-        view! { cx, <App user/> }
+        view! { cx, <App user settings/> }
     });
 }

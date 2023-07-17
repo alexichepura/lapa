@@ -5,26 +5,34 @@ use leptos_router::*;
 use crate::{
     auth::{Login, User},
     layout::Layout,
+    settings::SettingsCx,
 };
 
 #[component]
-pub fn App(cx: Scope, user: Option<User>) -> impl IntoView {
+pub fn App(cx: Scope, user: Option<User>, settings: SettingsCx) -> impl IntoView {
     provide_meta_context(cx);
     let (is_routing, set_is_routing) = create_signal(cx, false);
 
     let user_json = serde_json::to_string(&user).unwrap();
     let user_script = format!("window.USER = {user_json};");
 
+    let settings_json = serde_json::to_string(&settings).unwrap();
+    let settings_script = format!("window.SETTINGS = {settings_json};");
+
     let formatter = |text| format!("{text} - Admin");
 
     let user_signal = create_rw_signal(cx, user.clone());
     provide_context(cx, user_signal);
+
+    let settings_signal = create_rw_signal(cx, settings);
+    provide_context(cx, settings_signal);
 
     view! { cx,
         <Stylesheet id="leptos" href="/pkg/lapa_admin.css"/>
         <Title formatter/>
         <Favicons/>
         <Script>{user_script}</Script>
+        <Script>{settings_script}</Script>
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)

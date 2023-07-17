@@ -8,6 +8,7 @@ use super::PostError;
 use crate::{
     form::{Checkbox, FormFooter, Input},
     post::PostImages,
+    settings::use_site_url,
     util::{
         datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
     },
@@ -98,13 +99,13 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
     };
 
     let created = datetime_to_strings(post.created_at);
-
-    let public_link = move || format!("/post/{}", slug());
+    let site_url = use_site_url(cx);
+    let href = move || format!("{}/post/{}", &site_url(), &slug());
     view! { cx,
         <Title text=move || format!("Post: {}", title())/>
         <header>
             <h1>"Post edit"</h1>
-            <a href=public_link target="_blank">{public_link}</a>
+            <a href=move || href() target="_blank">{move || href()}</a>
         </header>
         <ActionForm action=post_upsert>
             <fieldset disabled=move || pending()>
