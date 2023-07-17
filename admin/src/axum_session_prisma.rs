@@ -22,7 +22,7 @@ impl From<ArcPrisma> for SessionPrismaPool {
 #[async_trait]
 impl DatabasePool for SessionPrismaPool {
     async fn initiate(&self, _table_name: &str) -> Result<(), SessionError> {
-        dbg!(("initiate", _table_name));
+        // dbg!(("initiate", _table_name));
         Ok(())
     }
 
@@ -57,7 +57,7 @@ impl DatabasePool for SessionPrismaPool {
         expires: i64,
         _table_name: &str,
     ) -> Result<(), SessionError> {
-        dbg!(("store", id, session, expires));
+        // dbg!(("store", id, session, expires));
         self.pool
             .session()
             .create(
@@ -72,7 +72,7 @@ impl DatabasePool for SessionPrismaPool {
     }
 
     async fn load(&self, id: &str, _table_name: &str) -> Result<Option<String>, SessionError> {
-        dbg!(("load", id));
+        // dbg!(("load", id));
         let result = self
             .pool
             .session()
@@ -87,7 +87,7 @@ impl DatabasePool for SessionPrismaPool {
             .await
             .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
 
-        dbg!(("load_result", result.clone()));
+        // dbg!(("load_result", result.clone()));
         Ok(match result {
             Some(result) => Some(result.session),
             None => None,
@@ -95,7 +95,7 @@ impl DatabasePool for SessionPrismaPool {
     }
 
     async fn delete_one_by_id(&self, id: &str, _table_name: &str) -> Result<(), SessionError> {
-        dbg!(("delete_one_by_id", id));
+        // dbg!(("delete_one_by_id", id));
         self.pool
             .session()
             .delete(session::id::equals(id.to_string()))
@@ -106,7 +106,7 @@ impl DatabasePool for SessionPrismaPool {
     }
 
     async fn exists(&self, id: &str, _table_name: &str) -> Result<bool, SessionError> {
-        dbg!(("exists", id));
+        // dbg!(("exists", id));
         let result = self
             .pool
             .session()
@@ -121,7 +121,7 @@ impl DatabasePool for SessionPrismaPool {
             .await
             .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
         let exists = result > 0;
-        dbg!(("exists_result", id, exists));
+        // dbg!(("exists_result", id, exists));
         Ok(exists)
     }
 
