@@ -26,10 +26,12 @@ log = "0.4"
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e0af632", default-features = false, features = [
     "sqlite",
     "sqlite-create-many",
+    "migrations",
 ] }
 prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e0af632", default-features = false, features = [
     "sqlite",
     "sqlite-create-many",
+    "migrations",
 ] }
 prisma_client = { path = "./prisma_client" }
 serde = { version = "1", features = ["derive"] }

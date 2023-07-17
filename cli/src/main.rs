@@ -14,6 +14,7 @@ struct Cli {
 enum Commands {
     UserAdd(UserAddArgs),
     SettingsInit,
+    Migrate,
 }
 
 #[derive(Args)]
@@ -38,6 +39,10 @@ async fn main() {
     prisma_client._db_push(false).await.unwrap();
 
     match &cli.command {
+        Commands::Migrate => {
+            prisma_client._migrate_deploy().await.unwrap();
+            println!("Migration success");
+        }
         Commands::UserAdd(user) => {
             let username = user.username.clone();
             let password = user.password.clone();
