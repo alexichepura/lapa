@@ -29,7 +29,6 @@ pub struct PostFormData {
 pub fn PostNew(cx: Scope) -> impl IntoView {
     let post = PostFormData::default();
     view! { cx,
-        <h1>"Post create"</h1>
         <PostForm post=post/>
     }
 }

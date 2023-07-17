@@ -54,22 +54,24 @@ button {
 		grid-template-areas: "header header" "nav main";
 		grid-template-columns: calc(var(--size-fluid-4) * 4) 1fr;
 	}
-}
 
-header {
-	grid-area: header;
-	background: var(--surface-1);
-	box-shadow: var(--shadow-3);
-	display: grid;
-	grid-template-columns: 1fr auto auto;
-	gap: var(--size-fluid-2);
-	padding: 0 var(--size-fluid-2);
-	align-items: center;
+	>header {
+		grid-area: header;
+		background: var(--surface-1);
+		box-shadow: var(--shadow-3);
+		display: grid;
+		grid-template-columns: 1fr auto auto;
+		gap: var(--size-fluid-2);
+		padding: 0 var(--size-fluid-2);
+		align-items: center;
 
-	& button {
-		padding: 1px 4px;
+		& button {
+			padding: 1px 4px;
+		}
 	}
 }
+
+
 
 .logo {
 	color: var(--text-2);
@@ -409,5 +411,19 @@ dialog {
 
 	&.not-published {
 		color: var(--blue-6);
+	}
+}
+
+.PostPage {
+	>header {
+		@media (--sm-n-above) {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		>h1 {
+			margin-block-end: 0;
+		}
 	}
 }
