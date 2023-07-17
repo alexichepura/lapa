@@ -32,8 +32,9 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 <https://github.com/Brendonovich/prisma-client-rust> \
 Type-safe database access.
 
-## Includes
+## Features
 - monorepo with 2 main packages for SEO site and admin dashboard
+- SSR + SPA hydrated
 - prisma schema for db (user, session, post, image, settings)
 - admin auth and session with 
     - axum_session <https://github.com/AscendingCreations/AxumSessions>
@@ -41,16 +42,22 @@ Type-safe database access.
     - custom adapter for DatabasePool to use prisma
 - image preview and upload
 - images resize and convert on backend
-- css based on <https://open-props.style>
-- css processing with <https://lightningcss.dev> (forked cargo-leptos for now)
-    - nesting
-    - custom media
+- images order in gallery
+- image is_hero flag
+- css 
+    - based on <https://open-props.style>
+    - dark and light themes
+    - mobile first
+    - processing with <https://lightningcss.dev> (forked cargo-leptos for now)
+        - nesting
+        - custom media
 - compression and precompression
 - stiched together forms, inputs and response messages
 - input datetime-local usage with chrono library
 - robots.txt from database
 - RoutingProgress
 - Favicons
+- CLI with clap
 
 ## Run 
 ### Generate prisma client
