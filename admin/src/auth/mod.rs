@@ -14,8 +14,8 @@ pub struct User {
 }
 
 type UserSignal = RwSignal<Option<User>>;
-pub fn use_user_signal(cx: Scope) -> RwSignal<Option<User>> {
-    let user = use_context::<UserSignal>(cx).expect("RwSignal<Option<User>>");
+pub fn use_user_signal(cx: Scope) -> UserSignal {
+    let user = use_context::<UserSignal>(cx).expect("UserSignal");
     return user;
 }
 
