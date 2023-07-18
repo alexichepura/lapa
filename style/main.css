@@ -151,8 +151,8 @@ dialog {
 .PostList {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, 240px);
-	grid-gap: var(--size-fluid-2);
-	justify-content: center;
+	gap: var(--size-fluid-2) var(--size-fluid-1);
+	justify-content: space-around;
 
 	& a {
 		text-decoration: none;
@@ -187,8 +187,8 @@ dialog {
 .post-images {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, 240px);
-	grid-gap: var(--size-fluid-2);
-	justify-content: center;
+	gap: var(--size-fluid-2) var(--size-fluid-1);
+	justify-content: space-around;
 
 	& img {
 		/* background: var(--surface-2); */
