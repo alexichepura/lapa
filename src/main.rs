@@ -84,7 +84,7 @@ async fn main() {
         });
         let settings = settins_db(prisma_client.clone()).await;
 
-        let handler = leptos_axum::render_app_to_stream_in_order_with_context(
+        let handler = leptos_axum::render_app_async_with_context(
             app_state.leptos_options.clone(),
             move |cx| {
                 provide_context(cx, prisma_client.clone());
