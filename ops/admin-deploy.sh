@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -o allexport; source .env; set +o allexport
 
-LEPTOS_BIN_TARGET_TRIPLE=$TARGET cargo leptos build --release -p $ADMIN_BIN  --features="prod"
+LEPTOS_BIN_TARGET_TRIPLE=$TARGET cargo leptos build --release -p $ADMIN_BIN  --features="compression"
 precompress --brotli --deflate --gzip --zstd target/admin/pkg
 
 rsync -arvC --progress --copy-links target/admin $SERVER_HOST:$SERVER_DIR/
