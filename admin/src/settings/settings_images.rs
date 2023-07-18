@@ -52,7 +52,7 @@ pub fn SettingsImagesForm(cx: Scope, settings: SettingsImages) -> impl IntoView 
                         value=settings.thumb_height.to_string()
                     />
                 </div>
-                <FormFooter action=settings_upsert/>
+                <FormFooter action=settings_upsert submit_text="Update images settings"/>
             </ActionForm>
         </fieldset>
     }

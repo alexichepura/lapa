@@ -22,7 +22,7 @@ pub fn SettingsHomeForm(cx: Scope, settings: SettingsHome) -> impl IntoView {
                     <div>"Text"</div>
                     <textarea name="home_text" prop:value=settings.home_text.to_string() rows="5" />
                 </label>
-                <FormFooter action=settings_site_update/>
+                <FormFooter action=settings_site_update submit_text="Update home data"/>
             </ActionForm>
         </fieldset>
     }

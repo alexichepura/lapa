@@ -245,7 +245,7 @@ form footer {
 }
 
 fieldset {
-	margin-block-end: var(--size-fluid-2);
+	margin-block-end: var(--size-fluid-3);
 
 	&:disabled {
 		opacity: 0.8;
@@ -311,10 +311,15 @@ input:disabled {
 }
 
 .images {
+	margin-block: var(--size-fluid-1);
 	display: grid;
 	grid-template-columns: repeat(auto-fill, 240px);
 	gap: var(--size-fluid-2) var(--size-fluid-1);
 	justify-content: space-around;
+
+	@media (--md-n-above) {
+		justify-content: start;
+	}
 
 	>figure {
 		box-shadow: var(--shadow-3);

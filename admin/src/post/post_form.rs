@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use super::PostError;
 use crate::{
-    form::{Checkbox, FormFooter, Input},
+    form::{Checkbox, FormFooter},
     post::{PostDeleteForm, PostImages},
     settings::use_site_url,
     util::{
@@ -102,78 +102,77 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
     });
     view! { cx,
         <Title text=move || format!("Post: {}", title())/>
-        <header>
-            <div>
-                <h1>"Post edit"</h1>
-                <a href=move || href() target="_blank">
-                    {move || href()}
-                </a>
-            </div>
-            <dl>
-                <dt>"ID: "</dt>
-                <dd>{id_view}</dd>
-                <br/>
-                <dt>"Created at " <small>"(Local): "</small></dt>
-                <dd>{created.local}</dd>
-                <br/>
-                <dt>"Created at " <small>"(UTC): "</small></dt>
-                <dd>{created.utc}</dd>
-                <br/>
-                <dt>"Published at " <small>"(UTC): "</small></dt>
-                <dd>{published_at_utc_string}</dd>
-            </dl>
-        </header>
-        <ActionForm action=post_upsert>
-            <fieldset disabled=move || pending()>
-                <legend>"Data"</legend>
-                <div class="Grid-fluid-2">
-                    <div>
-                        <label>
-                            <div>"Title"</div>
-                            <input
-                                name="title"
-                                value=title
-                                on:input=move |ev| {
-                                    set_title(event_target_value(&ev));
-                                }
-                            />
-                        </label>
-                        <label>
-                            <div>"Slug"</div>
-                            <input
-                                name="slug"
-                                value=slug
-                                on:input=move |ev| {
-                                    set_slug(event_target_value(&ev));
-                                }
-                            />
-                        </label>
-                        <Input name="slug" label="Slug" value=post.slug/>
-                        <label>
-                            <div>"Description"</div>
-                            <textarea name="description" prop:value=post.description></textarea>
-                        </label>
-                    </div>
-                    <div>
-                        <PublishedAt published_at set_published_at/>
-                        <label>
-                            <div>"Text"</div>
-                            <textarea
-                                name="text"
-                                value=&post.text
-                                prop:value=post.text
-                                rows="6"
-                            ></textarea>
-                        </label>
-                    </div>
+        <section class="PostPage">
+            <header>
+                <div>
+                    <h1>"Post"</h1>
+                    <a href=move || href() target="_blank">
+                        {move || href()}
+                    </a>
                 </div>
-                <FormFooter action=post_upsert/>
-            </fieldset>
-        </ActionForm>
-        {gallery_view}
-        <div class="Grid-fluid-2">
-            {delete_view}
-        </div>
+                <dl>
+                    <dt>"ID: "</dt>
+                    <dd>{id_view}</dd>
+                    <br/>
+                    <dt>"Created at " <small>"(Local): "</small></dt>
+                    <dd>{created.local}</dd>
+                    <br/>
+                    <dt>"Created at " <small>"(UTC): "</small></dt>
+                    <dd>{created.utc}</dd>
+                    <br/>
+                    <dt>"Published at " <small>"(UTC): "</small></dt>
+                    <dd>{published_at_utc_string}</dd>
+                </dl>
+            </header>
+            <ActionForm action=post_upsert>
+                <fieldset disabled=move || pending()>
+                    <legend>"Data"</legend>
+                    <div class="Grid-fluid-2">
+                        <div>
+                            <label>
+                                <div>"Title"</div>
+                                <input
+                                    name="title"
+                                    value=title
+                                    on:input=move |ev| {
+                                        set_title(event_target_value(&ev));
+                                    }
+                                />
+                            </label>
+                            <label>
+                                <div>"Slug"</div>
+                                <input
+                                    name="slug"
+                                    value=slug
+                                    on:input=move |ev| {
+                                        set_slug(event_target_value(&ev));
+                                    }
+                                />
+                            </label>
+                            <label>
+                                <div>"Description"</div>
+                                <textarea name="description" prop:value=post.description></textarea>
+                            </label>
+                        </div>
+                        <div>
+                            <PublishedAt published_at set_published_at/>
+                            <label>
+                                <div>"Text"</div>
+                                <textarea
+                                    name="text"
+                                    value=&post.text
+                                    prop:value=post.text
+                                    rows="6"
+                                ></textarea>
+                            </label>
+                        </div>
+                    </div>
+                    <FormFooter action=post_upsert submit_text="Submit post data"/>
+                </fieldset>
+            </ActionForm>
+            {gallery_view}
+            <div class="Grid-fluid-2">{delete_view}</div>
+        </section>
     }
 }
 

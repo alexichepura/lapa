@@ -33,19 +33,23 @@ pub fn PostPage(cx: Scope) -> impl IntoView {
     });
 
     view! { cx,
-        <section class="PostPage">
-            <Suspense fallback=move || {
-                view! { cx, <Loading/> }
-            }>
-                {move || {
-                    post.read(cx)
-                        .map(|post| match post {
-                            Err(e) => view! { cx, <p>{e.to_string()}</p> }.into_view(cx),
-                            Ok(post) => view! { cx, <PostForm post=post/> }.into_view(cx),
-                        })
-                }}
-            </Suspense>
-        </section>
+        <Suspense fallback=move || {
+            view! { cx, <Loading/> }
+        }>
+            {move || {
+                post.read(cx)
+                    .map(|post| match post {
+                        Err(e) => {
+                            view! { cx, <p>{e.to_string()}</p> }
+                                .into_view(cx)
+                        }
+                        Ok(post) => {
+                            view! { cx, <PostForm post=post/> }
+                                .into_view(cx)
+                        }
+                    })
+            }}
+        </Suspense>
     }
 }
 

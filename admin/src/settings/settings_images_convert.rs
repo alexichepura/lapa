@@ -12,7 +12,7 @@ pub fn ImagesConvertView(cx: Scope) -> impl IntoView {
         <fieldset disabled=move || pending()>
             <legend>"Images convert"</legend>
             <ActionForm action=images_convert>
-                <FormFooter action=images_convert/>
+                <FormFooter action=images_convert submit_text="Reconvert images"/>
             </ActionForm>
         </fieldset>
     }

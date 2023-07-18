@@ -27,7 +27,7 @@ pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
                     <div>"Site url"</div>
                     <input name="site_url" prop:value=settings.site_url.to_string() value=settings.site_url.to_string()/>
                 </label>
-                <FormFooter action=settings_site_update/>
+                <FormFooter action=settings_site_update submit_text="Update site data"/>
             </ActionForm>
         </fieldset>
     }

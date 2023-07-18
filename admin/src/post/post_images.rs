@@ -146,11 +146,10 @@ pub fn PostImagesView(
                         view! { cx, <input type="hidden" name="ids[]" value=image.id/> }
                     }
                 />
-                <FormFooter action=order_action/>
+                <FormFooter action=order_action submit_text="Save order"/>
             </ActionForm>
-            <hr/>
-            {no_images}
             <div class="images">
+                {no_images}
                 <For
                     each=move || images_sorted()
                     key=|image| format!("{}:{}", image.id, image.order)

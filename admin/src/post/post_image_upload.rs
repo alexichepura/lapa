@@ -40,7 +40,7 @@ pub fn ImageUpload(cx: Scope, post_id: String, image_upload: ImageUploadAction) 
                                 )
                             }
                         />
-                        <FormFooter action=image_upload/>
+                        <FormFooter action=image_upload submit_text="Upload image"/>
                     </ActionForm>
                 </div>
                 <ImageUploadPreview obj_url/>
