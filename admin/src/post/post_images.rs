@@ -59,13 +59,13 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
                                 .into_view(cx)
                         }
                         Ok(images) => {
-                            if images.is_empty() {
-                                view! { cx, <p>"No images were found."</p> }
-                                    .into_view(cx)
-                            } else {
-                                view! { cx, <PostImagesView images image_delete image_update order_action hero_action/> }
-                                    .into_view(cx)
-                            }
+                            view! { cx, <PostImagesView images image_delete image_update order_action hero_action/> }
+                                .into_view(cx)
+                            // if images.is_empty() {
+                            //     view! { cx, <p>"No images were found."</p> }
+                            //         .into_view(cx)
+                            // } else {
+                            // }
                         }
                     })
             }}
@@ -130,6 +130,11 @@ pub fn PostImagesView(
     let hero_pending = hero_action.pending();
     let disabled = move || order_pending() || hero_pending();
 
+    let no_images = move || match images_sorted().len() {
+        0 => view! { cx, <p>"No images were found."</p> }.into_view(cx),
+        _ => ().into_view(cx),
+    };
+
     view! { cx,
         <fieldset disabled=disabled>
             <legend>"Images"</legend>
@@ -144,6 +149,7 @@ pub fn PostImagesView(
                 <FormFooter action=order_action/>
             </ActionForm>
             <hr/>
+            {no_images}
             <div class="images">
                 <For
                     each=move || images_sorted()

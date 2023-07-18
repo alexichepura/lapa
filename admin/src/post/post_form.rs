@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use super::PostError;
 use crate::{
     form::{Checkbox, FormFooter, Input},
-    post::PostImages,
+    post::{PostDeleteForm, PostImages},
     settings::use_site_url,
     util::{
         datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
@@ -79,15 +79,17 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
         |state, published_at| state.published_at = published_at,
     );
 
-    let id_view = if let Some(id) = post.id.clone() {
-        id
-    } else {
-        "".to_string()
+    let id_view = match post.id.clone() {
+        Some(id) => id,
+        None => "".to_string(),
     };
-    let gallery_view = if let Some(id) = post.id {
-        view! { cx, <PostImages post_id=id/> }.into_view(cx)
-    } else {
-        view! { cx, <p>"Gallery is not available for not saved post"</p> }.into_view(cx)
+    let gallery_view = match post.id.clone() {
+        Some(id) => view! { cx, <PostImages post_id=id/> }.into_view(cx),
+        None => view! { cx, <p>"Gallery is not available for not saved post"</p> }.into_view(cx),
+    };
+    let delete_view = match post.id.clone() {
+        Some(id) => view! { cx, <PostDeleteForm id=id.clone() slug/> }.into_view(cx),
+        None => ().into_view(cx),
     };
 
     let created = datetime_to_strings(post.created_at);
@@ -169,6 +171,9 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
             </fieldset>
         </ActionForm>
         {gallery_view}
+        <div class="Grid-fluid-2">
+            {delete_view}
+        </div>
     }
 }
 
