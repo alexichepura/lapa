@@ -33,17 +33,33 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 Type-safe database access.
 
 ## Features
-- monorepo with 2 main packages for SEO site and admin dashboard
-- SSR + SPA hydrated
-- prisma schema for db (user, session, post, image, settings)
+- project
+    - SEO site
+    - admin dashboard
+    - CLI with clap: settings-init, user-add, migrate
+    - prisma schema: user, session, post, image, settings
+    - ops scripts: build, upload, run (site, admin, cli)
+- site
+    - SSR + SPA hydrated
+    - compression and precompression
+    - open graph meta tags
 - admin auth and session with 
     - axum_session <https://github.com/AscendingCreations/AxumSessions>
     - axum_session_auth <https://github.com/AscendingCreations/AxumSessionsAuth>
-    - custom adapter for DatabasePool to use prisma
-- image preview and upload
-- images resize and convert on backend
-- images order in gallery
-- image is_hero flag
+    - custom prisma DatabasePool
+- post 
+    - admin CRUDL
+    - published_at
+- images
+    - preview and upload
+    - resize and convert on backend
+    - order in gallery
+    - is_hero flag
+    - delete and alt update in "dialog"
+- settings
+    - robots.txt, site_url
+    - images sizes
+    - home_text
 - css 
     - based on <https://open-props.style>
     - dark and light themes
@@ -51,13 +67,11 @@ Type-safe database access.
     - processing with <https://lightningcss.dev> (forked cargo-leptos for now)
         - nesting
         - custom media
-- compression and precompression
-- stiched together forms, inputs and response messages
-- input datetime-local usage with chrono library
-- robots.txt from database
-- RoutingProgress
-- Favicons
-- CLI with clap
+- components
+    - forms, inputs and response messages
+    - input datetime-local usage with chrono library
+    - RoutingProgress
+    - Favicons
 
 ## Run 
 ### Generate prisma client
@@ -84,6 +98,19 @@ See relevant tutorial and demo project.
 <https://www.youtube.com/watch?v=KLg8Hcd3K_U>
 ```sh
 cargo leptos build --release
+```
+
+### Ops
+./ops folder contains example scripts to prepare production build and deploy it on server.
+Check .env.example
+Requires <https://github.com/ryanfowler/precompress>
+```sh
+./ops/site-deploy.sh && ./ops/site-run.sh # build, deploy and run site
+./ops/admin-deploy.sh && ./ops/admin-run.sh # build, deploy and run admin
+```
+```sh
+./ops/prisma-upload.sh # upload prisma folder with migrations to server
+./ops/cli-deploy.sh # upload cli to server
 ```
 
 ## Notes on CSS nesting and custom media
