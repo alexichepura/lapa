@@ -61,11 +61,6 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
                         Ok(images) => {
                             view! { cx, <PostImagesView images image_delete image_update order_action hero_action/> }
                                 .into_view(cx)
-                            // if images.is_empty() {
-                            //     view! { cx, <p>"No images were found."</p> }
-                            //         .into_view(cx)
-                            // } else {
-                            // }
                         }
                     })
             }}
@@ -157,9 +152,10 @@ pub fn PostImagesView(
                         let is_last = image.order + 1 == images_sorted().len() as i32;
                         let id_to_make_hero = image.id.clone();
                         let make_hero = move || {
-                            hero_action.dispatch(ImageMakeHero {
-                                id: id_to_make_hero.clone()
-                            });
+                            hero_action
+                                .dispatch(ImageMakeHero {
+                                    id: id_to_make_hero.clone(),
+                                });
                         };
                         view! { cx, <PostImage image set_editing on_order is_last make_hero/> }
                     }
@@ -200,9 +196,9 @@ where
     let is_first = image.order == 0;
 
     let hero_view = match image.is_hero {
-        true => view! { cx,<button disabled>"Hero"</button>}.into_view(cx),
+        true => view! { cx, <button disabled>"Hero"</button> }.into_view(cx),
         false => {
-            view! { cx,<button on:click=move |_| make_hero()>"Make hero"</button>}.into_view(cx)
+            view! { cx, <button on:click=move |_| make_hero()>"Make hero"</button> }.into_view(cx)
         }
     };
 
@@ -211,17 +207,27 @@ where
             <img on:click=on_edit src=src srcset=srcset width=250/>
             <figcaption>{image.alt}</figcaption>
             <footer>
-                <button disabled=is_first on:click={
-                    let on_order = on_order.clone();
-                    let id = image.id.clone();
-                    move |_| on_order(id.clone(), -1)
-                }>"⇐"</button>
+                <button
+                    disabled=is_first
+                    on:click={
+                        let on_order = on_order.clone();
+                        let id = image.id.clone();
+                        move |_| on_order(id.clone(), -1)
+                    }
+                >
+                    "⇐"
+                </button>
                 {hero_view}
-                <button disabled=is_last on:click={
-                    let on_order = on_order.clone();
-                    let id = image.id.clone();
-                    move |_| on_order(id.clone(), 1)
-                }>"⇒"</button>
+                <button
+                    disabled=is_last
+                    on:click={
+                        let on_order = on_order.clone();
+                        let id = image.id.clone();
+                        move |_| on_order(id.clone(), 1)
+                    }
+                >
+                    "⇒"
+                </button>
             </footer>
         </figure>
     }
