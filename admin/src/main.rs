@@ -151,7 +151,32 @@ async fn main() {
         .layer(SessionLayer::new(session_store))
         .layer(Extension(Arc::new(leptos_options.clone())));
 
-    #[cfg(not(debug_assertions))]
+    #[cfg(feature = "ratelimit")]
+    let app = {
+        use axum::{error_handling::HandleErrorLayer, BoxError};
+        use tower::ServiceBuilder;
+        use tower_governor::{
+            errors::display_error, governor::GovernorConfigBuilder,
+            key_extractor::SmartIpKeyExtractor, GovernorLayer,
+        };
+        let governor_conf = Box::new(
+            GovernorConfigBuilder::default()
+                .key_extractor(SmartIpKeyExtractor)
+                .finish()
+                .unwrap(),
+        );
+        app.layer(
+            ServiceBuilder::new()
+                .layer(HandleErrorLayer::new(|e: BoxError| async move {
+                    display_error(e)
+                }))
+                .layer(GovernorLayer {
+                    config: Box::leak(governor_conf),
+                }),
+        )
+    };
+
+    #[cfg(feature = "compression")]
     let app = {
         use tower_http::{compression::CompressionLayer, services::ServeDir};
         let pkg_path = "/".to_owned() + &leptos_options.site_pkg_dir;

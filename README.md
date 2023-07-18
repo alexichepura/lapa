@@ -98,6 +98,14 @@ See relevant tutorial and demo project.
 <https://www.youtube.com/watch?v=KLg8Hcd3K_U>
 ```sh
 cargo leptos build --release
+cargo leptos build --release --features="prod"
+cargo leptos build --release --features="prod"
+```
+Production with compress and ratelimit
+```sh
+cargo leptos build --release --features="compression,ratelimit"
+# or
+cargo leptos build --release --features="prod"
 ```
 
 ### Ops
