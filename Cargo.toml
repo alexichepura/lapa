@@ -18,10 +18,10 @@ console_error_panic_hook = "0.1"
 console_log = "1"
 http = "0.2"
 js-sys = { version = "0.3" }
-leptos = { version = "0.4.3", features = ["nightly"] }
-leptos_axum = { version = "0.4.3" }
-leptos_meta = { version = "0.4.3", features = ["nightly"] }
-leptos_router = { version = "0.4.3", features = ["nightly"] }
+leptos = { version = "0.4.5", features = ["nightly"] }
+leptos_axum = { version = "0.4.5" }
+leptos_meta = { version = "0.4.5", features = ["nightly"] }
+leptos_router = { version = "0.4.5", features = ["nightly"] }
 log = "0.4"
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e0af632", default-features = false, features = [
     "sqlite",
@@ -53,12 +53,6 @@ web-sys = { version = "0.3", features = [
     "Blob",
     "Url",
 ] }
-
-[patch.crates-io]
-leptos = { git = "https://github.com/leptos-rs/leptos", rev = "e8aa9b2" }
-leptos_axum = { git = "https://github.com/leptos-rs/leptos", rev = "e8aa9b2" }
-leptos_meta = { git = "https://github.com/leptos-rs/leptos", rev = "e8aa9b2" }
-leptos_router = { git = "https://github.com/leptos-rs/leptos", rev = "e8aa9b2" }
 
 [profile.dev.package.image]
 opt-level = 3
