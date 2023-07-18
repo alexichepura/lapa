@@ -54,10 +54,10 @@ web-sys = { version = "0.3", features = [
 ] }
 
 [patch.crates-io]
-leptos = { git = "https://github.com/leptos-rs/leptos", rev = "85644a7" }
-leptos_axum = { git = "https://github.com/leptos-rs/leptos", rev = "85644a7" }
-leptos_meta = { git = "https://github.com/leptos-rs/leptos", rev = "85644a7" }
-leptos_router = { git = "https://github.com/leptos-rs/leptos", rev = "85644a7" }
+leptos = { git = "https://github.com/leptos-rs/leptos", rev = "e8aa9b2" }
+leptos_axum = { git = "https://github.com/leptos-rs/leptos", rev = "e8aa9b2" }
+leptos_meta = { git = "https://github.com/leptos-rs/leptos", rev = "e8aa9b2" }
+leptos_router = { git = "https://github.com/leptos-rs/leptos", rev = "e8aa9b2" }
 
 [profile.dev.package.image]
 opt-level = 3

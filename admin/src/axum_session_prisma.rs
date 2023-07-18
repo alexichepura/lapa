@@ -40,7 +40,7 @@ impl DatabasePool for SessionPrismaPool {
 
         let ids: Vec<String> = result.iter().map(|r| r.id.clone()).collect();
 
-        let result = self
+        let _result = self
             .pool
             .session()
             // .delete_many(vec![session::expires::lt(Utc::now().timestamp() as i32)])
