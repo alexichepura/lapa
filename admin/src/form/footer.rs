@@ -27,6 +27,8 @@ where
 pub fn FormFooter<I, O, E>(
     cx: Scope,
     action: Action<I, Result<Result<O, E>, ServerFnError>>, // first result for 5xx, second for 4xx
+    #[prop(optional, into)] submit_text: Option<TextProp>,
+    #[prop(optional, into)] disabled: Option<MaybeSignal<bool>>,
 ) -> impl IntoView
 where
     I: Clone + ServerFn + 'static,
@@ -35,9 +37,19 @@ where
 {
     let value = action.value();
     let pending = action.pending();
+
+    let submit_text = match submit_text {
+        Some(submit_text) => submit_text,
+        None => "SUBMIT".into(),
+    };
+    let disabled = move || match disabled {
+        Some(disabled) => disabled.get(),
+        None => false,
+    };
+
     view! { cx,
         <footer>
-            <input type="submit" value="SUBMIT"/>
+            <input type="submit" value=submit_text.get() disabled=disabled/>
             <Pending pending/>
             <Suspense fallback=|| ()>
                 {move || {
