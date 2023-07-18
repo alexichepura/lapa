@@ -19,17 +19,17 @@ Some benefits:
 ## 3 pillars
 ### Leptos
 <https://leptos.dev> \
-<https://github.com/leptos-rs/leptos> \
+[leptos-rs/leptos](https://github.com/leptos-rs/leptos) \
 A cutting-edge, high-performance frontend framework SSR+SPA. Using reactive signals.
 
 ### Axum
-<https://github.com/tokio-rs/axum> \
+[tokio-rs/axum](https://github.com/tokio-rs/axum) \
 Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and modularity.
 
 ### Prisma
 <https://www.prisma.io> \
 <https://prisma.brendonovich.dev> \
-<https://github.com/Brendonovich/prisma-client-rust> \
+[Brendonovich/prisma-client-rust](https://github.com/Brendonovich/prisma-client-rust) \
 Type-safe database access.
 
 ## Features
@@ -41,11 +41,14 @@ Type-safe database access.
     - ops scripts: build, upload, run (site, admin, cli)
 - site
     - SSR + SPA hydrated
-    - compression and precompression
     - open graph meta tags
+- prod features
+    - ratelimit with [benwis/tower-governor](https://github.com/benwis/tower-governor)
+    - compression with tower-http/compression
+    - precompression with [ryanfowler/precompress](https://github.com/ryanfowler/precompress) see ./ops scripts
 - admin auth and session with 
-    - axum_session <https://github.com/AscendingCreations/AxumSessions>
-    - axum_session_auth <https://github.com/AscendingCreations/AxumSessionsAuth>
+    - axum_session [AscendingCreations/AxumSessions](https://github.com/AscendingCreations/AxumSessions)
+    - axum_session_auth [AscendingCreations/AxumSessionsAuth](https://github.com/AscendingCreations/AxumSessionsAuth)
     - custom prisma DatabasePool
 - post 
     - admin CRUDL
