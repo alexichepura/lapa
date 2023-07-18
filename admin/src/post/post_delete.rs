@@ -1,7 +1,7 @@
 use leptos::*;
 use leptos_router::{use_navigate, ActionForm};
 
-use crate::form::{FormFooter, Input};
+use crate::form::FormFooter;
 
 use super::PostError;
 
@@ -63,7 +63,12 @@ pub async fn post_delete(cx: Scope, id: String) -> Result<PostDeleteResult, Serv
     let found_post = prisma_client
         .post()
         .find_unique(db::post::id::equals(id.clone()))
-        .select(db::post::select!({ id }))
+        .select(db::post::select!({
+            id
+            images: select {
+                id
+            }
+        }))
         .exec()
         .await
         .map_err(|e| {
@@ -75,6 +80,18 @@ pub async fn post_delete(cx: Scope, id: String) -> Result<PostDeleteResult, Serv
         crate::err::serverr_404(cx);
         return Ok(Err(PostError::NotFound));
     }
+    let found_post = found_post.unwrap();
+    let images_ids: Vec<String> = found_post.images.iter().map(|img| img.id.clone()).collect();
+
+    let _images_delete_result = prisma_client
+        .image()
+        .delete_many(vec![db::image::id::in_vec(images_ids.clone())])
+        .exec()
+        .await
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
 
     prisma_client
         .post()
@@ -85,6 +102,10 @@ pub async fn post_delete(cx: Scope, id: String) -> Result<PostDeleteResult, Serv
             dbg!(e);
             ServerFnError::ServerError("Server error".to_string())
         })?;
+
+    for id in images_ids {
+        crate::post::delete_image_on_server(&id);
+    }
 
     Ok(Ok(()))
 }

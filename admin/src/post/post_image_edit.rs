@@ -89,6 +89,23 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ImageDeleteResult, Se
         return Ok(Err(ImageLoadError::NotFound));
     }
 
+    delete_image_on_server(&id);
+
+    prisma_client
+        .image()
+        .delete(db::image::id::equals(id))
+        .exec()
+        .await
+        .map_err(|e| {
+            dbg!(e);
+            ServerFnError::ServerError("Server error".to_string())
+        })?;
+
+    Ok(Ok(()))
+}
+
+#[cfg(feature = "ssr")]
+pub fn delete_image_on_server(id: &String) {
     // TODO iterate
     if let Err(e) = std::fs::remove_file(crate::image::img_path_small(&id)) {
         dbg!(e);
@@ -106,18 +123,6 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ImageDeleteResult, Se
     {
         dbg!(e);
     };
-
-    prisma_client
-        .image()
-        .delete(db::image::id::equals(id))
-        .exec()
-        .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
-        })?;
-
-    Ok(Ok(()))
 }
 
 type ImageUpdateResult = Result<(), ImageLoadError>;
