@@ -1,8 +1,5 @@
 {
-    "rust-analyzer.cargo.features": [
-        "ssr",
-        "hydrate"
-    ],
+    "rust-analyzer.cargo.features": "all",
     "[rust]": {
         // "editor.defaultFormatter": "bram209.leptos-language-server"
         "editor.defaultFormatter": "rust-lang.rust-analyzer"

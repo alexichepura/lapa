@@ -111,6 +111,25 @@ async fn main() {
         .with_state(app_state)
         .layer(Extension(Arc::new(leptos_options.clone())));
 
+    #[cfg(feature = "ratelimit")]
+    let app = {
+        use axum::{error_handling::HandleErrorLayer, BoxError};
+        use tower::ServiceBuilder;
+        use tower_governor::{
+            errors::display_error, governor::GovernorConfigBuilder, GovernorLayer,
+        };
+        let governor_conf = Box::new(GovernorConfigBuilder::default().finish().unwrap());
+        app.layer(
+            ServiceBuilder::new()
+                .layer(HandleErrorLayer::new(|e: BoxError| async move {
+                    display_error(e)
+                }))
+                .layer(GovernorLayer {
+                    config: Box::leak(governor_conf),
+                }),
+        )
+    };
+
     #[cfg(not(debug_assertions))]
     let app = {
         use tower_http::{compression::CompressionLayer, services::ServeDir};

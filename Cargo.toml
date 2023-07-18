@@ -42,6 +42,7 @@ thiserror = "1.0"
 tokio = { version = "1.28" }
 tower = { version = "0.4.13" }
 tower-http = { version = "0.4", features = ["fs", "compression-full"] }
+tower_governor = { version = "0.0.4" }
 wasm-bindgen = "=0.2.87"
 web-sys = { version = "0.3", features = [
     "HtmlDocument",
@@ -86,6 +87,7 @@ simple_logger = { workspace = true, optional = true }
 tokio = { workspace = true }
 tower = { workspace = true, optional = true }
 tower-http = { workspace = true, optional = true }
+tower_governor = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 thiserror = { workspace = true }
 http = { workspace = true }
@@ -94,6 +96,7 @@ prisma-client-rust = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }
 
 [features]
+ratelimit = ["dep:tower_governor"]
 hydrate = [
     "dep:wasm-bindgen",
     "dep:web-sys",
