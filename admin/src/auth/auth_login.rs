@@ -49,7 +49,7 @@ pub fn Login(cx: Scope, children: Children) -> impl IntoView {
                 <Input name="username" label="User"/>
                 <Input name="password" label="Password" type_="password"/>
                 <Checkbox name="remember" label="Remember me?"/>
-                <FormFooter action=login/>
+                <FormFooter action=login submit_text="Login"/>
                 <hr/>
                 <div>{children(cx)}</div>
             </ActionForm>
