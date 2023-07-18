@@ -116,9 +116,16 @@ async fn main() {
         use axum::{error_handling::HandleErrorLayer, BoxError};
         use tower::ServiceBuilder;
         use tower_governor::{
-            errors::display_error, governor::GovernorConfigBuilder, GovernorLayer,
+            errors::display_error, governor::GovernorConfigBuilder,
+            key_extractor::SmartIpKeyExtractor, GovernorLayer,
         };
-        let governor_conf = Box::new(GovernorConfigBuilder::default().finish().unwrap());
+
+        let governor_conf = Box::new(
+            GovernorConfigBuilder::default()
+                .key_extractor(SmartIpKeyExtractor)
+                .finish()
+                .unwrap(),
+        );
         app.layer(
             ServiceBuilder::new()
                 .layer(HandleErrorLayer::new(|e: BoxError| async move {
