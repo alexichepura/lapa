@@ -43,7 +43,9 @@ async fn main() {
         .with_cookie_name("session");
     let auth_config = AuthConfig::<String>::default();
     let session_store =
-        SessionStore::<SessionPrismaPool>::new(Some(prisma_client.clone().into()), session_config);
+        SessionStore::<SessionPrismaPool>::new(Some(prisma_client.clone().into()), session_config)
+            .await
+            .unwrap();
     session_store.initiate().await.unwrap();
 
     let conf = get_configuration(None).await.unwrap();

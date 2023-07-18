@@ -1,6 +1,7 @@
 use crate::prisma::ArcPrisma;
 use async_trait::async_trait;
 use axum_session::{DatabasePool, Session, SessionError, SessionStore};
+use prisma_client::db;
 use prisma_client::db::session;
 use prisma_client_rust::chrono::Utc;
 use std::vec;
@@ -26,15 +27,28 @@ impl DatabasePool for SessionPrismaPool {
         Ok(())
     }
 
-    async fn delete_by_expiry(&self, _table_name: &str) -> Result<(), SessionError> {
-        dbg!("delete_by_expiry");
-        self.pool
+    async fn delete_by_expiry(&self, _table_name: &str) -> Result<Vec<String>, SessionError> {
+        // dbg!("delete_by_expiry");
+        let result = self
+            .pool
             .session()
-            .delete_many(vec![session::expires::lt(Utc::now().timestamp() as i32)])
+            .find_many(vec![session::expires::lt(Utc::now().timestamp() as i32)])
+            .select(db::session::select!({ id }))
             .exec()
             .await
             .map_err(|e| SessionError::GenericDeleteError(e.to_string()))?;
-        Ok(())
+
+        let ids: Vec<String> = result.iter().map(|r| r.id.clone()).collect();
+
+        let result = self
+            .pool
+            .session()
+            // .delete_many(vec![session::expires::lt(Utc::now().timestamp() as i32)])
+            .delete_many(vec![session::id::in_vec(ids.clone())])
+            .exec()
+            .await
+            .map_err(|e| SessionError::GenericDeleteError(e.to_string()))?;
+        Ok(ids)
     }
 
     async fn count(&self, _table_name: &str) -> Result<i64, SessionError> {
@@ -134,5 +148,28 @@ impl DatabasePool for SessionPrismaPool {
             .await
             .map_err(|e| SessionError::GenericDeleteError(e.to_string()))?;
         Ok(())
+    }
+
+    async fn get_ids(&self, _table_name: &str) -> Result<Vec<String>, SessionError> {
+        use prisma_client::db;
+        let result = self
+            .pool
+            .session()
+            .find_many(vec![prisma_client_rust::or!(
+                session::expires::equals(None),
+                session::expires::gt(Utc::now().timestamp() as i32)
+            )])
+            .select(db::session::select!({ id }))
+            .exec()
+            .await
+            .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
+
+        let result: Vec<String> = result.iter().map(|data| data.id.clone()).collect();
+
+        Ok(result)
+    }
+
+    fn auto_handles_expiry(&self) -> bool {
+        false
     }
 }

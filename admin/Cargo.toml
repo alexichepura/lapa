@@ -34,9 +34,9 @@ prisma-client-rust = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }
 
 async-trait = { version = "0.1", optional = true }
-axum_session = { version = "0.2", optional = true }
-axum_session_auth = { version = "0.2.1", optional = true, default-features = false }
-bcrypt = { version = "0.14", optional = true }
+axum_session = { version = "0.3", default-features = false, optional = true }
+axum_session_auth = { version = "0.3", default-features = false, optional = true }
+bcrypt = { version = "0.15", optional = true }
 image = { version = "0.24", optional = true, features = ["webp-encoder"] }
 wasm-bindgen-futures = { version = "0.4" }
 # cookie = "0.17.0"
