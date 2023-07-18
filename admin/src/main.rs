@@ -170,7 +170,7 @@ async fn main() {
         )
     };
 
-    #[cfg(not(debug_assertions))]
+    #[cfg(feature = "compression")]
     let app = {
         use tower_http::{compression::CompressionLayer, services::ServeDir};
         let pkg_path = "/".to_owned() + &leptos_options.site_pkg_dir;

@@ -41,7 +41,7 @@ serde-wasm-bindgen = "0.5"
 thiserror = "1.0"
 tokio = { version = "1.28" }
 tower = { version = "0.4.13" }
-tower-http = { version = "0.4", features = ["fs", "compression-full"] }
+tower-http = { version = "0.4", features = ["fs"] }
 tower_governor = { version = "0.0.4" }
 wasm-bindgen = "=0.2.87"
 web-sys = { version = "0.3", features = [
@@ -96,7 +96,9 @@ prisma-client-rust = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }
 
 [features]
-ratelimit = ["dep:tower_governor"]
+prod = ["compression", "ratelimit"]
+compression = ["tower-http?/compression-full"]
+ratelimit = []
 hydrate = [
     "dep:wasm-bindgen",
     "dep:web-sys",
@@ -112,6 +114,7 @@ ssr = [
     "dep:prisma-client-rust",
     "dep:simple_logger",
     "dep:tower",
+    "dep:tower_governor",
     "dep:tower-http",
     "leptos/ssr",
     "leptos_meta/ssr",
