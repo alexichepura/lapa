@@ -169,7 +169,7 @@ nav {
 main {
 	flex: 1;
 	grid-area: main;
-	padding: var(--size-fluid-1) var(--size-fluid-2);
+	padding: var(--size-fluid-1);
 	overflow-y: auto;
 	overflow-x: hidden;
 	-webkit-overflow-scrolling: touch;
