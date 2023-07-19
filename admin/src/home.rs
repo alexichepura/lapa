@@ -1,7 +1,6 @@
 use leptos::*;
 use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 use crate::util::Loading;
 
@@ -132,6 +131,7 @@ pub struct StatsResult {
 #[server(GetStats, "/api")]
 pub async fn get_stats(cx: Scope, period: StatsPeriod) -> Result<StatsResult, ServerFnError> {
     use prisma_client::db;
+    use std::collections::HashMap;
     let prisma_client = crate::prisma::use_prisma(cx)?;
 
     let now = chrono::Utc::now().fixed_offset();
