@@ -17,74 +17,47 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
             <hr/>
             <h2>"Stats"</h2>
             <section class="Stats">
-                <Transition fallback=move || {
-                    view! { cx, <Loading/> }
-                }>
-                    {move || {
-                        stats_all
-                            .read(cx)
-                            .map(|stats| match stats {
-                                Err(e) => {
-                                    view! { cx, <p>"error" {e.to_string()}</p> }
-                                        .into_view(cx)
-                                }
-                                Ok(stats) => {
-                                    view! { cx, <StatsTable caption="All time" list=stats.list/> }
-                                        .into_view(cx)
-                                }
-                            })
-                    }}
-                </Transition>
-                <Transition fallback=move || {
-                    view! { cx, <Loading/> }
-                }>
-                    {move || {
-                        stats_month
-                            .read(cx)
-                            .map(|stats| match stats {
-                                Err(e) => {
-                                    view! { cx, <p>"error" {e.to_string()}</p> }
-                                        .into_view(cx)
-                                }
-                                Ok(stats) => {
-                                    view! { cx, <StatsTable caption="Last month" list=stats.list/> }
-                                        .into_view(cx)
-                                }
-                            })
-                    }}
-                </Transition>
-                <Transition fallback=move || {
-                    view! { cx, <Loading/> }
-                }>
-                    {move || {
-                        stats_hour
-                            .read(cx)
-                            .map(|stats| match stats {
-                                Err(e) => {
-                                    view! { cx, <p>"error" {e.to_string()}</p> }
-                                        .into_view(cx)
-                                }
-                                Ok(stats) => {
-                                    view! { cx, <StatsTable caption="Last hour" list=stats.list/> }
-                                        .into_view(cx)
-                                }
-                            })
-                    }}
-                </Transition>
+                <StatsTableTransition caption="All time" resource=stats_all/>
+                <StatsTableTransition caption="Last month" resource=stats_month/>
+                <StatsTableTransition caption="Last hour" resource=stats_hour/>
             </section>
         </div>
     }
 }
 
 #[component]
-pub fn StatsTable(
+pub fn StatsTableTransition(
     cx: Scope,
-    #[prop(into)] caption: TextProp,
-    list: Vec<StatsListItem>,
+    resource: StatsResource,
+    caption: &'static str,
 ) -> impl IntoView {
     view! { cx,
+        <Transition fallback=move || {
+            view! { cx, <Loading/> }
+        }>
+            {move || {
+                resource
+                    .read(cx)
+                    .map(|stats| match stats {
+                        Err(e) => {
+                            view! { cx, <p>"error" {e.to_string()}</p> }
+                                .into_view(cx)
+                        }
+                        Ok(stats) => {
+                            view! { cx, <StatsTable caption list=stats.list/> }
+                                .into_view(cx)
+                        }
+                    })
+            }}
+        </Transition>
+    }
+}
+
+#[component]
+pub fn StatsTable(cx: Scope, caption: &'static str, list: Vec<StatsListItem>) -> impl IntoView {
+    view! { cx,
         <table class="StatsTable">
-            <caption>{caption.get()}</caption>
+            <caption>{caption}</caption>
             <thead>
                 <tr>
                     <th class="StatsTable-path">"Path"</th>
@@ -108,6 +81,8 @@ pub fn StatsTable(
         </table>
     }
 }
+
+type StatsResource = Resource<(), Result<StatsResult, ServerFnError>>;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum StatsPeriod {
