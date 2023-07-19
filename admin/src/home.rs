@@ -61,7 +61,7 @@ pub fn StatsTable(cx: Scope, caption: &'static str, list: Vec<StatsListItem>) ->
             <thead>
                 <tr>
                     <th class="StatsTable-path">"Path"</th>
-                    <th class="StatsTable-count">"Renders"</th>
+                    <th class="StatsTable-count">"Count"</th>
                 </tr>
             </thead>
             <tbody>
