@@ -8,6 +8,8 @@ use crate::util::Loading;
 #[component]
 pub fn HomePage(cx: Scope) -> impl IntoView {
     let stats_all = create_blocking_resource(cx, || (), move |_| get_stats(cx, StatsPeriod::All));
+    let stats_month =
+        create_blocking_resource(cx, || (), move |_| get_stats(cx, StatsPeriod::Month));
     let stats_hour = create_blocking_resource(cx, || (), move |_| get_stats(cx, StatsPeriod::Hour));
     view! { cx,
         <Title text="Dashboard"/>
@@ -28,6 +30,24 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
                                 }
                                 Ok(stats) => {
                                     view! { cx, <StatsTable caption="All time" list=stats.list /> }
+                                        .into_view(cx)
+                                }
+                            })
+                    }}
+                </Transition>
+                <Transition fallback=move || {
+                    view! { cx, <Loading/> }
+                }>
+                    {move || {
+                        stats_month
+                            .read(cx)
+                            .map(|stats| match stats {
+                                Err(e) => {
+                                    view! { cx, <p>"error" {e.to_string()}</p> }
+                                        .into_view(cx)
+                                }
+                                Ok(stats) => {
+                                    view! { cx, <StatsTable caption="Last month" list=stats.list /> }
                                         .into_view(cx)
                                 }
                             })
@@ -67,8 +87,8 @@ pub fn StatsTable(
             <caption>{caption.get()}</caption>
             <thead>
                 <tr>
-                    <th>"Path"</th>
-                    <th>"Renders"</th>
+                    <th class="StatsTable-path">"Path"</th>
+                    <th class="StatsTable-count">"Renders"</th>
                 </tr>
             </thead>
             <tbody>
@@ -78,8 +98,8 @@ pub fn StatsTable(
                     view=move |cx, stat| {
                         view! { cx,
                             <tr>
-                                <td>{stat.path}</td>
-                                <td>{stat.n}</td>
+                                <td class="StatsTable-path">{stat.path}</td>
+                                <td class="StatsTable-count">{stat.n}</td>
                             </tr>
                         }
                     }
@@ -113,9 +133,20 @@ pub struct StatsResult {
 pub async fn get_stats(cx: Scope, period: StatsPeriod) -> Result<StatsResult, ServerFnError> {
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
+
+    let now = chrono::Utc::now().fixed_offset();
+    let last_hour = now - chrono::Duration::hours(1);
+    let last_month = now - chrono::Duration::days(30);
+    let wh = match period {
+        StatsPeriod::Hour => vec![db::ssr::created_at::gt(last_hour)],
+        StatsPeriod::Month => vec![db::ssr::created_at::gt(last_month)],
+        // StatsPeriod::All => vec![session::expires::lt(Utc::now().timestamp() as i32)],
+        _ => vec![],
+    };
+
     let renders = prisma_client
         .ssr()
-        .find_many(vec![])
+        .find_many(wh)
         .select(db::ssr::select!({ id created_at path  }))
         .exec()
         .await

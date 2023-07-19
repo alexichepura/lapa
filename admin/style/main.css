@@ -453,7 +453,21 @@ dialog {
 /* STATS PAGE */
 .StatsPage {
 	>fieldset {
-		display: flex;
-		gap: var(--size-fluid-1)
+		display: grid;
+		grid-template-columns: repeat(auto-fill, 300px);
+		gap: var(--size-fluid-2) var(--size-fluid-1);
+		align-items: start;
 	}
+
+	& table {
+		text-align: left;
+	}
+}
+
+.StatsTable-path {
+	width: 200px;
+}
+
+.StatsTable-count {
+	width: 100px;
 }
