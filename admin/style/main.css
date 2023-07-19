@@ -449,3 +449,11 @@ dialog {
 	}
 
 }
+
+/* STATS PAGE */
+.StatsPage {
+	>fieldset {
+		display: flex;
+		gap: var(--size-fluid-1)
+	}
+}

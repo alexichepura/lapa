@@ -1,27 +1,116 @@
 use leptos::*;
 use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+use crate::util::Loading;
 
 #[component]
 pub fn HomePage(cx: Scope) -> impl IntoView {
-    let renders = create_blocking_resource(cx, || (), move |_| get_renders(cx));
+    let stats_all = create_blocking_resource(cx, || (), move |_| get_stats(cx, StatsPeriod::All));
+    let stats_hour = create_blocking_resource(cx, || (), move |_| get_stats(cx, StatsPeriod::Hour));
     view! { cx,
         <Title text="Dashboard"/>
         <h1>"Dashboard"</h1>
-        <div class="Card">"Hello"</div>
+        <section class="StatsPage">
+            <fieldset>
+                <legend>"Stats"</legend>
+                <Transition fallback=move || {
+                    view! { cx, <Loading/> }
+                }>
+                    {move || {
+                        stats_all
+                            .read(cx)
+                            .map(|stats| match stats {
+                                Err(e) => {
+                                    view! { cx, <p>"error" {e.to_string()}</p> }
+                                        .into_view(cx)
+                                }
+                                Ok(stats) => {
+                                    view! { cx, <StatsTable caption="All time" list=stats.list /> }
+                                        .into_view(cx)
+                                }
+                            })
+                    }}
+                </Transition>
+                <Transition fallback=move || {
+                    view! { cx, <Loading/> }
+                }>
+                    {move || {
+                        stats_hour
+                            .read(cx)
+                            .map(|stats| match stats {
+                                Err(e) => {
+                                    view! { cx, <p>"error" {e.to_string()}</p> }
+                                        .into_view(cx)
+                                }
+                                Ok(stats) => {
+                                    view! { cx, <StatsTable caption="Last hour" list=stats.list /> }
+                                        .into_view(cx)
+                                }
+                            })
+                    }}
+                </Transition>
+            </fieldset>
+        </section>
     }
 }
 
-// enum StatsPeriod {
-//     Live,
-//     Hour,
-//     Day,
-//     Week,
-//     Month,
-// }
+#[component]
+pub fn StatsTable(
+    cx: Scope,
+    #[prop(into)] caption: TextProp,
+    list: Vec<StatsListItem>,
+) -> impl IntoView {
+    view! { cx,
+        <table class="Card">
+            <caption>{caption.get()}</caption>
+            <thead>
+                <tr>
+                    <th>"Path"</th>
+                    <th>"Renders"</th>
+                </tr>
+            </thead>
+            <tbody>
+                <For
+                    each=move || list.clone()
+                    key=|stat| stat.path.clone()
+                    view=move |cx, stat| {
+                        view! { cx,
+                            <tr>
+                                <td>{stat.path}</td>
+                                <td>{stat.n}</td>
+                            </tr>
+                        }
+                    }
+                />
+            </tbody>
+        </table>
+    }
+}
 
-#[server(GetSsr, "/api")]
-pub async fn get_renders(cx: Scope) -> Result<Vec<SsrListItem>, ServerFnError> {
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum StatsPeriod {
+    Live,
+    Hour,
+    Day,
+    Week,
+    Month,
+    All,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StatsListItem {
+    pub path: String,
+    pub n: i32,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StatsResult {
+    pub list: Vec<StatsListItem>,
+}
+#[server(GetStats, "/api")]
+pub async fn get_stats(cx: Scope, period: StatsPeriod) -> Result<StatsResult, ServerFnError> {
     use prisma_client::db;
     let prisma_client = crate::prisma::use_prisma(cx)?;
     let renders = prisma_client
@@ -35,8 +124,6 @@ pub async fn get_renders(cx: Scope) -> Result<Vec<SsrListItem>, ServerFnError> {
             ServerFnError::ServerError("Server error".to_string())
         })?;
 
-    use std::collections::HashMap;
-
     let hmap: HashMap<String, i32> = renders.iter().fold(HashMap::new(), |mut acc, data| {
         match acc.get(&data.path) {
             Some(count) => acc.insert(data.path.clone(), count + 1),
@@ -45,15 +132,14 @@ pub async fn get_renders(cx: Scope) -> Result<Vec<SsrListItem>, ServerFnError> {
         acc
     });
 
-    dbg!(hmap);
+    let mut list = hmap
+        .into_iter()
+        .map(|(path, n)| StatsListItem { path, n })
+        .collect::<Vec<StatsListItem>>();
 
-    let renders: Vec<SsrListItem> = renders
-        .iter()
-        .map(|data| SsrListItem {
-            id: data.id.clone(),
-        })
-        .collect();
-    Ok(renders)
+    list.sort_by(|a, b| b.n.cmp(&a.n));
+
+    Ok(StatsResult { list })
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
