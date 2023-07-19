@@ -83,6 +83,10 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
         Some(id) => id,
         None => "".to_string(),
     };
+    let id_input = match post.id.clone() {
+        Some(id) => view! { cx, <input type="hidden" name="id" value=id/> }.into_view(cx),
+        None => ().into_view(cx),
+    };
     let gallery_view = match post.id.clone() {
         Some(id) => view! { cx, <PostImages post_id=id/> }.into_view(cx),
         None => view! { cx, <p>"Gallery is not available for not saved post"</p> }.into_view(cx),
@@ -125,6 +129,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                 </dl>
             </header>
             <ActionForm action=post_upsert>
+                {id_input}
                 <fieldset disabled=move || pending()>
                     <legend>"Data"</legend>
                     <div class="Grid-fluid-2">
