@@ -69,6 +69,7 @@ button {
 		gap: var(--size-fluid-2);
 		padding: 0 var(--size-fluid-2);
 		align-items: center;
+		z-index: 1;
 
 		& button {
 			padding: 1px 4px;
@@ -448,4 +449,29 @@ dialog {
 		}
 	}
 
+}
+
+/* STATS */
+.Stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 350px);
+	gap: var(--size-fluid-2) var(--size-fluid-1);
+	align-items: start;
+}
+
+.StatsTable {
+	text-align: left;
+	background: var(--surface-2);
+	border-radius: var(--radius-2);
+	box-shadow: var(--shadow-3);
+	padding: var(--size-fluid-1);
+	margin-block-end: var(--size-fluid-2);
+}
+
+.StatsTable-path {
+	width: 250px;
+}
+
+.StatsTable-count {
+	width: 70px;
 }
