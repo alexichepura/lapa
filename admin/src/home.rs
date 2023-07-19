@@ -12,10 +12,11 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
     let stats_hour = create_blocking_resource(cx, || (), move |_| get_stats(cx, StatsPeriod::Hour));
     view! { cx,
         <Title text="Dashboard"/>
-        <h1>"Dashboard"</h1>
-        <section class="StatsPage">
-            <fieldset>
-                <legend>"Stats"</legend>
+        <div class="HomePage">
+            <h1>"Dashboard"</h1>
+            <hr/>
+            <h2>"Stats"</h2>
+            <section class="Stats">
                 <Transition fallback=move || {
                     view! { cx, <Loading/> }
                 }>
@@ -28,7 +29,7 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
                                         .into_view(cx)
                                 }
                                 Ok(stats) => {
-                                    view! { cx, <StatsTable caption="All time" list=stats.list /> }
+                                    view! { cx, <StatsTable caption="All time" list=stats.list/> }
                                         .into_view(cx)
                                 }
                             })
@@ -46,7 +47,7 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
                                         .into_view(cx)
                                 }
                                 Ok(stats) => {
-                                    view! { cx, <StatsTable caption="Last month" list=stats.list /> }
+                                    view! { cx, <StatsTable caption="Last month" list=stats.list/> }
                                         .into_view(cx)
                                 }
                             })
@@ -64,14 +65,14 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
                                         .into_view(cx)
                                 }
                                 Ok(stats) => {
-                                    view! { cx, <StatsTable caption="Last hour" list=stats.list /> }
+                                    view! { cx, <StatsTable caption="Last hour" list=stats.list/> }
                                         .into_view(cx)
                                 }
                             })
                     }}
                 </Transition>
-            </fieldset>
-        </section>
+            </section>
+        </div>
     }
 }
 
@@ -82,7 +83,7 @@ pub fn StatsTable(
     list: Vec<StatsListItem>,
 ) -> impl IntoView {
     view! { cx,
-        <table class="Card">
+        <table class="StatsTable">
             <caption>{caption.get()}</caption>
             <thead>
                 <tr>
