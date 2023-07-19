@@ -101,8 +101,8 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
     let href = move || format!("{}/post/{}", &site_url(), &slug());
 
     let published_at_utc_string = create_memo(cx, move |_| match published_at() {
-        Some(published_at) => datetime_to_string(published_at),
-        None => String::default(),
+        Some(published_at) => datetime_to_string(published_at).into_view(cx),
+        None => ().into_view(cx),
     });
     view! { cx,
         <Title text=move || format!("Post: {}", title())/>
