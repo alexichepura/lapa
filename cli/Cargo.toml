@@ -10,3 +10,4 @@ prisma_client = { workspace = true }
 prisma-client-rust = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }
+lightningcss = { version = "1.0.0-alpha.44", features = ["browserslist"] }

@@ -15,6 +15,7 @@ enum Commands {
     UserAdd(UserAddArgs),
     SettingsInit,
     Migrate,
+    Css,
 }
 
 #[derive(Args)]
@@ -39,6 +40,33 @@ async fn main() {
     prisma_client._db_push(false).await.unwrap();
 
     match &cli.command {
+        Commands::Css => {
+            use lightningcss::{
+                bundler::{Bundler, FileProvider},
+                stylesheet::{ParserFlags, ParserOptions, PrinterOptions},
+                targets::Targets,
+            };
+            use std::{fs::File, io::prelude::*, path::Path};
+
+            let fs = FileProvider::new();
+            let parser_options = ParserOptions {
+                flags: ParserFlags::NESTING | ParserFlags::CUSTOM_MEDIA,
+                ..ParserOptions::default()
+            };
+            let mut bundler = Bundler::new(&fs, None, parser_options);
+            let stylesheet = bundler.bundle(Path::new("./style/main.css")).unwrap();
+            let options = PrinterOptions::<'_> {
+                targets: Targets::default(),
+                // targets: Targets::from(Browsers::default()),
+                minify: true,
+                ..Default::default()
+            };
+            let style_output = stylesheet.to_css(options).unwrap();
+            let bytes = style_output.code.as_bytes();
+            let mut buffer = File::create("./style/main-bundle.css").unwrap();
+            buffer.write(bytes).unwrap();
+            println!("Css success");
+        }
         Commands::Migrate => {
             prisma_client._migrate_deploy().await.unwrap();
             println!("Migration success");
