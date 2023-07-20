@@ -1,6 +1,6 @@
-@import "https://unpkg.com/open-props";
-@import "https://unpkg.com/open-props/normalize.min.css";
-@import "https://unpkg.com/open-props/buttons.min.css";
+@use "./open-props.min.css";
+@use "./normalize.min.css";
+@use "./buttons.min.css";
 
 /* https://caniuse.com/css-nesting */
 
