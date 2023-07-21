@@ -1,15 +1,12 @@
-cfg_if::cfg_if! { if #[cfg(feature = "ssr")] {
-    use axum::{
-        body::{boxed, Body, BoxBody},
-        extract::Extension,
-        response::{IntoResponse, Response as AxumResponse},
-        http::{Request, Response, StatusCode, Uri},
-    };
-    use std::sync::Arc;
-    use leptos::*;
-}}
+use axum::{
+    body::{boxed, Body, BoxBody},
+    extract::Extension,
+    http::{Request, Response, StatusCode, Uri},
+    response::{IntoResponse, Response as AxumResponse},
+};
+use leptos::*;
+use std::sync::Arc;
 
-#[cfg(feature = "ssr")]
 pub async fn file_and_error_handler(
     uri: Uri,
     Extension(options): Extension<Arc<LeptosOptions>>,
@@ -41,7 +38,7 @@ pub async fn file_and_error_handler(
         handler(req).await.into_response()
     }
 }
-#[cfg(feature = "ssr")]
+
 async fn get_static_file(uri: Uri, root: &str) -> Result<Response<BoxBody>, (StatusCode, String)> {
     use tower::ServiceExt;
     use tower_http::services::ServeDir;
