@@ -1,16 +1,10 @@
-@import "https://unpkg.com/open-props";
-@import "https://unpkg.com/open-props/normalize.min.css";
-@import "https://unpkg.com/open-props/buttons.min.css";
+@use "./open-props.min.css";
+@use "./normalize.min.css";
+@use "./buttons.min.css";
 
-/* https://caniuse.com/css-nesting */
-
-/* https://drafts.csswg.org/mediaqueries-5/#at-ruledef-custom-media */
-/* @import "https://unpkg.com/open-props/media.min.css"; */
-/* https://open-props.style/#media-queries */
-/* https://github.com/parcel-bundler/lightningcss/issues/49 */
-/* https://github.com/parcel-bundler/lightningcss/pull/60 */
 @custom-media --md-n-above (width >=768px);
 @custom-media --sm-n-above (width >=480px);
+$sm-n-above: 480px; // need for container queries https://github.com/sass/sass/issues/3486
 
 :root {
 	--font-size-fluid-1-07: calc(var(--font-size-fluid-1) * 0.7);
@@ -235,12 +229,8 @@ form footer {
 	gap: var(--size-fluid-2);
 	align-items: center;
 	justify-content: start;
-}
 
-
-/* @container (--sm-n-above) { */
-@container (width >=360px) {
-	form footer {
+	@container (min-width: #{$sm-n-above}) {
 		grid-template-columns: auto auto;
 	}
 }
@@ -254,7 +244,6 @@ fieldset {
 }
 
 label {
-	/* :has(input) {} Firefox https://caniuse.com/css-has */
 	display: block;
 	margin-block-end: var(--size-fluid-1);
 
