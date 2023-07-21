@@ -4,6 +4,8 @@
 
 ![LAPA Admin screenshot 2023-07-10](https://github.com/alexichepura/lapa/assets/5582266/753ba3ff-1911-4d00-80cc-90888252f54f)
 
+DEMO site <https://lapa.chepura.space>
+
 ## Motivation
 I want to have practical full-stack setup to build websites and services. \
 Utilising type safety and performance of Rust opens the door for new era of web dev, that is taking off. \
