@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_meta::Title;
+use leptos_meta::{Meta, Title};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -18,6 +18,7 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
 
     view! { cx,
         <Title text="Home"/>
+        <Meta name="description" content="Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website"/>
         <h1>"Welcome to LAPA"</h1>
         <Suspense fallback=move || {
             view! { cx, <Loading/> }
