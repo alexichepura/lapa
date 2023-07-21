@@ -125,9 +125,12 @@ Requires <https://github.com/ryanfowler/precompress>
 ```
 
 ## Notes on CSS
-Modern CSS is quite cool. Nesting, custom media, container queries. All that was used here before. But required cargo-leptos fork. As well another cli step to bundle everything into one css. For now returning to SASS.
+Modern CSS is quite cool. Nesting, custom media, container queries. All that was used here before, but required cargo-leptos fork. As well another cli step to bundle everything into one css. For now returning to SASS. 
+Considering return back to CSS if/when cargo-leptos will support lightningcss config and bundling.
 
-See ligntningcss bundle with cli proof of concept <https://github.com/alexichepura/lapa/pull/23>.
+Sass PR <https://github.com/alexichepura/lapa/pull/24>.
+Ligntningcss bundle with cli proof of concept <https://github.com/alexichepura/lapa/pull/23>.
+
 
 ## Notes on prisma
 How initial migration created
