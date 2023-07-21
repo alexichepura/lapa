@@ -69,9 +69,7 @@ Type-safe database access.
     - based on <https://open-props.style>
     - dark and light themes
     - mobile first
-    - processing with <https://lightningcss.dev> (forked cargo-leptos for now)
-        - nesting
-        - custom media
+    - sass, @custom-media, @container, see notes on css below
 - components
     - forms, inputs and response messages
     - input datetime-local usage with chrono library
