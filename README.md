@@ -124,50 +124,10 @@ Requires <https://github.com/ryanfowler/precompress>
 ./ops/cli-deploy.sh # upload cli to server
 ```
 
-## Notes on CSS nesting and custom media
-For now requires fork of cargo-leptos with relevant flags for lightningcss
-https://github.com/leptos-rs/cargo-leptos/commit/da6c7aeec7b062335e6592ca379c175fb82d3c16
-```sh
-cargo install --git https://github.com/alexichepura/cargo-leptos --branch lightningcss-parsing-flags --locked cargo-leptos
-```
+## Notes on CSS
+Modern CSS is quite cool. Nesting, custom media, container queries. All that was used here before. But required cargo-leptos fork. As well another cli step to bundle everything into one css. For now returning to SASS.
 
-### CSS nesting
-https://caniuse.com/css-nesting
-```css
-nav {
-    /* nav styles */
-	&>a {
-        /* nav>a styles */
-    }
-}
-```
-
-### Custom media
-```css
-@custom-media --md-n-above (width >=768px);
-@media (--md-n-above) {}
-```
-
-### Container query
-https://caniuse.com/css-container-queries
-
-```css
-main form {
-    container-type: inline-size;
-}
-@container (width >=480px) {
-    form footer {
-		grid-template-columns: auto auto;
-	}
-}
-```
-
-### Container query + custom media
-NOTE Container query doesn't work with custom media yet
-```css
-@container (--sm-n-above) {} /* doesn't work */
-@container (width >=480px) {} /* works */
-```
+See ligntningcss bundle with cli proof of concept <https://github.com/alexichepura/lapa/pull/23>.
 
 ## Notes on prisma
 How initial migration created

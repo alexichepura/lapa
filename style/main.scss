@@ -1,17 +1,7 @@
-// @import "https://unpkg.com/open-props@1.5.10/open-props.min.css";
-// @import "https://unpkg.com/open-props@1.5.10/normalize.min.css";
-// @import "https://unpkg.com/open-props@1.5.10/buttons.min.css";
 @use "./open-props.min.css";
 @use "./normalize.min.css";
 @use "./buttons.min.css";
 
-/* https://caniuse.com/css-nesting */
-
-/* https://drafts.csswg.org/mediaqueries-5/#at-ruledef-custom-media */
-/* @import "https://unpkg.com/open-props/media.min.css"; */
-/* https://open-props.style/#media-queries */
-/* https://github.com/parcel-bundler/lightningcss/issues/49 */
-/* https://github.com/parcel-bundler/lightningcss/pull/60 */
 @custom-media --md-n-above (width >=768px);
 @custom-media --sm-n-above (width >=480px);
 
