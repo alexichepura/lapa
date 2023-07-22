@@ -37,5 +37,5 @@ pub(crate) fn InputImage(
         }
     };
 
-    view! { cx, <input type="file" on:change=on_file_change node_ref=file_input/> }
+    view! { cx, <input type="file" on:change=on_file_change node_ref=file_input autocomplete="off"/> }
 }
