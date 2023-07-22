@@ -1,10 +1,27 @@
-use crate::prisma::ArcPrisma;
 use async_trait::async_trait;
-use axum_session::{DatabasePool, Session, SessionError, SessionStore};
+use axum_session::{
+    DatabasePool, Session, SessionConfig, SessionError, SessionLayer, SessionStore,
+};
 use prisma_client::db;
 use prisma_client::db::session;
 use prisma_client_rust::chrono::Utc;
 use std::vec;
+
+use super::ArcPrisma;
+
+pub async fn session_layer(prisma_client: ArcPrisma) -> SessionLayer<SessionPrismaPool> {
+    let config = SessionConfig::default()
+        .with_table_name("Session")
+        .with_cookie_name("session");
+
+    let store = SessionStore::<SessionPrismaPool>::new(Some(prisma_client.clone().into()), config)
+        .await
+        .unwrap();
+    store.initiate().await.unwrap();
+
+    let layer = SessionLayer::new(store);
+    layer
+}
 
 pub type SessionPrismaSession = Session<SessionPrismaPool>;
 pub type SessionPrismaSessionStore = SessionStore<SessionPrismaPool>;

@@ -11,9 +11,8 @@ async fn main() {
     };
     use lapa_site::{
         app::App,
-        fileserv::file_and_error_handler,
         routes::GenerateRouteList,
-        server::{robots_txt, AppState},
+        server::{file_and_error_handler, robots_txt, AppState},
         settings::settins_db,
     };
     use leptos::*;

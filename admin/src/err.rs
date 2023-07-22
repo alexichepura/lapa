@@ -2,29 +2,6 @@ use http::status::StatusCode;
 use leptos::*;
 use thiserror::Error;
 
-#[cfg(feature = "ssr")]
-use leptos_axum::ResponseOptions;
-
-#[cfg(feature = "ssr")]
-pub fn use_response(cx: Scope) -> ResponseOptions {
-    use_context::<ResponseOptions>(cx).expect("to have leptos_axum::ResponseOptions provided")
-}
-#[cfg(feature = "ssr")]
-pub fn serverr_401(cx: Scope) {
-    let response = use_response(cx);
-    response.set_status(StatusCode::UNAUTHORIZED);
-}
-#[cfg(feature = "ssr")]
-pub fn serverr_404(cx: Scope) {
-    let response = use_response(cx);
-    response.set_status(StatusCode::NOT_FOUND);
-}
-#[cfg(feature = "ssr")]
-pub fn serverr_400(cx: Scope) {
-    let response = use_response(cx);
-    response.set_status(StatusCode::BAD_REQUEST);
-}
-
 #[derive(Clone, Debug, Error)]
 pub enum AppError {
     #[error("Not Found")]
@@ -69,7 +46,7 @@ pub fn ErrorTemplate(
     println!("ErrorTemplate_Errors: {errors:#?}");
 
     #[cfg(feature = "ssr")]
-    if let Some(response) = use_context::<ResponseOptions>(cx) {
+    if let Some(response) = use_context::<leptos_axum::ResponseOptions>(cx) {
         response.set_status(errors[0].status_code());
     }
 

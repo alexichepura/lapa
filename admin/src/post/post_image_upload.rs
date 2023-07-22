@@ -70,27 +70,27 @@ pub async fn upload_img(
     let img_bytes = serde_json::from_str::<Vec<u8>>(&img);
     if let Err(e) = img_bytes {
         dbg!(e);
-        crate::err::serverr_400(cx);
+        crate::server::serverr_400(cx);
         return Ok(Err(ImageUploadError::Deserialization));
     }
     let img_bytes = img_bytes.unwrap();
 
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let cursor = std::io::Cursor::new(img_bytes.clone());
     let img_reader = image::io::Reader::new(cursor.clone()).with_guessed_format();
 
     if let Err(e) = img_reader {
         dbg!(e);
-        crate::err::serverr_400(cx);
+        crate::server::serverr_400(cx);
         return Ok(Err(ImageUploadError::Read));
     }
     let img_reader = img_reader.unwrap();
 
     let img_format = img_reader.format();
     if let None = img_format {
-        crate::err::serverr_400(cx);
+        crate::server::serverr_400(cx);
         return Ok(Err(ImageUploadError::Format));
     }
     let img_format = img_format.unwrap();

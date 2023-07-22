@@ -1,20 +1,23 @@
-cfg_if::cfg_if! {if #[cfg(feature = "ssr")] {
-    use axum::extract::FromRef;
-    use axum::extract::State;
-    use http::StatusCode;
-    use leptos::LeptosOptions;
-    use std::sync::Arc;
-    use prisma_client::db::PrismaClient;
-}}
+use axum::extract::FromRef;
+use axum::extract::State;
+use http::StatusCode;
+use leptos::LeptosOptions;
+use prisma_client::db::PrismaClient;
+use std::sync::Arc;
 
-#[cfg(feature = "ssr")]
+pub mod err;
+pub mod fileserv;
+pub mod prisma;
+pub use err::*;
+pub use fileserv::*;
+pub use prisma::*;
+
 #[derive(FromRef, Debug, Clone)]
 pub struct AppState {
     pub leptos_options: LeptosOptions,
     pub prisma_client: Arc<PrismaClient>,
 }
 
-#[cfg(feature = "ssr")]
 pub async fn robots_txt(State(app_state): State<AppState>) -> Result<String, (StatusCode, String)> {
     use prisma_client::db;
     let prisma_client = app_state.prisma_client;

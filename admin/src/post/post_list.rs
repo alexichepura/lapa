@@ -84,7 +84,7 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
 #[server(GetPosts, "/api")]
 pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
     let posts = prisma_client
         .post()
         .find_many(vec![])

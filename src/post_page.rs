@@ -197,7 +197,7 @@ pub async fn get_post(
     slug: String,
 ) -> Result<Result<PostData, PostError>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let post = prisma_client
         .post()
@@ -259,7 +259,7 @@ pub async fn get_post(
     match result {
         Some(post) => Ok(Ok(post)),
         None => {
-            crate::err::serverr_404(cx);
+            crate::server::serverr_404(cx);
             Ok(Err(PostError::NotFound))
         }
     }

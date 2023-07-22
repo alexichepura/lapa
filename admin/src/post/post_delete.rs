@@ -58,7 +58,7 @@ type PostDeleteResult = Result<(), PostError>;
 #[server(PostDelete, "/api")]
 pub async fn post_delete(cx: Scope, id: String) -> Result<PostDeleteResult, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let found_post = prisma_client
         .post()
@@ -77,7 +77,7 @@ pub async fn post_delete(cx: Scope, id: String) -> Result<PostDeleteResult, Serv
         })?;
 
     if found_post.is_none() {
-        crate::err::serverr_404(cx);
+        crate::server::serverr_404(cx);
         return Ok(Err(PostError::NotFound));
     }
     let found_post = found_post.unwrap();

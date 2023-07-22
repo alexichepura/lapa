@@ -125,7 +125,7 @@ pub fn Settings(cx: Scope) -> impl IntoView {
 type SettingsResult = Result<SettingsData, SettingsError>;
 #[server(GetSettings, "/api")]
 pub async fn get_settings(cx: Scope) -> Result<SettingsResult, ServerFnError> {
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let settings = prisma_client
         .settings()
@@ -148,7 +148,7 @@ pub async fn get_settings(cx: Scope) -> Result<SettingsResult, ServerFnError> {
             home_text: settings.home_text,
         }),
         None => {
-            crate::err::serverr_404(cx);
+            crate::server::serverr_404(cx);
             Err(SettingsError::NotFound)
         }
     })
