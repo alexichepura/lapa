@@ -14,8 +14,6 @@ $sm-n-above: 480px; // need for container queries https://github.com/sass/sass/i
 body {
 	font-family: var(--font-sans);
 	margin: 0;
-	height: 100%;
-	overflow-x: hidden;
 }
 
 h1 {
@@ -44,7 +42,6 @@ button {
 
 .admin {
 	display: grid;
-	height: 100vh;
 	grid-template-rows: 36px 1fr;
 	grid-template-areas: "header" "main";
 
@@ -55,6 +52,9 @@ button {
 	}
 
 	>header {
+		position: sticky;
+		top: 0;
+		z-index: 10;
 		grid-area: header;
 		background: var(--surface-1);
 		box-shadow: var(--shadow-3);
@@ -63,7 +63,6 @@ button {
 		gap: var(--size-fluid-2);
 		padding: 0 var(--size-fluid-2);
 		align-items: center;
-		z-index: 1;
 
 		& button {
 			padding: 1px 4px;
@@ -85,10 +84,10 @@ button {
 
 .menu {
 	grid-area: nav;
-	position: absolute;
+	position: fixed;
 	top: 0;
 	left: 0;
-	z-index: 1;
+	z-index: 15;
 
 	@media (--md-n-above) {
 		position: relative;
