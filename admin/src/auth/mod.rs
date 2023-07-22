@@ -21,6 +21,6 @@ pub fn use_user_signal(cx: Scope) -> UserSignal {
 
 #[server(GetUser, "/api")]
 pub async fn get_user(cx: Scope) -> Result<Option<User>, ServerFnError> {
-    let auth = crate::server::use_server_auth(cx)?;
+    let auth = crate::server::use_auth(cx)?;
     Ok(auth.current_user)
 }

@@ -58,7 +58,7 @@ pub async fn get_post(
     cx: Scope,
     id: String,
 ) -> Result<Result<PostFormData, PostError>, ServerFnError> {
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let post = prisma_client
         .post()

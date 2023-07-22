@@ -65,7 +65,7 @@ pub async fn login(
     remember: Option<String>,
     skip_redirect: Option<String>,
 ) -> Result<Result<super::User, AuthError>, ServerFnError> {
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
     let user = prisma_client
         .user()
         .find_unique(prisma_client::db::user::username::equals(username))
@@ -82,7 +82,7 @@ pub async fn login(
             Err(AuthError::NoMatch)
         }
         Some(user) => {
-            let auth = crate::server::use_server_auth(cx)?;
+            let auth = crate::server::use_auth(cx)?;
             match bcrypt::verify(password, &user.password)
                 .map_err(|e| ServerFnError::ServerError(e.to_string()))?
             {

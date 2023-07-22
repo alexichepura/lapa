@@ -1,8 +1,6 @@
 #![feature(result_flattening)]
 
 cfg_if::cfg_if! {if #[cfg(feature = "ssr")] {
-    pub mod fileserv;
-    pub mod prisma;
     pub mod server;
 }}
 

@@ -71,7 +71,7 @@ type ImageDeleteResult = Result<(), ImageLoadError>;
 #[server(ImageDelete, "/api")]
 pub async fn delete_image(cx: Scope, id: String) -> Result<ImageDeleteResult, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let found_image = prisma_client
         .image()
@@ -133,7 +133,7 @@ pub async fn image_update_alt(
     alt: String,
 ) -> Result<ImageUpdateResult, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let found_image = prisma_client
         .image()

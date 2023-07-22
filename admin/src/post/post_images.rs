@@ -236,7 +236,7 @@ where
 #[server(GetImages, "/api")]
 pub async fn get_images(cx: Scope, post_id: String) -> Result<Vec<PostImageData>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
     let images = prisma_client
         .image()
         .find_many(vec![db::image::post_id::equals(post_id)])
@@ -269,7 +269,7 @@ pub async fn images_order_update(
     ids: Vec<String>,
 ) -> Result<ImagesOrderUpdateResult, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let order_update = ids.into_iter().enumerate().map(|(i, id)| {
         prisma_client
@@ -300,7 +300,7 @@ pub type ImageMakeHeroAction = Action<ImageMakeHero, Result<ImageMakeHeroResult,
 #[server(ImageMakeHero, "/api")]
 pub async fn image_make_hero(cx: Scope, id: String) -> Result<ImageMakeHeroResult, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let current_img = prisma_client
         .image()

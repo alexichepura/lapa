@@ -76,7 +76,7 @@ pub async fn upload_img(
     let img_bytes = img_bytes.unwrap();
 
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let cursor = std::io::Cursor::new(img_bytes.clone());
     let img_reader = image::io::Reader::new(cursor.clone()).with_guessed_format();

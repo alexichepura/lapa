@@ -40,7 +40,7 @@ pub async fn settings_site_update(
     site_url: String,
 ) -> Result<Result<(), SettingsError>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let settings_saved = prisma_client
         .settings()

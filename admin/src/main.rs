@@ -3,11 +3,10 @@
 async fn main() {
     use axum::{extract::Extension, routing::get, Router};
     use lapa_admin::{
-        fileserv::file_and_error_handler,
         routes::GenerateRouteList,
         server::{
-            auth_session_layer, leptos_routes_handler, server_fn_private, server_fn_public,
-            session_layer, AppState,
+            auth_session_layer, file_and_error_handler, leptos_routes_handler, server_fn_private,
+            server_fn_public, session_layer, AppState,
         },
     };
     use leptos::*;

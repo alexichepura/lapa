@@ -108,7 +108,7 @@ pub struct StatsResult {
 pub async fn get_stats(cx: Scope, period: StatsPeriod) -> Result<StatsResult, ServerFnError> {
     use prisma_client::db;
     use std::collections::HashMap;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let now = chrono::Utc::now().fixed_offset();
     let last_hour = now - chrono::Duration::hours(1);

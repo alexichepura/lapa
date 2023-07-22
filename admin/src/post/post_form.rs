@@ -253,7 +253,7 @@ pub async fn post_upsert(
     text: String,
 ) -> Result<Result<PostFormData, PostError>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let post_by_slug = prisma_client
         .post()

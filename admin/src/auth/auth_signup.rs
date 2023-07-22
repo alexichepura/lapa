@@ -42,8 +42,8 @@ pub async fn signup(
     password_confirmation: String,
     remember: Option<String>,
 ) -> Result<(), ServerFnError> {
-    let prisma_client = crate::prisma::use_prisma(cx)?;
-    let auth = crate::server::use_server_auth(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
+    let auth = crate::server::use_auth(cx)?;
 
     if password != password_confirmation {
         return Err(ServerFnError::ServerError(

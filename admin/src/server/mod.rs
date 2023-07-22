@@ -1,19 +1,24 @@
-pub mod auth;
-pub mod err;
-pub mod session;
-use crate::{app::App, auth::User, settings::settins_db};
-pub use auth::*;
 use axum::{
     body::Body as AxumBody,
     extract::{FromRef, Path, RawQuery, State},
     http::Request,
     response::{IntoResponse, Response},
 };
-pub use err::*;
 use http::HeaderMap;
 use leptos::LeptosOptions;
 use leptos::*;
 use leptos_axum::handle_server_fns_with_context;
+
+use crate::{app::App, auth::User, settings::settins_db};
+pub mod auth;
+pub mod err;
+pub mod fileserv;
+pub mod prisma;
+pub mod session;
+pub use auth::*;
+pub use err::*;
+pub use fileserv::*;
+pub use prisma::*;
 pub use session::*;
 
 #[derive(FromRef, Debug, Clone)]

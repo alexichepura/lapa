@@ -21,7 +21,7 @@ pub fn ImagesConvertView(cx: Scope) -> impl IntoView {
 #[server(ImagesConvert, "/api")]
 pub async fn images_convert(cx: Scope) -> Result<Result<(), SettingsError>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
 
     let settings = prisma_client
         .settings()

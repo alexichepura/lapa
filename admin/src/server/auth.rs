@@ -4,7 +4,7 @@ use leptos::{use_context, Scope, ServerFnError};
 
 use super::SessionPrismaPool;
 use crate::auth::User;
-use crate::prisma::ArcPrisma;
+use crate::server::ArcPrisma;
 
 type PrismaAuthSessionLayer = AuthSessionLayer<User, String, SessionPrismaPool, ArcPrisma>;
 
@@ -17,7 +17,7 @@ pub fn auth_session_layer(prisma_client: ArcPrisma) -> PrismaAuthSessionLayer {
 
 pub type AuthSession = axum_session_auth::AuthSession<User, String, SessionPrismaPool, ArcPrisma>;
 
-pub fn use_server_auth(cx: Scope) -> Result<AuthSession, ServerFnError> {
+pub fn use_auth(cx: Scope) -> Result<AuthSession, ServerFnError> {
     use_context::<AuthSession>(cx)
         .ok_or("Auth session missing.")
         .map_err(|e| ServerFnError::ServerError(e.to_string()))
