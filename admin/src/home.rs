@@ -13,9 +13,9 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
     view! { cx,
         <Title text="Dashboard"/>
         <div class="HomePage">
-            <h1>"Dashboard"</h1>
+            <h1>Dashboard</h1>
             <hr/>
-            <h2>"Stats"</h2>
+            <h2>Stats</h2>
             <section class="Stats">
                 <StatsTableTransition caption="All time" resource=stats_all/>
                 <StatsTableTransition caption="Last month" resource=stats_month/>

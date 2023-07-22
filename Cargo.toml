@@ -18,11 +18,12 @@ console_error_panic_hook = "0.1"
 console_log = "1"
 http = "0.2"
 js-sys = { version = "0.3" }
-leptos = { version = "0.4.5", features = ["nightly"] }
-leptos_axum = { version = "0.4.5" }
-leptos_meta = { version = "0.4.5", features = ["nightly"] }
-leptos_router = { version = "0.4.5", features = ["nightly"] }
+leptos = { git = "https://github.com/leptos-rs/leptos", rev = "62bf315", features = ["nightly"] }
+leptos_axum = { git = "https://github.com/leptos-rs/leptos", rev = "62bf315" }
+leptos_meta = { git = "https://github.com/leptos-rs/leptos", rev = "62bf315", features = ["nightly"] }
+leptos_router = { git = "https://github.com/leptos-rs/leptos", rev = "62bf315", features = ["nightly"] }
 log = "0.4"
+prisma_client = { path = "./prisma_client" }
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e0af632", default-features = false, features = [
     "sqlite",
     "sqlite-create-many",
@@ -33,24 +34,23 @@ prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-
     "sqlite-create-many",
     "migrations",
 ] }
-prisma_client = { path = "./prisma_client" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-simple_logger = "4"
 serde-wasm-bindgen = "0.5"
+simple_logger = "4"
 thiserror = "1.0"
 tokio = { version = "1.28" }
 tower = { version = "0.4.13" }
-tower-http = { version = "0.4", features = ["fs"] }
 tower_governor = { version = "0.0.4" }
+tower-http = { version = "0.4", features = ["fs"] }
 wasm-bindgen = "=0.2.87"
 web-sys = { version = "0.3", features = [
-    "HtmlDocument",
+    "Blob",
     "File",
     "FileList",
-    "HtmlInputElement",
     "HtmlDialogElement",
-    "Blob",
+    "HtmlDocument",
+    "HtmlInputElement",
     "Url",
 ] }
 
@@ -64,29 +64,29 @@ codegen-units = 16
 
 [dependencies]
 axum = { workspace = true, optional = true }
-js-sys = { workspace = true, optional = true }
+cfg-if = { workspace = true }
 chrono = { workspace = true }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
-cfg-if = { workspace = true }
+http = { workspace = true }
+js-sys = { workspace = true, optional = true }
 leptos = { workspace = true }
 leptos_axum = { workspace = true, optional = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
 log = { workspace = true }
+prisma_client = { workspace = true, optional = true }
+prisma-client-rust = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 simple_logger = { workspace = true, optional = true }
+thiserror = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true, optional = true }
-tower-http = { workspace = true, optional = true }
 tower_governor = { workspace = true, optional = true }
+tower-http = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
-thiserror = { workspace = true }
-http = { workspace = true }
-prisma_client = { workspace = true, optional = true }
-prisma-client-rust = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }
 
 [features]
@@ -94,12 +94,12 @@ prod = ["compression", "ratelimit"]
 compression = ["tower-http?/compression-full"]
 ratelimit = []
 hydrate = [
+    "dep:js-sys",
     "dep:wasm-bindgen",
     "dep:web-sys",
-    "dep:js-sys",
-    "leptos/hydrate",
     "leptos_meta/hydrate",
     "leptos_router/hydrate",
+    "leptos/hydrate",
 ]
 ssr = [
     "dep:axum",
@@ -107,12 +107,12 @@ ssr = [
     "dep:prisma_client",
     "dep:prisma-client-rust",
     "dep:simple_logger",
-    "dep:tower",
     "dep:tower_governor",
     "dep:tower-http",
-    "leptos/ssr",
+    "dep:tower",
     "leptos_meta/ssr",
     "leptos_router/ssr",
+    "leptos/ssr",
 ]
 
 [package.metadata.cargo-all-features]
