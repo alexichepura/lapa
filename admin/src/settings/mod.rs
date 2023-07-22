@@ -94,7 +94,7 @@ pub fn Settings(cx: Scope) -> impl IntoView {
 
     view! { cx,
         <Title text="Settings"/>
-        <h1>"Settings"</h1>
+        <h1>Settings</h1>
         <Suspense fallback=move || {
             view! { cx, <Loading/> }
         }>

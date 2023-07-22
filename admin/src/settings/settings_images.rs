@@ -22,7 +22,7 @@ pub fn SettingsImagesForm(cx: Scope, settings: SettingsImages) -> impl IntoView 
 
     view! { cx,
         <fieldset disabled=move || pending()>
-            <legend>"Images"</legend>
+            <legend>Images</legend>
             <ActionForm action=settings_upsert>
                 <div class="Grid-fluid-2">
                     <Input

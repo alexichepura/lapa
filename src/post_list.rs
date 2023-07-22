@@ -12,7 +12,7 @@ pub fn PostList(cx: Scope) -> impl IntoView {
     let posts = create_blocking_resource(cx, || (), move |_| get_posts(cx));
 
     view! { cx,
-        <h2>"Posts"</h2>
+        <h2>Posts</h2>
         <Suspense fallback=move || {
             view! { cx, <Loading/> }
         }>
@@ -21,7 +21,7 @@ pub fn PostList(cx: Scope) -> impl IntoView {
                     .read(cx)
                     .map(|posts| match posts {
                         Err(e) => {
-                            view! { cx, <p>"error" {e.to_string()}</p> }
+                            view! { cx, <p>error {e.to_string()}</p> }
                                 .into_view(cx)
                         }
                         Ok(posts) => {
@@ -37,7 +37,7 @@ pub fn PostList(cx: Scope) -> impl IntoView {
 #[component]
 pub fn PostListView(cx: Scope, posts: Vec<PostListItem>) -> impl IntoView {
     let list = if posts.is_empty() {
-        view! { cx, <p>"No posts were found."</p> }.into_view(cx)
+        view! { cx, <p>No posts were found.</p> }.into_view(cx)
     } else {
         posts
             .into_iter()

@@ -17,14 +17,14 @@ pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
 
     view! { cx,
         <fieldset disabled=move || pending()>
-            <legend>"Site"</legend>
+            <legend>Site</legend>
             <ActionForm action=settings_site_update>
                 <label>
-                    <div>"robots.txt"</div>
+                    <div>robots.txt</div>
                     <textarea name="robots_txt" prop:value=settings.robots_txt.to_string() rows="5"/>
                 </label>
                 <label>
-                    <div>"Site url"</div>
+                    <div>Site url</div>
                     <input name="site_url" prop:value=settings.site_url.to_string() value=settings.site_url.to_string()/>
                 </label>
                 <FormFooter action=settings_site_update submit_text="Update site data"/>

@@ -186,7 +186,7 @@ pub fn PostImageModal(
             <button on:click=move |ev| {
                 ev.prevent_default();
                 set_dialog_open(None);
-            }>"Close"</button>
+            }>Close</button>
         </figure>
     }
 }

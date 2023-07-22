@@ -49,7 +49,7 @@ pub fn PostImageModalForm(
     view! { cx,
         <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) width=500/>
         <div>
-            <button on:click=on_delete>"Delete"</button>
+            <button on:click=on_delete>Delete</button>
             <hr/>
             <ActionForm action=image_update>
                 <fieldset disabled=move || pending()>
@@ -61,7 +61,7 @@ pub fn PostImageModalForm(
             <button on:click=move |ev| {
                 ev.prevent_default();
                 set_editing(None);
-            }>"Close"</button>
+            }>Close</button>
         </div>
     }
 }

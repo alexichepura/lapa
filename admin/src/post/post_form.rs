@@ -89,7 +89,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
     };
     let gallery_view = match post.id.clone() {
         Some(id) => view! { cx, <PostImages post_id=id/> }.into_view(cx),
-        None => view! { cx, <p>"Gallery is not available for not saved post"</p> }.into_view(cx),
+        None => view! { cx, <p>Gallery is not available for not saved post</p> }.into_view(cx),
     };
     let delete_view = match post.id.clone() {
         Some(id) => view! { cx, <PostDeleteForm id=id.clone() slug/> }.into_view(cx),
@@ -109,33 +109,33 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
         <section class="PostPage">
             <header>
                 <div>
-                    <h1>"Post"</h1>
+                    <h1>Post</h1>
                     <a href=move || href() target="_blank">
                         {move || href()}
                     </a>
                 </div>
                 <dl>
-                    <dt>"ID: "</dt>
+                    <dt>ID: </dt>
                     <dd>{id_view}</dd>
                     <br/>
-                    <dt>"Created at " <small>"(Local): "</small></dt>
+                    <dt>Created at  <small>(Local): </small></dt>
                     <dd>{created.local}</dd>
                     <br/>
-                    <dt>"Created at " <small>"(UTC): "</small></dt>
+                    <dt>Created at  <small>(UTC): </small></dt>
                     <dd>{created.utc}</dd>
                     <br/>
-                    <dt>"Published at " <small>"(UTC): "</small></dt>
+                    <dt>Published at  <small>(UTC): </small></dt>
                     <dd>{published_at_utc_string}</dd>
                 </dl>
             </header>
             <ActionForm action=post_upsert>
                 {id_input}
                 <fieldset disabled=move || pending()>
-                    <legend>"Data"</legend>
+                    <legend>Data</legend>
                     <div class="Grid-fluid-2">
                         <div>
                             <label>
-                                <div>"Title"</div>
+                                <div>Title</div>
                                 <input
                                     name="title"
                                     value=title
@@ -145,7 +145,7 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                                 />
                             </label>
                             <label>
-                                <div>"Slug"</div>
+                                <div>Slug</div>
                                 <input
                                     name="slug"
                                     value=slug
@@ -155,14 +155,14 @@ pub fn PostForm(cx: Scope, post: PostFormData) -> impl IntoView {
                                 />
                             </label>
                             <label>
-                                <div>"Description"</div>
+                                <div>Description</div>
                                 <textarea name="description" prop:value=post.description></textarea>
                             </label>
                         </div>
                         <div>
                             <PublishedAt published_at set_published_at/>
                             <label>
-                                <div>"Text"</div>
+                                <div>Text</div>
                                 <textarea
                                     name="text"
                                     value=&post.text
@@ -218,7 +218,7 @@ pub fn PublishedAt(
         <div class="Grid-fluid-2">
             <Checkbox label="Publish" checked=is_published set=set_is_published/>
             <label>
-                <div>"Published at " <small>"(Local)"</small></div>
+                <div>Published at  <small>(Local)</small></div>
                 <input
                     disabled=disabled
                     prop:disabled=disabled

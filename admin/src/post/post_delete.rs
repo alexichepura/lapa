@@ -34,11 +34,11 @@ pub fn PostDeleteForm(cx: Scope, id: String, slug: Signal<String>) -> impl IntoV
     let disabled = create_memo(cx, move |_| input_slug() != slug());
     view! { cx,
         <fieldset disabled=move || pending()>
-            <legend>"Danger zone. Delete post."</legend>
+            <legend>Danger zone. Delete post.</legend>
             <ActionForm action=post_delete>
                 <input type="hidden" name="id" value=id.clone()/>
                 <label>
-                    <div>"Slug"</div>
+                    <div>Slug</div>
                     <input
                         value=input_slug
                         prop:value=input_slug

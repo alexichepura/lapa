@@ -40,7 +40,7 @@ pub fn StatsTableTransition(
                     .read(cx)
                     .map(|stats| match stats {
                         Err(e) => {
-                            view! { cx, <p>"error" {e.to_string()}</p> }
+                            view! { cx, <p>error {e.to_string()}</p> }
                                 .into_view(cx)
                         }
                         Ok(stats) => {
@@ -60,8 +60,8 @@ pub fn StatsTable(cx: Scope, caption: &'static str, list: Vec<StatsListItem>) ->
             <caption>{caption}</caption>
             <thead>
                 <tr>
-                    <th class="StatsTable-path">"Path"</th>
-                    <th class="StatsTable-count">"Count"</th>
+                    <th class="StatsTable-path">Path</th>
+                    <th class="StatsTable-count">Count</th>
                 </tr>
             </thead>
             <tbody>

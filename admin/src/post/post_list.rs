@@ -16,10 +16,9 @@ pub fn PostList(cx: Scope) -> impl IntoView {
     view! { cx,
         <Title text="Posts"/>
         <h1>
-            <span>"Posts"</span>
-            <span>" "</span>
+            <span>Posts </span>
             <small>
-                <A href="/posts/new">"Create"</A>
+                <A href="/posts/new">Create</A>
             </small>
         </h1>
         <ul class="Card Listing">
@@ -30,10 +29,10 @@ pub fn PostList(cx: Scope) -> impl IntoView {
                     posts
                         .read(cx)
                         .map(|posts| match posts {
-                            Err(e) => view! { cx, <p>"error" {e.to_string()}</p> }.into_view(cx),
+                            Err(e) => view! { cx, <p>error {e.to_string()}</p> }.into_view(cx),
                             Ok(posts) => {
                                 if posts.is_empty() {
-                                    view! { cx, <p>"No posts were found."</p> }.into_view(cx)
+                                    view! { cx, <p>No posts were found.</p> }.into_view(cx)
                                 } else {
                                     posts
                                         .into_iter()
@@ -68,7 +67,7 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
         Some(id) => {
             view! { cx, <img title="Post hero" src=img_url_small(&id) width="36"/> }.into_view(cx)
         }
-        None => view! { cx, <div title="No post hero">"?"</div> }.into_view(cx),
+        None => view! { cx, <div title="No post hero">?</div> }.into_view(cx),
     };
     view! { cx,
         <li class="PostListItem">

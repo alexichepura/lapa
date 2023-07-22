@@ -43,7 +43,7 @@ pub fn Login(cx: Scope, children: Children) -> impl IntoView {
 
     view! { cx,
         <fieldset disabled=move || pending() class="login-card">
-            <legend>"Log in"</legend>
+            <legend>Log in</legend>
             <ActionForm action=login>
                 {skip_redirect_view}
                 <Input name="username" label="User"/>

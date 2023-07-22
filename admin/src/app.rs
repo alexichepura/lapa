@@ -45,7 +45,7 @@ pub fn App(cx: Scope, user: Option<User>, settings: SettingsCx) -> impl IntoView
                 None => {
                     view! { cx,
                         <Login>
-                            <span>"Logged out."</span>
+                            <span>Logged out.</span>
                         </Login>
                     }
                         .into_view(cx)

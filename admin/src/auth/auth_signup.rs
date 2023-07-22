@@ -6,29 +6,29 @@ pub fn Signup(cx: Scope) -> impl IntoView {
     let signup = create_server_action::<Signup>(cx);
     view! { cx,
         <ActionForm action=signup>
-            <h1>"Sign Up"</h1>
+            <h1>Sign Up</h1>
             <label>
-                <span>"User ID:"</span>
+                <span>User ID:</span>
                 <input type="text" placeholder="User ID" maxlength="32" name="username"/>
             </label>
             <br/>
             <label>
-                <span>"Password:"</span>
+                <span>Password:</span>
                 <input type="password" placeholder="Password" name="password"/>
             </label>
             <br/>
             <label>
-                <span>"Confirm Password:"</span>
+                <span>Confirm Password:</span>
                 <input type="password" placeholder="Password again" name="password_confirmation"/>
             </label>
             <br/>
             <label>
-                <span>"Remember me?"</span>
+                <span>Remember me?</span>
                 <input type="checkbox" name="remember" class="auth-input"/>
             </label>
             <br/>
             <button type="submit" class="button">
-                "Sign Up"
+                Sign Up
             </button>
         </ActionForm>
     }

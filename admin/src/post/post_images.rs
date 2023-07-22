@@ -55,7 +55,7 @@ pub fn PostImages(cx: Scope, post_id: String) -> impl IntoView {
                     .read(cx)
                     .map(|images| match images {
                         Err(e) => {
-                            view! { cx, <p>"error" {e.to_string()}</p> }
+                            view! { cx, <p>error {e.to_string()}</p> }
                                 .into_view(cx)
                         }
                         Ok(images) => {
@@ -126,13 +126,13 @@ pub fn PostImagesView(
     let disabled = move || order_pending() || hero_pending();
 
     let no_images = move || match images_sorted().len() {
-        0 => view! { cx, <p>"No images were found."</p> }.into_view(cx),
+        0 => view! { cx, <p>No images were found.</p> }.into_view(cx),
         _ => ().into_view(cx),
     };
 
     view! { cx,
         <fieldset disabled=disabled>
-            <legend>"Images"</legend>
+            <legend>Images</legend>
             <ActionForm action=order_action>
                 <For
                     each=move || images_sorted()
@@ -196,9 +196,9 @@ where
     let is_first = image.order == 0;
 
     let hero_view = match image.is_hero {
-        true => view! { cx, <button disabled>"Hero"</button> }.into_view(cx),
+        true => view! { cx, <button disabled>Hero</button> }.into_view(cx),
         false => {
-            view! { cx, <button on:click=move |_| make_hero()>"Make hero"</button> }.into_view(cx)
+            view! { cx, <button on:click=move |_| make_hero()>Make hero</button> }.into_view(cx)
         }
     };
 

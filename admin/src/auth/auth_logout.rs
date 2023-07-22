@@ -17,7 +17,7 @@ pub fn Logout(cx: Scope) -> impl IntoView {
     });
     view! { cx,
         <ActionForm action=logout>
-            <button type="submit">"Log Out"</button>
+            <button type="submit">Log Out</button>
         </ActionForm>
     }
 }

@@ -15,17 +15,17 @@ pub fn ImageUpload(cx: Scope, post_id: String, image_upload: ImageUploadAction) 
     let (obj_url, set_obj_url) = create_signal(cx, None::<String>);
     view! { cx,
         <fieldset disabled=move || pending()>
-            <legend>"Image upload"</legend>
+            <legend>Image upload</legend>
             <div class="Grid-fluid-2">
                 <div>
                     <label>
-                        <div>"Select image"</div>
+                        <div>Select image</div>
                         <InputImage set_file_name set_save_file set_obj_url set_save_byte_vec/>
                     </label>
                     <ActionForm action=image_upload>
                         <input type="hidden" name="post_id" value=post_id/>
                         <label>
-                            <span>"Alt"</span>
+                            <span>Alt</span>
                             <input name="alt"/>
                         </label>
                         <input
@@ -53,7 +53,7 @@ pub fn ImageUpload(cx: Scope, post_id: String, image_upload: ImageUploadAction) 
 pub fn ImageUploadPreview(cx: Scope, obj_url: ReadSignal<Option<String>>) -> impl IntoView {
     let view = move || match obj_url.get() {
         Some(url) => view! { cx, <img src=url/> }.into_view(cx),
-        None => view! { cx, <p>"Upload preview"</p> }.into_view(cx),
+        None => view! { cx, <p>Upload preview</p> }.into_view(cx),
     };
     view! { cx, <div class="ImageUploadPreview">{view}</div> }
 }

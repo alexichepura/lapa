@@ -16,18 +16,18 @@ pub fn Layout(cx: Scope, user: User) -> impl IntoView {
     view! { cx,
         <div class="admin">
             <header>
-                <div class="logo">"Admin"</div>
+                <div class="logo">Admin</div>
                 <span>{user.username}</span>
                 <Logout/>
             </header>
             <div class="menu" tabindex="0">
-                <a class="toggle" href="#" tabindex="0">"Menu"</a>
+                <a class="toggle" href="#" tabindex="0">Menu</a>
                 <nav tabindex="1" on:click=blur node_ref=el_blur>
                     <A href="/" exact=true>
                         "Dashboard"
                     </A>
-                    <A href="/posts">"Posts"</A>
-                    <A href="/settings">"Settings"</A>
+                    <A href="/posts">Posts</A>
+                    <A href="/settings">Settings</A>
                 </nav>
             </div>
             <main>

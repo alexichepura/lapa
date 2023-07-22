@@ -16,10 +16,10 @@ pub fn SettingsHomeForm(cx: Scope, settings: SettingsHome) -> impl IntoView {
 
     view! { cx,
         <fieldset disabled=move || pending()>
-            <legend>"Home"</legend>
+            <legend>Home</legend>
             <ActionForm action=settings_site_update>
                 <label>
-                    <div>"Text"</div>
+                    <div>Text</div>
                     <textarea name="home_text" prop:value=settings.home_text.to_string() rows="5" />
                 </label>
                 <FormFooter action=settings_site_update submit_text="Update home data"/>
