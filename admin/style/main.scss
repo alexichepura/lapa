@@ -91,6 +91,7 @@ button {
 
 	@media (--md-n-above) {
 		position: relative;
+		z-index: 1;
 	}
 
 	&:focus-within {
