@@ -43,7 +43,7 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
 #[server(GetHome, "/api")]
 pub async fn get_home(cx: Scope) -> Result<HomeData, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
     let settings = prisma_client
         .settings()
         .find_first(vec![])

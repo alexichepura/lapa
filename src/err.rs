@@ -2,21 +2,6 @@ use http::status::StatusCode;
 use leptos::*;
 use thiserror::Error;
 
-#[cfg(feature = "ssr")]
-pub fn serverr_404(cx: Scope) {
-    let res_parts = leptos_axum::ResponseParts {
-        status: Some(http::StatusCode::NOT_FOUND),
-        ..Default::default()
-    };
-    let res_options_outer = use_context::<leptos_axum::ResponseOptions>(cx);
-    if let Some(res_options) = res_options_outer {
-        res_options.overwrite(res_parts);
-    }
-}
-
-#[cfg(feature = "ssr")]
-use leptos_axum::ResponseOptions;
-
 #[derive(Clone, Debug, Error)]
 pub enum AppError {
     #[error("Not Found")]
@@ -57,7 +42,7 @@ pub fn ErrorTemplate(
     println!("Errors: {errors:#?}");
 
     #[cfg(feature = "ssr")]
-    if let Some(response) = use_context::<ResponseOptions>(cx) {
+    if let Some(response) = use_context::<leptos_axum::ResponseOptions>(cx) {
         response.set_status(errors[0].status_code());
     }
 

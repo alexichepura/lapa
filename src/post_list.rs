@@ -62,7 +62,7 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
 #[server(GetPosts, "/api")]
 pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::prisma::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma(cx)?;
     let now = prisma_client_rust::chrono::Utc::now().fixed_offset();
     let posts = prisma_client
         .post()
