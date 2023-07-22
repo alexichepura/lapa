@@ -81,7 +81,7 @@ pub async fn get_post(
             text: post.text,
         }),
         None => {
-            crate::err::serverr_404(cx);
+            crate::server::serverr_404(cx);
             Err(PostError::NotFound)
         }
     })

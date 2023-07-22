@@ -43,7 +43,7 @@ pub async fn signup(
     remember: Option<String>,
 ) -> Result<(), ServerFnError> {
     let prisma_client = crate::prisma::use_prisma(cx)?;
-    let auth = super::ssr_auth(cx)?;
+    let auth = crate::server::use_server_auth(cx)?;
 
     if password != password_confirmation {
         return Err(ServerFnError::ServerError(

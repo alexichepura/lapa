@@ -24,7 +24,7 @@ pub fn Logout(cx: Scope) -> impl IntoView {
 
 #[server(Logout, "/auth")]
 pub async fn logout(cx: Scope) -> Result<(), ServerFnError> {
-    let auth = super::ssr_auth(cx)?;
+    let auth = crate::server::use_server_auth(cx)?;
 
     auth.logout_user();
     leptos_axum::redirect(cx, "/");

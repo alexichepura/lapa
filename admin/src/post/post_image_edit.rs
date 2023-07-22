@@ -85,7 +85,7 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ImageDeleteResult, Se
         })?;
 
     if found_image.is_none() {
-        crate::err::serverr_404(cx);
+        crate::server::serverr_404(cx);
         return Ok(Err(ImageLoadError::NotFound));
     }
 
@@ -147,7 +147,7 @@ pub async fn image_update_alt(
         })?;
 
     if found_image.is_none() {
-        crate::err::serverr_404(cx);
+        crate::server::serverr_404(cx);
         return Ok(Err(ImageLoadError::NotFound));
     }
 

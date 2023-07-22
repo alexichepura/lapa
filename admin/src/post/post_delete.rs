@@ -77,7 +77,7 @@ pub async fn post_delete(cx: Scope, id: String) -> Result<PostDeleteResult, Serv
         })?;
 
     if found_post.is_none() {
-        crate::err::serverr_404(cx);
+        crate::server::serverr_404(cx);
         return Ok(Err(PostError::NotFound));
     }
     let found_post = found_post.unwrap();

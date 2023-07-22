@@ -78,11 +78,11 @@ pub async fn login(
 
     Ok(match user {
         None => {
-            crate::err::serverr_401(cx);
+            crate::server::serverr_401(cx);
             Err(AuthError::NoMatch)
         }
         Some(user) => {
-            let auth = super::ssr_auth(cx)?;
+            let auth = crate::server::use_server_auth(cx)?;
             match bcrypt::verify(password, &user.password)
                 .map_err(|e| ServerFnError::ServerError(e.to_string()))?
             {

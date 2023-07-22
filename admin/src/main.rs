@@ -1,28 +1,17 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use axum::{
-        body::Body as AxumBody,
-        extract::{Extension, FromRef, Path, RawQuery, State},
-        http::Request,
-        response::{IntoResponse, Response},
-        routing::get,
-        Router,
-    };
-    use axum_session::{SessionConfig, SessionLayer, SessionStore};
-    use axum_session_auth::{AuthConfig, AuthSessionLayer};
-    use http::HeaderMap;
+    use axum::{extract::Extension, routing::get, Router};
     use lapa_admin::{
-        app::App,
-        auth::{AuthSession, User},
-        axum_session_prisma::SessionPrismaPool,
         fileserv::file_and_error_handler,
-        prisma::ArcPrisma,
         routes::GenerateRouteList,
-        settings::settins_db,
+        server::{
+            auth_session_layer, leptos_routes_handler, server_fn_private, server_fn_public,
+            session_layer, AppState,
+        },
     };
     use leptos::*;
-    use leptos_axum::handle_server_fns_with_context;
+
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use prisma_client::db;
     use std::sync::Arc;
@@ -38,92 +27,10 @@ async fn main() {
     #[cfg(debug)]
     prisma_client._db_push(false).await.unwrap();
 
-    let session_config = SessionConfig::default()
-        .with_table_name("Session")
-        .with_cookie_name("session");
-    let auth_config = AuthConfig::<String>::default();
-    let session_store =
-        SessionStore::<SessionPrismaPool>::new(Some(prisma_client.clone().into()), session_config)
-            .await
-            .unwrap();
-    session_store.initiate().await.unwrap();
-
     let conf = get_configuration(None).await.unwrap();
     let leptos_options = conf.leptos_options;
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(|cx| view! { cx, <GenerateRouteList/> }).await;
-
-    #[derive(FromRef, Debug, Clone)]
-    pub struct AppState {
-        pub leptos_options: LeptosOptions,
-        pub prisma_client: std::sync::Arc<prisma_client::db::PrismaClient>,
-    }
-    async fn server_fn_public(
-        State(app_state): State<AppState>,
-        auth_session: AuthSession,
-        path: Path<String>,
-        headers: HeaderMap,
-        raw_query: RawQuery,
-        request: Request<AxumBody>,
-    ) -> impl IntoResponse {
-        handle_server_fns_with_context(
-            path,
-            headers,
-            raw_query,
-            move |cx| {
-                provide_context(cx, app_state.prisma_client.clone());
-                provide_context(cx, auth_session.clone());
-            },
-            request,
-        )
-        .await
-    }
-
-    async fn server_fn_private(
-        State(app_state): State<AppState>,
-        auth_session: AuthSession,
-        path: Path<String>,
-        headers: HeaderMap,
-        raw_query: RawQuery,
-        request: Request<AxumBody>,
-    ) -> Response {
-        if auth_session.current_user.is_none() {
-            return (http::StatusCode::NOT_FOUND, "NOT FOUND").into_response();
-        }
-        handle_server_fns_with_context(
-            path,
-            headers,
-            raw_query,
-            move |cx| {
-                provide_context(cx, app_state.prisma_client.clone());
-                provide_context(cx, auth_session.clone());
-            },
-            request,
-        )
-        .await
-        .into_response()
-    }
-
-    async fn leptos_routes_handler(
-        State(app_state): State<AppState>,
-        auth_session: AuthSession,
-        req: Request<AxumBody>,
-    ) -> Response {
-        let user: Option<User> = auth_session.current_user.clone();
-        let prisma_client = app_state.prisma_client.clone();
-        let settings = settins_db(prisma_client.clone()).await;
-        let handler = leptos_axum::render_app_async_with_context(
-            app_state.leptos_options.clone(),
-            move |cx| {
-                provide_context(cx, app_state.prisma_client.clone());
-                provide_context(cx, auth_session.clone());
-            },
-            move |cx| view! { cx, <App user=user.clone() settings=settings.clone()/> },
-        );
-
-        let leptos_res = handler(req).await.into_response();
-        leptos_res
-    }
 
     let app_state = AppState {
         leptos_options: leptos_options.clone(),
@@ -142,13 +49,8 @@ async fn main() {
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .fallback(file_and_error_handler)
         .with_state(app_state)
-        .layer(
-            AuthSessionLayer::<User, String, SessionPrismaPool, ArcPrisma>::new(Some(
-                prisma_client.clone(),
-            ))
-            .with_config(auth_config),
-        )
-        .layer(SessionLayer::new(session_store))
+        .layer(auth_session_layer(prisma_client.clone()))
+        .layer(session_layer(prisma_client.clone()).await)
         .layer(Extension(Arc::new(leptos_options.clone())));
 
     #[cfg(feature = "ratelimit")]

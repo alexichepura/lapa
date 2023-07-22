@@ -148,7 +148,7 @@ pub async fn get_settings(cx: Scope) -> Result<SettingsResult, ServerFnError> {
             home_text: settings.home_text,
         }),
         None => {
-            crate::err::serverr_404(cx);
+            crate::server::serverr_404(cx);
             Err(SettingsError::NotFound)
         }
     })
