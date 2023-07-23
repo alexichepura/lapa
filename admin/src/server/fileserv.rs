@@ -1,47 +1,52 @@
 use axum::{
     body::{boxed, Body, BoxBody},
-    extract::Extension,
+    extract::{Extension, Path},
     http::{Request, Response, StatusCode, Uri},
     response::{IntoResponse, Response as AxumResponse},
 };
+use http::HeaderValue;
 use leptos::*;
 use std::sync::Arc;
+use tower::ServiceExt;
+use tower_http::services::ServeDir;
+
+use crate::err::AppError;
+use crate::err::ErrorTemplate;
+
+const MAX_AGE_MONTH: HeaderValue = HeaderValue::from_static("public, max-age=2592000");
+// const MAX_AGE_YEAR: HeaderValue = HeaderValue::from_static("public, max-age=31536000");
+
+pub async fn img_handler(
+    Path(img_name): Path<String>,
+    Extension(options): Extension<Arc<LeptosOptions>>,
+    req: Request<Body>,
+) -> AxumResponse {
+    let img_name = format!("/{img_name}");
+    let uri = img_name.parse::<Uri>().unwrap();
+    let mut res = get_static_file(uri, &"img").await.unwrap();
+    if res.status() == StatusCode::OK {
+        res.headers_mut()
+            .insert(http::header::CACHE_CONTROL, MAX_AGE_MONTH);
+        res.into_response()
+    } else {
+        not_found_response(req, &options).await
+    }
+}
 
 pub async fn file_and_error_handler(
     uri: Uri,
     Extension(options): Extension<Arc<LeptosOptions>>,
     req: Request<Body>,
 ) -> AxumResponse {
-    use crate::err::AppError;
-    use crate::err::ErrorTemplate;
-
-    let options = &*options;
-    let uri_path = uri.path();
-    let (root, uri): (String, Uri) = if uri_path.starts_with("/img") {
-        let uri_path = uri_path.replace("/img", "");
-        let uri = uri_path.parse::<Uri>().unwrap();
-        ("img".to_string(), uri)
-    } else {
-        (options.site_root.clone(), uri.clone())
-    };
-    let res = get_static_file(uri, &root).await.unwrap();
-
+    let res = get_static_file(uri, &options.site_root).await.unwrap();
     if res.status() == StatusCode::OK {
         res.into_response()
     } else {
-        let mut errors = Errors::default();
-        errors.insert_with_default_key(AppError::NotFound);
-        let handler = leptos_axum::render_app_to_stream(
-            options.to_owned(),
-            move |cx| view! { cx, <ErrorTemplate outside_errors=errors.clone()/> },
-        );
-        handler(req).await.into_response()
+        not_found_response(req, &options).await
     }
 }
 
 async fn get_static_file(uri: Uri, root: &str) -> Result<Response<BoxBody>, (StatusCode, String)> {
-    use tower::ServiceExt;
-    use tower_http::services::ServeDir;
     let req = Request::builder()
         .uri(uri.clone())
         .body(Body::empty())
@@ -53,4 +58,14 @@ async fn get_static_file(uri: Uri, root: &str) -> Result<Response<BoxBody>, (Sta
             format!("Something went wrong: {err}"),
         )),
     }
+}
+
+pub async fn not_found_response(req: Request<Body>, options: &LeptosOptions) -> AxumResponse {
+    let mut errors = Errors::default();
+    errors.insert_with_default_key(AppError::NotFound);
+    let handler = leptos_axum::render_app_to_stream(
+        options.to_owned(),
+        move |cx| view! { cx, <ErrorTemplate outside_errors=errors.clone()/> },
+    );
+    handler(req).await.into_response()
 }

@@ -9,8 +9,8 @@ async fn main() {
     use lapa_site::{
         routes::GenerateRouteList,
         server::{
-            file_and_error_handler, init_prisma_client, leptos_routes_handler, robots_txt,
-            server_fn_handler, AppState,
+            file_and_error_handler, img_handler, init_prisma_client, leptos_routes_handler,
+            robots_txt, server_fn_handler, AppState,
         },
     };
     use leptos::*;
@@ -25,6 +25,7 @@ async fn main() {
     let app = Router::new()
         .route("/api/*fn_name", post(server_fn_handler))
         .route("/robots.txt", get(robots_txt))
+        .route("/img/:img_name", get(img_handler))
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .fallback(file_and_error_handler)
         .with_state(AppState {
