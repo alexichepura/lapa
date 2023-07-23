@@ -1,50 +1,38 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use axum::{extract::Extension, routing::get, Router};
+    use axum::{
+        extract::Extension,
+        routing::{get, post},
+        Router,
+    };
     use lapa_admin::{
         routes::GenerateRouteList,
         server::{
-            auth_session_layer, file_and_error_handler, leptos_routes_handler, server_fn_private,
-            server_fn_public, session_layer, AppState,
+            auth_session_layer, file_and_error_handler, init_prisma_client, leptos_routes_handler,
+            server_fn_private, server_fn_public, session_layer, AppState,
         },
     };
     use leptos::*;
-
     use leptos_axum::{generate_route_list, LeptosRoutes};
-    use prisma_client::db;
     use std::sync::Arc;
 
     simple_logger::init_with_env().expect("couldn't initialize logging");
-
-    let client = if let Ok(db_url) = std::env::var("DATABASE_URL") {
-        db::new_client_with_url(db_url.as_str()).await
-    } else {
-        db::new_client().await
-    };
-    let prisma_client = Arc::new(client.unwrap());
-    #[cfg(debug)]
-    prisma_client._db_push(false).await.unwrap();
 
     let conf = get_configuration(None).await.unwrap();
     let leptos_options = conf.leptos_options;
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(|cx| view! { cx, <GenerateRouteList/> }).await;
 
+    let prisma_client = init_prisma_client().await;
     let app_state = AppState {
         leptos_options: leptos_options.clone(),
         prisma_client: prisma_client.clone(),
     };
 
     let app = Router::new()
-        .route(
-            "/api/*fn_name",
-            get(server_fn_private).post(server_fn_private),
-        )
-        .route(
-            "/auth/*fn_name",
-            get(server_fn_public).post(server_fn_public),
-        )
+        .route("/api/*fn_name", post(server_fn_private))
+        .route("/auth/*fn_name", post(server_fn_public))
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .fallback(file_and_error_handler)
         .with_state(app_state)
