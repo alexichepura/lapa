@@ -9,12 +9,12 @@ use std::vec;
 
 use super::ArcPrisma;
 
-pub async fn session_layer(prisma_client: ArcPrisma) -> SessionLayer<SessionPrismaPool> {
+pub async fn session_layer(prisma: &ArcPrisma) -> SessionLayer<SessionPrismaPool> {
     let config = SessionConfig::default()
         .with_table_name("Session")
         .with_cookie_name("session");
 
-    let store = SessionStore::<SessionPrismaPool>::new(Some(prisma_client.clone().into()), config)
+    let store = SessionStore::<SessionPrismaPool>::new(Some(prisma.clone().into()), config)
         .await
         .unwrap();
     store.initiate().await.unwrap();

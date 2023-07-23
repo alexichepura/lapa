@@ -8,10 +8,9 @@ use crate::server::ArcPrisma;
 
 type PrismaAuthSessionLayer = AuthSessionLayer<User, String, SessionPrismaPool, ArcPrisma>;
 
-pub fn auth_session_layer(prisma_client: ArcPrisma) -> PrismaAuthSessionLayer {
+pub fn auth_session_layer(prisma: &ArcPrisma) -> PrismaAuthSessionLayer {
     let auth_config = AuthConfig::<String>::default();
-
-    let layer = PrismaAuthSessionLayer::new(Some(prisma_client.clone())).with_config(auth_config);
+    let layer = PrismaAuthSessionLayer::new(Some(prisma.clone())).with_config(auth_config);
     layer
 }
 
