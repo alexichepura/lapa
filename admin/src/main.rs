@@ -2,7 +2,6 @@
 #[tokio::main]
 async fn main() {
     use axum::{
-        extract::Extension,
         routing::{get, post},
         Router,
     };
@@ -15,7 +14,6 @@ async fn main() {
     };
     use leptos::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
-    use std::sync::Arc;
 
     simple_logger::init_with_env().expect("couldn't initialize logging");
 
@@ -33,8 +31,7 @@ async fn main() {
             prisma_client: prisma_client.clone(),
         })
         .layer(auth_session_layer(&prisma_client))
-        .layer(session_layer(&prisma_client).await)
-        .layer(Extension(Arc::new(leptopts.clone())));
+        .layer(session_layer(&prisma_client).await);
 
     #[cfg(feature = "ratelimit")]
     let app = lapa_admin::server::ratelimit(app);

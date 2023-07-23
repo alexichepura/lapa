@@ -36,7 +36,7 @@ pub use session::*;
 #[derive(FromRef, Debug, Clone)]
 pub struct AppState {
     pub leptos_options: LeptosOptions,
-    pub prisma_client: std::sync::Arc<prisma_client::db::PrismaClient>,
+    pub prisma_client: ArcPrisma,
 }
 
 pub async fn server_fn_public(

@@ -1,12 +1,11 @@
 use axum::{
     body::{boxed, Body, BoxBody},
-    extract::{Extension, Path},
+    extract::{Path, State},
     http::{Request, Response, StatusCode, Uri},
     response::{IntoResponse, Response as AxumResponse},
 };
 use http::HeaderValue;
 use leptos::*;
-use std::sync::Arc;
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
 
@@ -18,7 +17,7 @@ const MAX_AGE_MONTH: HeaderValue = HeaderValue::from_static("public, max-age=259
 
 pub async fn img_handler(
     Path(img_name): Path<String>,
-    Extension(options): Extension<Arc<LeptosOptions>>,
+    State(options): State<LeptosOptions>,
     req: Request<Body>,
 ) -> AxumResponse {
     let img_name = format!("/{img_name}");
@@ -35,7 +34,7 @@ pub async fn img_handler(
 
 pub async fn file_and_error_handler(
     uri: Uri,
-    Extension(options): Extension<Arc<LeptosOptions>>,
+    State(options): State<LeptosOptions>,
     req: Request<Body>,
 ) -> AxumResponse {
     let res = get_static_file(uri, &options.site_root).await.unwrap();
