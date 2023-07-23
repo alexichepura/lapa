@@ -12,12 +12,13 @@ use leptos_axum::handle_server_fns_with_context;
 use prisma_client::db::{self, PrismaClient};
 use std::sync::Arc;
 
-cfg_if::cfg_if! {if #[cfg(feature = "ssr")] {
-    cfg_if::cfg_if! {if #[cfg(feature = "ratelimit")] {
+use cfg_if::cfg_if;
+cfg_if! {if #[cfg(feature = "ssr")] {
+    cfg_if! {if #[cfg(feature = "ratelimit")] {
         pub mod ratelimit;
         pub use ratelimit::*;
     }}
-    cfg_if::cfg_if! {if #[cfg(feature = "compression")] {
+    cfg_if! {if #[cfg(feature = "compression")] {
         pub mod compression;
         pub use compression::*;
     }}
