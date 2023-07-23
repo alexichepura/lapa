@@ -21,10 +21,10 @@ async fn main() {
     let routes = generate_route_list(|cx| view! { cx, <GenerateRouteList/> }).await;
     let prisma_client = init_prisma_client().await;
     let app = Router::new()
+        .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .route("/api/*fn_name", post(server_fn_private))
         .route("/auth/*fn_name", post(server_fn_public))
         .route("/img/:img_name", get(img_handler))
-        .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .fallback(file_and_error_handler)
         .with_state(AppState {
             leptos_options: leptopts.clone(),
