@@ -4,7 +4,7 @@ use axum::{
     http::{Request, Response, StatusCode, Uri},
     response::{IntoResponse, Response as AxumResponse},
 };
-use http::HeaderValue;
+use http::{header::CACHE_CONTROL, HeaderValue};
 use leptos::*;
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
@@ -24,8 +24,7 @@ pub async fn img_handler(
     let uri = img_name.parse::<Uri>().unwrap();
     let mut res = get_static_file(uri, &"img").await.unwrap();
     if res.status() == StatusCode::OK {
-        res.headers_mut()
-            .insert(http::header::CACHE_CONTROL, MAX_AGE_MONTH);
+        res.headers_mut().insert(CACHE_CONTROL, MAX_AGE_MONTH);
         res.into_response()
     } else {
         not_found_response(req, &options).await
