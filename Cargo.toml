@@ -12,6 +12,7 @@ members = ["admin", "cli", "prisma_cli", "prisma_client"]
 
 [workspace.dependencies]
 axum = { version = "0.6.18" }
+bcrypt = { version = "0.15" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
 console_error_panic_hook = "0.1"

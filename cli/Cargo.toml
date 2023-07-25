@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bcrypt = { version = "0.14" }
+bcrypt = { workspace = true }
 clap = { version = "4.3", features = ["derive"] }
 prisma_client = { workspace = true }
 prisma-client-rust = { workspace = true }
