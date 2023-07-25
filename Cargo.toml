@@ -11,7 +11,7 @@ resolver = "2"
 members = ["admin", "cli", "prisma_cli", "prisma_client"]
 
 [workspace.dependencies]
-axum = { version = "0.6.18" }
+axum = { version = "0.6.19" }
 bcrypt = { version = "0.15" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
@@ -25,12 +25,12 @@ leptos_meta = { version = "0.4.6", features = ["nightly"] }
 leptos_router = { version = "0.4.6", features = ["nightly"] }
 log = "0.4"
 prisma_client = { path = "./prisma_client" }
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e0af632", default-features = false, features = [
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "8cd6f70", default-features = false, features = [
     "sqlite",
     "sqlite-create-many",
     "migrations",
 ] }
-prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e0af632", default-features = false, features = [
+prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "8cd6f70", default-features = false, features = [
     "sqlite",
     "sqlite-create-many",
     "migrations",
