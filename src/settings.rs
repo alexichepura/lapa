@@ -1,4 +1,4 @@
-use leptos::{use_context, Scope};
+use leptos::use_context;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -10,18 +10,18 @@ pub struct SettingsCx {
     pub thumb_height: i32,
 }
 
-pub fn use_settings(cx: Scope) -> SettingsCx {
-    let settings = use_context::<SettingsCx>(cx).expect("SettingsCx");
+pub fn use_settings() -> SettingsCx {
+    let settings = use_context::<SettingsCx>().expect("SettingsCx");
     settings
 }
-pub fn use_site_url(cx: Scope) -> String {
-    let settings = use_settings(cx);
+pub fn use_site_url() -> String {
+    let settings = use_settings();
     settings.site_url
 }
 
 #[cfg(feature = "ssr")]
-pub async fn use_settins_db(cx: Scope) -> SettingsCx {
-    let prisma_client = crate::server::use_prisma(cx).unwrap();
+pub async fn use_settins_db() -> SettingsCx {
+    let prisma_client = crate::server::use_prisma().unwrap();
     settins_db(prisma_client).await
 }
 

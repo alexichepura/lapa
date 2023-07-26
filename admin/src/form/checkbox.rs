@@ -2,14 +2,13 @@ use leptos::*;
 
 #[component]
 pub fn Checkbox(
-    cx: Scope,
     #[prop(optional, into)] name: Option<TextProp>,
     #[prop(optional, into)] label: Option<TextProp>,
     #[prop(optional, into)] set: Option<SignalSetter<bool>>,
     #[prop(optional, into)] checked: Option<MaybeSignal<bool>>,
     #[prop(optional, into)] attributes: Option<MaybeSignal<AdditionalAttributes>>,
 ) -> impl IntoView {
-    let mut inner = html::input(cx).attr("type", "checkbox");
+    let mut inner = html::input().attr("type", "checkbox");
 
     if let Some(name) = name {
         inner = inner.attr("name", name.get());
@@ -38,9 +37,9 @@ pub fn Checkbox(
     }
 
     let label = match label {
-        Some(label) => view! { cx, <span>{label.get()}</span> }.into_view(cx),
-        None => ().into_view(cx),
+        Some(label) => view! { <span>{label.get()}</span> }.into_view(),
+        None => ().into_view(),
     };
 
-    view! { cx, <label>{inner} {label}</label> }
+    view! { <label>{inner} {label}</label> }
 }

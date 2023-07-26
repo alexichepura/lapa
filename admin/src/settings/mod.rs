@@ -28,12 +28,12 @@ pub struct SettingsCx {
     pub thumb_height: i32,
 }
 pub type SettingsSignal = RwSignal<SettingsCx>;
-pub fn use_settings(cx: Scope) -> SettingsSignal {
-    use_context::<SettingsSignal>(cx).expect("settings signal")
+pub fn use_settings() -> SettingsSignal {
+    use_context::<SettingsSignal>().expect("settings signal")
 }
-pub fn use_site_url(cx: Scope) -> Signal<String> {
-    let settings = use_settings(cx);
-    create_read_slice(cx, settings, |state| state.site_url.clone())
+pub fn use_site_url() -> Signal<String> {
+    let settings = use_settings();
+    create_read_slice(settings, |state| state.site_url.clone())
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -74,12 +74,11 @@ impl From<&SettingsData> for SettingsSite {
     }
 }
 
-pub fn create_settings_resource(cx: Scope) -> Resource<(), Result<SettingsData, SettingsError>> {
+pub fn create_settings_resource() -> Resource<(), Result<SettingsData, SettingsError>> {
     let settings = create_blocking_resource(
-        cx,
         || (),
         move |_| async move {
-            get_settings(cx)
+            get_settings()
                 .await
                 .map_err(|_| SettingsError::ServerError)
                 .flatten()
@@ -89,22 +88,22 @@ pub fn create_settings_resource(cx: Scope) -> Resource<(), Result<SettingsData, 
 }
 
 #[component]
-pub fn Settings(cx: Scope) -> impl IntoView {
-    let settings = create_settings_resource(cx);
+pub fn Settings() -> impl IntoView {
+    let settings = create_settings_resource();
 
-    view! { cx,
+    view! {
         <Title text="Settings"/>
         <h1>Settings</h1>
         <Suspense fallback=move || {
-            view! { cx, <Loading/> }
+            view! { <Loading/> }
         }>
             {move || {
                 settings
-                    .read(cx)
+                    .read()
                     .map(|settings| match settings {
-                        Err(e) => view! { cx, <p>{e.to_string()}</p> }.into_view(cx),
+                        Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
                         Ok(settings) => {
-                            view! { cx,
+                            view! {
                                 <div class="Grid-fluid-2">
                                     <SettingsHomeForm settings=SettingsHome::from(&settings)/>
                                     <SettingsSiteForm settings=SettingsSite::from(&settings)/>
@@ -114,7 +113,7 @@ pub fn Settings(cx: Scope) -> impl IntoView {
                                     <ImagesConvertView/>
                                 </div>
                             }
-                                .into_view(cx)
+                                .into_view()
                         }
                     })
             }}
@@ -124,8 +123,8 @@ pub fn Settings(cx: Scope) -> impl IntoView {
 
 type SettingsResult = Result<SettingsData, SettingsError>;
 #[server(GetSettings, "/api")]
-pub async fn get_settings(cx: Scope) -> Result<SettingsResult, ServerFnError> {
-    let prisma_client = crate::server::use_prisma(cx)?;
+pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
+    let prisma_client = crate::server::use_prisma()?;
 
     let settings = prisma_client
         .settings()
@@ -148,7 +147,7 @@ pub async fn get_settings(cx: Scope) -> Result<SettingsResult, ServerFnError> {
             home_text: settings.home_text,
         }),
         None => {
-            crate::server::serverr_404(cx);
+            crate::server::serverr_404();
             Err(SettingsError::NotFound)
         }
     })

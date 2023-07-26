@@ -16,11 +16,11 @@ pub struct SettingsImages {
 }
 
 #[component]
-pub fn SettingsImagesForm(cx: Scope, settings: SettingsImages) -> impl IntoView {
-    let settings_upsert = create_server_action::<SettingsImagesUpdate>(cx);
+pub fn SettingsImagesForm(settings: SettingsImages) -> impl IntoView {
+    let settings_upsert = create_server_action::<SettingsImagesUpdate>();
     let pending = settings_upsert.pending();
 
-    view! { cx,
+    view! {
         <fieldset disabled=move || pending()>
             <legend>Images</legend>
             <ActionForm action=settings_upsert>
@@ -60,14 +60,13 @@ pub fn SettingsImagesForm(cx: Scope, settings: SettingsImages) -> impl IntoView 
 
 #[server(SettingsImagesUpdate, "/api")]
 pub async fn settings_images_update(
-    cx: Scope,
     hero_width: String,
     hero_height: String,
     thumb_width: String,
     thumb_height: String,
 ) -> Result<Result<(), SettingsError>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::server::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
 
     let settings_saved = prisma_client
         .settings()

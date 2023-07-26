@@ -2,9 +2,9 @@ use leptos::*;
 use leptos_router::ActionForm;
 
 #[component]
-pub fn Signup(cx: Scope) -> impl IntoView {
-    let signup = create_server_action::<Signup>(cx);
-    view! { cx,
+pub fn Signup() -> impl IntoView {
+    let signup = create_server_action::<Signup>();
+    view! {
         <ActionForm action=signup>
             <h1>Sign Up</h1>
             <label>
@@ -36,14 +36,13 @@ pub fn Signup(cx: Scope) -> impl IntoView {
 
 #[server(Signup, "/auth")]
 pub async fn signup(
-    cx: Scope,
     username: String,
     password: String,
     password_confirmation: String,
     remember: Option<String>,
 ) -> Result<(), ServerFnError> {
-    let prisma_client = crate::server::use_prisma(cx)?;
-    let auth = crate::server::use_auth(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
+    let auth = crate::server::use_auth()?;
 
     if password != password_confirmation {
         return Err(ServerFnError::ServerError(
@@ -79,7 +78,7 @@ pub async fn signup(
     auth.login_user(user.id);
     auth.remember_user(remember.is_some());
 
-    leptos_axum::redirect(cx, "/");
+    leptos_axum::redirect("/");
 
     Ok(())
 }

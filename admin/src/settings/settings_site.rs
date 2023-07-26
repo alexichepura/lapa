@@ -11,11 +11,11 @@ pub struct SettingsSite {
 }
 
 #[component]
-pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
-    let settings_site_update = create_server_action::<SettingsSiteUpdate>(cx);
+pub fn SettingsSiteForm(settings: SettingsSite) -> impl IntoView {
+    let settings_site_update = create_server_action::<SettingsSiteUpdate>();
     let pending = settings_site_update.pending();
 
-    view! { cx,
+    view! {
         <fieldset disabled=move || pending()>
             <legend>Site</legend>
             <ActionForm action=settings_site_update>
@@ -35,12 +35,11 @@ pub fn SettingsSiteForm(cx: Scope, settings: SettingsSite) -> impl IntoView {
 
 #[server(SettingsSiteUpdate, "/api")]
 pub async fn settings_site_update(
-    cx: Scope,
     robots_txt: String,
     site_url: String,
 ) -> Result<Result<(), SettingsError>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::server::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
 
     let settings_saved = prisma_client
         .settings()

@@ -2,17 +2,17 @@ use chrono::{DateTime, Duration, FixedOffset, Local, ParseResult};
 use leptos::*;
 
 #[component]
-pub fn Loading(cx: Scope) -> impl IntoView {
-    view! { cx, <p>Loading...</p> }
+pub fn Loading() -> impl IntoView {
+    view! { <p>Loading...</p> }
 }
 
 #[component]
-pub fn AlertDanger(cx: Scope, text: String) -> impl IntoView {
-    view! { cx, <div class="Alert Danger">{text}</div> }
+pub fn AlertDanger(text: String) -> impl IntoView {
+    view! { <div class="Alert Danger">{text}</div> }
 }
 #[component]
-pub fn AlertSuccess(cx: Scope) -> impl IntoView {
-    view! { cx, <div class="Alert Success">Success</div> }
+pub fn AlertSuccess() -> impl IntoView {
+    view! { <div class="Alert Success">Success</div> }
 }
 
 pub fn datetime_to_string(datetime: DateTime<FixedOffset>) -> String {

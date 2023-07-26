@@ -10,10 +10,10 @@ use crate::{
 };
 
 #[component]
-pub fn PostList(cx: Scope) -> impl IntoView {
-    let posts = create_blocking_resource(cx, || (), move |_| get_posts(cx));
+pub fn PostList() -> impl IntoView {
+    let posts = create_blocking_resource(|| (), move |_| get_posts());
 
-    view! { cx,
+    view! {
         <Title text="Posts"/>
         <h1>
             <span>Posts </span>
@@ -23,25 +23,25 @@ pub fn PostList(cx: Scope) -> impl IntoView {
         </h1>
         <ul class="Card Listing">
             <Suspense fallback=move || {
-                view! { cx, <Loading/> }
+                view! { <Loading/> }
             }>
                 {move || {
                     posts
-                        .read(cx)
+                        .read()
                         .map(|posts| match posts {
-                            Err(e) => view! { cx, <p>error {e.to_string()}</p> }.into_view(cx),
+                            Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
                             Ok(posts) => {
                                 if posts.is_empty() {
-                                    view! { cx, <p>No posts were found.</p> }.into_view(cx)
+                                    view! { <p>No posts were found.</p> }.into_view()
                                 } else {
                                     posts
                                         .into_iter()
                                         .map(|post| {
-                                            view! { cx,
+                                            view! {
                                                 <PostListItem post/>
                                             }
                                         })
-                                        .collect_view(cx)
+                                        .collect_view()
                                 }
                             }
                         })
@@ -52,7 +52,7 @@ pub fn PostList(cx: Scope) -> impl IntoView {
 }
 
 #[component]
-pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
+pub fn PostListItem(post: PostListItem) -> impl IntoView {
     let created = datetime_to_strings(post.created_at);
 
     let published = match post.published_at {
@@ -65,11 +65,11 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
     };
     let hero_view = match post.hero {
         Some(id) => {
-            view! { cx, <img title="Post hero" src=img_url_small(&id) width="36"/> }.into_view(cx)
+            view! { <img title="Post hero" src=img_url_small(&id) width="36"/> }.into_view()
         }
-        None => view! { cx, <div title="No post hero">?</div> }.into_view(cx),
+        None => view! { <div title="No post hero">?</div> }.into_view(),
     };
-    view! { cx,
+    view! {
         <li class="PostListItem">
             <A href=format!("/posts/{}", post.id)>
                 <div title="Published at" class=format!("PostListItem-status {}", class)>{published.local}</div>
@@ -82,9 +82,9 @@ pub fn PostListItem(cx: Scope, post: PostListItem) -> impl IntoView {
 }
 
 #[server(GetPosts, "/api")]
-pub async fn get_posts(cx: Scope) -> Result<Vec<PostListItem>, ServerFnError> {
+pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::server::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
     let posts = prisma_client
         .post()
         .find_many(vec![])

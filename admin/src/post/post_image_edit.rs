@@ -17,7 +17,6 @@ pub type ImageDeleteAction = Action<ImageDelete, Result<ImageDeleteResult, Serve
 pub type ImageUpdateAction = Action<ImageUpdate, Result<ImageUpdateResult, ServerFnError>>;
 #[component]
 pub fn PostImageModalForm(
-    cx: Scope,
     image: ImageEditData,
     set_editing: WriteSignal<ImageEditSignal>,
     image_delete: ImageDeleteAction,
@@ -27,7 +26,7 @@ pub fn PostImageModalForm(
     let delete_rw = image_delete.value();
 
     let id_effect = image.id.clone();
-    create_effect(cx, move |old| {
+    create_effect(move |old| {
         let id = id_effect.clone();
         let delete_result = delete_rw.get();
         // Some(old) to prevent initial run
@@ -46,7 +45,7 @@ pub fn PostImageModalForm(
         })
     };
 
-    view! { cx,
+    view! {
         <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) width=500/>
         <div>
             <button on:click=on_delete>Delete</button>
@@ -69,9 +68,9 @@ pub fn PostImageModalForm(
 type ImageDeleteResult = Result<(), ImageLoadError>;
 
 #[server(ImageDelete, "/api")]
-pub async fn delete_image(cx: Scope, id: String) -> Result<ImageDeleteResult, ServerFnError> {
+pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::server::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
 
     let found_image = prisma_client
         .image()
@@ -85,7 +84,7 @@ pub async fn delete_image(cx: Scope, id: String) -> Result<ImageDeleteResult, Se
         })?;
 
     if found_image.is_none() {
-        crate::server::serverr_404(cx);
+        crate::server::serverr_404();
         return Ok(Err(ImageLoadError::NotFound));
     }
 
@@ -127,13 +126,9 @@ pub fn delete_image_on_server(id: &String) {
 
 type ImageUpdateResult = Result<(), ImageLoadError>;
 #[server(ImageUpdate, "/api")]
-pub async fn image_update_alt(
-    cx: Scope,
-    id: String,
-    alt: String,
-) -> Result<ImageUpdateResult, ServerFnError> {
+pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResult, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::server::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
 
     let found_image = prisma_client
         .image()
@@ -147,7 +142,7 @@ pub async fn image_update_alt(
         })?;
 
     if found_image.is_none() {
-        crate::server::serverr_404(cx);
+        crate::server::serverr_404();
         return Ok(Err(ImageLoadError::NotFound));
     }
 

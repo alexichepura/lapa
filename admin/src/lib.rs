@@ -41,7 +41,7 @@ pub fn hydrate() {
         serde_wasm_bindgen::from_value(settings).unwrap_or_default();
     log!("SETTINGS: {:?}", settings);
 
-    leptos::mount_to_body(move |cx| {
-        view! { cx, <App user settings/> }
+    leptos::mount_to_body(move || {
+        view! { <App user=user.clone() settings=settings.clone()/> }
     });
 }

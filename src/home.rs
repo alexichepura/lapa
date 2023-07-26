@@ -13,25 +13,25 @@ pub struct HomeData {
 }
 
 #[component]
-pub fn HomePage(cx: Scope) -> impl IntoView {
-    let home = create_blocking_resource(cx, || (), move |_| get_home(cx));
+pub fn HomePage() -> impl IntoView {
+    let home = create_blocking_resource(|| (), move |_| get_home());
 
-    view! { cx,
+    view! {
         <Title text="Home"/>
         <Meta name="description" content="Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website"/>
         <h1>Welcome to LAPA</h1>
         <Suspense fallback=move || {
-            view! { cx, <Loading/> }
+            view! { <Loading/> }
         }>
             {move || {
-                home.read(cx)
+                home.read()
                     .map(|home| match home {
-                        Err(e) => view! { cx, <p>{e.to_string()}</p> }.into_view(cx),
-                        Ok(home) => view! { cx,
+                        Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
+                        Ok(home) => view! {
                             <section>
                                 <ParagraphsByMultiline text=home.home_text/>
                             </section>
-                        }.into_view(cx),
+                        }.into_view(),
                     })
             }}
         </Suspense>
@@ -41,9 +41,9 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
 }
 
 #[server(GetHome, "/api")]
-pub async fn get_home(cx: Scope) -> Result<HomeData, ServerFnError> {
+pub async fn get_home() -> Result<HomeData, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::server::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
     let settings = prisma_client
         .settings()
         .find_first(vec![])

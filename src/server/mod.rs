@@ -50,8 +50,8 @@ pub async fn server_fn_handler(
         path,
         headers,
         raw_query,
-        move |cx| {
-            provide_context(cx, app_state.prisma_client.clone());
+        move || {
+            provide_context(app_state.prisma_client.clone());
         },
         request,
     )
@@ -85,10 +85,10 @@ pub async fn leptos_routes_handler(
 
     let handler = leptos_axum::render_app_async_with_context(
         app_state.leptos_options.clone(),
-        move |cx| {
-            provide_context(cx, prisma_client.clone());
+        move || {
+            provide_context(prisma_client.clone());
         },
-        move |cx| view! { cx, <App settings=settings.clone()/> },
+        move || view! { <App settings=settings.clone()/> },
     );
     handler(req).await.into_response()
 }

@@ -5,12 +5,11 @@ use serde::{Deserialize, Serialize};
 use crate::util::Loading;
 
 #[component]
-pub fn HomePage(cx: Scope) -> impl IntoView {
-    let stats_all = create_blocking_resource(cx, || (), move |_| get_stats(cx, StatsPeriod::All));
-    let stats_month =
-        create_blocking_resource(cx, || (), move |_| get_stats(cx, StatsPeriod::Month));
-    let stats_hour = create_blocking_resource(cx, || (), move |_| get_stats(cx, StatsPeriod::Hour));
-    view! { cx,
+pub fn HomePage() -> impl IntoView {
+    let stats_all = create_blocking_resource(|| (), move |_| get_stats(StatsPeriod::All));
+    let stats_month = create_blocking_resource(|| (), move |_| get_stats(StatsPeriod::Month));
+    let stats_hour = create_blocking_resource(|| (), move |_| get_stats(StatsPeriod::Hour));
+    view! {
         <Title text="Dashboard"/>
         <div class="HomePage">
             <h1>Dashboard</h1>
@@ -26,26 +25,22 @@ pub fn HomePage(cx: Scope) -> impl IntoView {
 }
 
 #[component]
-pub fn StatsTableTransition(
-    cx: Scope,
-    resource: StatsResource,
-    caption: &'static str,
-) -> impl IntoView {
-    view! { cx,
+pub fn StatsTableTransition(resource: StatsResource, caption: &'static str) -> impl IntoView {
+    view! {
         <Transition fallback=move || {
-            view! { cx, <Loading/> }
+            view! { <Loading/> }
         }>
             {move || {
                 resource
-                    .read(cx)
+                    .read()
                     .map(|stats| match stats {
                         Err(e) => {
-                            view! { cx, <p>error {e.to_string()}</p> }
-                                .into_view(cx)
+                            view! { <p>error {e.to_string()}</p> }
+                                .into_view()
                         }
                         Ok(stats) => {
-                            view! { cx, <StatsTable caption list=stats.list/> }
-                                .into_view(cx)
+                            view! { <StatsTable caption list=stats.list/> }
+                                .into_view()
                         }
                     })
             }}
@@ -54,8 +49,8 @@ pub fn StatsTableTransition(
 }
 
 #[component]
-pub fn StatsTable(cx: Scope, caption: &'static str, list: Vec<StatsListItem>) -> impl IntoView {
-    view! { cx,
+pub fn StatsTable(caption: &'static str, list: Vec<StatsListItem>) -> impl IntoView {
+    view! {
         <table class="StatsTable">
             <caption>{caption}</caption>
             <thead>
@@ -68,8 +63,8 @@ pub fn StatsTable(cx: Scope, caption: &'static str, list: Vec<StatsListItem>) ->
                 <For
                     each=move || list.clone()
                     key=|stat| stat.path.clone()
-                    view=move |cx, stat| {
-                        view! { cx,
+                    view=move |stat| {
+                        view! {
                             <tr>
                                 <td class="StatsTable-path">{stat.path}</td>
                                 <td class="StatsTable-count">{stat.n}</td>
@@ -105,10 +100,10 @@ pub struct StatsResult {
     pub list: Vec<StatsListItem>,
 }
 #[server(GetStats, "/api")]
-pub async fn get_stats(cx: Scope, period: StatsPeriod) -> Result<StatsResult, ServerFnError> {
+pub async fn get_stats(period: StatsPeriod) -> Result<StatsResult, ServerFnError> {
     use prisma_client::db;
     use std::collections::HashMap;
-    let prisma_client = crate::server::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
 
     let now = chrono::Utc::now().fixed_offset();
     let last_hour = now - chrono::Duration::hours(1);

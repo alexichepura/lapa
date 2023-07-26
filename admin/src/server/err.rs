@@ -1,22 +1,22 @@
 use http::status::StatusCode;
-use leptos::{use_context, Scope};
+use leptos::use_context;
 use leptos_axum::ResponseOptions;
 
-pub fn use_response(cx: Scope) -> ResponseOptions {
-    use_context::<ResponseOptions>(cx).expect("to have leptos_axum::ResponseOptions provided")
+pub fn use_response() -> ResponseOptions {
+    use_context::<ResponseOptions>().expect("to have leptos_axum::ResponseOptions provided")
 }
 
-pub fn serverr_401(cx: Scope) {
-    let response = use_response(cx);
+pub fn serverr_401() {
+    let response = use_response();
     response.set_status(StatusCode::UNAUTHORIZED);
 }
 
-pub fn serverr_404(cx: Scope) {
-    let response = use_response(cx);
+pub fn serverr_404() {
+    let response = use_response();
     response.set_status(StatusCode::NOT_FOUND);
 }
 
-pub fn serverr_400(cx: Scope) {
-    let response = use_response(cx);
+pub fn serverr_400() {
+    let response = use_response();
     response.set_status(StatusCode::BAD_REQUEST);
 }

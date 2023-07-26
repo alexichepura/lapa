@@ -2,7 +2,6 @@ use leptos::*;
 
 #[component]
 pub fn Input(
-    cx: Scope,
     #[prop(optional, into)] type_: Option<TextProp>,
     #[prop(optional, into)] name: Option<TextProp>,
     #[prop(optional, into)] label: Option<TextProp>,
@@ -10,7 +9,7 @@ pub fn Input(
     #[prop(optional, into)] value: Option<MaybeSignal<String>>,
     #[prop(optional, into)] attributes: Option<MaybeSignal<AdditionalAttributes>>,
 ) -> impl IntoView {
-    let mut inner = html::input(cx);
+    let mut inner = html::input();
 
     if let Some(name) = name {
         inner = inner.attr("name", name.get());
@@ -46,9 +45,9 @@ pub fn Input(
     }
 
     let label = match label {
-        Some(label) => view! { cx, <div>{label.get()}</div> }.into_view(cx),
-        None => ().into_view(cx),
+        Some(label) => view! { <div>{label.get()}</div> }.into_view(),
+        None => ().into_view(),
     };
 
-    view! { cx, <label>{label} {inner}</label> }
+    view! { <label>{label} {inner}</label> }
 }

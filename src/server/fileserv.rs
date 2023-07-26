@@ -63,7 +63,7 @@ pub async fn not_found_response(req: Request<Body>, options: &LeptosOptions) -> 
     errors.insert_with_default_key(AppError::NotFound);
     let handler = leptos_axum::render_app_to_stream(
         options.to_owned(),
-        move |cx| view! { cx, <ErrorTemplate outside_errors=errors.clone()/> },
+        move || view! { <ErrorTemplate outside_errors=errors.clone()/> },
     );
     handler(req).await.into_response()
 }

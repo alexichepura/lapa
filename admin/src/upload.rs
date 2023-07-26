@@ -2,7 +2,6 @@ use leptos::*;
 
 #[component]
 pub(crate) fn InputImage(
-    cx: Scope,
     #[allow(unused_variables)] set_file_name: WriteSignal<Option<String>>,
     #[allow(unused_variables)] set_save_file: WriteSignal<Option<String>>,
     // set_save_bytes: WriteSignal<Option<js_sys::Uint8Array>>,
@@ -10,7 +9,7 @@ pub(crate) fn InputImage(
     #[allow(unused_variables)] set_obj_url: WriteSignal<Option<String>>,
 ) -> impl IntoView {
     #[allow(unused_variables)]
-    let file_input = create_node_ref::<html::Input>(cx);
+    let file_input = create_node_ref::<html::Input>();
     let on_file_change = move |_ev: leptos::ev::Event| {
         #[cfg(feature = "hydrate")]
         if let Some(files) = file_input.get().map(|fi| fi.files()).flatten() {
@@ -37,5 +36,5 @@ pub(crate) fn InputImage(
         }
     };
 
-    view! { cx, <input type="file" on:change=on_file_change node_ref=file_input autocomplete="off"/> }
+    view! { <input type="file" on:change=on_file_change node_ref=file_input autocomplete="off"/> }
 }

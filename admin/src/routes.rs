@@ -8,8 +8,8 @@ use crate::{
 };
 
 #[component]
-pub fn AdminRoutes(cx: Scope) -> impl IntoView {
-    view! { cx,
+pub fn AdminRoutes() -> impl IntoView {
+    view! {
         <Routes>
             <Route path="/" view=HomePage/>
             <Route path="/posts" view=PostList/>
@@ -21,9 +21,9 @@ pub fn AdminRoutes(cx: Scope) -> impl IntoView {
 }
 
 #[component]
-pub fn GenerateRouteList(cx: Scope) -> impl IntoView {
-    leptos_meta::provide_meta_context(cx);
-    view! { cx,
+pub fn GenerateRouteList() -> impl IntoView {
+    leptos_meta::provide_meta_context();
+    view! {
         <Router>
             <AdminRoutes/>
         </Router>

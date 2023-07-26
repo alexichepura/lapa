@@ -7,13 +7,13 @@ use crate::{
 };
 
 #[component]
-pub fn Layout(cx: Scope, user: User) -> impl IntoView {
-    let el_blur: NodeRef<Nav> = create_node_ref(cx);
+pub fn Layout(user: User) -> impl IntoView {
+    let el_blur: NodeRef<Nav> = create_node_ref();
 
     let blur = move |_| {
         let _ = el_blur().expect("<nav> to exist").blur();
     };
-    view! { cx,
+    view! {
         <div class="admin">
             <header>
                 <div class="logo">Admin</div>

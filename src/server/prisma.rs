@@ -1,4 +1,4 @@
-use leptos::{use_context, Scope, ServerFnError};
+use leptos::{use_context, ServerFnError};
 use prisma_client::db;
 use std::sync::Arc;
 
@@ -16,8 +16,8 @@ pub async fn init_prisma_client() -> ArcPrisma {
     prisma_client
 }
 
-pub fn use_prisma(cx: Scope) -> Result<ArcPrisma, ServerFnError> {
-    use_context::<ArcPrisma>(cx)
+pub fn use_prisma() -> Result<ArcPrisma, ServerFnError> {
+    use_context::<ArcPrisma>()
         .ok_or("Prisma missing.")
         .map_err(|e| ServerFnError::ServerError(e.to_string()))
 }

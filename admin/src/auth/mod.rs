@@ -14,13 +14,13 @@ pub struct User {
 }
 
 type UserSignal = RwSignal<Option<User>>;
-pub fn use_user_signal(cx: Scope) -> UserSignal {
-    let user = use_context::<UserSignal>(cx).expect("UserSignal");
+pub fn use_user_signal() -> UserSignal {
+    let user = use_context::<UserSignal>().expect("UserSignal");
     return user;
 }
 
 #[server(GetUser, "/api")]
-pub async fn get_user(cx: Scope) -> Result<Option<User>, ServerFnError> {
-    let auth = crate::server::use_auth(cx)?;
+pub async fn get_user() -> Result<Option<User>, ServerFnError> {
+    let auth = crate::server::use_auth()?;
     Ok(auth.current_user)
 }

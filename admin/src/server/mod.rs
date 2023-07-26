@@ -52,9 +52,9 @@ pub async fn server_fn_public(
         path,
         headers,
         raw_query,
-        move |cx| {
-            provide_context(cx, app_state.prisma_client.clone());
-            provide_context(cx, auth_session.clone());
+        move || {
+            provide_context(app_state.prisma_client.clone());
+            provide_context(auth_session.clone());
         },
         request,
     )
@@ -76,9 +76,9 @@ pub async fn server_fn_private(
         path,
         headers,
         raw_query,
-        move |cx| {
-            provide_context(cx, app_state.prisma_client.clone());
-            provide_context(cx, auth_session.clone());
+        move || {
+            provide_context(app_state.prisma_client.clone());
+            provide_context(auth_session.clone());
         },
         request,
     )
@@ -96,11 +96,11 @@ pub async fn leptos_routes_handler(
     let settings = settins_db(prisma_client.clone()).await;
     let handler = leptos_axum::render_app_async_with_context(
         app_state.leptos_options.clone(),
-        move |cx| {
-            provide_context(cx, app_state.prisma_client.clone());
-            provide_context(cx, auth_session.clone());
+        move || {
+            provide_context(app_state.prisma_client.clone());
+            provide_context(auth_session.clone());
         },
-        move |cx| view! { cx, <App user=user.clone() settings=settings.clone()/> },
+        move || view! { <App user=user.clone() settings=settings.clone()/> },
     );
 
     let leptos_res = handler(req).await.into_response();

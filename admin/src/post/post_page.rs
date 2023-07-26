@@ -12,8 +12,8 @@ pub struct PostParams {
 }
 
 #[component]
-pub fn PostPage(cx: Scope) -> impl IntoView {
-    let params = use_params::<PostParams>(cx);
+pub fn PostPage() -> impl IntoView {
+    let params = use_params::<PostParams>();
     let id = move || {
         params.with(|q| {
             q.as_ref()
@@ -22,30 +22,30 @@ pub fn PostPage(cx: Scope) -> impl IntoView {
         })
     };
 
-    let post = create_blocking_resource(cx, id, move |id| async move {
+    let post = create_blocking_resource(id, move |id| async move {
         match id {
             Err(e) => Err(e),
-            Ok(id) => get_post(cx, id)
+            Ok(id) => get_post(id)
                 .await
                 .map_err(|_| PostError::ServerError)
                 .flatten(),
         }
     });
 
-    view! { cx,
+    view! {
         <Suspense fallback=move || {
-            view! { cx, <Loading/> }
+            view! { <Loading/> }
         }>
             {move || {
-                post.read(cx)
+                post.read()
                     .map(|post| match post {
                         Err(e) => {
-                            view! { cx, <p>{e.to_string()}</p> }
-                                .into_view(cx)
+                            view! { <p>{e.to_string()}</p> }
+                                .into_view()
                         }
                         Ok(post) => {
-                            view! { cx, <PostForm post=post/> }
-                                .into_view(cx)
+                            view! { <PostForm post=post/> }
+                                .into_view()
                         }
                     })
             }}
@@ -54,11 +54,8 @@ pub fn PostPage(cx: Scope) -> impl IntoView {
 }
 
 #[server(GetPost, "/api")]
-pub async fn get_post(
-    cx: Scope,
-    id: String,
-) -> Result<Result<PostFormData, PostError>, ServerFnError> {
-    let prisma_client = crate::server::use_prisma(cx)?;
+pub async fn get_post(id: String) -> Result<Result<PostFormData, PostError>, ServerFnError> {
+    let prisma_client = crate::server::use_prisma()?;
 
     let post = prisma_client
         .post()
@@ -81,7 +78,7 @@ pub async fn get_post(
             text: post.text,
         }),
         None => {
-            crate::server::serverr_404(cx);
+            crate::server::serverr_404();
             Err(PostError::NotFound)
         }
     })

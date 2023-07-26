@@ -9,23 +9,23 @@ use crate::{
 };
 
 #[component]
-pub fn App(cx: Scope, user: Option<User>, settings: SettingsCx) -> impl IntoView {
-    provide_meta_context(cx);
-    let (is_routing, set_is_routing) = create_signal(cx, false);
+pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
+    provide_meta_context();
+    let (is_routing, set_is_routing) = create_signal(false);
 
     let user_json = serde_json::to_string(&user).unwrap();
     let user_script = format!("window.USER = {user_json};");
-    let user_signal = create_rw_signal(cx, user.clone());
-    provide_context(cx, user_signal);
+    let user_signal = create_rw_signal(user.clone());
+    provide_context(user_signal);
 
     let settings_json = serde_json::to_string(&settings).unwrap();
     let settings_script = format!("window.SETTINGS = {settings_json};");
-    let settings_signal = create_rw_signal(cx, settings);
-    provide_context(cx, settings_signal);
+    let settings_signal = create_rw_signal(settings);
+    provide_context(settings_signal);
 
     let formatter = |text| format!("{text} - Admin");
 
-    view! { cx,
+    view! {
         <Stylesheet id="leptos" href="/pkg/lapa_admin.css"/>
         <Title formatter/>
         <Favicons/>
@@ -39,16 +39,16 @@ pub fn App(cx: Scope, user: Option<User>, settings: SettingsCx) -> impl IntoView
         <Router set_is_routing>
             {move || match user_signal() {
                 Some(user) => {
-                    view! { cx, <Layout user/> }
-                        .into_view(cx)
+                    view! { <Layout user/> }
+                        .into_view()
                 }
                 None => {
-                    view! { cx,
+                    view! {
                         <Login>
                             <span>Logged out.</span>
                         </Login>
                     }
-                        .into_view(cx)
+                        .into_view()
                 }
             }}
         </Router>
@@ -56,8 +56,8 @@ pub fn App(cx: Scope, user: Option<User>, settings: SettingsCx) -> impl IntoView
 }
 
 #[component]
-pub fn Favicons(cx: Scope) -> impl IntoView {
-    view! { cx,
+pub fn Favicons() -> impl IntoView {
+    view! {
         <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico"/>
         <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png"/>
         <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png"/>

@@ -10,12 +10,12 @@ pub struct ImgData {
 }
 
 #[component]
-pub fn Thumb(cx: Scope, image: ImgData) -> impl IntoView {
-    let settings = use_settings(cx);
+pub fn Thumb(image: ImgData) -> impl IntoView {
+    let settings = use_settings();
 
     let src = format!("/img/{}-s.webp", image.id);
     let srcset = format!("/img/{}-s2.webp 2x", image.id);
-    view! { cx, <img
+    view! { <img
         src=src
         srcset=srcset
         width=settings.thumb_width
