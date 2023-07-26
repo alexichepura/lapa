@@ -49,25 +49,20 @@ where
     view! {
         <footer>
             <input type="submit" value=submit_text.get() disabled=disabled/>
-            <Pending pending/>
-            <Suspense fallback=|| ()>
-                {move || {
-                    if pending() {
-                        return ().into_view();
-                    }
-                    match value() {
-                        None => ().into_view(),
-                        Some(result) => {
-                            match result {
-                                Ok(result) => view! { <ResultAlert result/> }
-                                .into_view(),
-                                Err(e) => view! { <AlertDanger text=e.to_string()/> }
-                                .into_view()
-                            }
+            {move || {
+                if pending() {
+                    return view!{ <progress indeterminate></progress> }.into_view();
+                }
+                match value() {
+                    None => ().into_view(),
+                    Some(result) => {
+                        match result {
+                            Ok(result) => view! { <ResultAlert result/> }.into_view(),
+                            Err(e) => view! { <AlertDanger text=e.to_string()/> }.into_view()
                         }
                     }
-                }}
-            </Suspense>
+                }
+            }}
         </footer>
     }
 }
