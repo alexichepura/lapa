@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_router::{use_navigate, ActionForm};
+use leptos_router::ActionForm;
 
 use crate::auth::use_user_signal;
 
@@ -11,8 +11,6 @@ pub fn Logout() -> impl IntoView {
     create_effect(move |_| {
         if let Some(_) = value() {
             user_signal.set(None);
-            let navigate = use_navigate();
-            navigate(&"/", Default::default()).expect("home route");
         }
     });
     view! {

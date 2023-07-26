@@ -12,7 +12,6 @@ pub mod home;
 pub mod image;
 pub mod layout;
 pub mod post;
-pub mod routes;
 pub mod settings;
 pub mod upload;
 pub mod util;

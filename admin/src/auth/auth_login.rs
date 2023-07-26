@@ -4,7 +4,7 @@ use crate::{
     form::{Checkbox, FormFooter, Input},
 };
 use leptos::*;
-use leptos_router::{use_navigate, ActionForm};
+use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -14,7 +14,7 @@ pub struct LoginFormData {
 }
 
 #[component]
-pub fn Login(children: Children) -> impl IntoView {
+pub fn Login() -> impl IntoView {
     let login = create_server_action::<Login>();
     let pending = login.pending();
     let value = login.value();
@@ -35,8 +35,6 @@ pub fn Login(children: Children) -> impl IntoView {
             let login_result = v.map_err(|_| AuthError::ServerError).flatten();
             if let Ok(login_result) = login_result {
                 user_signal.set(Some(login_result));
-                let navigate = use_navigate();
-                navigate(&"/", Default::default()).expect("home route");
             }
         }
     });
@@ -50,8 +48,6 @@ pub fn Login(children: Children) -> impl IntoView {
                 <Input name="password" label="Password" type_="password"/>
                 <Checkbox name="remember" label="Remember me?"/>
                 <FormFooter action=login submit_text="Login"/>
-                <hr/>
-                <div>{children()}</div>
             </ActionForm>
         </fieldset>
     }

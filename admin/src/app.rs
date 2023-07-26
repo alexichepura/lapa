@@ -3,9 +3,11 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::{
-    auth::{Login, User},
+    auth::{use_user_signal, Login, User},
+    home::HomePage,
     layout::Layout,
-    settings::SettingsCx,
+    post::{PostList, PostNew, PostPage},
+    settings::{Settings, SettingsCx},
 };
 
 #[component]
@@ -37,20 +39,51 @@ pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
             class="RoutingProgress"
         />
         <Router set_is_routing>
-            {move || match user_signal() {
-                Some(user) => {
-                    view! { <Layout user/> }
-                        .into_view()
-                }
-                None => {
-                    view! {
-                        <Login>
-                            <span>Logged out.</span>
-                        </Login>
-                    }
-                        .into_view()
-                }
-            }}
+            <AdminRoutes user_signal/>
+        </Router>
+    }
+}
+
+#[component]
+pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
+    create_effect(move |prev: Option<Option<User>>| {
+        let user = user_signal();
+        // log!("AdminRoutes user {:?}", user);
+        // log!("AdminRoutes prev {:?}", prev);
+        if let Some(prev) = prev {
+            if user.is_some() && prev.is_none() {
+                let navigate = use_navigate();
+                navigate(&"/", Default::default()).expect("home route");
+            }
+        }
+        user
+    });
+    view! {
+        <Routes>
+            <ProtectedRoute path="/login" redirect_path="/" condition={move || user_signal.get().is_none()} view=Login/>
+            <ProtectedRoute path="/*" redirect_path="/login" condition={move || user_signal.get().is_some()} view=LayoutWithUser>
+                <Route path="/" view=HomePage/>
+                <Route path="/posts" view=PostList/>
+                <Route path="/posts/new" view=PostNew/>
+                <Route path="/posts/:id" view=PostPage/>
+                <Route path="/settings" view=Settings/>
+            </ProtectedRoute>
+        </Routes>
+    }
+}
+#[component]
+pub fn LayoutWithUser() -> impl IntoView {
+    let user_signal = use_user_signal();
+    let user = user_signal.get_untracked().unwrap(); // at this point user must be some
+    view! {<Layout user/>}
+}
+
+#[component]
+pub fn AdminRouter() -> impl IntoView {
+    let user_signal = create_rw_signal(None);
+    view! {
+        <Router>
+            <AdminRoutes user_signal/>
         </Router>
     }
 }

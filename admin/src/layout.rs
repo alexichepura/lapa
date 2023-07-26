@@ -1,10 +1,7 @@
 use leptos::{html::Nav, *};
-use leptos_router::A;
+use leptos_router::{Outlet, A};
 
-use crate::{
-    auth::{Logout, User},
-    routes::AdminRoutes,
-};
+use crate::auth::{Logout, User};
 
 #[component]
 pub fn Layout(user: User) -> impl IntoView {
@@ -31,7 +28,7 @@ pub fn Layout(user: User) -> impl IntoView {
                 </nav>
             </div>
             <main>
-                <AdminRoutes/>
+                <Outlet/>
             </main>
         </div>
     }
