@@ -4,28 +4,27 @@ use serde::{de::DeserializeOwned, Serialize};
 use crate::util::{AlertDanger, AlertSuccess};
 
 #[component]
-pub fn Pending(cx: Scope, pending: ReadSignal<bool>) -> impl IntoView {
-    view! { cx,
-        <Show when=move || pending() fallback=|_| ()>
+pub fn Pending(pending: ReadSignal<bool>) -> impl IntoView {
+    view! {
+        <Show when=move || pending() fallback=|| ()>
             <progress indeterminate></progress>
         </Show>
     }
 }
 
 #[component]
-pub fn ResultAlert<T, E>(cx: Scope, result: Result<T, E>) -> impl IntoView
+pub fn ResultAlert<T, E>(result: Result<T, E>) -> impl IntoView
 where
     E: std::error::Error,
 {
     match result {
-        Ok(_) => view! { cx, <AlertSuccess/> }.into_view(cx),
-        Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }.into_view(cx),
+        Ok(_) => view! { <AlertSuccess/> }.into_view(),
+        Err(e) => view! { <AlertDanger text=e.to_string()/> }.into_view(),
     }
 }
 
 #[component]
 pub fn FormFooter<I, O, E>(
-    cx: Scope,
     action: Action<I, Result<Result<O, E>, ServerFnError>>, // first result for 5xx, second for 4xx
     #[prop(optional, into)] submit_text: Option<TextProp>,
     #[prop(optional, into)] disabled: Option<MaybeSignal<bool>>,
@@ -47,28 +46,23 @@ where
         None => false,
     };
 
-    view! { cx,
+    view! {
         <footer>
             <input type="submit" value=submit_text.get() disabled=disabled/>
-            <Pending pending/>
-            <Suspense fallback=|| ()>
-                {move || {
-                    if pending() {
-                        return ().into_view(cx);
-                    }
-                    match value() {
-                        None => ().into_view(cx),
-                        Some(result) => {
-                            match result {
-                                Ok(result) => view! { cx, <ResultAlert result/> }
-                                .into_view(cx),
-                                Err(e) => view! { cx, <AlertDanger text=e.to_string()/> }
-                                .into_view(cx)
-                            }
+            {move || {
+                if pending() {
+                    return view!{ <progress indeterminate></progress> }.into_view();
+                }
+                match value() {
+                    None => ().into_view(),
+                    Some(result) => {
+                        match result {
+                            Ok(result) => view! { <ResultAlert result/> }.into_view(),
+                            Err(e) => view! { <AlertDanger text=e.to_string()/> }.into_view()
                         }
                     }
-                }}
-            </Suspense>
+                }
+            }}
         </footer>
     }
 }

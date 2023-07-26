@@ -7,13 +7,13 @@ use crate::{form::FormFooter, image::ImageUploadError, upload::InputImage};
 pub type ImageUploadAction = Action<ImageUpload, Result<ImageUploadResult, ServerFnError>>;
 
 #[component]
-pub fn ImageUpload(cx: Scope, post_id: String, image_upload: ImageUploadAction) -> impl IntoView {
+pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl IntoView {
     let pending = image_upload.pending();
-    let (_file_name, set_file_name) = create_signal(cx, None::<String>);
-    let (save_byte_vec, set_save_byte_vec) = create_signal(cx, None::<Vec<u8>>);
-    let (_save_file, set_save_file) = create_signal(cx, None::<String>);
-    let (obj_url, set_obj_url) = create_signal(cx, None::<String>);
-    view! { cx,
+    let (_file_name, set_file_name) = create_signal(None::<String>);
+    let (save_byte_vec, set_save_byte_vec) = create_signal(None::<Vec<u8>>);
+    let (_save_file, set_save_file) = create_signal(None::<String>);
+    let (obj_url, set_obj_url) = create_signal(None::<String>);
+    view! {
         <fieldset disabled=move || pending()>
             <legend>Image upload</legend>
             <div class="Grid-fluid-2">
@@ -50,19 +50,18 @@ pub fn ImageUpload(cx: Scope, post_id: String, image_upload: ImageUploadAction) 
 }
 
 #[component]
-pub fn ImageUploadPreview(cx: Scope, obj_url: ReadSignal<Option<String>>) -> impl IntoView {
+pub fn ImageUploadPreview(obj_url: ReadSignal<Option<String>>) -> impl IntoView {
     let view = move || match obj_url.get() {
-        Some(url) => view! { cx, <img src=url/> }.into_view(cx),
-        None => view! { cx, <p>Upload preview</p> }.into_view(cx),
+        Some(url) => view! { <img src=url/> }.into_view(),
+        None => view! { <p>Upload preview</p> }.into_view(),
     };
-    view! { cx, <div class="ImageUploadPreview">{view}</div> }
+    view! { <div class="ImageUploadPreview">{view}</div> }
 }
 
 type ImageUploadResult = Result<ImageResult, ImageUploadError>;
 
 #[server(ImageUpload, "/api")]
 pub async fn upload_img(
-    cx: Scope,
     img: String,
     alt: String,
     post_id: String,
@@ -70,27 +69,27 @@ pub async fn upload_img(
     let img_bytes = serde_json::from_str::<Vec<u8>>(&img);
     if let Err(e) = img_bytes {
         dbg!(e);
-        crate::server::serverr_400(cx);
+        crate::server::serverr_400();
         return Ok(Err(ImageUploadError::Deserialization));
     }
     let img_bytes = img_bytes.unwrap();
 
     use prisma_client::db;
-    let prisma_client = crate::server::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
 
     let cursor = std::io::Cursor::new(img_bytes.clone());
     let img_reader = image::io::Reader::new(cursor.clone()).with_guessed_format();
 
     if let Err(e) = img_reader {
         dbg!(e);
-        crate::server::serverr_400(cx);
+        crate::server::serverr_400();
         return Ok(Err(ImageUploadError::Read));
     }
     let img_reader = img_reader.unwrap();
 
     let img_format = img_reader.format();
     if let None = img_format {
-        crate::server::serverr_400(cx);
+        crate::server::serverr_400();
         return Ok(Err(ImageUploadError::Format));
     }
     let img_format = img_format.unwrap();

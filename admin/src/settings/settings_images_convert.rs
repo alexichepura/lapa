@@ -4,11 +4,11 @@ use leptos_router::ActionForm;
 use crate::{form::FormFooter, settings::SettingsError};
 
 #[component]
-pub fn ImagesConvertView(cx: Scope) -> impl IntoView {
-    let images_convert = create_server_action::<ImagesConvert>(cx);
+pub fn ImagesConvertView() -> impl IntoView {
+    let images_convert = create_server_action::<ImagesConvert>();
     let pending = images_convert.pending();
 
-    view! { cx,
+    view! {
         <fieldset disabled=move || pending()>
             <legend>Images convert</legend>
             <ActionForm action=images_convert>
@@ -19,9 +19,9 @@ pub fn ImagesConvertView(cx: Scope) -> impl IntoView {
 }
 
 #[server(ImagesConvert, "/api")]
-pub async fn images_convert(cx: Scope) -> Result<Result<(), SettingsError>, ServerFnError> {
+pub async fn images_convert() -> Result<Result<(), SettingsError>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::server::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
 
     let settings = prisma_client
         .settings()

@@ -1,27 +1,27 @@
 use leptos::*;
 
 #[component]
-pub fn Loading(cx: Scope) -> impl IntoView {
-    view! { cx, <p>Loading...</p> }
+pub fn Loading() -> impl IntoView {
+    view! { <p>Loading...</p> }
 }
 
 #[component]
-pub fn AlertDanger(cx: Scope, text: String) -> impl IntoView {
-    view! { cx, <p class="AlertDanger">{text}</p> }
+pub fn AlertDanger(text: String) -> impl IntoView {
+    view! { <p class="AlertDanger">{text}</p> }
 }
 #[component]
-pub fn AlertSuccess(cx: Scope) -> impl IntoView {
-    view! { cx, <p class="AlertSuccess">Success</p> }
+pub fn AlertSuccess() -> impl IntoView {
+    view! { <p class="AlertSuccess">Success</p> }
 }
 
 #[component]
-pub fn ParagraphsByMultiline(cx: Scope, text: String) -> impl IntoView {
+pub fn ParagraphsByMultiline(text: String) -> impl IntoView {
     let lines = text.lines();
     lines
         .map(|line| {
-            view! { cx,
+            view! {
                 <p>{line.to_string()}</p>
             }
         })
-        .collect_view(cx)
+        .collect_view()
 }

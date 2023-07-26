@@ -2,14 +2,13 @@ use leptos::*;
 
 #[component]
 pub fn FileField(
-    cx: Scope,
     #[prop(optional, into)] name: Option<TextProp>,
     #[prop(optional, into)] label: Option<TextProp>,
     #[prop(optional)] set: Option<WriteSignal<String>>,
     #[prop(optional, into)] value: Option<MaybeSignal<String>>,
     #[prop(optional, into)] attributes: Option<MaybeSignal<AdditionalAttributes>>,
 ) -> impl IntoView {
-    let mut inner = html::input(cx).attr("type", "file");
+    let mut inner = html::input().attr("type", "file");
 
     if let Some(name) = name {
         inner = inner.attr("name", name.get());
@@ -42,9 +41,9 @@ pub fn FileField(
     }
 
     let label = match label {
-        Some(label) => view! { cx, <span>{label.get()}</span> }.into_view(cx),
-        None => ().into_view(cx),
+        Some(label) => view! { <span>{label.get()}</span> }.into_view(),
+        None => ().into_view(),
     };
 
-    view! { cx, <label>{label} {inner}</label> }
+    view! { <label>{label} {inner}</label> }
 }

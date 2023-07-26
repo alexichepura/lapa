@@ -5,17 +5,17 @@ use leptos_router::*;
 use crate::{routes::FrontRoutes, settings::SettingsCx};
 
 #[component]
-pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
-    provide_meta_context(cx);
-    provide_context(cx, settings.clone());
-    let (is_routing, set_is_routing) = create_signal(cx, false);
+pub fn App(settings: SettingsCx) -> impl IntoView {
+    provide_meta_context();
+    provide_context(settings.clone());
+    let (is_routing, set_is_routing) = create_signal(false);
 
     let settings_json = serde_json::to_string(&settings).unwrap();
     let settings_script = format!("window.SETTINGS = {settings_json};");
 
     let formatter = |text| format!("{text} - LAPA");
 
-    view! { cx,
+    view! {
         <Html lang="en"/>
         <Stylesheet id="leptos" href="/pkg/lapa_site.css"/>
         <Title formatter/>
@@ -41,8 +41,8 @@ pub fn App(cx: Scope, settings: SettingsCx) -> impl IntoView {
 }
 
 #[component]
-pub fn Favicons(cx: Scope) -> impl IntoView {
-    view! { cx,
+pub fn Favicons() -> impl IntoView {
+    view! {
         <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico"/>
         <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png"/>
         <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png"/>

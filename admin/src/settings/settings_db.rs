@@ -1,9 +1,7 @@
-use leptos::Scope;
-
 use super::SettingsCx;
 
-pub async fn use_settins_db(cx: Scope) -> SettingsCx {
-    let prisma_client = crate::server::use_prisma(cx).unwrap();
+pub async fn use_settins_db() -> SettingsCx {
+    let prisma_client = crate::server::use_prisma().unwrap();
     settins_db(prisma_client).await
 }
 

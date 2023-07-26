@@ -33,7 +33,7 @@ pub fn hydrate() {
 
     log!("SETTINGS: {:?}", settings);
 
-    leptos::mount_to_body(move |cx| {
-        view! { cx, <App settings/> }
+    leptos::mount_to_body(move || {
+        view! { <App settings=settings.clone()/> }
     });
 }

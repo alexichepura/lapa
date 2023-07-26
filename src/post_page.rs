@@ -37,8 +37,8 @@ pub struct PostData {
 }
 
 #[component]
-pub fn PostPage(cx: Scope) -> impl IntoView {
-    let params = use_params::<PostParams>(cx);
+pub fn PostPage() -> impl IntoView {
+    let params = use_params::<PostParams>();
     let slug = move || {
         params.with(|q| {
             q.as_ref()
@@ -47,25 +47,25 @@ pub fn PostPage(cx: Scope) -> impl IntoView {
         })
     };
 
-    let post = create_blocking_resource(cx, slug, move |slug| async move {
+    let post = create_blocking_resource(slug, move |slug| async move {
         match slug {
             Err(e) => Err(e),
-            Ok(slug) => get_post(cx, slug)
+            Ok(slug) => get_post(slug)
                 .await
                 .map_err(|_| PostError::ServerError)
                 .flatten(),
         }
     });
 
-    view! { cx,
+    view! {
         <Suspense fallback=move || {
-            view! { cx, <Loading/> }
+            view! { <Loading/> }
         }>
             {move || {
-                post.read(cx)
+                post.read()
                     .map(|post| match post {
-                        Err(e) => view! { cx, <p>{e.to_string()}</p> }.into_view(cx),
-                        Ok(post) => view! { cx, <PostView post=post/> }.into_view(cx),
+                        Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
+                        Ok(post) => view! { <PostView post=post/> }.into_view(),
                     })
             }}
         </Suspense>
@@ -73,11 +73,11 @@ pub fn PostPage(cx: Scope) -> impl IntoView {
 }
 
 #[component]
-pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
-    let dialog_element: NodeRef<Dialog> = create_node_ref(cx);
-    let (dialog_open, set_dialog_open) = create_signal::<DialogSignal>(cx, None);
+pub fn PostView(post: PostData) -> impl IntoView {
+    let dialog_element: NodeRef<Dialog> = create_node_ref();
+    let (dialog_open, set_dialog_open) = create_signal::<DialogSignal>(None);
 
-    create_effect(cx, move |old| {
+    create_effect(move |old| {
         let current = dialog_open();
         if let Some(_id) = current.clone() {
             let el = dialog_element().expect("<dialog> to exist");
@@ -95,21 +95,21 @@ pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
     });
 
     let dialog_view = move || match dialog_open() {
-        Some(image) => view! { cx, <PostImageModal image set_dialog_open/> }.into_view(cx),
-        None => ().into_view(cx),
+        Some(image) => view! { <PostImageModal image set_dialog_open/> }.into_view(),
+        None => ().into_view(),
     };
 
-    let site_url = use_site_url(cx);
+    let site_url = use_site_url();
 
     let hero_og = match post.hero {
         Some(hero) => {
             let og = format!("{site_url}{}", img_url_large_retina(&hero)); // TODO domain from DB
-            view! { cx, <Meta property="og:image" content=og/> }.into_view(cx)
+            view! { <Meta property="og:image" content=og/> }.into_view()
         }
-        None => ().into_view(cx),
+        None => ().into_view(),
     };
 
-    view! { cx,
+    view! {
         <Title text=post.title.clone()/>
         <Meta name="description" content=post.description.clone()/>
         <Meta property="og:title" content=post.title.clone()/>
@@ -122,8 +122,8 @@ pub fn PostView(cx: Scope, post: PostData) -> impl IntoView {
             <For
                 each=move || post.images.clone()
                 key=|image| image.id.clone()
-                view=move |cx, image: ImgData| {
-                    view! { cx, <Thumb image=image set_dialog_open/> }
+                view=move |image: ImgData| {
+                    view! { <Thumb image=image set_dialog_open/> }
                 }
             />
         </div>
@@ -141,12 +141,8 @@ pub struct ImgData {
 
 type DialogSignal = Option<ImgData>;
 #[component]
-pub fn Thumb(
-    cx: Scope,
-    image: ImgData,
-    set_dialog_open: WriteSignal<DialogSignal>,
-) -> impl IntoView {
-    let settings = use_settings(cx);
+pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl IntoView {
+    let settings = use_settings();
     let id = image.id.clone();
     let alt = image.alt.clone();
 
@@ -159,7 +155,7 @@ pub fn Thumb(
 
     let src = format!("/img/{}-s.webp", image.id);
     let srcset = format!("/img/{}-s2.webp 2x", image.id);
-    view! { cx,
+    view! {
         <figure>
             <img
                 on:click=on_edit
@@ -174,12 +170,8 @@ pub fn Thumb(
 }
 
 #[component]
-pub fn PostImageModal(
-    cx: Scope,
-    image: ImgData,
-    set_dialog_open: WriteSignal<DialogSignal>,
-) -> impl IntoView {
-    view! { cx,
+pub fn PostImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl IntoView {
+    view! {
         <figure>
             <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) />
             <figcaption>{&image.alt}</figcaption>
@@ -192,12 +184,9 @@ pub fn PostImageModal(
 }
 
 #[server(GetPost, "/api")]
-pub async fn get_post(
-    cx: Scope,
-    slug: String,
-) -> Result<Result<PostData, PostError>, ServerFnError> {
+pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, ServerFnError> {
     use prisma_client::db;
-    let prisma_client = crate::server::use_prisma(cx)?;
+    let prisma_client = crate::server::use_prisma()?;
 
     let post = prisma_client
         .post()
@@ -259,7 +248,7 @@ pub async fn get_post(
     match result {
         Some(post) => Ok(Ok(post)),
         None => {
-            crate::server::serverr_404(cx);
+            crate::server::serverr_404();
             Ok(Err(PostError::NotFound))
         }
     }

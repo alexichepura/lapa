@@ -6,7 +6,7 @@ async fn main() {
         Router,
     };
     use lapa_admin::{
-        routes::GenerateRouteList,
+        app::AdminRouter,
         server::{
             auth_session_layer, file_and_error_handler, img_handler, init_prisma_client,
             leptos_routes_handler, server_fn_private, server_fn_public, session_layer, AppState,
@@ -18,7 +18,7 @@ async fn main() {
     simple_logger::init_with_env().expect("couldn't initialize logging");
 
     let leptopts = get_configuration(None).await.unwrap().leptos_options;
-    let routes = generate_route_list(|cx| view! { cx, <GenerateRouteList/> }).await;
+    let routes = generate_route_list(|| view! { <AdminRouter /> }).await;
     let prisma_client = init_prisma_client().await;
     let app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
