@@ -74,7 +74,7 @@ impl From<&SettingsData> for SettingsSite {
     }
 }
 
-pub fn create_settings_resource() -> Resource<(), Result<SettingsData, SettingsError>> {
+pub fn create_settings_resource() -> Resource<(), SettingsResult> {
     let settings = create_blocking_resource(
         || (),
         move |_| async move {
