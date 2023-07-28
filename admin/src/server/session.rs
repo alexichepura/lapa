@@ -40,12 +40,10 @@ impl From<ArcPrisma> for SessionPrismaPool {
 #[async_trait]
 impl DatabasePool for SessionPrismaPool {
     async fn initiate(&self, _table_name: &str) -> Result<(), SessionError> {
-        // dbg!(("initiate", _table_name));
         Ok(())
     }
 
     async fn delete_by_expiry(&self, _table_name: &str) -> Result<Vec<String>, SessionError> {
-        // dbg!("delete_by_expiry");
         let result = self
             .pool
             .session()
@@ -69,7 +67,6 @@ impl DatabasePool for SessionPrismaPool {
     }
 
     async fn count(&self, _table_name: &str) -> Result<i64, SessionError> {
-        dbg!("count");
         let count = self
             .pool
             .session()
@@ -88,7 +85,6 @@ impl DatabasePool for SessionPrismaPool {
         expires: i64,
         _table_name: &str,
     ) -> Result<(), SessionError> {
-        // dbg!(("store", id, session, expires));
         self.pool
             .session()
             .create(
@@ -103,7 +99,6 @@ impl DatabasePool for SessionPrismaPool {
     }
 
     async fn load(&self, id: &str, _table_name: &str) -> Result<Option<String>, SessionError> {
-        // dbg!(("load", id));
         let result = self
             .pool
             .session()
@@ -118,7 +113,6 @@ impl DatabasePool for SessionPrismaPool {
             .await
             .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
 
-        // dbg!(("load_result", result.clone()));
         Ok(match result {
             Some(result) => Some(result.session),
             None => None,
@@ -126,7 +120,6 @@ impl DatabasePool for SessionPrismaPool {
     }
 
     async fn delete_one_by_id(&self, id: &str, _table_name: &str) -> Result<(), SessionError> {
-        // dbg!(("delete_one_by_id", id));
         self.pool
             .session()
             .delete(session::id::equals(id.to_string()))
@@ -137,7 +130,6 @@ impl DatabasePool for SessionPrismaPool {
     }
 
     async fn exists(&self, id: &str, _table_name: &str) -> Result<bool, SessionError> {
-        // dbg!(("exists", id));
         let result = self
             .pool
             .session()
@@ -152,7 +144,6 @@ impl DatabasePool for SessionPrismaPool {
             .await
             .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
         let exists = result > 0;
-        // dbg!(("exists_result", id, exists));
         Ok(exists)
     }
 
@@ -168,7 +159,6 @@ impl DatabasePool for SessionPrismaPool {
     }
 
     async fn get_ids(&self, _table_name: &str) -> Result<Vec<String>, SessionError> {
-        use prisma_client::db;
         let result = self
             .pool
             .session()
@@ -182,7 +172,6 @@ impl DatabasePool for SessionPrismaPool {
             .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
 
         let result: Vec<String> = result.iter().map(|data| data.id.clone()).collect();
-
         Ok(result)
     }
 
