@@ -19,7 +19,7 @@ pub mod util;
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {
-    use crate::app::*;
+    use crate::app::App;
     use crate::auth::User;
     use leptos::*;
     use wasm_bindgen::JsValue;
