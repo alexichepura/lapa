@@ -1,6 +1,8 @@
 <img width="128" alt="LAPA Logo" src="https://github.com/alexichepura/lapa/assets/5582266/d13a532e-dd04-48a5-af49-d5f8e9e75c6e">
 
 # LAPA - Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website
+Intro: <https://youtu.be/6eMWAI1D-XA> \
+Demo site: <https://lapa.chepura.space>
 
 <img width="360" alt="Site Home" src="https://github.com/alexichepura/lapa/assets/5582266/66326ce4-c61c-4fcc-a9f3-1f0548bb8c60">
 <img width="360" alt="Site Home" src="https://github.com/alexichepura/lapa/assets/5582266/4a0f0d99-fd95-4abe-84bb-30e43c9aeeaa">
@@ -11,8 +13,6 @@
 <img width="360" alt="Admin Post" src="https://github.com/alexichepura/lapa/assets/5582266/3f08bf40-9c80-4b6a-8a5b-b9b2b8732066">
 <img width="360" alt="Admin Settings" src="https://github.com/alexichepura/lapa/assets/5582266/b2913992-bfb2-4454-83f3-f526a73fbb49">
 <img width="90" alt="Admin Mobile" src="https://github.com/alexichepura/lapa/assets/5582266/96f10565-19da-4b8e-80c0-6125bb5a97ac">
-
-DEMO site <https://lapa.chepura.space>
 
 ## Motivation
 I want to have practical full-stack setup to build websites and services. \
