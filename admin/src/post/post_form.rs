@@ -51,7 +51,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                         // see use_navigate docs
                         // RAF prevents action signal update warning
                         log!("navigate request_animation_frame");
-                        navigate(&to, Default::default()).expect("post route");
+                        navigate(&to, Default::default());
                     });
                 }
             }

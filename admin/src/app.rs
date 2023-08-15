@@ -53,7 +53,7 @@ pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
         if let Some(prev) = prev {
             if user.is_some() && prev.is_none() {
                 let navigate = use_navigate();
-                navigate(&"/", Default::default()).expect("home route");
+                navigate(&"/", Default::default());
             }
         }
         user
