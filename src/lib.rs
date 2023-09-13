@@ -31,7 +31,7 @@ pub fn hydrate() {
     let settings: settings::SettingsCx =
         serde_wasm_bindgen::from_value(settings).unwrap_or_default();
 
-    log!("SETTINGS: {:?}", settings);
+    logging::log!("SETTINGS: {:?}", settings);
 
     leptos::mount_to_body(move || {
         view! { <App settings=settings.clone()/> }

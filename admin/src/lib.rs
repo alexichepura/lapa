@@ -31,14 +31,14 @@ pub fn hydrate() {
         js_sys::Reflect::get(&web_sys::window().unwrap(), &JsValue::from_str("USER"))
             .unwrap_or(JsValue::NULL);
     let user: Option<User> = serde_wasm_bindgen::from_value(user).ok();
-    log!("USER: {:?}", user);
+    logging::log!("USER: {:?}", user);
 
     let settings: JsValue =
         js_sys::Reflect::get(&web_sys::window().unwrap(), &JsValue::from_str("SETTINGS"))
             .unwrap_or(JsValue::NULL);
     let settings: settings::SettingsCx =
         serde_wasm_bindgen::from_value(settings).unwrap_or_default();
-    log!("SETTINGS: {:?}", settings);
+    logging::log!("SETTINGS: {:?}", settings);
 
     leptos::mount_to_body(move || {
         view! { <App user=user.clone() settings=settings.clone()/> }

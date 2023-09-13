@@ -36,7 +36,7 @@ async fn main() {
     #[cfg(feature = "compression")]
     let app = lapa_site::server::compression(app, &leptopts.site_pkg_dir, &leptopts.site_root);
 
-    log!("listening on http://{}", &leptopts.site_addr);
+    logging::log!("listening on http://{}", &leptopts.site_addr);
     axum::Server::bind(&leptopts.site_addr)
         .serve(app.into_make_service())
         .await
