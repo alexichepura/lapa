@@ -62,7 +62,7 @@ pub fn PostPage() -> impl IntoView {
             view! { <Loading/> }
         }>
             {move || {
-                post.read()
+                post.get()
                     .map(|post| match post {
                         Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
                         Ok(post) => view! { <PostView post=post/> }.into_view(),

@@ -99,7 +99,7 @@ pub fn Settings() -> impl IntoView {
         }>
             {move || {
                 settings
-                    .read()
+                    .get()
                     .map(|settings| match settings {
                         Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
                         Ok(settings) => {

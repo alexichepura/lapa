@@ -32,7 +32,7 @@ pub fn StatsTableTransition(resource: StatsResource, caption: &'static str) -> i
         }>
             {move || {
                 resource
-                    .read()
+                    .get()
                     .map(|stats| match stats {
                         Err(e) => {
                             view! { <p>error {e.to_string()}</p> }

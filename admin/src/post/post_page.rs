@@ -56,7 +56,7 @@ pub fn PostPage() -> impl IntoView {
     view! {
         <Suspense fallback=move || view! { <Loading/> }>
             {move || {
-                post.read()
+                post.get()
                     .map(|post| match post {
                         Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
                         Ok(post) => view! { <PostForm post=post/> }.into_view()
