@@ -41,7 +41,7 @@ pub fn FileField(
     }
 
     let label = match label {
-        Some(label) => view! { <span>{label.get()}</span> }.into_view(),
+        Some(label) => view! { <span>{label.get().into_owned()}</span> }.into_view(),
         None => ().into_view(),
     };
 

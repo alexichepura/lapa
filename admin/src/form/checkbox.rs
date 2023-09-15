@@ -36,8 +36,8 @@ pub fn Checkbox(
         }
     }
 
-    let label = match label {
-        Some(label) => view! { <span>{label.get()}</span> }.into_view(),
+    let label: View = match label {
+        Some(label) => view! { <span>{label.get().into_owned()}</span> }.into_view(),
         None => ().into_view(),
     };
 
