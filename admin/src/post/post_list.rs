@@ -27,7 +27,7 @@ pub fn PostList() -> impl IntoView {
             }>
                 {move || {
                     posts
-                        .read()
+                        .get()
                         .map(|posts| match posts {
                             Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
                             Ok(posts) => {

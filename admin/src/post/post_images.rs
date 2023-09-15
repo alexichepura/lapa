@@ -51,7 +51,7 @@ pub fn PostImages(post_id: String) -> impl IntoView {
         }>
             {move || {
                 images
-                    .read()
+                    .get()
                     .map(|images| match images {
                         Err(e) => {
                             view! { <p>error {e.to_string()}</p> }

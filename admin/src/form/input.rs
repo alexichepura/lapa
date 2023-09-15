@@ -45,7 +45,7 @@ pub fn Input(
     }
 
     let label = match label {
-        Some(label) => view! { <div>{label.get()}</div> }.into_view(),
+        Some(label) => view! { <div>{label.get().into_owned()}</div> }.into_view(),
         None => ().into_view(),
     };
 

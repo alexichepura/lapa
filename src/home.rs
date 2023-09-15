@@ -24,7 +24,7 @@ pub fn HomePage() -> impl IntoView {
             view! { <Loading/> }
         }>
             {move || {
-                home.read()
+                home.get()
                     .map(|home| match home {
                         Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
                         Ok(home) => view! {
