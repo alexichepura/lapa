@@ -6,9 +6,9 @@ pub fn FileField(
     #[prop(optional, into)] label: Option<TextProp>,
     #[prop(optional)] set: Option<WriteSignal<String>>,
     #[prop(optional, into)] value: Option<MaybeSignal<String>>,
-    #[prop(optional, into)] attributes: Option<MaybeSignal<AdditionalAttributes>>,
+    #[prop(attrs)] attrs: Vec<(&'static str, Attribute)>,
 ) -> impl IntoView {
-    let mut inner = html::input().attr("type", "file");
+    let mut inner = html::input().attr("type", "file").attrs(attrs);
 
     if let Some(name) = name {
         inner = inner.attr("name", name.get());
@@ -29,16 +29,6 @@ pub fn FileField(
             set(event_target_value(&ev));
         })
     };
-
-    // see leptos Form, Html
-    if let Some(attributes) = attributes {
-        let attributes = attributes.get();
-        for (attr_name, attr_value) in attributes.into_iter() {
-            let attr_name = attr_name.to_owned();
-            let attr_value = attr_value.to_owned();
-            inner = inner.attr(attr_name, move || attr_value.get());
-        }
-    }
 
     let label = match label {
         Some(label) => view! { <span>{label.get().into_owned()}</span> }.into_view(),
