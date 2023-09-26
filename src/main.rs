@@ -18,7 +18,7 @@ async fn main() {
     simple_logger::init_with_env().expect("couldn't initialize logging");
 
     let leptopts = get_configuration(None).await.unwrap().leptos_options;
-    let routes = generate_route_list(|| view! { <GenerateRouteList /> }).await;
+    let routes = generate_route_list(|| view! { <GenerateRouteList /> });
     let prisma_client = init_prisma_client().await;
     let app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
