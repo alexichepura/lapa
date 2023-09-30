@@ -63,7 +63,7 @@ pub fn StatsTable(caption: &'static str, list: Vec<StatsListItem>) -> impl IntoV
                 <For
                     each=move || list.clone()
                     key=|stat| stat.path.clone()
-                    view=move |stat| {
+                    children=move |stat| {
                         view! {
                             <tr>
                                 <td class="StatsTable-path">{stat.path}</td>

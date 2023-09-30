@@ -50,7 +50,7 @@ pub fn ErrorTemplate(
         <For
             each=move || { errors.clone().into_iter().enumerate() }
             key=|(index, _error)| *index
-            view=move |error| {
+            children=move |error| {
                 let error_string = error.1.to_string();
                 let error_code = error.1.status_code();
                 view! {

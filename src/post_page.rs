@@ -122,7 +122,7 @@ pub fn PostView(post: PostData) -> impl IntoView {
             <For
                 each=move || post.images.clone()
                 key=|image| image.id.clone()
-                view=move |image: ImgData| {
+                children=move |image: ImgData| {
                     view! { <Thumb image=image set_dialog_open/> }
                 }
             />

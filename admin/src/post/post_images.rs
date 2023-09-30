@@ -134,7 +134,7 @@ pub fn PostImagesView(
                 <For
                     each=move || images_sorted()
                     key=|image| format!("{}:{}", image.id, image.order)
-                    view=move |image: PostImageData| {
+                    children=move |image: PostImageData| {
                         view! { <input type="hidden" name="ids[]" value=image.id/> }
                     }
                 />
@@ -145,7 +145,7 @@ pub fn PostImagesView(
                 <For
                     each=move || images_sorted()
                     key=|image| format!("{}:{}", image.id, image.order)
-                    view=move |image: PostImageData| {
+                    children=move |image: PostImageData| {
                         let is_last = image.order + 1 == images_sorted().len() as i32;
                         let id_to_make_hero = image.id.clone();
                         let make_hero = move || {
