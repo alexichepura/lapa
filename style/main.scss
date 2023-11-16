@@ -2,8 +2,9 @@
 @use "./normalize.min.css";
 @use "./buttons.min.css";
 
-@custom-media --md-n-above (width >=768px);
-@custom-media --sm-n-above (width >=480px);
+// @custom-media --md-n-above (width >=768px);
+// @custom-media --sm-n-above (width >=480px);
+$sm-n-above: 480px;
 
 :root {
 	--inner-width: min(100% - 2rem, 50rem);
@@ -99,7 +100,7 @@ dialog {
 	& figure {
 		grid-template-areas: "img" "text" "btn";
 
-		@media (--sm-n-above) {
+		@media (min-width: #{$sm-n-above}) {
 			grid-template-areas: "img img" "text btn";
 		}
 	}
@@ -117,7 +118,7 @@ dialog {
 	& button {
 		grid-area: btn;
 
-		@media (--sm-n-above) {
+		@media (min-width: #{$sm-n-above}) {
 			justify-self: end;
 		}
 	}

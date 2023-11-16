@@ -2,9 +2,10 @@
 @use "./normalize.min.css";
 @use "./buttons.min.css";
 
-@custom-media --md-n-above (width >=768px);
-@custom-media --sm-n-above (width >=480px);
-$sm-n-above: 480px; // need for container queries https://github.com/sass/sass/issues/3486
+// @custom-media --md-n-above (width >=768px);
+// @custom-media --sm-n-above (width >=480px);
+$md-n-above: 768px;
+$sm-n-above: 480px;
 
 :root {
 	--font-size-fluid-1-07: calc(var(--font-size-fluid-1) * 0.7);
@@ -45,7 +46,7 @@ button {
 	grid-template-rows: 36px 1fr;
 	grid-template-areas: "header" "main";
 
-	@media (--md-n-above) {
+	@media (min-width: #{$md-n-above}) {
 		grid-template-rows: 48px 1fr;
 		grid-template-areas: "header header" "nav main";
 		grid-template-columns: calc(var(--size-fluid-4) * 4) 1fr;
@@ -77,7 +78,7 @@ button {
 	font-size: var(--font-size-fluid-1);
 	visibility: hidden;
 
-	@media (--md-n-above) {
+	@media (min-width: #{$md-n-above}) {
 		visibility: visible;
 	}
 }
@@ -89,7 +90,7 @@ button {
 	left: 0;
 	z-index: 15;
 
-	@media (--md-n-above) {
+	@media (min-width: #{$md-n-above}) {
 		position: relative;
 		z-index: 1;
 	}
@@ -113,7 +114,7 @@ button {
 		align-items: center;
 
 		/* text-decoration: none; */
-		@media (--md-n-above) {
+		@media (min-width: #{$md-n-above}) {
 			display: none;
 		}
 
@@ -131,7 +132,7 @@ nav {
 	left: 0;
 	display: none;
 
-	@media (--md-n-above) {
+	@media (min-width: #{$md-n-above}) {
 		display: block;
 		position: relative;
 		top: 0;
@@ -293,7 +294,7 @@ input:disabled {
 	}
 }
 
-@media (--md-n-above) {
+@media (min-width: #{$md-n-above}) {
 	.Grid-fluid-2 {
 		display: grid;
 		gap: var(--size-fluid-2);
@@ -308,7 +309,7 @@ input:disabled {
 	gap: var(--size-fluid-2) var(--size-fluid-1);
 	justify-content: space-around;
 
-	@media (--md-n-above) {
+	@media (min-width: #{$md-n-above}) {
 		justify-content: start;
 	}
 
@@ -386,7 +387,7 @@ dialog {
 	>a {
 		grid-template-columns: 125px 50px auto;
 
-		@media (--sm-n-above) {
+		@media (min-width: #{$sm-n-above}) {
 			grid-template-columns: 170px 50px auto 170px;
 		}
 	}
@@ -395,7 +396,7 @@ dialog {
 .PostListItem-created {
 	display: none;
 
-	@media (--sm-n-above) {
+	@media (min-width: #{$sm-n-above}) {
 		display: block;
 	}
 }
@@ -415,7 +416,7 @@ dialog {
 	>header {
 		margin-block-end: var(--size-fluid-1-05);
 
-		@media (--sm-n-above) {
+		@media (min-width: #{$sm-n-above}) {
 			display: grid;
 			grid-template-columns: 1fr auto;
 		}
@@ -428,7 +429,7 @@ dialog {
 			font-size: var(--font-size-fluid-1-07);
 			margin-block-start: var(--size-fluid-1-05);
 
-			@media (--sm-n-above) {
+			@media (min-width: #{$sm-n-above}) {
 				margin-block-start: 0;
 			}
 
