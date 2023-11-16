@@ -334,9 +334,9 @@ dependencies = [
 
 [[package]]
 name = "axum_session"
-version = "0.3.5"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b9a35d2907b706dcd52f875c4f9fe55293ebc03fc5b3c2d8883104c821452b8"
+checksum = "606cc66b6c8cb51751636c56d1a3ac326d58af5856d56f1ed4d5ae3a811fb2f1"
 dependencies = [
  "aes-gcm",
  "async-trait",
@@ -362,9 +362,9 @@ dependencies = [
 
 [[package]]
 name = "axum_session_auth"
-version = "0.3.1"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88d26b395b86d34230970c09fee81cad335704d5b6b797714a9ebb8a51cc4fa6"
+checksum = "47cb4dd39a004a5a756380ec3fbdd8fbbcb0d1210d02ca4935f7f7904dd43ad7"
 dependencies = [
  "anyhow",
  "async-recursion",
@@ -868,9 +868,9 @@ dependencies = [
 
 [[package]]
 name = "cookie"
-version = "0.17.0"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7efb37c3e1ccb1ff97164ad95ac1606e8ccd35b3fa0a7d99a304c7f4a428cc24"
+checksum = "3cd91cf61412820176e137621345ee43b3f4423e589e7ae4e50d601d93e35ef8"
 dependencies = [
  "aes-gcm",
  "base64 0.21.5",
