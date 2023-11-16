@@ -191,9 +191,9 @@ checksum = "eab1c04a571841102f5345a8fc0f6bb3d31c315dec879b5c6e42e40ce7ffa34e"
 
 [[package]]
 name = "async-compression"
-version = "0.4.4"
+version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f658e2baef915ba0f26f1f7c42bfb8e12f532a01f449a090ded75ae7a07e9ba2"
+checksum = "bc2d0cfb2a7388d34f590e76686704c494ed7aaceed62ee1ba35cbf363abc2a5"
 dependencies = [
  "brotli",
  "flate2",
@@ -638,10 +638,11 @@ checksum = "c59e92b5a388f549b863a7bea62612c09f24c8393560709a54558a9abdfb3b9c"
 
 [[package]]
 name = "cc"
-version = "1.0.84"
+version = "1.0.83"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f8e7c90afad890484a21653d08b6e209ae34770fb5ee298f9c699fcc1e5c856"
+checksum = "f1174fb0b6ec23863f8b971027804a42614e347eafb0a95bf0b12cdae21fc4d0"
 dependencies = [
+ "jobserver",
  "libc",
 ]
 
@@ -1160,10 +1161,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "dotenv"
-version = "0.15.0"
+name = "dotenvy"
+version = "0.15.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
+checksum = "1aaf95b3e5c8f23aa320147307562d361db0ae0d51242340f558153b4eb2439b"
 
 [[package]]
 name = "drain_filter_polyfill"
@@ -1221,9 +1222,9 @@ checksum = "5443807d6dff69373d433ab9ef5378ad8df50ca6298caf15de6e52e24aaf54d5"
 
 [[package]]
 name = "errno"
-version = "0.3.6"
+version = "0.3.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c18ee0ed65a5f1f81cac6b1d213b69c35fa47d4252ad41f1486dbd8226fe36e"
+checksum = "f258a7194e7f7c2a7837a8913aeab7fd8c383457034fa20ce4dd3dcb813e8eb8"
 dependencies = [
  "libc",
  "windows-sys 0.48.0",
@@ -1595,9 +1596,9 @@ dependencies = [
 
 [[package]]
 name = "h2"
-version = "0.3.21"
+version = "0.3.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91fc23aa11be92976ef4729127f1a74adf36d8436f7816b185d18df956790833"
+checksum = "4d6250322ef6e60f93f9a2162799302cd6f68f79f6e5d85c8c16f14d1d958178"
 dependencies = [
  "bytes",
  "fnv",
@@ -1605,7 +1606,7 @@ dependencies = [
  "futures-sink",
  "futures-util",
  "http",
- "indexmap 1.9.3",
+ "indexmap 2.1.0",
  "slab",
  "tokio",
  "tokio-util",
@@ -1667,7 +1668,7 @@ version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e8094feaf31ff591f651a2664fb9cfd92bba7a60ce3197265e9482ebe753c8f7"
 dependencies = [
- "hashbrown 0.14.1",
+ "hashbrown 0.14.2",
 ]
 
 [[package]]
@@ -1719,9 +1720,9 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "0.2.10"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f95b9abcae896730d42b78e09c155ed4ddf82c07b4de772c64aee5b2d8b7c150"
+checksum = "8947b1a6fad4393052c7ba1f4cd97bed3e953a95c79c92ad9b051a04611d9fbb"
 dependencies = [
  "bytes",
  "fnv",
@@ -1971,6 +1972,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "af150ab688ff2122fcef229be89cb50dd66af9e01a4ff320cc137eecc9bacc38"
 
 [[package]]
+name = "jobserver"
+version = "0.1.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8c37f63953c4c63420ed5fd3d6d398c719489b9f872b9fa683262f8edd363c7d"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "jpeg-decoder"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2092,7 +2102,6 @@ dependencies = [
  "chrono",
  "console_error_panic_hook",
  "console_log",
- "http",
  "js-sys",
  "leptos",
  "leptos_axum",
@@ -3195,13 +3204,13 @@ dependencies = [
 [[package]]
 name = "prisma-client-rust"
 version = "0.6.8"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=c852262#c85226284cc9e256a38af22701584d1132d2b67f"
+source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=e7d7475#e7d74755cfaa5a7969cc199340031c9ff83819d0"
 dependencies = [
  "base64 0.13.1",
  "bigdecimal",
  "chrono",
  "diagnostics",
- "dotenv",
+ "dotenvy",
  "futures",
  "include_dir",
  "indexmap 1.9.3",
@@ -3226,7 +3235,7 @@ dependencies = [
 [[package]]
 name = "prisma-client-rust-cli"
 version = "0.6.8"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=c852262#c85226284cc9e256a38af22701584d1132d2b67f"
+source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=e7d7475#e7d74755cfaa5a7969cc199340031c9ff83819d0"
 dependencies = [
  "directories",
  "flate2",
@@ -3246,7 +3255,7 @@ dependencies = [
 [[package]]
 name = "prisma-client-rust-generator"
 version = "0.6.8"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=c852262#c85226284cc9e256a38af22701584d1132d2b67f"
+source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=e7d7475#e7d74755cfaa5a7969cc199340031c9ff83819d0"
 dependencies = [
  "directories",
  "flate2",
@@ -3267,7 +3276,7 @@ dependencies = [
 [[package]]
 name = "prisma-client-rust-generator-macros"
 version = "0.6.8"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=c852262#c85226284cc9e256a38af22701584d1132d2b67f"
+source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=e7d7475#e7d74755cfaa5a7969cc199340031c9ff83819d0"
 dependencies = [
  "convert_case 0.6.0",
  "prisma-client-rust-generator-shared",
@@ -3279,7 +3288,7 @@ dependencies = [
 [[package]]
 name = "prisma-client-rust-generator-shared"
 version = "0.1.0"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=c852262#c85226284cc9e256a38af22701584d1132d2b67f"
+source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=e7d7475#e7d74755cfaa5a7969cc199340031c9ff83819d0"
 dependencies = [
  "convert_case 0.6.0",
  "prisma-client-rust-sdk",
@@ -3291,7 +3300,7 @@ dependencies = [
 [[package]]
 name = "prisma-client-rust-sdk"
 version = "0.6.8"
-source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=c852262#c85226284cc9e256a38af22701584d1132d2b67f"
+source = "git+https://github.com/Brendonovich/prisma-client-rust?rev=e7d7475#e7d74755cfaa5a7969cc199340031c9ff83819d0"
 dependencies = [
  "convert_case 0.5.0",
  "dmmf",
@@ -3990,7 +3999,7 @@ version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "549b9d036d571d42e6e85d1c1425e2ac83491075078ca9a15be021c56b1641f2"
 dependencies = [
- "bitflags 2.4.0",
+ "bitflags 2.4.1",
  "chrono",
  "fallible-iterator",
  "fallible-streaming-iterator",
@@ -4013,9 +4022,9 @@ checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
 
 [[package]]
 name = "rustix"
-version = "0.38.21"
+version = "0.38.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b426b0506e5d50a7d8dafcf2e81471400deb602392c7dd110815afb4eaf02a3"
+checksum = "9ad981d6c340a49cdc40a1028d9c6084ec7e9fa33fcb839cab656a267071e234"
 dependencies = [
  "bitflags 2.4.1",
  "errno",
@@ -4973,6 +4982,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tracing-log"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
+dependencies = [
+ "log",
+ "once_cell",
+ "tracing-core",
+]
+
+[[package]]
 name = "tracing-opentelemetry"
 version = "0.17.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4982,15 +5002,15 @@ dependencies = [
  "opentelemetry",
  "tracing",
  "tracing-core",
- "tracing-log",
+ "tracing-log 0.1.4",
  "tracing-subscriber",
 ]
 
 [[package]]
 name = "tracing-subscriber"
-version = "0.3.17"
+version = "0.3.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30a651bc37f915e81f087d86e62a18eec5f79550c7faff886f7090b4ea757c77"
+checksum = "ad0f048c97dbd9faa9b7df56362b8ebcaa52adb06b498c050d2f4e32f90a7a8b"
 dependencies = [
  "matchers",
  "nu-ansi-term",
@@ -5001,7 +5021,7 @@ dependencies = [
  "thread_local",
  "tracing",
  "tracing-core",
- "tracing-log",
+ "tracing-log 0.2.0",
 ]
 
 [[package]]
@@ -5516,18 +5536,18 @@ checksum = "1367295b8f788d371ce2dbc842c7b709c73ee1364d30351dd300ec2203b12377"
 
 [[package]]
 name = "zerocopy"
-version = "0.7.25"
+version = "0.7.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cd369a67c0edfef15010f980c3cbe45d7f651deac2cd67ce097cd801de16557"
+checksum = "e97e415490559a91254a2979b4829267a57d2fcd741a98eee8b722fb57289aa0"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.7.25"
+version = "0.7.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2f140bda219a26ccc0cdb03dba58af72590c53b22642577d88a927bc5c87d6b"
+checksum = "dd7e48ccf166952882ca8bd778a43502c64f33bf94c12ebe2a7f08e5a0f6689f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5536,9 +5556,9 @@ dependencies = [
 
 [[package]]
 name = "zeroize"
-version = "1.6.0"
+version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2a0956f1ba7c7909bfb66c2e9e4124ab6f6482560f6628b5aaeba39207c9aad9"
+checksum = "12a3946ecfc929b583800f4629b6c25b88ac6e92a40ea5670f77112a85d40a8b"
 
 [[package]]
 name = "zstd"
