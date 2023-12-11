@@ -12,12 +12,11 @@ use super::ArcPrisma;
 pub async fn session_layer(prisma: &ArcPrisma) -> SessionLayer<SessionPrismaPool> {
     let config = SessionConfig::default()
         .with_table_name("Session")
-        .with_cookie_name("session");
+        .with_session_name("session");
 
     let store = SessionStore::<SessionPrismaPool>::new(Some(prisma.clone().into()), config)
         .await
         .unwrap();
-    store.initiate().await.unwrap();
 
     let layer = SessionLayer::new(store);
     layer
