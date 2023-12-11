@@ -27,12 +27,11 @@ struct UserAddArgs {
 async fn main() {
     let cli = Cli::parse();
 
+    let prisma_client_builder = db::PrismaClient::_builder();
     let client = if let Ok(db_url) = std::env::var("DATABASE_URL") {
-        dbg!(&db_url);
-        db::new_client_with_url(db_url.as_str()).await
+        prisma_client_builder.with_url(db_url).build().await
     } else {
-        println!("DATABASE_URL not set");
-        db::new_client().await
+        prisma_client_builder.build().await
     };
     let prisma_client = Arc::new(client.unwrap());
     #[cfg(debug)]

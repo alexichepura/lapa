@@ -5,10 +5,11 @@ use std::sync::Arc;
 pub type ArcPrisma = Arc<db::PrismaClient>;
 
 pub async fn init_prisma_client() -> ArcPrisma {
+    let prisma_client_builder = db::PrismaClient::_builder();
     let client = if let Ok(db_url) = std::env::var("DATABASE_URL") {
-        db::new_client_with_url(db_url.as_str()).await
+        prisma_client_builder.with_url(db_url).build().await
     } else {
-        db::new_client().await
+        prisma_client_builder.build().await
     };
     let prisma_client = Arc::new(client.unwrap());
     #[cfg(debug)]
