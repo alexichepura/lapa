@@ -25,12 +25,12 @@ leptos_meta = { version = "0.5.4", features = ["nightly"] }
 leptos_router = { version = "0.5.4", features = ["nightly"] }
 log = "0.4"
 prisma_client = { path = "./prisma_client" }
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "cef079c", default-features = false, features = [
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "68a2f9a", default-features = false, features = [
     "sqlite",
     "sqlite-create-many",
     "migrations",
 ] }
-prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "cef079c", default-features = false, features = [
+prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "68a2f9a", default-features = false, features = [
     "sqlite",
     "sqlite-create-many",
     "migrations",
