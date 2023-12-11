@@ -69,7 +69,7 @@ cfg-if = { workspace = true }
 chrono = { workspace = true }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
-# http = { workspace = true }
+http = { workspace = true }
 js-sys = { workspace = true, optional = true }
 leptos = { workspace = true }
 leptos_axum = { workspace = true, optional = true }

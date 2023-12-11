@@ -1,7 +1,8 @@
 generator client {
   client_format = "folder"
   // https://prisma.brendonovich.dev/reading-data/select-include#setup
-  module_path   = "prisma_client::db"
+  // module_path   = "prisma_client::db"
+  module_path   = "db"
   output        = "../prisma_client/src/db"
   provider      = "cargo prisma"
 }
