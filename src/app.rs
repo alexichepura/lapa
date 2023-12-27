@@ -17,6 +17,9 @@ pub fn App(settings: SettingsCx) -> impl IntoView {
 
     view! {
         <Html lang="en"/>
+        <Stylesheet href="/css/open-props.min.css"/>
+        <Stylesheet href="/css/normalize.min.css"/>
+        <Stylesheet href="/css/buttons.min.css"/>
         <Stylesheet id="leptos" href="/pkg/lapa_site.css"/>
         <Title formatter/>
         <Favicons/>
