@@ -39,8 +39,10 @@ async fn main() {
     let app = lapa_admin::server::compression(app, &leptopts.site_pkg_dir, &leptopts.site_root);
 
     logging::log!("listening on http://{}", &leptopts.site_addr);
-    axum::Server::bind(&leptopts.site_addr)
-        .serve(app.into_make_service())
+    let listener = tokio::net::TcpListener::bind(&leptopts.site_addr)
+        .await
+        .unwrap();
+    axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
 }

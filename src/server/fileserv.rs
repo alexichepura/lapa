@@ -1,5 +1,5 @@
 use axum::{
-    body::{boxed, Body, BoxBody},
+    body::Body,
     extract::{Path, State},
     http::{Request, Response, StatusCode, Uri},
     response::{IntoResponse, Response as AxumResponse},
@@ -44,13 +44,13 @@ pub async fn file_and_error_handler(
     }
 }
 
-async fn get_static_file(uri: Uri, root: &str) -> Result<Response<BoxBody>, (StatusCode, String)> {
+async fn get_static_file(uri: Uri, root: &str) -> Result<Response<Body>, (StatusCode, String)> {
     let req = Request::builder()
         .uri(uri.clone())
         .body(Body::empty())
         .unwrap();
     match ServeDir::new(root).oneshot(req).await {
-        Ok(res) => Ok(res.map(boxed)),
+        Ok(res) => Ok(res.into_response()),
         Err(err) => Err((
             StatusCode::INTERNAL_SERVER_ERROR,
             format!("Something went wrong: {err}"),
