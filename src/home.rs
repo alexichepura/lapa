@@ -18,7 +18,10 @@ pub fn HomePage() -> impl IntoView {
 
     view! {
         <Title text="Home"/>
-        <Meta name="description" content="Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website"/>
+        <Meta
+            name="description"
+            content="Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website"
+        />
         <h1>Welcome to LAPA</h1>
         <Suspense fallback=move || {
             view! { <Loading/> }
@@ -27,13 +30,17 @@ pub fn HomePage() -> impl IntoView {
                 home.get()
                     .map(|home| match home {
                         Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
-                        Ok(home) => view! {
-                            <section>
-                                <ParagraphsByMultiline text=home.home_text/>
-                            </section>
-                        }.into_view(),
+                        Ok(home) => {
+                            view! {
+                                <section>
+                                    <ParagraphsByMultiline text=home.home_text/>
+                                </section>
+                            }
+                                .into_view()
+                        }
                     })
             }}
+
         </Suspense>
         <hr/>
         <PostList/>
@@ -52,7 +59,7 @@ pub async fn get_home() -> Result<HomeData, ServerFnError> {
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?
         .unwrap();
 

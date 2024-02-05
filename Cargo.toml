@@ -11,7 +11,7 @@ resolver = "2"
 members = ["admin", "cli", "prisma_cli", "prisma_client"]
 
 [workspace.dependencies]
-axum = { version = "0.7.3" }
+axum = { version = "0.7.4", features = ["macros"] }
 bcrypt = { version = "0.15" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
@@ -19,10 +19,10 @@ console_error_panic_hook = "0.1"
 console_log = "1"
 http = "1.0"
 js-sys = { version = "0.3" }
-leptos = { version = "0.5.4", features = ["nightly"] }
-leptos_axum = { version = "0.6.0-alpha" }
-leptos_meta = { version = "0.5.4", features = ["nightly"] }
-leptos_router = { version = "0.5.4", features = ["nightly"] }
+leptos = { version = "0.6.5", features = ["nightly"] }
+leptos_axum = { version = "0.6.5" }
+leptos_meta = { version = "0.6.5", features = ["nightly"] }
+leptos_router = { version = "0.6.5", features = ["nightly"] }
 log = "0.4"
 prisma_client = { path = "./prisma_client" }
 prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "68a2f9a", default-features = false, features = [
@@ -37,12 +37,12 @@ prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-
 ] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-serde-wasm-bindgen = "0.6.3" # leptos_reactive depends on 0.5
+serde-wasm-bindgen = "0.6.3"
 simple_logger = "4"
 thiserror = "1.0"
 tokio = { version = "1.28" }
 tower = { version = "0.4.13" }
-tower_governor = { version = "0.2" }
+tower_governor = { version = "0.3" }
 tower-http = { version = "0.5", features = ["fs"] }
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = [

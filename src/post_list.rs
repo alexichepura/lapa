@@ -20,16 +20,11 @@ pub fn PostList() -> impl IntoView {
                 posts
                     .get()
                     .map(|posts| match posts {
-                        Err(e) => {
-                            view! { <p>error {e.to_string()}</p> }
-                                .into_view()
-                        }
-                        Ok(posts) => {
-                            view! { <PostListView posts/> }
-                                .into_view()
-                        }
+                        Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
+                        Ok(posts) => view! { <PostListView posts/> }.into_view(),
                     })
             }}
+
         </Suspense>
     }
 }
@@ -76,7 +71,7 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let posts: Vec<PostListItem> = posts

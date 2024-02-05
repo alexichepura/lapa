@@ -45,8 +45,9 @@ pub fn PostDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
                             set_input_slug(event_target_value(&ev));
                         }
                     />
+
                 </label>
-                <FormFooter action=post_delete submit_text="Delete post" disabled />
+                <FormFooter action=post_delete submit_text="Delete post" disabled/>
             </ActionForm>
         </fieldset>
     }
@@ -72,7 +73,7 @@ pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> 
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     if found_post.is_none() {
@@ -89,7 +90,7 @@ pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> 
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     prisma_client
@@ -99,7 +100,7 @@ pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> 
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     for id in images_ids {

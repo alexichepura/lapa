@@ -53,16 +53,22 @@ pub fn PostImages(post_id: String) -> impl IntoView {
                 images
                     .get()
                     .map(|images| match images {
-                        Err(e) => {
-                            view! { <p>error {e.to_string()}</p> }
-                                .into_view()
-                        }
+                        Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
                         Ok(images) => {
-                            view! { <PostImagesView images image_delete image_update order_action hero_action/> }
+                            view! {
+                                <PostImagesView
+                                    images
+                                    image_delete
+                                    image_update
+                                    order_action
+                                    hero_action
+                                />
+                            }
                                 .into_view()
                         }
                     })
             }}
+
         </Transition>
     }
 }
@@ -138,6 +144,7 @@ pub fn PostImagesView(
                         view! { <input type="hidden" name="ids[]" value=image.id/> }
                     }
                 />
+
                 <FormFooter action=order_action submit_text="Save order"/>
             </ActionForm>
             <div class="images">
@@ -157,6 +164,7 @@ pub fn PostImagesView(
                         view! { <PostImage image set_editing on_order is_last make_hero/> }
                     }
                 />
+
             </div>
         </fieldset>
         <dialog class="Grid-fluid-2" node_ref=dialog_element>
@@ -209,6 +217,7 @@ where
                         move |_| on_order(id.clone(), -1)
                     }
                 >
+
                     "⇐"
                 </button>
                 {hero_view}
@@ -220,6 +229,7 @@ where
                         move |_| on_order(id.clone(), 1)
                     }
                 >
+
                     "⇒"
                 </button>
             </footer>
@@ -239,7 +249,7 @@ pub async fn get_images(post_id: String) -> Result<Vec<PostImageData>, ServerFnE
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let images: Vec<PostImageData> = images
@@ -276,7 +286,7 @@ pub async fn images_order_update(
 
     let _images_updated: Vec<_> = prisma_client._batch(order_update).await.map_err(|e| {
         dbg!(e);
-        ServerFnError::ServerError("Server error".to_string())
+        ServerFnError::new("Server error".to_string())
     })?;
     // dbg!(&images_updated);
 
@@ -303,7 +313,7 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
     if let None = current_img {
         return Ok(Err(ImageLoadError::NotFound));
@@ -320,7 +330,7 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let data: ImageMakeHeroData = prisma_client
@@ -358,7 +368,7 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     Ok(Ok(data))

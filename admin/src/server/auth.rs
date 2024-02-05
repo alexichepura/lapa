@@ -19,7 +19,7 @@ pub type AuthSession = axum_session_auth::AuthSession<User, String, SessionPrism
 pub fn use_auth() -> Result<AuthSession, ServerFnError> {
     use_context::<AuthSession>()
         .ok_or("Auth session missing.")
-        .map_err(|e| ServerFnError::ServerError(e.to_string()))
+        .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
 #[async_trait::async_trait]

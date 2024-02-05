@@ -21,11 +21,19 @@ pub fn SettingsSiteForm(settings: SettingsSite) -> impl IntoView {
             <ActionForm action=settings_site_update>
                 <label>
                     <div>robots.txt</div>
-                    <textarea name="robots_txt" prop:value=settings.robots_txt.to_string() rows="5"/>
+                    <textarea
+                        name="robots_txt"
+                        prop:value=settings.robots_txt.to_string()
+                        rows="5"
+                    ></textarea>
                 </label>
                 <label>
                     <div>Site url</div>
-                    <input name="site_url" prop:value=settings.site_url.to_string() value=settings.site_url.to_string()/>
+                    <input
+                        name="site_url"
+                        prop:value=settings.site_url.to_string()
+                        value=settings.site_url.to_string()
+                    />
                 </label>
                 <FormFooter action=settings_site_update submit_text="Update site data"/>
             </ActionForm>
@@ -49,7 +57,7 @@ pub async fn settings_site_update(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let id: String;
@@ -77,7 +85,7 @@ pub async fn settings_site_update(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     Ok(Ok(()))

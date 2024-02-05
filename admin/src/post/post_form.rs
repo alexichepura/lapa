@@ -111,22 +111,21 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                     </a>
                 </div>
                 <dl>
-                    <dt>ID: </dt>
+                    <dt>ID:</dt>
                     <dd>{id_view}</dd>
                     <br/>
-                    <dt>Created at  <small>(Local): </small></dt>
+                    <dt>Created at <small>(Local):</small></dt>
                     <dd>{created.local}</dd>
                     <br/>
-                    <dt>Created at  <small>(UTC): </small></dt>
+                    <dt>Created at <small>(UTC):</small></dt>
                     <dd>{created.utc}</dd>
                     <br/>
-                    <dt>Published at  <small>(UTC): </small></dt>
+                    <dt>Published at <small>(UTC):</small></dt>
                     <dd>{published_at_utc_string}</dd>
                 </dl>
             </header>
             <ActionForm action=post_upsert>
-                {id_input}
-                <fieldset disabled=move || pending()>
+                {id_input} <fieldset disabled=move || pending()>
                     <legend>Data</legend>
                     <div class="Grid-fluid-2">
                         <div>
@@ -139,6 +138,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                                         set_title(event_target_value(&ev));
                                     }
                                 />
+
                             </label>
                             <label>
                                 <div>Slug</div>
@@ -149,6 +149,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                                         set_slug(event_target_value(&ev));
                                     }
                                 />
+
                             </label>
                             <label>
                                 <div>Description</div>
@@ -213,7 +214,7 @@ pub fn PublishedAt(
         <div class="Grid-fluid-2">
             <Checkbox label="Publish" checked=is_published set=set_is_published/>
             <label>
-                <div>Published at  <small>(Local)</small></div>
+                <div>Published at <small>(Local)</small></div>
                 <input
                     disabled=disabled
                     prop:disabled=disabled
@@ -226,6 +227,7 @@ pub fn PublishedAt(
                         set_published_at(Some(datetime));
                     }
                 />
+
                 <input
                     name="published_at"
                     type="hidden"
@@ -257,7 +259,7 @@ pub async fn post_upsert(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     if let Some(id) = id {
@@ -283,7 +285,7 @@ pub async fn post_upsert(
             .await
             .map_err(|e| {
                 dbg!(e);
-                ServerFnError::ServerError("Server error".to_string())
+                ServerFnError::new("Server error".to_string())
             })?;
         return Ok(Ok(PostFormData {
             id: Some(post.id),
@@ -314,7 +316,7 @@ pub async fn post_upsert(
             .await
             .map_err(|e| {
                 dbg!(e);
-                ServerFnError::ServerError("Server error".to_string())
+                ServerFnError::new("Server error".to_string())
             })?;
         return Ok(Ok(PostFormData {
             id: Some(post.id),

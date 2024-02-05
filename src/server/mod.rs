@@ -1,10 +1,9 @@
 use axum::{
     body::Body as AxumBody,
-    extract::{FromRef, Path, RawQuery, State},
+    extract::{FromRef, State},
     http::Request,
     response::{IntoResponse, Response},
 };
-use http::HeaderMap;
 use http::StatusCode;
 use leptos::LeptosOptions;
 use leptos::*;
@@ -41,15 +40,9 @@ pub struct AppState {
 
 pub async fn server_fn_handler(
     State(app_state): State<AppState>,
-    path: Path<String>,
-    headers: HeaderMap,
-    raw_query: RawQuery,
     request: Request<AxumBody>,
 ) -> impl IntoResponse {
     handle_server_fns_with_context(
-        path,
-        headers,
-        raw_query,
         move || {
             provide_context(app_state.prisma_client.clone());
         },

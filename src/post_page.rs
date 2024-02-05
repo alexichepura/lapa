@@ -68,6 +68,7 @@ pub fn PostPage() -> impl IntoView {
                         Ok(post) => view! { <PostView post=post/> }.into_view(),
                     })
             }}
+
         </Suspense>
     }
 }
@@ -116,7 +117,9 @@ pub fn PostView(post: PostData) -> impl IntoView {
         <Meta property="og:description" content=post.description.clone()/>
         {hero_og}
         <h1>{post.title}</h1>
-        <section><ParagraphsByMultiline text=post.text/></section>
+        <section>
+            <ParagraphsByMultiline text=post.text/>
+        </section>
         <hr/>
         <div class="post-images">
             <For
@@ -126,10 +129,9 @@ pub fn PostView(post: PostData) -> impl IntoView {
                     view! { <Thumb image=image set_dialog_open/> }
                 }
             />
+
         </div>
-        <dialog node_ref=dialog_element>
-            {dialog_view}
-        </dialog>
+        <dialog node_ref=dialog_element>{dialog_view}</dialog>
     }
 }
 
@@ -173,7 +175,7 @@ pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl
 pub fn PostImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl IntoView {
     view! {
         <figure>
-            <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) />
+            <img src=img_url_large(&image.id) srcset=srcset_large(&image.id)/>
             <figcaption>{&image.alt}</figcaption>
             <button on:click=move |ev| {
                 ev.prevent_default();
@@ -202,7 +204,7 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let result: Option<PostData> = match post {

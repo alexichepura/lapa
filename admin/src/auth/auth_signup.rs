@@ -45,7 +45,7 @@ pub async fn signup(
     let auth = crate::server::use_auth()?;
 
     if password != password_confirmation {
-        return Err(ServerFnError::ServerError(
+        return Err(ServerFnError::new(
             "Passwords did not match.".to_string(),
         ));
     }
@@ -60,7 +60,7 @@ pub async fn signup(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let user = prisma_client
@@ -70,10 +70,10 @@ pub async fn signup(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?
         .ok_or("Signup failed: User does not exist.")
-        .map_err(|e| ServerFnError::ServerError(e.to_string()))?;
+        .map_err(|e| ServerFnError::new(e.to_string()))?;
 
     auth.login_user(user.id);
     auth.remember_user(remember.is_some());

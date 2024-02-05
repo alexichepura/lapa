@@ -40,6 +40,7 @@ pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl Int
                                 )
                             }
                         />
+
                         <FormFooter action=image_upload submit_text="Upload image"/>
                     </ActionForm>
                 </div>
@@ -102,14 +103,14 @@ pub async fn upload_img(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let id = image_upload_data.id;
     let file_path = crate::image::img_path_upload_ext(&id, &ext.to_string());
     std::fs::write(file_path.clone(), img_bytes).map_err(|e| {
         dbg!(e);
-        ServerFnError::ServerError("Server error".to_string())
+        ServerFnError::new("Server error".to_string())
     })?;
 
     let img_decoded = img_reader.decode().unwrap();
@@ -121,7 +122,7 @@ pub async fn upload_img(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?
         .unwrap();
 
@@ -141,7 +142,7 @@ pub async fn upload_img(
     )
     .map_err(|e| {
         dbg!(e);
-        ServerFnError::ServerError("Server error".to_string())
+        ServerFnError::new("Server error".to_string())
     })?;
 
     Ok(Ok(ImageResult { id }))

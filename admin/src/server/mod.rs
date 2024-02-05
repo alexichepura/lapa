@@ -1,10 +1,9 @@
 use axum::{
     body::Body as AxumBody,
-    extract::{FromRef, Path, RawQuery, State},
+    extract::{FromRef, State},
     http::Request,
     response::{IntoResponse, Response},
 };
-use http::HeaderMap;
 use leptos::LeptosOptions;
 use leptos::*;
 use leptos_axum::handle_server_fns_with_context;
@@ -43,15 +42,9 @@ pub struct AppState {
 pub async fn server_fn_public(
     State(app_state): State<AppState>,
     auth_session: AuthSession,
-    path: Path<String>,
-    headers: HeaderMap,
-    raw_query: RawQuery,
     request: Request<AxumBody>,
 ) -> impl IntoResponse {
     handle_server_fns_with_context(
-        path,
-        headers,
-        raw_query,
         move || {
             provide_context(app_state.prisma_client.clone());
             provide_context(auth_session.clone());
@@ -64,18 +57,12 @@ pub async fn server_fn_public(
 pub async fn server_fn_private(
     State(app_state): State<AppState>,
     auth_session: AuthSession,
-    path: Path<String>,
-    headers: HeaderMap,
-    raw_query: RawQuery,
     request: Request<AxumBody>,
 ) -> Response {
     if auth_session.current_user.is_none() {
         return (http::StatusCode::NOT_FOUND, "NOT FOUND").into_response();
     }
     handle_server_fns_with_context(
-        path,
-        headers,
-        raw_query,
         move || {
             provide_context(app_state.prisma_client.clone());
             provide_context(auth_session.clone());

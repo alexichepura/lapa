@@ -76,7 +76,7 @@ pub async fn settings_images_update(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let id: String;
@@ -108,7 +108,7 @@ pub async fn settings_images_update(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     Ok(Ok(()))
@@ -127,7 +127,7 @@ pub async fn settings_images_update(
     //         .await
     //         .map_err(|e| {
     //             dbg!(e);
-    //             ServerFnError::ServerError("Server error".to_string())
+    //             ServerFnError::new("Server error".to_string())
     //         })?;
 
     //     dbg!(settings.clone());

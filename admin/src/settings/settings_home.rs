@@ -20,7 +20,11 @@ pub fn SettingsHomeForm(settings: SettingsHome) -> impl IntoView {
             <ActionForm action=settings_site_update>
                 <label>
                     <div>Text</div>
-                    <textarea name="home_text" prop:value=settings.home_text.to_string() rows="5" />
+                    <textarea
+                        name="home_text"
+                        prop:value=settings.home_text.to_string()
+                        rows="5"
+                    ></textarea>
                 </label>
                 <FormFooter action=settings_site_update submit_text="Update home data"/>
             </ActionForm>
@@ -43,7 +47,7 @@ pub async fn settings_home_update(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let id: String;
@@ -63,7 +67,7 @@ pub async fn settings_home_update(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     Ok(Ok(()))
