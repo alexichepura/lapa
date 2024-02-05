@@ -117,6 +117,7 @@ pub fn Settings() -> impl IntoView {
                         }
                     })
             }}
+
         </Suspense>
     }
 }
@@ -133,7 +134,7 @@ pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     Ok(match settings {

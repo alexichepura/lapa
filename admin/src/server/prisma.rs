@@ -20,5 +20,5 @@ pub async fn init_prisma_client() -> ArcPrisma {
 pub fn use_prisma() -> Result<ArcPrisma, ServerFnError> {
     use_context::<ArcPrisma>()
         .ok_or("Prisma missing.")
-        .map_err(|e| ServerFnError::ServerError(e.to_string()))
+        .map_err(|e| ServerFnError::new(e.to_string()))
 }

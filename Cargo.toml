@@ -11,7 +11,7 @@ resolver = "2"
 members = ["admin", "cli", "prisma_cli", "prisma_client"]
 
 [workspace.dependencies]
-axum = { version = "0.7.4" }
+axum = { version = "0.7.4", features = ["macros"] }
 bcrypt = { version = "0.15" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }

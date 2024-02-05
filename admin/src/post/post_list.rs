@@ -16,7 +16,7 @@ pub fn PostList() -> impl IntoView {
     view! {
         <Title text="Posts"/>
         <h1>
-            <span>Posts </span>
+            <span>Posts</span>
             <small>
                 <A href="/posts/new">Create</A>
             </small>
@@ -37,15 +37,14 @@ pub fn PostList() -> impl IntoView {
                                     posts
                                         .into_iter()
                                         .map(|post| {
-                                            view! {
-                                                <PostListItem post/>
-                                            }
+                                            view! { <PostListItem post/> }
                                         })
                                         .collect_view()
                                 }
                             }
                         })
                 }}
+
             </Suspense>
         </ul>
     }
@@ -72,10 +71,14 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
     view! {
         <li class="PostListItem">
             <A href=format!("/posts/{}", post.id)>
-                <div title="Published at" class=format!("PostListItem-status {}", class)>{published.local}</div>
+                <div title="Published at" class=format!("PostListItem-status {}", class)>
+                    {published.local}
+                </div>
                 {hero_view}
                 <span title="Post title">{&post.title}</span>
-                <div title="Created at" class="PostListItem-created">{created.local}</div>
+                <div title="Created at" class="PostListItem-created">
+                    {created.local}
+                </div>
             </A>
         </li>
     }
@@ -97,7 +100,7 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let posts: Vec<PostListItem> = posts

@@ -80,7 +80,7 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     if found_image.is_none() {
@@ -97,7 +97,7 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     Ok(Ok(()))
@@ -138,7 +138,7 @@ pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResu
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     if found_image.is_none() {
@@ -153,7 +153,7 @@ pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResu
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     Ok(Ok(()))

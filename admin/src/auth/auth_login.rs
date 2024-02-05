@@ -43,8 +43,7 @@ pub fn Login() -> impl IntoView {
         <fieldset disabled=move || pending() class="login-card">
             <legend>Log in</legend>
             <ActionForm action=login>
-                {skip_redirect_view}
-                <Input name="username" label="User"/>
+                {skip_redirect_view} <Input name="username" label="User"/>
                 <Input name="password" label="Password" type_="password"/>
                 <Checkbox name="remember" label="Remember me?"/>
                 <FormFooter action=login submit_text="Login"/>
@@ -68,7 +67,7 @@ pub async fn login(
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     Ok(match user {
@@ -79,7 +78,7 @@ pub async fn login(
         Some(user) => {
             let auth = crate::server::use_auth()?;
             match bcrypt::verify(password, &user.password)
-                .map_err(|e| ServerFnError::ServerError(e.to_string()))?
+                .map_err(|e| ServerFnError::new(e.to_string()))?
             {
                 true => {
                     auth.login_user(user.id.clone());

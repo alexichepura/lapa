@@ -36,7 +36,7 @@ pub async fn images_convert() -> Result<Result<(), SettingsError>, ServerFnError
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
     let settings = settings.unwrap();
     let convert_settings = crate::image::ConvertSettings {
@@ -54,7 +54,7 @@ pub async fn images_convert() -> Result<Result<(), SettingsError>, ServerFnError
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     for image_data in images {

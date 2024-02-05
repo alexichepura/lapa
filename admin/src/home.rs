@@ -34,16 +34,11 @@ pub fn StatsTableTransition(resource: StatsResource, caption: &'static str) -> i
                 resource
                     .get()
                     .map(|stats| match stats {
-                        Err(e) => {
-                            view! { <p>error {e.to_string()}</p> }
-                                .into_view()
-                        }
-                        Ok(stats) => {
-                            view! { <StatsTable caption list=stats.list/> }
-                                .into_view()
-                        }
+                        Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
+                        Ok(stats) => view! { <StatsTable caption list=stats.list/> }.into_view(),
                     })
             }}
+
         </Transition>
     }
 }
@@ -72,6 +67,7 @@ pub fn StatsTable(caption: &'static str, list: Vec<StatsListItem>) -> impl IntoV
                         }
                     }
                 />
+
             </tbody>
         </table>
     }
@@ -123,7 +119,7 @@ pub async fn get_stats(period: StatsPeriod) -> Result<StatsResult, ServerFnError
         .await
         .map_err(|e| {
             dbg!(e);
-            ServerFnError::ServerError("Server error".to_string())
+            ServerFnError::new("Server error".to_string())
         })?;
 
     let hmap: HashMap<String, i32> = renders.iter().fold(HashMap::new(), |mut acc, data| {
