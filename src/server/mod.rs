@@ -1,10 +1,9 @@
 use axum::{
     body::Body as AxumBody,
-    extract::{FromRef, Path, RawQuery, State},
+    extract::{FromRef, State},
     http::Request,
     response::{IntoResponse, Response},
 };
-use http::HeaderMap;
 use http::StatusCode;
 use leptos::LeptosOptions;
 use leptos::*;
