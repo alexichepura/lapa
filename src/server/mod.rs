@@ -41,15 +41,9 @@ pub struct AppState {
 
 pub async fn server_fn_handler(
     State(app_state): State<AppState>,
-    path: Path<String>,
-    headers: HeaderMap,
-    raw_query: RawQuery,
     request: Request<AxumBody>,
 ) -> impl IntoResponse {
     handle_server_fns_with_context(
-        path,
-        headers,
-        raw_query,
         move || {
             provide_context(app_state.prisma_client.clone());
         },

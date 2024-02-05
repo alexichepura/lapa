@@ -1,7 +1,13 @@
 {
-    "rust-analyzer.cargo.features": "all",
     "[rust]": {
         // "editor.defaultFormatter": "bram209.leptos-language-server"
         "editor.defaultFormatter": "rust-lang.rust-analyzer"
     },
+    "rust-analyzer.cargo.features": "all",
+    "rust-analyzer.rust.analyzerTargetDir": true,
+    "rust-analyzer.rustfmt.overrideCommand": [
+        "leptosfmt",
+        "--stdin",
+        "--rustfmt"
+    ],
 }

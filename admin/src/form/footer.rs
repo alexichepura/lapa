@@ -30,7 +30,7 @@ pub fn FormFooter<I, O, E>(
     #[prop(optional, into)] disabled: Option<MaybeSignal<bool>>,
 ) -> impl IntoView
 where
-    I: Clone + ServerFn + 'static,
+    I: Clone + server_fn::ServerFn + 'static,
     O: Clone + Serialize + DeserializeOwned + 'static,
     E: Clone + Serialize + DeserializeOwned + std::error::Error + 'static,
 {
@@ -51,18 +51,19 @@ where
             <input type="submit" value=submit_text.get() disabled=disabled/>
             {move || {
                 if pending() {
-                    return view!{ <progress indeterminate></progress> }.into_view();
+                    return view! { <progress indeterminate></progress> }.into_view();
                 }
                 match value() {
                     None => ().into_view(),
                     Some(result) => {
                         match result {
                             Ok(result) => view! { <ResultAlert result/> }.into_view(),
-                            Err(e) => view! { <AlertDanger text=e.to_string()/> }.into_view()
+                            Err(e) => view! { <AlertDanger text=e.to_string()/> }.into_view(),
                         }
                     }
                 }
             }}
+
         </footer>
     }
 }
