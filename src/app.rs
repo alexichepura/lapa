@@ -17,7 +17,7 @@ pub fn App(settings: SettingsCx) -> impl IntoView {
 
     view! {
         <Html lang="en"/>
-        <Stylesheet id="leptos" href="/pkg/lapa_site.css"/>
+        <Stylesheet id="leptos" href="/pkg/site.css"/>
         <Title formatter/>
         <Favicons/>
         <Script>{settings_script}</Script>
@@ -29,7 +29,9 @@ pub fn App(settings: SettingsCx) -> impl IntoView {
         <Router set_is_routing>
             <header>
                 <section>
-                    <A href="/" exact=true>Home</A>
+                    <A href="/" exact=true>
+                        Home
+                    </A>
                     <a href="https://github.com/alexichepura/lapa">GitHub</a>
                 </section>
             </header>

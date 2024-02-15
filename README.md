@@ -112,8 +112,8 @@ cargo lapa user-add
 ### Dev
 
 ```sh
-cargo leptos watch -p lapa_admin
-cargo leptos watch -p lapa_site
+cargo leptos watch -p admin
+cargo leptos watch -p site
 ```
 
 ### Prod

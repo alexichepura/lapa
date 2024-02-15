@@ -18,6 +18,46 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe"
 
 [[package]]
+name = "admin"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "axum",
+ "axum_session",
+ "axum_session_auth",
+ "bcrypt",
+ "cfg-if",
+ "chrono",
+ "console_error_panic_hook",
+ "console_log",
+ "http 1.0.0",
+ "image",
+ "js-sys",
+ "kamadak-exif",
+ "leptos",
+ "leptos_axum",
+ "leptos_meta",
+ "leptos_router",
+ "log",
+ "prisma-client-rust",
+ "prisma_client",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tower_governor",
+ "tracing",
+ "tracing-subscriber",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "aead"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -754,6 +794,20 @@ name = "clap_lex"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "702fc72eb24e5a1e48ce58027a675bc24edd52096d5397d4aea7c6dd9eca0bd1"
+
+[[package]]
+name = "cli"
+version = "0.1.0"
+dependencies = [
+ "bcrypt",
+ "clap",
+ "prisma-client-rust",
+ "prisma_client",
+ "serde",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
 
 [[package]]
 name = "collection_literals"
@@ -2147,88 +2201,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lapa_admin"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "axum",
- "axum_session",
- "axum_session_auth",
- "bcrypt",
- "cfg-if",
- "chrono",
- "console_error_panic_hook",
- "console_log",
- "http 1.0.0",
- "image",
- "js-sys",
- "kamadak-exif",
- "leptos",
- "leptos_axum",
- "leptos_meta",
- "leptos_router",
- "log",
- "prisma-client-rust",
- "prisma_client",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "simple_logger",
- "thiserror",
- "tokio",
- "tower",
- "tower-http",
- "tower_governor",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
-name = "lapa_cli"
-version = "0.1.0"
-dependencies = [
- "bcrypt",
- "clap",
- "prisma-client-rust",
- "prisma_client",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "lapa_site"
-version = "0.1.0"
-dependencies = [
- "axum",
- "cfg-if",
- "chrono",
- "console_error_panic_hook",
- "console_log",
- "http 1.0.0",
- "js-sys",
- "leptos",
- "leptos_axum",
- "leptos_meta",
- "leptos_router",
- "log",
- "prisma-client-rust",
- "prisma_client",
- "serde",
- "serde-wasm-bindgen",
- "serde_json",
- "simple_logger",
- "thiserror",
- "tokio",
- "tower",
- "tower-http",
- "tower_governor",
- "wasm-bindgen",
- "web-sys",
-]
-
-[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2977,15 +2949,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
 dependencies = [
  "hermit-abi",
- "libc",
-]
-
-[[package]]
-name = "num_threads"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2819ce041d2ee131036f4fc9d6ae7ae125a3a40e97ba64d04fe799ad9dabbb44"
-dependencies = [
  "libc",
 ]
 
@@ -4491,15 +4454,35 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f27f6278552951f1f2b8cf9da965d10969b2efdea95a6ec47987ab46edfe263a"
 
 [[package]]
-name = "simple_logger"
-version = "4.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e7e46c8c90251d47d08b28b8a419ffb4aede0f87c2eea95e17d1d5bacbf3ef1"
+name = "site"
+version = "0.1.0"
 dependencies = [
- "colored",
+ "axum",
+ "cfg-if",
+ "chrono",
+ "console_error_panic_hook",
+ "console_log",
+ "http 1.0.0",
+ "js-sys",
+ "leptos",
+ "leptos_axum",
+ "leptos_meta",
+ "leptos_router",
  "log",
- "time",
- "windows-sys 0.48.0",
+ "prisma-client-rust",
+ "prisma_client",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tower_governor",
+ "tracing",
+ "tracing-subscriber",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
@@ -4813,9 +4796,7 @@ checksum = "c8248b6521bb14bc45b4067159b9b6ad792e2d6d754d6c41fb50e29fefe38749"
 dependencies = [
  "deranged",
  "itoa",
- "libc",
  "num-conv",
- "num_threads",
  "powerfmt",
  "serde",
  "time-core",

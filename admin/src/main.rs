@@ -1,11 +1,14 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt::Subscriber::builder()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
     use axum::{
         routing::{get, post},
         Router,
     };
-    use lapa_admin::{
+    use admin::{
         app::AdminRouter,
         server::{
             auth_session_layer, file_and_error_handler, img_handler, init_prisma_client,
@@ -14,11 +17,10 @@ async fn main() {
     };
     use leptos::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
-
-    simple_logger::init_with_env().expect("couldn't initialize logging");
+    use tracing::info;
 
     let leptopts = get_configuration(None).await.unwrap().leptos_options;
-    let routes = generate_route_list(|| view! { <AdminRouter /> });
+    let routes = generate_route_list(|| view! { <AdminRouter/> });
     let prisma_client = init_prisma_client().await;
     let app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
@@ -34,14 +36,15 @@ async fn main() {
         .layer(session_layer(&prisma_client).await);
 
     #[cfg(feature = "ratelimit")]
-    let app = lapa_admin::server::ratelimit(app);
+    let app = admin::server::ratelimit(app);
     #[cfg(feature = "compression")]
-    let app = lapa_admin::server::compression(app, &leptopts.site_pkg_dir, &leptopts.site_root);
+    let app = admin::server::compression(app, &leptopts.site_pkg_dir, &leptopts.site_root);
 
-    logging::log!("listening on http://{}", &leptopts.site_addr);
+    info!("starting to listen TCP on http://{}", &leptopts.site_addr);
     let listener = tokio::net::TcpListener::bind(&leptopts.site_addr)
         .await
         .unwrap();
+    info!("binded TCP listener on http://{}", &leptopts.site_addr);
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();

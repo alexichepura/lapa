@@ -1,7 +1,8 @@
 [package]
-name = "lapa_site"
+name = "site"
 version = "0.1.0"
 edition = "2021"
+publish = false
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -11,7 +12,7 @@ resolver = "2"
 members = ["admin", "cli", "prisma_cli", "prisma_client"]
 
 [workspace.dependencies]
-axum = { version = "0.7.4", features = ["macros"] }
+axum = { version = "0.7.4", features = ["macros", "tracing"] }
 bcrypt = { version = "0.15" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
@@ -19,7 +20,7 @@ console_error_panic_hook = "0.1"
 console_log = "1"
 http = "1.0"
 js-sys = { version = "0.3" }
-leptos = { version = "0.6.5", features = ["nightly"] }
+leptos = { version = "0.6.5", features = ["nightly", "tracing"] }
 leptos_axum = { version = "0.6.5" }
 leptos_meta = { version = "0.6.5", features = ["nightly"] }
 leptos_router = { version = "0.6.5", features = ["nightly"] }
@@ -38,12 +39,13 @@ prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde-wasm-bindgen = "0.6.3"
-simple_logger = "4"
 thiserror = "1.0"
 tokio = { version = "1.28" }
 tower = { version = "0.4.13" }
 tower_governor = { version = "0.3" }
-tower-http = { version = "0.5", features = ["fs"] }
+tower-http = { version = "0.5", features = ["fs", "trace"] }
+tracing = { version = "0.1" }
+tracing-subscriber = { version = "0.3", features = ["tracing-log"] }
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = [
     "Blob",
@@ -75,18 +77,19 @@ leptos = { workspace = true }
 leptos_axum = { workspace = true, optional = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
-log = { workspace = true }
+log = { workspace = true, optional = true }
 prisma_client = { workspace = true, optional = true }
 prisma-client-rust = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
-simple_logger = { workspace = true, optional = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true, optional = true }
 tower_governor = { workspace = true, optional = true }
 tower-http = { workspace = true, optional = true }
+tracing = { workspace = true, optional = true }
+tracing-subscriber = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }
 
@@ -96,6 +99,7 @@ compression = ["tower-http?/compression-full"]
 ratelimit = []
 hydrate = [
     "dep:js-sys",
+    "dep:log",
     "dep:wasm-bindgen",
     "dep:web-sys",
     "leptos_meta/hydrate",
@@ -107,10 +111,11 @@ ssr = [
     "dep:leptos_axum",
     "dep:prisma_client",
     "dep:prisma-client-rust",
-    "dep:simple_logger",
     "dep:tower_governor",
     "dep:tower-http",
     "dep:tower",
+    "dep:tracing",
+    "dep:tracing-subscriber",
     "leptos_meta/ssr",
     "leptos_router/ssr",
     "leptos/ssr",
@@ -121,7 +126,6 @@ denylist = ["axum", "tokio", "tower", "tower-http", "leptos_axum"]
 skip_feature_sets = [["ssr", "hydrate"]]
 
 [package.metadata.leptos]
-# output-name = "lapa_site"
 site-root = "target/site"
 site-pkg-dir = "pkg"
 style-file = "style/main.scss"
