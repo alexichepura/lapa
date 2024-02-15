@@ -86,9 +86,13 @@ impl DatabasePool for SessionPrismaPool {
     ) -> Result<(), SessionError> {
         self.pool
             .session()
-            .create(
-                id.to_string(),
-                session.to_string(),
+            .upsert(
+                session::id::equals(id.to_string()),
+                session::create(
+                    id.to_string(),
+                    session.to_string(),
+                    vec![session::expires::set(Some(expires as i32))],
+                ),
                 vec![session::expires::set(Some(expires as i32))],
             )
             .exec()
