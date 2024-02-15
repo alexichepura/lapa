@@ -38,7 +38,6 @@ pub fn ErrorTemplate(
         .into_iter()
         .filter_map(|(_k, v)| v.downcast_ref::<AppError>().cloned())
         .collect();
-    println!("Errors: {errors:#?}");
 
     #[cfg(feature = "ssr")]
     if let Some(response) = use_context::<leptos_axum::ResponseOptions>() {

@@ -59,6 +59,7 @@ async fn get_static_file(uri: Uri, root: &str) -> Result<Response<Body>, (Status
 }
 
 pub async fn not_found_response(req: Request<Body>, options: &LeptosOptions) -> AxumResponse {
+    tracing::warn!("404 not_found_response for: {:?}", req.uri());
     let mut errors = Errors::default();
     errors.insert_with_default_key(AppError::NotFound);
     let handler = leptos_axum::render_app_to_stream(
