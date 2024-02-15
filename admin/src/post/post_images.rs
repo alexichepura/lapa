@@ -218,7 +218,7 @@ where
                     }
                 >
 
-                    "⇐"
+                    "<"
                 </button>
                 {hero_view}
                 <button
@@ -230,7 +230,7 @@ where
                     }
                 >
 
-                    "⇒"
+                    ">"
                 </button>
             </footer>
         </figure>
