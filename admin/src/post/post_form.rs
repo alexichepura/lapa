@@ -44,15 +44,10 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
             if let Some(v) = v {
                 let post_result = v.map_err(|_| PostError::ServerError).flatten();
                 if let Ok(post_result) = post_result {
-                    logging::log!("navigate post_result ok");
+                    tracing::info!("navigate post_result ok");
                     let navigate = use_navigate();
                     let to = format!("/posts/{}", post_result.id.unwrap());
-                    request_animation_frame(move || {
-                        // see use_navigate docs
-                        // RAF prevents action signal update warning
-                        logging::log!("navigate request_animation_frame");
-                        navigate(&to, Default::default());
-                    });
+                    navigate(&to, Default::default());
                 }
             }
         });

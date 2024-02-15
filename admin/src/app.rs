@@ -48,12 +48,17 @@ pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
 pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
     create_effect(move |prev: Option<Option<User>>| {
         let user = user_signal();
-        // log!("AdminRoutes user {:?}", user);
-        // log!("AdminRoutes prev {:?}", prev);
+        tracing::debug!("AdminRoutes effect: user: {:?}; prev: {:?}", &user, &prev);
         if let Some(prev) = prev {
             if user.is_some() && prev.is_none() {
+                tracing::debug!("prev is none, user is some: {:?}", &user);
                 let navigate = use_navigate();
                 navigate(&"/", Default::default());
+            }
+            if user.is_none() && prev.is_some() {
+                tracing::debug!("user is none, prev is some: {:?}", &prev);
+                let navigate = use_navigate();
+                navigate(&"/login", Default::default());
             }
         }
         user

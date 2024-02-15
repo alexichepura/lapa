@@ -21,7 +21,7 @@ pub fn hydrate() {
     use leptos::*;
     use wasm_bindgen::JsValue;
 
-    _ = console_log::init_with_level(log::Level::Debug);
+    tracing_wasm::set_as_global_default();
     console_error_panic_hook::set_once();
 
     let settings: JsValue =
@@ -31,7 +31,7 @@ pub fn hydrate() {
     let settings: settings::SettingsCx =
         serde_wasm_bindgen::from_value(settings).unwrap_or_default();
 
-    logging::log!("SETTINGS: {:?}", settings);
+    tracing::info!("SETTINGS: {:?}", settings);
 
     leptos::mount_to_body(move || {
         view! { <App settings=settings.clone()/> }

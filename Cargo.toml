@@ -17,7 +17,6 @@ bcrypt = { version = "0.15" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
 console_error_panic_hook = "0.1"
-console_log = "1"
 http = "1.0"
 js-sys = { version = "0.3" }
 leptos = { version = "0.6.5", features = ["nightly", "tracing"] }
@@ -46,6 +45,7 @@ tower_governor = { version = "0.3" }
 tower-http = { version = "0.5", features = ["fs", "trace"] }
 tracing = { version = "0.1" }
 tracing-subscriber = { version = "0.3", features = ["tracing-log"] }
+tracing-wasm = "0.2.1"
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = [
     "Blob",
@@ -70,7 +70,6 @@ axum = { workspace = true, optional = true }
 cfg-if = { workspace = true }
 chrono = { workspace = true }
 console_error_panic_hook = { workspace = true }
-console_log = { workspace = true }
 http = { workspace = true }
 js-sys = { workspace = true, optional = true }
 leptos = { workspace = true }
@@ -90,6 +89,7 @@ tower_governor = { workspace = true, optional = true }
 tower-http = { workspace = true, optional = true }
 tracing = { workspace = true, optional = true }
 tracing-subscriber = { workspace = true, optional = true }
+tracing-wasm = { workspace = true }
 wasm-bindgen = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }
 

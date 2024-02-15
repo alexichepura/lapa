@@ -8,7 +8,6 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-# cookie = "0.17.0"
 anyhow = "1"
 async-trait = { version = "0.1", optional = true }
 axum = { workspace = true, optional = true }
@@ -18,7 +17,6 @@ bcrypt = { workspace = true, optional = true }
 cfg-if = { workspace = true }
 chrono = { workspace = true }
 console_error_panic_hook = { workspace = true }
-console_log = { workspace = true }
 http = { workspace = true }
 image = { version = "0.24", optional = true, features = ["webp-encoder"] }
 js-sys = { workspace = true, optional = true }
@@ -40,6 +38,7 @@ tower_governor = { workspace = true, optional = true }
 tower-http = { workspace = true, optional = true }
 tracing = { workspace = true, optional = true }
 tracing-subscriber = { workspace = true, optional = true }
+tracing-wasm = { workspace = true }
 wasm-bindgen = { workspace = true, optional = true }
 wasm-bindgen-futures = { version = "0.4" }
 web-sys = { workspace = true, optional = true }
