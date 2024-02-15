@@ -33,7 +33,7 @@ pub fn use_settings() -> SettingsSignal {
 }
 pub fn use_site_url() -> String {
     let settings = use_settings();
-    settings().site_url
+    settings.get_untracked().site_url
 }
 pub fn use_site_url_signal() -> Signal<String> {
     let settings = use_settings();
