@@ -28,7 +28,7 @@ pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
     let formatter = |text| format!("{text} - Admin");
 
     view! {
-        <Stylesheet id="leptos" href="/pkg/lapa_admin.css"/>
+        <Stylesheet id="leptos" href="/pkg/admin.css"/>
         <Title formatter/>
         <Favicons/>
         <Script>{user_script}</Script>
@@ -60,8 +60,18 @@ pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
     });
     view! {
         <Routes>
-            <ProtectedRoute path="/login" redirect_path="/" condition={move || user_signal.get().is_none()} view=Login/>
-            <ProtectedRoute path="/*" redirect_path="/login" condition={move || user_signal.get().is_some()} view=LayoutWithUser>
+            <ProtectedRoute
+                path="/login"
+                redirect_path="/"
+                condition=move || user_signal.get().is_none()
+                view=Login
+            />
+            <ProtectedRoute
+                path="/*"
+                redirect_path="/login"
+                condition=move || user_signal.get().is_some()
+                view=LayoutWithUser
+            >
                 <Route path="/" view=HomePage/>
                 <Route path="/posts" view=PostList/>
                 <Route path="/posts/new" view=PostNew/>
@@ -75,7 +85,7 @@ pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
 pub fn LayoutWithUser() -> impl IntoView {
     let user_signal = use_user_signal();
     let user = user_signal.get_untracked().unwrap(); // at this point user must be some
-    view! {<Layout user/>}
+    view! { <Layout user/> }
 }
 
 #[component]

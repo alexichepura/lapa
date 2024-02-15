@@ -105,15 +105,15 @@ cargo prisma generate # only generate client
 ### Init
 
 ```sh
-cargo lapa settings-init
-cargo lapa user-add
+RUST_LOG="debug" cargo lapa settings-init
+RUST_LOG="debug" cargo lapa user-add
 ```
 
 ### Dev
 
 ```sh
-cargo leptos watch -p lapa_admin
-cargo leptos watch -p lapa_site
+RUST_LOG="warn,admin=debug" cargo leptos watch -p admin
+RUST_LOG="warn,site=debug" cargo leptos watch -p site
 ```
 
 ### Prod
