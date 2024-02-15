@@ -11,8 +11,8 @@ crate-type = ["cdylib", "rlib"]
 anyhow = "1"
 async-trait = { version = "0.1", optional = true }
 axum = { workspace = true, optional = true }
-axum_session = { version = "0.11.1", default-features = false, optional = true }
-axum_session_auth = { version = "0.11", default-features = false, optional = true }
+axum_session = { version = "0.12.4", default-features = false, optional = true }
+axum_session_auth = { version = "0.12.1", default-features = false, optional = true }
 bcrypt = { workspace = true, optional = true }
 cfg-if = { workspace = true }
 chrono = { workspace = true }
