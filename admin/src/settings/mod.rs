@@ -31,7 +31,11 @@ pub type SettingsSignal = RwSignal<SettingsCx>;
 pub fn use_settings() -> SettingsSignal {
     use_context::<SettingsSignal>().expect("settings signal")
 }
-pub fn use_site_url() -> Signal<String> {
+pub fn use_site_url() -> String {
+    let settings = use_settings();
+    settings().site_url
+}
+pub fn use_site_url_signal() -> Signal<String> {
     let settings = use_settings();
     create_read_slice(settings, |state| state.site_url.clone())
 }

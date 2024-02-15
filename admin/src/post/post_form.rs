@@ -89,7 +89,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
 
     let created = datetime_to_strings(post.created_at);
     let site_url = use_site_url();
-    let href = move || format!("{}/post/{}", &site_url(), &slug());
+    let href = format!("{}/post/{}", &site_url, &slug());
 
     let published_at_utc_string = create_memo(move |_| match published_at() {
         Some(published_at) => datetime_to_string(published_at).into_view(),
@@ -101,8 +101,8 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
             <header>
                 <div>
                     <h1>Post</h1>
-                    <a href=move || href() target="_blank">
-                        {move || href()}
+                    <a href=href.clone() target="_blank">
+                        {href}
                     </a>
                 </div>
                 <dl>
