@@ -11,5 +11,5 @@ prisma_client = { workspace = true }
 prisma-client-rust = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }
-tracing = { workspace = true, optional = true }
-tracing-subscriber = { workspace = true, optional = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

@@ -3,5 +3,5 @@ set -o allexport; source .env; set +o allexport
 
 ssh $SERVER_HOST "
 cd $SERVER_DIR
-./$CLI_BIN migrate
+RUST_LOG=debug ./$CLI_BIN migrate
 "

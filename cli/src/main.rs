@@ -25,6 +25,9 @@ struct UserAddArgs {
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt::Subscriber::builder()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
     let cli = Cli::parse();
 
     let prisma_client_builder = db::PrismaClient::_builder();
