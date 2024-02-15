@@ -8,6 +8,8 @@ async fn main() {
         routing::{get, post},
         Router,
     };
+    use leptos::*;
+    use leptos_axum::{generate_route_list, LeptosRoutes};
     use site::{
         routes::GenerateRouteList,
         server::{
@@ -15,8 +17,6 @@ async fn main() {
             robots_txt, server_fn_handler, AppState,
         },
     };
-    use leptos::*;
-    use leptos_axum::{generate_route_list, LeptosRoutes};
     use tracing::info;
 
     let leptopts = get_configuration(None).await.unwrap().leptos_options;
@@ -31,7 +31,8 @@ async fn main() {
         .with_state(AppState {
             leptos_options: leptopts.clone(),
             prisma_client: prisma_client.clone(),
-        });
+        })
+        .layer(tower_http::trace::TraceLayer::new_for_http());
 
     #[cfg(feature = "ratelimit")]
     let app = site::server::ratelimit(app);

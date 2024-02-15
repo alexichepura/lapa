@@ -115,6 +115,11 @@ RUST_LOG="debug" cargo lapa user-add
 RUST_LOG="warn,admin=debug" cargo leptos watch -p admin
 RUST_LOG="warn,site=debug" cargo leptos watch -p site
 ```
+Tip to enable tower_http debug
+```sh
+RUST_LOG="warn,tower_http=debug,admin=debug" cargo leptos watch -p admin
+RUST_LOG="warn,tower_http=debug,site=debug" cargo leptos watch -p site
+```
 
 ### Prod
 

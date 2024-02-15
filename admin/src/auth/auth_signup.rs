@@ -45,9 +45,7 @@ pub async fn signup(
     let auth = crate::server::use_auth()?;
 
     if password != password_confirmation {
-        return Err(ServerFnError::new(
-            "Passwords did not match.".to_string(),
-        ));
+        return Err(ServerFnError::new("Passwords did not match.".to_string()));
     }
 
     let password_hashed = bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap();
