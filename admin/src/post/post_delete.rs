@@ -66,10 +66,7 @@ pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> 
         }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Post find"))?;
 
     if found_post.is_none() {
         crate::server::serverr_404();
@@ -83,20 +80,14 @@ pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> 
         .delete_many(vec![db::image::id::in_vec(images_ids.clone())])
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Image delete"))?;
 
     prisma_client
         .post()
         .delete(db::post::id::equals(id))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Post delete"))?;
 
     for id in images_ids {
         crate::post::delete_image_on_server(&id);

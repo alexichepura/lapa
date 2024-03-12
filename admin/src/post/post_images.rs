@@ -247,10 +247,7 @@ pub async fn get_images(post_id: String) -> Result<Vec<PostImageData>, ServerFnE
         .order_by(db::image::order::order(db::SortOrder::Asc))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Images find_many"))?;
 
     let images: Vec<PostImageData> = images
         .iter()
@@ -284,11 +281,10 @@ pub async fn images_order_update(
             .select(db::image::select!({ id order }))
     });
 
-    let _images_updated: Vec<_> = prisma_client._batch(order_update).await.map_err(|e| {
-        dbg!(e);
-        ServerFnError::new("Server error".to_string())
-    })?;
-    // dbg!(&images_updated);
+    let _images_updated: Vec<_> = prisma_client
+        ._batch(order_update)
+        .await
+        .map_err(|e| lib::emsg(e, "Images update batch"))?;
 
     Ok(Ok(()))
 }
@@ -311,10 +307,7 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
         .select(db::image::select!({ post_id }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Image find"))?;
     if let None = current_img {
         return Ok(Err(ImageLoadError::NotFound));
     }
@@ -328,10 +321,7 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
         .select(db::image::select!({ id }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Image hero find"))?;
 
     let data: ImageMakeHeroData = prisma_client
         ._transaction()
@@ -366,10 +356,7 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
                 })
         })
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Image update"))?;
 
     Ok(Ok(data))
 }

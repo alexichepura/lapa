@@ -69,10 +69,7 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
         }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Post find_many"))?;
 
     let posts: Vec<PostListItem> = posts
         .iter()
