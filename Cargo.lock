@@ -38,6 +38,7 @@ dependencies = [
  "leptos_axum",
  "leptos_meta",
  "leptos_router",
+ "lib",
  "log",
  "prisma-client-rust",
  "prisma_client",
@@ -2437,6 +2438,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "lib"
+version = "0.1.0"
+dependencies = [
+ "cfg-if",
+ "http 1.1.0",
+ "leptos",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.153"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4472,6 +4484,7 @@ dependencies = [
  "leptos_axum",
  "leptos_meta",
  "leptos_router",
+ "lib",
  "log",
  "prisma-client-rust",
  "prisma_client",
