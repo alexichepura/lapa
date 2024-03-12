@@ -73,7 +73,7 @@ impl DatabasePool for SessionPrismaPool {
             .exec()
             .await
             .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
-        tracing::debug!(("count_result", count));
+        tracing::debug!("count_result={}", count);
         return Ok(count);
     }
 

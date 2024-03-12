@@ -257,7 +257,7 @@ pub async fn post_upsert(
     if let Some(id) = id {
         if let Some(_post_by_slug) = post_by_slug {
             if id != _post_by_slug.id {
-                tracing::warn!(_post_by_slug);
+                tracing::warn!("Post exists for slug={}", slug);
                 return Ok(Err(PostError::CreateSlugExists));
             }
         }
@@ -287,7 +287,7 @@ pub async fn post_upsert(
         }));
     } else {
         if let Some(_post_by_slug) = post_by_slug {
-            tracing::warn!(_post_by_slug);
+            tracing::warn!("Post exists for slug={}", slug);
             return Ok(Err(PostError::CreateSlugExists));
         }
         let post = prisma_client

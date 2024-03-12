@@ -101,20 +101,20 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
 pub fn delete_image_on_server(id: &String) {
     // TODO iterate
     if let Err(e) = std::fs::remove_file(crate::image::img_path_small(&id)) {
-        tracing::error!(e);
+        tracing::error!("remove_file e={e}");
     };
     if let Err(e) = std::fs::remove_file(crate::image::img_path_small_retina(&id)) {
-        tracing::error!(e);
+        tracing::error!("remove_file e={e}");
     };
     if let Err(e) = std::fs::remove_file(crate::image::img_path_large(&id)) {
-        tracing::error!(e);
+        tracing::error!("remove_file e={e}");
     };
     if let Err(e) = std::fs::remove_file(crate::image::img_path_large_retina(&id)) {
-        tracing::error!(e);
+        tracing::error!("remove_file e={e}");
     };
     if let Err(e) = std::fs::remove_file(crate::image::img_path_upload_ext(&id, &"jpg".to_string()))
     {
-        tracing::error!(e);
+        tracing::error!("remove_file e={e}");
     };
 }
 
