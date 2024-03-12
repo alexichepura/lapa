@@ -106,24 +106,4 @@ pub async fn settings_images_update(
         .map_err(|e| lib::emsg(e, "Settings update"))?;
 
     Ok(Ok(()))
-    // if let Some(id) = id {
-    // } else {
-    //     let settings = prisma_client
-    //         .settings()
-    //         .create(
-    //             settings_data.hero_width,
-    //             settings_data.hero_height,
-    //             settings_data.thumb_width,
-    //             settings_data.thumb_height,
-    //             vec![],
-    //         )
-    //         .exec()
-    //         .await
-    //         .map_err(|e| {
-    //             dbg!(e);
-    //             ServerFnError::new("Server error".to_string())
-    //         })?;
-
-    //     dbg!(settings.clone());
-    // }
 }

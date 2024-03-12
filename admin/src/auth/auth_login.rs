@@ -65,10 +65,7 @@ pub async fn login(
         .find_unique(prisma_client::db::user::username::equals(username))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "User find"))?;
 
     Ok(match user {
         None => {
