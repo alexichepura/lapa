@@ -117,10 +117,7 @@ pub async fn get_stats(period: StatsPeriod) -> Result<StatsResult, ServerFnError
         .select(db::ssr::select!({ id created_at path  }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "SSR counter find_many"))?;
 
     let hmap: HashMap<String, i32> = renders.iter().fold(HashMap::new(), |mut acc, data| {
         match acc.get(&data.path) {

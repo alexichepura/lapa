@@ -71,7 +71,7 @@ pub async fn leptos_routes_handler(
             .exec()
             .await;
         if let Err(query_error) = result {
-            dbg!(query_error);
+            tracing::error!("{query_error:?}");
         }
     });
     let settings = settins_db(prisma_client.clone()).await;
@@ -97,7 +97,7 @@ pub async fn robots_txt(State(app_state): State<AppState>) -> Result<String, (St
         .exec()
         .await
         .map_err(|e| {
-            dbg!(e);
+            tracing::error!("{e:?}");
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Server error".to_string(),

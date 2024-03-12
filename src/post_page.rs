@@ -202,10 +202,7 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Post find"))?;
 
     let result: Option<PostData> = match post {
         Some(post) => {

@@ -34,10 +34,7 @@ pub async fn images_convert() -> Result<Result<(), SettingsError>, ServerFnError
         }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Settings find"))?;
     let settings = settings.unwrap();
     let convert_settings = crate::image::ConvertSettings {
         hero_height: settings.hero_height as u32,
@@ -52,10 +49,7 @@ pub async fn images_convert() -> Result<Result<(), SettingsError>, ServerFnError
         .select(db::image::select!({ id ext }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Image find_many"))?;
 
     for image_data in images {
         let path = crate::image::img_path_upload_ext(&image_data.id, &image_data.ext);
@@ -72,7 +66,7 @@ pub async fn images_convert() -> Result<Result<(), SettingsError>, ServerFnError
                 );
             }
             Err(err) => {
-                dbg!((&path, err));
+                tracing::error!("path:{path}, err={err}");
             }
         }
     }

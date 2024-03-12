@@ -69,7 +69,7 @@ pub async fn upload_img(
 ) -> Result<ImageUploadResult, ServerFnError> {
     let img_bytes = serde_json::from_str::<Vec<u8>>(&img);
     if let Err(e) = img_bytes {
-        dbg!(e);
+        tracing::error!("{e:?}");
         crate::server::serverr_400();
         return Ok(Err(ImageUploadError::Deserialization));
     }
@@ -82,7 +82,7 @@ pub async fn upload_img(
     let img_reader = image::io::Reader::new(cursor.clone()).with_guessed_format();
 
     if let Err(e) = img_reader {
-        dbg!(e);
+        tracing::error!("{e:?}");
         crate::server::serverr_400();
         return Ok(Err(ImageUploadError::Read));
     }
@@ -101,17 +101,11 @@ pub async fn upload_img(
         .create(alt, ext.to_string(), db::post::id::equals(post_id), vec![])
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Image create"))?;
 
     let id = image_upload_data.id;
     let file_path = crate::image::img_path_upload_ext(&id, &ext.to_string());
-    std::fs::write(file_path.clone(), img_bytes).map_err(|e| {
-        dbg!(e);
-        ServerFnError::new("Server error".to_string())
-    })?;
+    std::fs::write(file_path.clone(), img_bytes).map_err(|e| lib::emsg(e, "Image write"))?;
 
     let img_decoded = img_reader.decode().unwrap();
 
@@ -120,10 +114,7 @@ pub async fn upload_img(
         .find_first(vec![])
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?
+        .map_err(|e| lib::emsg(e, "Settings find"))?
         .unwrap();
 
     let convert_settings = crate::image::ConvertSettings {
@@ -140,10 +131,7 @@ pub async fn upload_img(
         &convert_settings,
         &id,
     )
-    .map_err(|e| {
-        dbg!(e);
-        ServerFnError::new("Server error".to_string())
-    })?;
+    .map_err(|e| lib::emsg(e, "Image create variants"))?;
 
     Ok(Ok(ImageResult { id }))
 }

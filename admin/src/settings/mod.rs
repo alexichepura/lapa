@@ -136,10 +136,7 @@ pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
         .find_first(vec![])
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Settings find"))?;
 
     Ok(match settings {
         Some(settings) => Ok(SettingsData {

@@ -57,12 +57,7 @@ pub async fn get_home() -> Result<HomeData, ServerFnError> {
         .select(db::settings::select!({ home_text }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?
-        .unwrap();
-
+        .map_err(|e| lib::emsg(e, "Settings find"))?.unwrap();
     Ok(HomeData {
         home_text: settings.home_text,
     })

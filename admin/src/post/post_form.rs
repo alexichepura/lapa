@@ -252,15 +252,12 @@ pub async fn post_upsert(
         .select(db::post::select!({ id }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Post find"))?;
 
     if let Some(id) = id {
         if let Some(_post_by_slug) = post_by_slug {
             if id != _post_by_slug.id {
-                dbg!(_post_by_slug);
+                tracing::warn!("Post exists for slug={}", slug);
                 return Ok(Err(PostError::CreateSlugExists));
             }
         }
@@ -278,10 +275,7 @@ pub async fn post_upsert(
             )
             .exec()
             .await
-            .map_err(|e| {
-                dbg!(e);
-                ServerFnError::new("Server error".to_string())
-            })?;
+            .map_err(|e| lib::emsg(e, "Post update"))?;
         return Ok(Ok(PostFormData {
             id: Some(post.id),
             created_at: post.created_at,
@@ -293,7 +287,7 @@ pub async fn post_upsert(
         }));
     } else {
         if let Some(_post_by_slug) = post_by_slug {
-            dbg!(_post_by_slug);
+            tracing::warn!("Post exists for slug={}", slug);
             return Ok(Err(PostError::CreateSlugExists));
         }
         let post = prisma_client
@@ -309,10 +303,7 @@ pub async fn post_upsert(
             )
             .exec()
             .await
-            .map_err(|e| {
-                dbg!(e);
-                ServerFnError::new("Server error".to_string())
-            })?;
+            .map_err(|e| lib::emsg(e, "Post create"))?;
         return Ok(Ok(PostFormData {
             id: Some(post.id),
             slug: post.slug,

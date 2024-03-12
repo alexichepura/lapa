@@ -78,10 +78,7 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
         .select(db::image::select!({ id }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Image find"))?;
 
     if found_image.is_none() {
         crate::server::serverr_404();
@@ -95,10 +92,7 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
         .delete(db::image::id::equals(id))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Image delete"))?;
 
     Ok(Ok(()))
 }
@@ -107,20 +101,20 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
 pub fn delete_image_on_server(id: &String) {
     // TODO iterate
     if let Err(e) = std::fs::remove_file(crate::image::img_path_small(&id)) {
-        dbg!(e);
+        tracing::error!("remove_file e={e}");
     };
     if let Err(e) = std::fs::remove_file(crate::image::img_path_small_retina(&id)) {
-        dbg!(e);
+        tracing::error!("remove_file e={e}");
     };
     if let Err(e) = std::fs::remove_file(crate::image::img_path_large(&id)) {
-        dbg!(e);
+        tracing::error!("remove_file e={e}");
     };
     if let Err(e) = std::fs::remove_file(crate::image::img_path_large_retina(&id)) {
-        dbg!(e);
+        tracing::error!("remove_file e={e}");
     };
     if let Err(e) = std::fs::remove_file(crate::image::img_path_upload_ext(&id, &"jpg".to_string()))
     {
-        dbg!(e);
+        tracing::error!("remove_file e={e}");
     };
 }
 
@@ -136,10 +130,7 @@ pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResu
         .select(db::image::select!({ id }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Image find"))?;
 
     if found_image.is_none() {
         crate::server::serverr_404();
@@ -151,10 +142,7 @@ pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResu
         .update(db::image::id::equals(id), vec![db::image::alt::set(alt)])
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Image update"))?;
 
     Ok(Ok(()))
 }

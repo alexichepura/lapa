@@ -56,22 +56,15 @@ pub async fn signup(
         .create(username.clone(), password_hashed, vec![])
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "User create"))?;
 
     let user = prisma_client
         .user()
         .find_unique(prisma_client::db::user::username::equals(username))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?
-        .ok_or("Signup failed: User does not exist.")
-        .map_err(|e| ServerFnError::new(e.to_string()))?;
+        .map_err(|e| lib::emsg(e, "Settings find"))?
+        .unwrap();
 
     auth.login_user(user.id);
     auth.remember_user(remember.is_some());
