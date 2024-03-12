@@ -73,7 +73,7 @@ impl DatabasePool for SessionPrismaPool {
             .exec()
             .await
             .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
-        dbg!(("count_result", count));
+        tracing::debug!(("count_result", count));
         return Ok(count);
     }
 
@@ -151,7 +151,7 @@ impl DatabasePool for SessionPrismaPool {
     }
 
     async fn delete_all(&self, _table_name: &str) -> Result<(), SessionError> {
-        dbg!("delete_all");
+        tracing::debug!("delete_all");
         self.pool
             .session()
             .delete_many(vec![])

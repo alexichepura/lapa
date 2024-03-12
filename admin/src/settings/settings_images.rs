@@ -74,10 +74,7 @@ pub async fn settings_images_update(
         .select(db::settings::select!({ id }))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Settings find"))?;
 
     let id: String;
     if let Some(settings_saved) = settings_saved {
@@ -106,10 +103,7 @@ pub async fn settings_images_update(
         )
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Settings update"))?;
 
     Ok(Ok(()))
     // if let Some(id) = id {

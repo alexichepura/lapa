@@ -78,10 +78,7 @@ pub async fn get_post(id: String) -> Result<Result<PostFormData, PostError>, Ser
         .find_unique(prisma_client::db::post::id::equals(id))
         .exec()
         .await
-        .map_err(|e| {
-            dbg!(e);
-            ServerFnError::new("Server error".to_string())
-        })?;
+        .map_err(|e| lib::emsg(e, "Post find"))?;
 
     Ok(match post {
         Some(post) => Ok(PostFormData {
