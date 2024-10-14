@@ -6,6 +6,7 @@ cd $SERVER_DIR
 lsof -t -i:4143 | xargs -r kill
 RUST_LOG="info,admin=debug" \
 DATABASE_URL=file:$SERVER_DIR/site.db \
+LEPTOS_HASH_FILES=true \
 LEPTOS_SITE_ADDR=127.0.0.1:4143 \
 LEPTOS_SITE_ROOT=$SERVER_DIR/admin \
 LEPTOS_OUTPUT_NAME=$ADMIN_BIN \
