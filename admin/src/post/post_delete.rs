@@ -1,6 +1,7 @@
 use super::PostError;
 use crate::form::FormFooter;
 use leptos::prelude::*;
+use leptos_router::hooks::use_navigate;
 
 #[component]
 pub fn PostDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
