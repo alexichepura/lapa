@@ -99,6 +99,7 @@ web-sys = { workspace = true, optional = true }
 
 [features]
 prod = ["compression", "ratelimit"]
+tracing = [] # not used
 compression = ["tower-http?/compression-full"]
 ratelimit = []
 hydrate = [
