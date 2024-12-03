@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_router::A;
 use serde::{Deserialize, Serialize};
 
@@ -9,19 +9,19 @@ use crate::{
 
 #[component]
 pub fn PostList() -> impl IntoView {
-    let posts = create_blocking_resource(|| (), move |_| get_posts());
+    let posts = Resource::new_blocking(|| (), move |_| get_posts());
 
     view! {
         <h2>Posts</h2>
         <Suspense fallback=move || {
-            view! { <Loading/> }
+            view! { <Loading /> }
         }>
             {move || {
                 posts
                     .get()
                     .map(|posts| match posts {
                         Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
-                        Ok(posts) => view! { <PostListView posts/> }.into_view(),
+                        Ok(posts) => view! { <PostListView posts /> }.into_view(),
                     })
             }}
 
@@ -37,7 +37,7 @@ pub fn PostListView(posts: Vec<PostListItem>) -> impl IntoView {
         posts
             .into_iter()
             .map(|post| {
-                view! { <PostListItem post/> }
+                view! { <PostListItem post /> }
             })
             .collect_view()
     };
@@ -47,7 +47,7 @@ pub fn PostListView(posts: Vec<PostListItem>) -> impl IntoView {
 #[component]
 pub fn PostListItem(post: PostListItem) -> impl IntoView {
     let image_view = match post.hero {
-        Some(image) => view! { <Thumb image/> }.into_view(),
+        Some(image) => view! { <Thumb image /> }.into_view(),
         None => ().into_view(),
     };
     let href = format!("/post/{}", post.slug);

@@ -5,7 +5,7 @@ use axum::{
     response::{IntoResponse, Response as AxumResponse},
 };
 use http::{header::CACHE_CONTROL, HeaderValue};
-use leptos::*;
+use leptos::prelude::*;
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
 

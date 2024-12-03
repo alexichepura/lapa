@@ -1,32 +1,31 @@
-use leptos::*;
-use leptos_router::ActionForm;
+use leptos::prelude::*;
 
 #[component]
 pub fn Signup() -> impl IntoView {
-    let signup = create_server_action::<Signup>();
+    let signup = ServerAction::<Signup>::new();
     view! {
         <ActionForm action=signup>
             <h1>Sign Up</h1>
             <label>
                 <span>User ID:</span>
-                <input type="text" placeholder="User ID" maxlength="32" name="username"/>
+                <input type="text" placeholder="User ID" maxlength="32" name="username" />
             </label>
-            <br/>
+            <br />
             <label>
                 <span>Password:</span>
-                <input type="password" placeholder="Password" name="password"/>
+                <input type="password" placeholder="Password" name="password" />
             </label>
-            <br/>
+            <br />
             <label>
                 <span>Confirm Password:</span>
-                <input type="password" placeholder="Password again" name="password_confirmation"/>
+                <input type="password" placeholder="Password again" name="password_confirmation" />
             </label>
-            <br/>
+            <br />
             <label>
                 <span>Remember me?</span>
-                <input type="checkbox" name="remember" class="auth-input"/>
+                <input type="checkbox" name="remember" class="auth-input" />
             </label>
-            <br/>
+            <br />
             <button type="submit" class="button">
                 Sign Up
             </button>

@@ -1,5 +1,5 @@
 use chrono::{DateTime, FixedOffset};
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::Title;
 use leptos_router::A;
 use serde::{Deserialize, Serialize};
@@ -11,10 +11,10 @@ use crate::{
 
 #[component]
 pub fn PostList() -> impl IntoView {
-    let posts = create_blocking_resource(|| (), move |_| get_posts());
+    let posts = Resource::new_blocking(|| (), move |_| get_posts());
 
     view! {
-        <Title text="Posts"/>
+        <Title text="Posts" />
         <h1>
             <span>Posts</span>
             <small>
@@ -23,7 +23,7 @@ pub fn PostList() -> impl IntoView {
         </h1>
         <ul class="Card Listing">
             <Suspense fallback=move || {
-                view! { <Loading/> }
+                view! { <Loading /> }
             }>
                 {move || {
                     posts
@@ -37,7 +37,7 @@ pub fn PostList() -> impl IntoView {
                                     posts
                                         .into_iter()
                                         .map(|post| {
-                                            view! { <PostListItem post/> }
+                                            view! { <PostListItem post /> }
                                         })
                                         .collect_view()
                                 }
@@ -64,7 +64,7 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
     };
     let hero_view = match post.hero {
         Some(id) => {
-            view! { <img title="Post hero" src=img_url_small(&id) width="36"/> }.into_view()
+            view! { <img title="Post hero" src=img_url_small(&id) width="36" /> }.into_view()
         }
         None => view! { <div title="No post hero">?</div> }.into_view(),
     };

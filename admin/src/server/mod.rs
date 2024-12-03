@@ -5,7 +5,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use leptos::LeptosOptions;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_axum::handle_server_fns_with_context;
 
 use crate::{app::App, auth::User, settings::settins_db};

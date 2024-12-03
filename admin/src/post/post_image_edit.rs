@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
@@ -26,7 +26,7 @@ pub fn PostImageModalForm(
     let delete_rw = image_delete.value();
 
     let id_effect = image.id.clone();
-    create_effect(move |old| {
+    Effect::new(move |old| {
         let id = id_effect.clone();
         let delete_result = delete_rw.get();
         // Some(old) to prevent initial run
@@ -46,15 +46,15 @@ pub fn PostImageModalForm(
     };
 
     view! {
-        <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) width=500/>
+        <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) width=500 />
         <div>
             <button on:click=on_delete>Delete</button>
-            <hr/>
+            <hr />
             <ActionForm action=image_update>
                 <fieldset disabled=move || pending()>
-                    <input type="hidden" name="id" value=image.id.clone()/>
-                    <Input name="alt" label="Alt" value=image.alt.clone()/>
-                    <FormFooter action=image_update submit_text="Update image data"/>
+                    <input type="hidden" name="id" value=image.id.clone() />
+                    <Input name="alt" label="Alt" value=image.alt.clone() />
+                    <FormFooter action=image_update submit_text="Update image data" />
                 </fieldset>
             </ActionForm>
             <button on:click=move |ev| {

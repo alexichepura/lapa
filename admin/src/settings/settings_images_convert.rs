@@ -1,18 +1,17 @@
-use leptos::*;
-use leptos_router::ActionForm;
+use leptos::prelude::*;
 
 use crate::{form::FormFooter, settings::SettingsError};
 
 #[component]
 pub fn ImagesConvertView() -> impl IntoView {
-    let images_convert = create_server_action::<ImagesConvert>();
+    let images_convert = ServerAction::<ImagesConvert>::new();
     let pending = images_convert.pending();
 
     view! {
         <fieldset disabled=move || pending()>
             <legend>Images convert</legend>
             <ActionForm action=images_convert>
-                <FormFooter action=images_convert submit_text="Reconvert images"/>
+                <FormFooter action=images_convert submit_text="Reconvert images" />
             </ActionForm>
         </fieldset>
     }

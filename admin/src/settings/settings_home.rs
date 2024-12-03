@@ -1,5 +1,4 @@
-use leptos::*;
-use leptos_router::ActionForm;
+use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{form::FormFooter, settings::SettingsError};
@@ -11,7 +10,7 @@ pub struct SettingsHome {
 
 #[component]
 pub fn SettingsHomeForm(settings: SettingsHome) -> impl IntoView {
-    let settings_site_update = create_server_action::<SettingsHomeUpdate>();
+    let settings_site_update = ServerAction::<SettingsHomeUpdate>::new();
     let pending = settings_site_update.pending();
 
     view! {
@@ -26,7 +25,7 @@ pub fn SettingsHomeForm(settings: SettingsHome) -> impl IntoView {
                         rows="5"
                     ></textarea>
                 </label>
-                <FormFooter action=settings_site_update submit_text="Update home data"/>
+                <FormFooter action=settings_site_update submit_text="Update home data" />
             </ActionForm>
         </fieldset>
     }

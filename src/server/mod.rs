@@ -6,7 +6,7 @@ use axum::{
 };
 use http::StatusCode;
 use leptos::LeptosOptions;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_axum::handle_server_fns_with_context;
 use prisma_client::db::{self, PrismaClient};
 use std::sync::Arc;

@@ -1,6 +1,5 @@
-use leptos::{html::Dialog, *};
+use leptos::{html::Dialog, prelude::*};
 use leptos_meta::{Meta, Title};
-use leptos_router::*;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -47,7 +46,7 @@ pub fn PostPage() -> impl IntoView {
         })
     };
 
-    let post = create_blocking_resource(slug, move |slug| async move {
+    let post = Resource::new_blocking(slug, move |slug| async move {
         match slug {
             Err(e) => Err(e),
             Ok(slug) => get_post(slug)
@@ -59,13 +58,13 @@ pub fn PostPage() -> impl IntoView {
 
     view! {
         <Suspense fallback=move || {
-            view! { <Loading/> }
+            view! { <Loading /> }
         }>
             {move || {
                 post.get()
                     .map(|post| match post {
                         Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
-                        Ok(post) => view! { <PostView post=post/> }.into_view(),
+                        Ok(post) => view! { <PostView post=post /> }.into_view(),
                     })
             }}
 
@@ -78,7 +77,7 @@ pub fn PostView(post: PostData) -> impl IntoView {
     let dialog_element: NodeRef<Dialog> = create_node_ref();
     let (dialog_open, set_dialog_open) = create_signal::<DialogSignal>(None);
 
-    create_effect(move |old| {
+    Effect::new(move |old| {
         let current = dialog_open();
         if let Some(_id) = current.clone() {
             let el = dialog_element().expect("<dialog> to exist");
@@ -96,7 +95,7 @@ pub fn PostView(post: PostData) -> impl IntoView {
     });
 
     let dialog_view = move || match dialog_open() {
-        Some(image) => view! { <PostImageModal image set_dialog_open/> }.into_view(),
+        Some(image) => view! { <PostImageModal image set_dialog_open /> }.into_view(),
         None => ().into_view(),
     };
 
@@ -105,28 +104,28 @@ pub fn PostView(post: PostData) -> impl IntoView {
     let hero_og = match post.hero {
         Some(hero) => {
             let og = format!("{site_url}{}", img_url_large_retina(&hero)); // TODO domain from DB
-            view! { <Meta property="og:image" content=og/> }.into_view()
+            view! { <Meta property="og:image" content=og /> }.into_view()
         }
         None => ().into_view(),
     };
 
     view! {
-        <Title text=post.title.clone()/>
-        <Meta name="description" content=post.description.clone()/>
-        <Meta property="og:title" content=post.title.clone()/>
-        <Meta property="og:description" content=post.description.clone()/>
+        <Title text=post.title.clone() />
+        <Meta name="description" content=post.description.clone() />
+        <Meta property="og:title" content=post.title.clone() />
+        <Meta property="og:description" content=post.description.clone() />
         {hero_og}
         <h1>{post.title}</h1>
         <section>
-            <ParagraphsByMultiline text=post.text/>
+            <ParagraphsByMultiline text=post.text />
         </section>
-        <hr/>
+        <hr />
         <div class="post-images">
             <For
                 each=move || post.images.clone()
                 key=|image| image.id.clone()
                 children=move |image: ImgData| {
-                    view! { <Thumb image=image set_dialog_open/> }
+                    view! { <Thumb image=image set_dialog_open /> }
                 }
             />
 
@@ -175,7 +174,7 @@ pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl
 pub fn PostImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl IntoView {
     view! {
         <figure>
-            <img src=img_url_large(&image.id) srcset=srcset_large(&image.id)/>
+            <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) />
             <figcaption>{&image.alt}</figcaption>
             <button on:click=move |ev| {
                 ev.prevent_default();

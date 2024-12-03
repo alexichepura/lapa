@@ -15,7 +15,7 @@ async fn main() {
         routing::{get, post},
         Router,
     };
-    use leptos::*;
+    use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use tracing::info;
 

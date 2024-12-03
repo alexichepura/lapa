@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::*;
 use leptos_router::*;
 
@@ -28,9 +28,9 @@ pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
     let formatter = |text| format!("{text} - Admin");
 
     view! {
-        <Stylesheet id="leptos" href="/pkg/admin.css"/>
-        <Title formatter/>
-        <Favicons/>
+        <Stylesheet id="leptos" href="/pkg/admin.css" />
+        <Title formatter />
+        <Favicons />
         <Script>{user_script}</Script>
         <Script>{settings_script}</Script>
         <RoutingProgress
@@ -39,14 +39,14 @@ pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
             class="RoutingProgress"
         />
         <Router set_is_routing>
-            <AdminRoutes user_signal/>
+            <AdminRoutes user_signal />
         </Router>
     }
 }
 
 #[component]
 pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
-    create_effect(move |prev: Option<Option<User>>| {
+    Effect::new(move |prev: Option<Option<User>>| {
         let user = user_signal();
         tracing::debug!("AdminRoutes effect: user: {:?}; prev: {:?}", &user, &prev);
         if let Some(prev) = prev {
@@ -77,11 +77,11 @@ pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
                 condition=move || user_signal.get().is_some()
                 view=LayoutWithUser
             >
-                <Route path="/" view=HomePage/>
-                <Route path="/posts" view=PostList/>
-                <Route path="/posts/new" view=PostNew/>
-                <Route path="/posts/:id" view=PostPage/>
-                <Route path="/settings" view=Settings/>
+                <Route path="/" view=HomePage />
+                <Route path="/posts" view=PostList />
+                <Route path="/posts/new" view=PostNew />
+                <Route path="/posts/:id" view=PostPage />
+                <Route path="/settings" view=Settings />
             </ProtectedRoute>
         </Routes>
     }
@@ -90,7 +90,7 @@ pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
 pub fn LayoutWithUser() -> impl IntoView {
     let user_signal = use_user_signal();
     let user = user_signal.get_untracked().unwrap(); // at this point user must be some
-    view! { <Layout user/> }
+    view! { <Layout user /> }
 }
 
 #[component]
@@ -98,7 +98,7 @@ pub fn AdminRouter() -> impl IntoView {
     let user_signal = create_rw_signal(None);
     view! {
         <Router>
-            <AdminRoutes user_signal/>
+            <AdminRoutes user_signal />
         </Router>
     }
 }
@@ -106,10 +106,10 @@ pub fn AdminRouter() -> impl IntoView {
 #[component]
 pub fn Favicons() -> impl IntoView {
     view! {
-        <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico"/>
-        <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png"/>
-        <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png"/>
-        <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
-        <Link rel="manifest" href="/site.webmanifest"/>
+        <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico" />
+        <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <Link rel="manifest" href="/site.webmanifest" />
     }
 }

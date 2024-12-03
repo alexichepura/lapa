@@ -13,7 +13,7 @@ pub use settings_images::*;
 pub use settings_images_convert::*;
 pub use settings_site::*;
 
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
 
@@ -79,7 +79,7 @@ impl From<&SettingsData> for SettingsSite {
 }
 
 pub fn create_settings_resource() -> Resource<(), SettingsResult> {
-    let settings = create_blocking_resource(
+    let settings = Resource::new_blocking(
         || (),
         move |_| async move {
             get_settings()
@@ -96,10 +96,10 @@ pub fn Settings() -> impl IntoView {
     let settings = create_settings_resource();
 
     view! {
-        <Title text="Settings"/>
+        <Title text="Settings" />
         <h1>Settings</h1>
         <Suspense fallback=move || {
-            view! { <Loading/> }
+            view! { <Loading /> }
         }>
             {move || {
                 settings
@@ -109,12 +109,12 @@ pub fn Settings() -> impl IntoView {
                         Ok(settings) => {
                             view! {
                                 <div class="Grid-fluid-2">
-                                    <SettingsHomeForm settings=SettingsHome::from(&settings)/>
-                                    <SettingsSiteForm settings=SettingsSite::from(&settings)/>
+                                    <SettingsHomeForm settings=SettingsHome::from(&settings) />
+                                    <SettingsSiteForm settings=SettingsSite::from(&settings) />
                                 </div>
                                 <div class="Grid-fluid-2">
-                                    <SettingsImagesForm settings=SettingsImages::from(&settings)/>
-                                    <ImagesConvertView/>
+                                    <SettingsImagesForm settings=SettingsImages::from(&settings) />
+                                    <ImagesConvertView />
                                 </div>
                             }
                                 .into_view()

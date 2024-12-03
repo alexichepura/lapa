@@ -1,7 +1,6 @@
 use chrono::{DateTime, FixedOffset, Utc};
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::Title;
-use leptos_router::{use_navigate, ActionForm};
 use serde::{Deserialize, Serialize};
 
 use super::PostError;
@@ -28,18 +27,18 @@ pub struct PostFormData {
 #[component]
 pub fn PostNew() -> impl IntoView {
     let post = PostFormData::default();
-    view! { <PostForm post=post/> }
+    view! { <PostForm post=post /> }
 }
 
 #[component]
 pub fn PostForm(post: PostFormData) -> impl IntoView {
-    let post_upsert = create_server_action::<PostUpsert>();
+    let post_upsert = ServerAction::<PostUpsert>::new();
     let value = post_upsert.value();
     let pending = post_upsert.pending();
     // let has_error = move || value.with(|val| matches!(val, Some(Err(_))));
 
     if let None = post.id {
-        create_effect(move |_| {
+        Effect::new(move |_| {
             let v = value();
             if let Some(v) = v {
                 let post_result = v.map_err(|_| PostError::ServerError).flatten();
@@ -75,15 +74,15 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
         None => "".to_string(),
     };
     let id_input = match post.id.clone() {
-        Some(id) => view! { <input type="hidden" name="id" value=id/> }.into_view(),
+        Some(id) => view! { <input type="hidden" name="id" value=id /> }.into_view(),
         None => ().into_view(),
     };
     let gallery_view = match post.id.clone() {
-        Some(id) => view! { <PostImages post_id=id/> }.into_view(),
+        Some(id) => view! { <PostImages post_id=id /> }.into_view(),
         None => view! { <p>Gallery is not available for not saved post</p> }.into_view(),
     };
     let delete_view = match post.id.clone() {
-        Some(id) => view! { <PostDeleteForm id=id.clone() slug/> }.into_view(),
+        Some(id) => view! { <PostDeleteForm id=id.clone() slug /> }.into_view(),
         None => ().into_view(),
     };
 
@@ -96,7 +95,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
         None => ().into_view(),
     });
     view! {
-        <Title text=move || format!("Post: {}", title())/>
+        <Title text=move || format!("Post: {}", title()) />
         <section class="PostPage">
             <header>
                 <div>
@@ -108,13 +107,13 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                 <dl>
                     <dt>ID:</dt>
                     <dd>{id_view}</dd>
-                    <br/>
+                    <br />
                     <dt>Created at <small>(Local):</small></dt>
                     <dd>{created.local}</dd>
-                    <br/>
+                    <br />
                     <dt>Created at <small>(UTC):</small></dt>
                     <dd>{created.utc}</dd>
-                    <br/>
+                    <br />
                     <dt>Published at <small>(UTC):</small></dt>
                     <dd>{published_at_utc_string}</dd>
                 </dl>
@@ -152,7 +151,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                             </label>
                         </div>
                         <div>
-                            <PublishedAt published_at set_published_at/>
+                            <PublishedAt published_at set_published_at />
                             <label>
                                 <div>Text</div>
                                 <textarea
@@ -164,7 +163,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                             </label>
                         </div>
                     </div>
-                    <FormFooter action=post_upsert submit_text="Submit post data"/>
+                    <FormFooter action=post_upsert submit_text="Submit post data" />
                 </fieldset>
             </ActionForm>
             {gallery_view}
@@ -184,7 +183,7 @@ pub fn PublishedAt(
     let (is_published_signal, set_is_published) =
         create_signal(published_at.get_untracked().is_some());
 
-    create_effect(move |old| {
+    Effect::new(move |old| {
         let is = is_published_signal();
         if old.is_some() {
             if is {
@@ -207,7 +206,7 @@ pub fn PublishedAt(
 
     view! {
         <div class="Grid-fluid-2">
-            <Checkbox label="Publish" checked=is_published set=set_is_published/>
+            <Checkbox label="Publish" checked=is_published set=set_is_published />
             <label>
                 <div>Published at <small>(Local)</small></div>
                 <input

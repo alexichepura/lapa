@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_meta::{Meta, Title};
 use serde::{Deserialize, Serialize};
 
@@ -14,17 +14,17 @@ pub struct HomeData {
 
 #[component]
 pub fn HomePage() -> impl IntoView {
-    let home = create_blocking_resource(|| (), move |_| get_home());
+    let home = Resource::new_blocking(|| (), move |_| get_home());
 
     view! {
-        <Title text="Home"/>
+        <Title text="Home" />
         <Meta
             name="description"
             content="Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website"
         />
         <h1>Welcome to LAPA</h1>
         <Suspense fallback=move || {
-            view! { <Loading/> }
+            view! { <Loading /> }
         }>
             {move || {
                 home.get()
@@ -33,7 +33,7 @@ pub fn HomePage() -> impl IntoView {
                         Ok(home) => {
                             view! {
                                 <section>
-                                    <ParagraphsByMultiline text=home.home_text/>
+                                    <ParagraphsByMultiline text=home.home_text />
                                 </section>
                             }
                                 .into_view()
@@ -42,8 +42,8 @@ pub fn HomePage() -> impl IntoView {
             }}
 
         </Suspense>
-        <hr/>
-        <PostList/>
+        <hr />
+        <PostList />
     }
 }
 
@@ -57,7 +57,8 @@ pub async fn get_home() -> Result<HomeData, ServerFnError> {
         .select(db::settings::select!({ home_text }))
         .exec()
         .await
-        .map_err(|e| lib::emsg(e, "Settings find"))?.unwrap();
+        .map_err(|e| lib::emsg(e, "Settings find"))?
+        .unwrap();
     Ok(HomeData {
         home_text: settings.home_text,
     })

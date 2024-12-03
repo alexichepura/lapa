@@ -21,7 +21,7 @@ pub mod util;
 pub fn hydrate() {
     use crate::app::App;
     use crate::auth::User;
-    use leptos::*;
+    use leptos::prelude::*;
     use wasm_bindgen::JsValue;
 
     tracing_wasm::set_as_global_default();

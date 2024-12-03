@@ -18,7 +18,7 @@ pub mod util;
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {
     use crate::app::App;
-    use leptos::*;
+    use leptos::prelude::*;
     use wasm_bindgen::JsValue;
 
     tracing_wasm::set_as_global_default();

@@ -1,5 +1,4 @@
-use leptos::{html::Dialog, *};
-use leptos_router::ActionForm;
+use leptos::{html::Dialog, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -24,13 +23,13 @@ pub struct PostImageData {
 pub fn PostImages(post_id: String) -> impl IntoView {
     let post_id_clone = post_id.clone();
 
-    let image_delete = create_server_action::<ImageDelete>();
-    let image_upload = create_server_action::<ImageUpload>();
-    let image_update = create_server_action::<ImageUpdate>();
-    let order_action = create_server_action::<ImagesOrderUpdate>();
-    let hero_action = create_server_action::<ImageMakeHero>();
+    let image_delete = Resource::new_blocking::<ImageDelete>();
+    let image_upload = ServerAction::<ImageUpload>::new();
+    let image_update = ServerAction::<ImageUpdate>::new();
+    let order_action = ServerAction::<ImagesOrderUpdate>::new();
+    let hero_action = ServerAction::<ImageMakeHero>::new();
 
-    let images = create_blocking_resource(
+    let images = Resource::new_blocking(
         move || {
             (
                 post_id_clone.clone(),
@@ -45,9 +44,9 @@ pub fn PostImages(post_id: String) -> impl IntoView {
     );
 
     view! {
-        <ImageUpload post_id image_upload/>
+        <ImageUpload post_id image_upload />
         <Transition fallback=move || {
-            view! { <Loading/> }
+            view! { <Loading /> }
         }>
             {move || {
                 images
@@ -105,7 +104,7 @@ pub fn PostImagesView(
         });
     };
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         if let Some(_id) = editing() {
             let el = dialog_element().expect("<dialog> to exist");
             let _modal_result = el.show_modal();
@@ -119,7 +118,7 @@ pub fn PostImagesView(
 
     let edit_view = move || match editing() {
         Some(image) => {
-            view! { <PostImageModalForm image set_editing image_delete image_update/> }.into_view()
+            view! { <PostImageModalForm image set_editing image_delete image_update /> }.into_view()
         }
         None => ().into_view(),
     };
@@ -141,11 +140,11 @@ pub fn PostImagesView(
                     each=move || images_sorted()
                     key=|image| format!("{}:{}", image.id, image.order)
                     children=move |image: PostImageData| {
-                        view! { <input type="hidden" name="ids[]" value=image.id/> }
+                        view! { <input type="hidden" name="ids[]" value=image.id /> }
                     }
                 />
 
-                <FormFooter action=order_action submit_text="Save order"/>
+                <FormFooter action=order_action submit_text="Save order" />
             </ActionForm>
             <div class="images">
                 {no_images}
@@ -161,7 +160,7 @@ pub fn PostImagesView(
                                     id: id_to_make_hero.clone(),
                                 });
                         };
-                        view! { <PostImage image set_editing on_order is_last make_hero/> }
+                        view! { <PostImage image set_editing on_order is_last make_hero /> }
                     }
                 />
 
@@ -206,7 +205,7 @@ where
 
     view! {
         <figure>
-            <img on:click=on_edit src=src srcset=srcset width=250/>
+            <img on:click=on_edit src=src srcset=srcset width=250 />
             <figcaption>{image.alt}</figcaption>
             <footer>
                 <button

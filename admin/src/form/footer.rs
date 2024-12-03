@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::util::{AlertDanger, AlertSuccess};

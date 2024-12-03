@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use leptos_router::*;
 
 use crate::{
@@ -40,7 +40,7 @@ pub fn PostPage() -> impl IntoView {
         })
     });
 
-    let post = create_blocking_resource(
+    let post = Resource::new_blocking(
         move || id(),
         move |id| async move {
             match id {
@@ -55,13 +55,13 @@ pub fn PostPage() -> impl IntoView {
 
     view! {
         <Suspense fallback=move || {
-            view! { <Loading/> }
+            view! { <Loading /> }
         }>
             {move || {
                 post.get()
                     .map(|post| match post {
                         Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
-                        Ok(post) => view! { <PostForm post=post/> }.into_view(),
+                        Ok(post) => view! { <PostForm post=post /> }.into_view(),
                     })
             }}
 
