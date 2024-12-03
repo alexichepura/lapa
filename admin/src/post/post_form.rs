@@ -193,7 +193,7 @@ pub fn PublishedAt(
 
     let (is_published_signal, set_is_published) = signal(published_at.get_untracked().is_some());
 
-    Effect::new(move |old| {
+    Effect::new(move |old: Option<bool>| {
         let is = is_published_signal();
         if old.is_some() {
             if is {

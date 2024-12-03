@@ -13,7 +13,7 @@ pub use settings_images::*;
 pub use settings_images_convert::*;
 pub use settings_site::*;
 
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
 
@@ -78,7 +78,7 @@ impl From<&SettingsData> for SettingsSite {
     }
 }
 
-pub fn create_settings_resource() -> Resource<(), SettingsResult> {
+pub fn create_settings_resource() -> Resource<SettingsResult> {
     let settings = Resource::new_blocking(
         || (),
         move |_| async move {
@@ -105,19 +105,22 @@ pub fn Settings() -> impl IntoView {
                 settings
                     .get()
                     .map(|settings| match settings {
-                        Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
+                        Err(e) => Either::Left(view! { <p>{e.to_string()}</p> }),
                         Ok(settings) => {
-                            view! {
-                                <div class="Grid-fluid-2">
-                                    <SettingsHomeForm settings=SettingsHome::from(&settings) />
-                                    <SettingsSiteForm settings=SettingsSite::from(&settings) />
-                                </div>
-                                <div class="Grid-fluid-2">
-                                    <SettingsImagesForm settings=SettingsImages::from(&settings) />
-                                    <ImagesConvertView />
-                                </div>
-                            }
-                                .into_view()
+                            Either::Right(
+                                view! {
+                                    <div class="Grid-fluid-2">
+                                        <SettingsHomeForm settings=SettingsHome::from(&settings) />
+                                        <SettingsSiteForm settings=SettingsSite::from(&settings) />
+                                    </div>
+                                    <div class="Grid-fluid-2">
+                                        <SettingsImagesForm settings=SettingsImages::from(
+                                            &settings,
+                                        ) />
+                                        <ImagesConvertView />
+                                    </div>
+                                },
+                            )
                         }
                     })
             }}

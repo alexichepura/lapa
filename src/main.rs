@@ -19,8 +19,8 @@ async fn main() {
     };
     use tracing::info;
 
-    let leptopts = get_configuration(None).await.unwrap().leptos_options;
-    let routes = generate_route_list(|| view! { <GenerateRouteList/> });
+    let leptopts = get_configuration(None).unwrap().leptos_options;
+    let routes = generate_route_list(|| view! { <GenerateRouteList /> });
     let prisma_client = init_prisma_client().await;
     let app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))

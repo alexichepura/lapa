@@ -78,7 +78,7 @@ pub fn PostView(post: PostData) -> impl IntoView {
     let dialog_element: NodeRef<Dialog> = NodeRef::new();
     let (dialog_open, set_dialog_open) = signal::<DialogSignal>(None);
 
-    Effect::new(move |old| {
+    Effect::new(move |old: Option<Option<ImgData>>| {
         let current = dialog_open();
         if let Some(_id) = current.clone() {
             let el = dialog_element.get().expect("<dialog> to exist");

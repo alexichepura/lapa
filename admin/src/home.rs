@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
 
@@ -34,8 +34,8 @@ pub fn StatsTableTransition(resource: StatsResource, caption: &'static str) -> i
                 resource
                     .get()
                     .map(|stats| match stats {
-                        Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
-                        Ok(stats) => view! { <StatsTable caption list=stats.list /> }.into_view(),
+                        Err(e) => Either::Left(view! { <p>error {e.to_string()}</p> }),
+                        Ok(stats) => Either::Right(view! { <StatsTable caption list=stats.list /> }),
                     })
             }}
 
@@ -73,7 +73,7 @@ pub fn StatsTable(caption: &'static str, list: Vec<StatsListItem>) -> impl IntoV
     }
 }
 
-type StatsResource = Resource<(), Result<StatsResult, ServerFnError>>;
+type StatsResource = Resource<Result<StatsResult, ServerFnError>>;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum StatsPeriod {

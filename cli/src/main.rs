@@ -37,8 +37,8 @@ async fn main() {
         prisma_client_builder.build().await
     };
     let prisma_client = Arc::new(client.unwrap());
-    #[cfg(debug)]
-    prisma_client._db_push(false).await.unwrap();
+    // #[cfg(debug_assertions)]
+    // prisma_client._db_push(false).await.unwrap();
 
     match &cli.command {
         Commands::Migrate => {
