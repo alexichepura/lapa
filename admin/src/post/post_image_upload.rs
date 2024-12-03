@@ -8,10 +8,10 @@ pub type ImageUploadAction = Action<ImageUpload, Result<ImageUploadResult, Serve
 #[component]
 pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl IntoView {
     let pending = image_upload.pending();
-    let (_file_name, set_file_name) = create_signal(None::<String>);
-    let (save_byte_vec, set_save_byte_vec) = create_signal(None::<Vec<u8>>);
-    let (_save_file, set_save_file) = create_signal(None::<String>);
-    let (obj_url, set_obj_url) = create_signal(None::<String>);
+    let (_file_name, set_file_name) = signal(None::<String>);
+    let (save_byte_vec, set_save_byte_vec) = signal(None::<Vec<u8>>);
+    let (_save_file, set_save_file) = signal(None::<String>);
+    let (obj_url, set_obj_url) = signal(None::<String>);
     view! {
         <fieldset prop:disabled=move || pending()>
             <legend>Image upload</legend>

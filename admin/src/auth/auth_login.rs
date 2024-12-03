@@ -19,7 +19,7 @@ pub fn Login() -> impl IntoView {
     let value = login.value();
     let user_signal = use_user_signal();
 
-    let (is_skip_redirect, set_skip_redirect) = create_signal(false);
+    let (is_skip_redirect, set_skip_redirect) = signal(false);
     Effect::new(move |_| {
         request_animation_frame(move || {
             set_skip_redirect(true);

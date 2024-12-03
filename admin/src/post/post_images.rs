@@ -81,9 +81,9 @@ pub fn PostImagesView(
     hero_action: ImageMakeHeroAction,
 ) -> impl IntoView {
     let dialog_element: NodeRef<Dialog> = NodeRef::new();
-    let (editing, set_editing) = create_signal::<ImageEditSignal>(None);
+    let (editing, set_editing) = signal::<ImageEditSignal>(None);
 
-    let (images_sorted, set_images_sorted) = create_signal(images);
+    let (images_sorted, set_images_sorted) = signal(images);
 
     let on_order = move |id: String, dir: i32| {
         let il = images_sorted.get().clone();
@@ -106,10 +106,10 @@ pub fn PostImagesView(
 
     Effect::new(move |_| {
         if let Some(_id) = editing() {
-            let el = dialog_element().expect("<dialog> to exist");
+            let el = dialog_element.get().expect("<dialog> to exist");
             let _modal_result = el.show_modal();
         } else {
-            let el = dialog_element();
+            let el = dialog_element.get();
             if let Some(el) = el {
                 let _modal_result = el.close();
             }

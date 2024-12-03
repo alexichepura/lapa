@@ -53,7 +53,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
         });
     }
 
-    let post_rw = create_rw_signal(post.clone());
+    let post_rw = RwSignal::new(post.clone());
     let (slug, set_slug) = create_slice(
         post_rw,
         |state| state.slug.clone(),
@@ -104,7 +104,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
     //     Some(published_at) => Either::Left(datetime_to_string(published_at).into_any()),
     //     None => Either::Right(().into_any()),
     // });
-    let published_at_utc_string = create_memo(move |_| match published_at() {
+    let published_at_utc_string = Memo::new(move |_| match published_at() {
         Some(published_at) => Either::Left(datetime_to_string(published_at)),
         None => Either::Right(()),
     });
@@ -188,11 +188,10 @@ pub fn PublishedAt(
     published_at: Signal<Option<DateTime<FixedOffset>>>,
     set_published_at: SignalSetter<Option<DateTime<FixedOffset>>>,
 ) -> impl IntoView {
-    let is_published = create_memo(move |_| published_at.with(|p| p.is_some()));
-    let disabled = create_memo(move |_| !is_published());
+    let is_published = Memo::new(move |_| published_at.with(|p| p.is_some()));
+    let disabled = Memo::new(move |_| !is_published());
 
-    let (is_published_signal, set_is_published) =
-        create_signal(published_at.get_untracked().is_some());
+    let (is_published_signal, set_is_published) = signal(published_at.get_untracked().is_some());
 
     Effect::new(move |old| {
         let is = is_published_signal();
@@ -206,11 +205,11 @@ pub fn PublishedAt(
         is
     });
 
-    let html_published_at = create_memo(move |_| match published_at() {
+    let html_published_at = Memo::new(move |_| match published_at() {
         Some(published_at) => datetime_to_local_html(published_at),
         None => String::default(),
     });
-    let published_at_rfc3339 = create_memo(move |_| match published_at() {
+    let published_at_rfc3339 = Memo::new(move |_| match published_at() {
         Some(published_at) => published_at.to_rfc3339(),
         None => String::default(),
     });

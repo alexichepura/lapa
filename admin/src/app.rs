@@ -18,16 +18,16 @@ use crate::{
 #[component]
 pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
     provide_meta_context();
-    let (is_routing, set_is_routing) = create_signal(false);
+    let (is_routing, set_is_routing) = signal(false);
 
     let user_json = serde_json::to_string(&user).unwrap();
     let user_script = format!("window.USER = {user_json};");
-    let user_signal = create_rw_signal(user.clone());
+    let user_signal = RwSignal::new(user.clone());
     provide_context(user_signal);
 
     let settings_json = serde_json::to_string(&settings).unwrap();
     let settings_script = format!("window.SETTINGS = {settings_json};");
-    let settings_signal = create_rw_signal(settings);
+    let settings_signal = RwSignal::new(settings);
     provide_context(settings_signal);
 
     let formatter = |text| format!("{text} - Admin");
@@ -102,7 +102,7 @@ pub fn LayoutWithUser() -> impl IntoView {
 
 #[component]
 pub fn AdminRouter() -> impl IntoView {
-    let user_signal = create_rw_signal(None);
+    let user_signal = RwSignal::new(None);
     view! {
         <Router>
             <AdminRoutes user_signal />

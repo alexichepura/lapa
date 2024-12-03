@@ -23,9 +23,9 @@ pub fn PostPage() -> impl IntoView {
     //             .map_err(|_| PostError::InvalidId)
     //     })
     // };
-    let id = create_memo(move |prev: Option<&Result<String, PostError>>| {
+    let id = Memo::new(move |prev: Option<&Result<String, PostError>>| {
         params.with(|q| {
-            // create_memo to fix Err(MissingParam("id")) when navigating away from page inside <Outlet />
+            // Memo to fix Err(MissingParam("id")) when navigating away from page inside <Outlet />
             // log!("{:?}", q);
             match q {
                 Ok(q) => Ok(q.id.clone()),
