@@ -91,10 +91,10 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
     let site_url = move || use_site_url();
     let href = move || format!("{}/post/{}", &site_url(), &slug());
 
-    let memo_fn = move |_| match published_at() {
-        Some(published_at) => Either::Left(datetime_to_string(published_at).into_any()),
-        None => Either::Right(().into_any()),
-    };
+    // let memo_fn = move |_| match published_at() {
+    //     Some(published_at) => Either::Left(datetime_to_string(published_at).into_any()),
+    //     None => Either::Right(().into_any()),
+    // };
     // let published_at_utc_string = create_memo(memo_fn);
     // let published_at_utc_string = Memo::new(move |_| match published_at() {
     //     Some(published_at) => datetime_to_string(published_at).into_any(),
@@ -104,10 +104,10 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
     //     Some(published_at) => Either::Left(datetime_to_string(published_at).into_any()),
     //     None => Either::Right(().into_any()),
     // });
-    let published_at_utc_string = Memo::new(move |_| match published_at() {
+    let published_at_utc_string = move || match published_at() {
         Some(published_at) => Either::Left(datetime_to_string(published_at)),
         None => Either::Right(()),
-    });
+    };
     view! {
         <Title text=move || format!("Post: {}", title()) />
         <section class="PostPage">
