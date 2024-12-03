@@ -6,7 +6,7 @@ publish = false
 
 [dependencies]
 bcrypt = { workspace = true }
-clap = { version = "4.3", features = ["derive"] }
+clap = { version = "4.5", features = ["derive"] }
 prisma_client = { workspace = true }
 prisma-client-rust = { workspace = true }
 serde = { workspace = true }
