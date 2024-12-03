@@ -19,8 +19,8 @@ async fn main() {
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use tracing::info;
 
-    let leptopts = get_configuration(None).await.unwrap().leptos_options;
-    let routes = generate_route_list(|| view! { <AdminRouter/> });
+    let leptopts = get_configuration(None).unwrap().leptos_options;
+    let routes = generate_route_list(|| view! { <AdminRouter /> });
     let prisma_client = init_prisma_client().await;
 
     let private_app = Router::new()

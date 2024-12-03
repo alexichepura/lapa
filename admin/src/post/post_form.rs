@@ -191,10 +191,12 @@ pub fn PublishedAt(
     let is_published = Memo::new(move |_| published_at.with(|p| p.is_some()));
     let disabled = Memo::new(move |_| !is_published());
 
-    let (is_published_signal, set_is_published) = signal(published_at.get_untracked().is_some());
+    // let (is_published_signal, set_is_published) = signal(published_at.get_untracked().is_some());
+    let published_at_rw_signal = RwSignal::new(published_at.get_untracked().is_some());
 
     Effect::new(move |old: Option<bool>| {
-        let is = is_published_signal();
+        // let is = is_published_signal();
+        let is = published_at_rw_signal.get();
         if old.is_some() {
             if is {
                 set_published_at(Some(Utc::now().fixed_offset()));
@@ -216,7 +218,7 @@ pub fn PublishedAt(
 
     view! {
         <div class="Grid-fluid-2">
-            <Checkbox label="Publish" checked=is_published set=set_is_published />
+            <Checkbox label="Publish" checked=published_at_rw_signal />
             <label>
                 <div>Published at <small>(Local)</small></div>
                 <input
