@@ -1,4 +1,3 @@
-use image::ImageReader;
 use leptos::{either::Either, prelude::*};
 use serde::{Deserialize, Serialize};
 
@@ -77,7 +76,7 @@ pub async fn upload_img(
     let prisma_client = crate::server::use_prisma()?;
 
     let cursor = std::io::Cursor::new(img_bytes.clone());
-    let img_reader = ImageReader::new(cursor.clone()).with_guessed_format();
+    let img_reader = image::ImageReader::new(cursor.clone()).with_guessed_format();
 
     if let Err(e) = img_reader {
         tracing::error!("{e:?}");
