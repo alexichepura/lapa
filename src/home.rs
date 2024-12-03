@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use leptos_meta::{Meta, Title};
 use serde::{Deserialize, Serialize};
 
@@ -29,14 +29,15 @@ pub fn HomePage() -> impl IntoView {
             {move || {
                 home.get()
                     .map(|home| match home {
-                        Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
+                        Err(e) => Either::Left(view! { <p>{e.to_string()}</p> }),
                         Ok(home) => {
-                            view! {
-                                <section>
-                                    <ParagraphsByMultiline text=home.home_text />
-                                </section>
-                            }
-                                .into_view()
+                            Either::Right(
+                                view! {
+                                    <section>
+                                        <ParagraphsByMultiline text=home.home_text />
+                                    </section>
+                                },
+                            )
                         }
                     })
             }}

@@ -1,5 +1,6 @@
-use leptos::{html::Dialog, prelude::*};
+use leptos::{either::Either, html::Dialog, prelude::*};
 use leptos_meta::{Meta, Title};
+use leptos_router::{hooks::use_params, params::Params};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -63,8 +64,8 @@ pub fn PostPage() -> impl IntoView {
             {move || {
                 post.get()
                     .map(|post| match post {
-                        Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
-                        Ok(post) => view! { <PostView post=post /> }.into_view(),
+                        Err(e) => Either::Left(view! { <p>{e.to_string()}</p> }),
+                        Ok(post) => Either::Right(view! { <PostView post=post /> }),
                     })
             }}
 
@@ -95,8 +96,8 @@ pub fn PostView(post: PostData) -> impl IntoView {
     });
 
     let dialog_view = move || match dialog_open() {
-        Some(image) => view! { <PostImageModal image set_dialog_open /> }.into_view(),
-        None => ().into_view(),
+        Some(image) => Either::Left(view! { <PostImageModal image set_dialog_open /> }),
+        None => Either::Right(()),
     };
 
     let site_url = use_site_url();
@@ -104,9 +105,9 @@ pub fn PostView(post: PostData) -> impl IntoView {
     let hero_og = match post.hero {
         Some(hero) => {
             let og = format!("{site_url}{}", img_url_large_retina(&hero)); // TODO domain from DB
-            view! { <Meta property="og:image" content=og /> }.into_view()
+            Either::Left(view! { <Meta property="og:image" content=og /> })
         }
-        None => ().into_view(),
+        None => Either::Right(()),
     };
 
     view! {
@@ -165,7 +166,7 @@ pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl
                 width=settings.thumb_width
                 height=settings.thumb_height
             />
-            <figcaption>{&image.alt}</figcaption>
+            <figcaption>{image.alt}</figcaption>
         </figure>
     }
 }
@@ -175,7 +176,7 @@ pub fn PostImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>
     view! {
         <figure>
             <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) />
-            <figcaption>{&image.alt}</figcaption>
+            <figcaption>{image.alt}</figcaption>
             <button on:click=move |ev| {
                 ev.prevent_default();
                 set_dialog_open(None);

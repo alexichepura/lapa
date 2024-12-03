@@ -1,4 +1,4 @@
-use leptos::{html, prelude::*, text_prop::TextProp};
+use leptos::{either::Either, html, prelude::*, text_prop::TextProp};
 
 #[component]
 pub fn Input(
@@ -22,8 +22,8 @@ pub fn Input(
     // };
 
     let label = match label {
-        Some(label) => view! { <div>{label.get().into_owned()}</div> }.into_view(),
-        None => ().into_view(),
+        Some(label) => Either::Left(view! { <div>{label.get().into_owned()}</div> }),
+        None => Either::Right(()),
     };
 
     view! { <label>{label} {inner}</label> }

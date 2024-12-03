@@ -1,5 +1,5 @@
 use crate::auth::use_user_signal;
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 
 #[component]
 pub fn Logout() -> impl IntoView {
@@ -19,8 +19,8 @@ pub fn Logout() -> impl IntoView {
         });
     });
     let skip_redirect_view = move || match is_skip_redirect() {
-        true => view! { <input type="hidden" name="skip_redirect" value="1" /> }.into_view(),
-        false => ().into_view(),
+        true => Either::Left(view! { <input type="hidden" name="skip_redirect" value="1" /> }),
+        false => Either::Right(()),
     };
     view! {
         <ActionForm action=logout>

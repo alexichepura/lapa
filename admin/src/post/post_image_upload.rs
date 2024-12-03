@@ -1,4 +1,4 @@
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use leptos_router::ActionForm;
 use serde::{Deserialize, Serialize};
 
@@ -20,13 +20,13 @@ pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl Int
                 <div>
                     <label>
                         <div>Select image</div>
-                        <InputImage set_file_name set_save_file set_obj_url set_save_byte_vec/>
+                        <InputImage set_file_name set_save_file set_obj_url set_save_byte_vec />
                     </label>
                     <ActionForm action=image_upload>
-                        <input type="hidden" name="post_id" value=post_id/>
+                        <input type="hidden" name="post_id" value=post_id />
                         <label>
                             <span>Alt</span>
-                            <input name="alt"/>
+                            <input name="alt" />
                         </label>
                         <input
                             type="hidden"
@@ -41,10 +41,10 @@ pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl Int
                             }
                         />
 
-                        <FormFooter action=image_upload submit_text="Upload image"/>
+                        <FormFooter action=image_upload submit_text="Upload image" />
                     </ActionForm>
                 </div>
-                <ImageUploadPreview obj_url/>
+                <ImageUploadPreview obj_url />
             </div>
         </fieldset>
     }
@@ -53,8 +53,8 @@ pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl Int
 #[component]
 pub fn ImageUploadPreview(obj_url: ReadSignal<Option<String>>) -> impl IntoView {
     let view = move || match obj_url.get() {
-        Some(url) => view! { <img src=url/> }.into_view(),
-        None => view! { <p>Upload preview</p> }.into_view(),
+        Some(url) => Either::Left(view! { <img src=url /> }),
+        None => Either::Right(view! { <p>Upload preview</p> }),
     };
     view! { <div class="ImageUploadPreview">{view}</div> }
 }

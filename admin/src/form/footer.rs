@@ -1,4 +1,4 @@
-use leptos::{prelude::*, text_prop::TextProp};
+use leptos::{either::Either, prelude::*, text_prop::TextProp};
 use serde::{de::DeserializeOwned, Serialize};
 use server_fn::{codec::PostUrl, ServerFn};
 
@@ -14,13 +14,13 @@ pub fn Pending(pending: ReadSignal<bool>) -> impl IntoView {
 }
 
 #[component]
-pub fn ResultAlert<T, E>(result: Result<T, E>) -> impl IntoView
+pub fn ResultAlert<T: 'static, E>(result: Result<T, E>) -> impl IntoView
 where
-    E: std::error::Error,
+    E: std::error::Error + 'static,
 {
     match result {
-        Ok(_) => view! { <AlertSuccess /> }.into_view(),
-        Err(e) => view! { <AlertDanger text=e.to_string() /> }.into_view(),
+        Ok(_) => Either::Left(view! { <AlertSuccess /> }),
+        Err(e) => Either::Right(view! { <AlertDanger text=e.to_string() /> }),
     }
 }
 
@@ -54,25 +54,28 @@ where
         Some(disabled) => disabled.get(),
         None => false,
     };
-
     view! {
         <footer>
             <input type="submit" value=submit_text.get() disabled=disabled />
             {move || {
                 if pending() {
-                    return view! { <progress></progress> }.into_view();
+                    return view! { <progress></progress> }.into_any();
                 }
-                match value() {
-                    None => ().into_view(),
+                match value.get() {
+                    None => ().into_any(),
                     Some(result) => {
-                        match result {
-                            Ok(result) => view! { <ResultAlert result /> }.into_view(),
-                            Err(e) => view! { <AlertDanger text=e.to_string() /> }.into_view(),
+                        {
+                            match result {
+                                Ok(result) => Either::Left(view! { <ResultAlert result=result /> }),
+                                Err(e) => {
+                                    Either::Right(view! { <AlertDanger text=e.to_string() /> })
+                                }
+                            }
                         }
+                            .into_any()
                     }
                 }
             }}
-
         </footer>
     }
 }

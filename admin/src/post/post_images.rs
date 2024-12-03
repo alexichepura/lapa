@@ -1,4 +1,4 @@
-use leptos::{html::Dialog, prelude::*};
+use leptos::{either::Either, html::Dialog, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -117,10 +117,10 @@ pub fn PostImagesView(
     });
 
     let edit_view = move || match editing() {
-        Some(image) => {
-            view! { <PostImageModalForm image set_editing image_delete image_update /> }.into_view()
-        }
-        None => ().into_view(),
+        Some(image) => Either::Left(
+            view! { <PostImageModalForm image set_editing image_delete image_update /> },
+        ),
+        None => Either::Right(()),
     };
 
     let order_pending = order_action.pending();
@@ -128,8 +128,8 @@ pub fn PostImagesView(
     let disabled = move || order_pending() || hero_pending();
 
     let no_images = move || match images_sorted().len() {
-        0 => view! { <p>No images were found.</p> }.into_view(),
-        _ => ().into_view(),
+        0 => Either::Left(view! { <p>No images were found.</p> }),
+        _ => Either::Right(()),
     };
 
     view! {
@@ -199,8 +199,8 @@ where
     let is_first = image.order == 0;
 
     let hero_view = match image.is_hero {
-        true => view! { <button disabled>Hero</button> }.into_view(),
-        false => view! { <button on:click=move |_| make_hero()>Make hero</button> }.into_view(),
+        true => Either::Left(view! { <button disabled>Hero</button> }),
+        false => Either::Right(view! { <button on:click=move |_| make_hero()>Make hero</button> }),
     };
 
     view! {

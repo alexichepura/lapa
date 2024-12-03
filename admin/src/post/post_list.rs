@@ -1,7 +1,7 @@
 use chrono::{DateTime, FixedOffset};
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use leptos_meta::Title;
-use leptos_router::A;
+use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -29,18 +29,22 @@ pub fn PostList() -> impl IntoView {
                     posts
                         .get()
                         .map(|posts| match posts {
-                            Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
+                            Err(e) => Either::Left(view! { <p>error {e.to_string()}</p> }),
                             Ok(posts) => {
-                                if posts.is_empty() {
-                                    view! { <p>No posts were found.</p> }.into_view()
-                                } else {
-                                    posts
-                                        .into_iter()
-                                        .map(|post| {
-                                            view! { <PostListItem post /> }
-                                        })
-                                        .collect_view()
-                                }
+                                Either::Right(
+                                    if posts.is_empty() {
+                                        Either::Left(view! { <p>No posts were found.</p> })
+                                    } else {
+                                        Either::Right(
+                                            posts
+                                                .into_iter()
+                                                .map(|post| {
+                                                    view! { <PostListItem post /> }
+                                                })
+                                                .collect_view(),
+                                        )
+                                    },
+                                )
                             }
                         })
                 }}
@@ -64,9 +68,9 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
     };
     let hero_view = match post.hero {
         Some(id) => {
-            view! { <img title="Post hero" src=img_url_small(&id) width="36" /> }.into_view()
+            Either::Left(view! { <img title="Post hero" src=img_url_small(&id) width="36" /> })
         }
-        None => view! { <div title="No post hero">?</div> }.into_view(),
+        None => Either::Right(view! { <div title="No post hero">?</div> }),
     };
     view! {
         <li class="PostListItem">
@@ -75,7 +79,7 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
                     {published.local}
                 </div>
                 {hero_view}
-                <span title="Post title">{&post.title}</span>
+                <span title="Post title">{post.title}</span>
                 <div title="Created at" class="PostListItem-created">
                     {created.local}
                 </div>

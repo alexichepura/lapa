@@ -1,5 +1,5 @@
-use leptos::prelude::*;
-use leptos_router::A;
+use leptos::{either::Either, prelude::*};
+use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -20,8 +20,8 @@ pub fn PostList() -> impl IntoView {
                 posts
                     .get()
                     .map(|posts| match posts {
-                        Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
-                        Ok(posts) => view! { <PostListView posts /> }.into_view(),
+                        Err(e) => Either::Left(view! { <p>error {e.to_string()}</p> }),
+                        Ok(posts) => Either::Right(view! { <PostListView posts /> }),
                     })
             }}
 
@@ -32,14 +32,16 @@ pub fn PostList() -> impl IntoView {
 #[component]
 pub fn PostListView(posts: Vec<PostListItem>) -> impl IntoView {
     let list = if posts.is_empty() {
-        view! { <p>No posts were found.</p> }.into_view()
+        Either::Left(view! { <p>No posts were found.</p> })
     } else {
-        posts
-            .into_iter()
-            .map(|post| {
-                view! { <PostListItem post /> }
-            })
-            .collect_view()
+        Either::Right(
+            posts
+                .into_iter()
+                .map(|post| {
+                    view! { <PostListItem post /> }
+                })
+                .collect_view(),
+        )
     };
     view! { <div class="PostList">{list}</div> }
 }
@@ -47,11 +49,11 @@ pub fn PostListView(posts: Vec<PostListItem>) -> impl IntoView {
 #[component]
 pub fn PostListItem(post: PostListItem) -> impl IntoView {
     let image_view = match post.hero {
-        Some(image) => view! { <Thumb image /> }.into_view(),
-        None => ().into_view(),
+        Some(image) => Either::Left(view! { <Thumb image /> }),
+        None => Either::Right(()),
     };
     let href = format!("/post/{}", post.slug);
-    view! { <A href>{image_view} <p>{&post.title}</p></A> }
+    view! { <A href>{image_view} <p>{post.title}</p></A> }
 }
 
 #[server(GetPosts, "/api")]

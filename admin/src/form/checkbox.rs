@@ -1,4 +1,4 @@
-use leptos::{html, prelude::*, text_prop::TextProp};
+use leptos::{either::Either, html, prelude::*, text_prop::TextProp};
 
 #[component]
 pub fn Checkbox(
@@ -23,9 +23,9 @@ pub fn Checkbox(
     //     })
     // };
 
-    let label: View = match label {
-        Some(label) => view! { <span>{label.get().into_owned()}</span> }.into_view(),
-        None => ().into_view(),
+    let label = match label {
+        Some(label) => Either::Left(view! { <span>{label.get().into_owned()}</span> }),
+        None => Either::Right(()),
     };
 
     view! { <label>{inner} {label}</label> }

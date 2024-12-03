@@ -1,5 +1,5 @@
-use leptos::prelude::*;
-use leptos_router::*;
+use leptos::{either::Either, prelude::*};
+use leptos_router::{hooks::use_params, params::Params};
 
 use crate::{
     post::{PostError, PostForm, PostFormData},
@@ -60,8 +60,8 @@ pub fn PostPage() -> impl IntoView {
             {move || {
                 post.get()
                     .map(|post| match post {
-                        Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
-                        Ok(post) => view! { <PostForm post=post /> }.into_view(),
+                        Err(e) => Either::Left(view! { <p>{e.to_string()}</p> }),
+                        Ok(post) => Either::Right(view! { <PostForm post=post /> }),
                     })
             }}
 

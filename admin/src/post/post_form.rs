@@ -1,5 +1,5 @@
 use chrono::{DateTime, FixedOffset, Utc};
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
 
@@ -74,25 +74,38 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
         None => "".to_string(),
     };
     let id_input = match post.id.clone() {
-        Some(id) => view! { <input type="hidden" name="id" value=id /> }.into_view(),
-        None => ().into_view(),
+        Some(id) => Either::Left(view! { <input type="hidden" name="id" value=id /> }),
+        None => Either::Right(()),
     };
     let gallery_view = match post.id.clone() {
-        Some(id) => view! { <PostImages post_id=id /> }.into_view(),
-        None => view! { <p>Gallery is not available for not saved post</p> }.into_view(),
+        Some(id) => Either::Left(view! { <PostImages post_id=id /> }),
+        None => Either::Right(view! { <p>Gallery is not available for not saved post</p> }),
     };
     let delete_view = match post.id.clone() {
-        Some(id) => view! { <PostDeleteForm id=id.clone() slug /> }.into_view(),
-        None => ().into_view(),
+        Some(id) => Either::Left(view! { <PostDeleteForm id=id.clone() slug /> }),
+        None => Either::Right(()),
     };
 
     let created = datetime_to_strings(post.created_at);
     let site_url = move || use_site_url();
     let href = move || format!("{}/post/{}", &site_url(), &slug());
 
+    let memo_fn = move |_| match published_at() {
+        Some(published_at) => Either::Left(datetime_to_string(published_at).into_any()),
+        None => Either::Right(().into_any()),
+    };
+    // let published_at_utc_string = create_memo(memo_fn);
+    // let published_at_utc_string = Memo::new(move |_| match published_at() {
+    //     Some(published_at) => datetime_to_string(published_at).into_any(),
+    //     None => ().into_any(),
+    // });
+    // let published_at_utc_string = create_memo(move |_| match published_at() {
+    //     Some(published_at) => Either::Left(datetime_to_string(published_at).into_any()),
+    //     None => Either::Right(().into_any()),
+    // });
     let published_at_utc_string = create_memo(move |_| match published_at() {
-        Some(published_at) => datetime_to_string(published_at).into_view(),
-        None => ().into_view(),
+        Some(published_at) => Either::Left(datetime_to_string(published_at)),
+        None => Either::Right(()),
     });
     view! {
         <Title text=move || format!("Post: {}", title()) />
@@ -154,12 +167,9 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                             <PublishedAt published_at set_published_at />
                             <label>
                                 <div>Text</div>
-                                <textarea
-                                    name="text"
-                                    value=&post.text
-                                    prop:value=post.text
-                                    rows="6"
-                                ></textarea>
+                                <textarea name="text" rows="6">
+                                    {post.text}
+                                </textarea>
                             </label>
                         </div>
                     </div>

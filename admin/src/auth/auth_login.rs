@@ -3,7 +3,7 @@ use crate::{
     auth::use_user_signal,
     form::{Checkbox, FormFooter, Input},
 };
-use leptos::prelude::*;
+use leptos::{either::Either, prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -26,8 +26,8 @@ pub fn Login() -> impl IntoView {
         });
     });
     let skip_redirect_view = move || match is_skip_redirect() {
-        true => view! { <input type="hidden" name="skip_redirect" value="1" /> }.into_view(),
-        false => ().into_view(),
+        true => Either::Left(view! { <input type="hidden" name="skip_redirect" value="1" /> }),
+        false => Either::Right(()),
     };
     Effect::new(move |_| {
         if let Some(v) = value() {

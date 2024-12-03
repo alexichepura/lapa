@@ -1,4 +1,4 @@
-use leptos::{html, prelude::*, text_prop::TextProp};
+use leptos::{either::Either, html, prelude::*, text_prop::TextProp};
 
 #[component]
 pub fn FileField(
@@ -13,8 +13,8 @@ pub fn FileField(
         .autocomplete("off");
 
     let label = match label {
-        Some(label) => view! { <span>{label.get().into_owned()}</span> }.into_view(),
-        None => ().into_view(),
+        Some(label) => Either::Left(view! { <span>{label.get().into_owned()}</span> }),
+        None => Either::Right(()),
     };
 
     view! { <label>{label} {inner}</label> }
