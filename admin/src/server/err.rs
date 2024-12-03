@@ -1,5 +1,5 @@
 use http::status::StatusCode;
-use leptos::use_context;
+use leptos::prelude::use_context;
 use leptos_axum::ResponseOptions;
 
 pub fn use_response() -> ResponseOptions {

@@ -1,4 +1,4 @@
-use leptos::use_context;
+use leptos::prelude::use_context;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]

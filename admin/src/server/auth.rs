@@ -1,6 +1,6 @@
 use axum_session_auth::Authentication;
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
-use leptos::{use_context, ServerFnError};
+use leptos::prelude::{use_context, ServerFnError};
 
 use super::SessionPrismaPool;
 use crate::auth::User;

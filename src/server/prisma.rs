@@ -1,4 +1,4 @@
-use leptos::{use_context, ServerFnError};
+use leptos::prelude::{use_context, ServerFnError};
 use prisma_client::db;
 use std::sync::Arc;
 
@@ -12,8 +12,8 @@ pub async fn init_prisma_client() -> ArcPrisma {
         prisma_client_builder.build().await
     };
     let prisma_client = Arc::new(client.unwrap());
-    #[cfg(debug)]
-    prisma_client._db_push(false).await.unwrap();
+    // #[cfg(debug_assertions)]
+    // prisma_client._db_push(false).await.unwrap();
     prisma_client
 }
 
