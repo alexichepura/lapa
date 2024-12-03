@@ -16,7 +16,6 @@ pub fn App(settings: SettingsCx) -> impl IntoView {
     let formatter = |text| format!("{text} - LAPA");
 
     view! {
-        <Html lang="en" />
         <Stylesheet id="leptos" href="/pkg/site.css" />
         <Title formatter />
         <Favicons />

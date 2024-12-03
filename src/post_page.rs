@@ -81,12 +81,12 @@ pub fn PostView(post: PostData) -> impl IntoView {
     Effect::new(move |old| {
         let current = dialog_open();
         if let Some(_id) = current.clone() {
-            let el = dialog_element().expect("<dialog> to exist");
+            let el = dialog_element.get().expect("<dialog> to exist");
             let _modal_result = el.show_modal();
         } else {
             if old.is_some() {
                 // calling ref reruns effect, so need to check old value
-                let el = dialog_element();
+                let el = dialog_element.get();
                 if let Some(el) = el {
                     let _modal_result = el.close();
                 }
