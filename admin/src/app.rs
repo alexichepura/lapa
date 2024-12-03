@@ -1,3 +1,7 @@
+use components::{
+    Outlet, ParentRoute, ProtectedParentRoute, ProtectedRoute, Route, Router, Routes,
+    RoutingProgress,
+};
 use hooks::use_navigate;
 use leptos::prelude::*;
 use leptos_meta::*;
@@ -37,7 +41,7 @@ pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)
-            class="RoutingProgress"
+            class:RoutingProgress
         />
         <Router set_is_routing>
             <AdminRoutes user_signal />
@@ -65,25 +69,27 @@ pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
         user
     });
     view! {
-        <Routes>
+        <Routes fallback=|| "Page not found">
             <ProtectedRoute
-                path="/login"
-                redirect_path="/"
-                condition=move || user_signal.get().is_none()
+                path=StaticSegment("/login")
+                redirect_path=|| "/"
+                condition=move || Some(user_signal.get().is_none())
                 view=Login
             />
-            <ProtectedRoute
-                path="/*"
-                redirect_path="/login"
-                condition=move || user_signal.get().is_some()
+            <ProtectedParentRoute
+                path=StaticSegment("")
+                redirect_path=|| "/login"
+                condition=move || Some(user_signal.get().is_some())
                 view=LayoutWithUser
             >
-                <Route path="/" view=HomePage />
-                <Route path="/posts" view=PostList />
-                <Route path="/posts/new" view=PostNew />
-                <Route path="/posts/:id" view=PostPage />
-                <Route path="/settings" view=Settings />
-            </ProtectedRoute>
+                <Route path=StaticSegment("/") view=HomePage />
+                <Route path=StaticSegment("settings") view=Settings />
+                <Route path=StaticSegment("posts") view=PostList />
+                <ParentRoute path=StaticSegment("posts") view=|| view! { <Outlet /> }>
+                    <Route path=StaticSegment("new") view=PostNew />
+                    <Route path=ParamSegment("id") view=PostPage />
+                </ParentRoute>
+            </ProtectedParentRoute>
         </Routes>
     }
 }

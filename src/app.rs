@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::*;
+use leptos_router::components::{Router, RoutingProgress, A};
 
 use crate::{routes::FrontRoutes, settings::SettingsCx};
 
@@ -16,15 +16,15 @@ pub fn App(settings: SettingsCx) -> impl IntoView {
     let formatter = |text| format!("{text} - LAPA");
 
     view! {
-        <Html lang="en"/>
-        <Stylesheet id="leptos" href="/pkg/site.css"/>
-        <Title formatter/>
-        <Favicons/>
+        <Html lang="en" />
+        <Stylesheet id="leptos" href="/pkg/site.css" />
+        <Title formatter />
+        <Favicons />
         <Script>{settings_script}</Script>
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)
-            class="RoutingProgress"
+            class:RoutingProgress
         />
         <Router set_is_routing>
             <header>
@@ -36,7 +36,7 @@ pub fn App(settings: SettingsCx) -> impl IntoView {
                 </section>
             </header>
             <main>
-                <FrontRoutes/>
+                <FrontRoutes />
             </main>
         </Router>
     }
@@ -45,10 +45,10 @@ pub fn App(settings: SettingsCx) -> impl IntoView {
 #[component]
 pub fn Favicons() -> impl IntoView {
     view! {
-        <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico"/>
-        <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png"/>
-        <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png"/>
-        <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
-        <Link rel="manifest" href="/site.webmanifest"/>
+        <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico" />
+        <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <Link rel="manifest" href="/site.webmanifest" />
     }
 }

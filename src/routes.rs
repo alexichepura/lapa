@@ -1,22 +1,25 @@
 use leptos::prelude::*;
-use leptos_router::*;
+use leptos_router::{
+    components::{Route, Router, Routes},
+    ParamSegment, StaticSegment,
+};
 
 use crate::{home::HomePage, post_page::PostPage};
 
 #[component]
 pub fn FrontRoutes() -> impl IntoView {
     view! {
-        <Routes>
+        <Routes fallback=|| "Page not found">
             <Route
-                path=""
+                path=StaticSegment("")
                 view=|| {
-                    view! { <HomePage/> }
+                    view! { <HomePage /> }
                 }
             />
             <Route
-                path="/post/:slug"
+                path=(StaticSegment("post"), ParamSegment("slug"))
                 view=|| {
-                    view! { <PostPage/> }
+                    view! { <PostPage /> }
                 }
             />
         </Routes>
@@ -28,7 +31,7 @@ pub fn GenerateRouteList() -> impl IntoView {
     leptos_meta::provide_meta_context();
     view! {
         <Router>
-            <FrontRoutes/>
+            <FrontRoutes />
         </Router>
     }
 }
