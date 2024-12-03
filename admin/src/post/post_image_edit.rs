@@ -12,14 +12,12 @@ pub struct ImageEditData {
     pub alt: String,
 }
 pub type ImageEditSignal = Option<ImageEditData>;
-pub type ImageDeleteAction = Action<ImageDelete, Result<ImageDeleteResult, ServerFnError>>;
-pub type ImageUpdateAction = Action<ImageUpdate, Result<ImageUpdateResult, ServerFnError>>;
 #[component]
 pub fn PostImageModalForm(
     image: ImageEditData,
     set_editing: WriteSignal<ImageEditSignal>,
-    image_delete: ImageDeleteAction,
-    image_update: ImageUpdateAction,
+    image_delete: ServerAction<ImageDelete>,
+    image_update: ServerAction<ImageUpdate>,
 ) -> impl IntoView {
     let pending = image_update.pending();
     let delete_rw = image_delete.value();
@@ -41,7 +39,7 @@ pub fn PostImageModalForm(
     let on_delete = move |_| {
         image_delete.dispatch(ImageDelete {
             id: id_delete.clone(),
-        })
+        });
     };
 
     view! {

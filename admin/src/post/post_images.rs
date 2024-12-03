@@ -5,8 +5,7 @@ use crate::{
     form::FormFooter,
     image::{img_url_small, srcset_small, ImageLoadError},
     post::{
-        ImageDelete, ImageDeleteAction, ImageEditData, ImageEditSignal, ImageUpdate,
-        ImageUpdateAction, ImageUpload, PostImageModalForm,
+        ImageDelete, ImageEditData, ImageEditSignal, ImageUpdate, ImageUpload, PostImageModalForm,
     },
     util::Loading,
 };
@@ -23,7 +22,7 @@ pub struct PostImageData {
 pub fn PostImages(post_id: String) -> impl IntoView {
     let post_id_clone = post_id.clone();
 
-    let image_delete = Resource::<ImageDelete>::new_blocking();
+    let image_delete = ServerAction::<ImageDelete>::new();
     let image_upload = ServerAction::<ImageUpload>::new();
     let image_update = ServerAction::<ImageUpdate>::new();
     let order_action = ServerAction::<ImagesOrderUpdate>::new();
@@ -52,18 +51,19 @@ pub fn PostImages(post_id: String) -> impl IntoView {
                 images
                     .get()
                     .map(|images| match images {
-                        Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
+                        Err(e) => Either::Left(view! { <p>error {e.to_string()}</p> }),
                         Ok(images) => {
-                            view! {
-                                <PostImagesView
-                                    images
-                                    image_delete
-                                    image_update
-                                    order_action
-                                    hero_action
-                                />
-                            }
-                                .into_view()
+                            Either::Right(
+                                view! {
+                                    <PostImagesView
+                                        images
+                                        image_delete
+                                        image_update
+                                        order_action
+                                        hero_action
+                                    />
+                                },
+                            )
                         }
                     })
             }}
@@ -75,10 +75,10 @@ pub fn PostImages(post_id: String) -> impl IntoView {
 #[component]
 pub fn PostImagesView(
     images: Vec<PostImageData>,
-    image_delete: ImageDeleteAction,
-    image_update: ImageUpdateAction,
-    order_action: ImagesOrderUpdateAction,
-    hero_action: ImageMakeHeroAction,
+    image_delete: ServerAction<ImageDelete>,
+    image_update: ServerAction<ImageUpdate>,
+    order_action: ServerAction<ImagesOrderUpdate>,
+    hero_action: ServerAction<ImageMakeHero>,
 ) -> impl IntoView {
     let dialog_element: NodeRef<Dialog> = NodeRef::new();
     let (editing, set_editing) = signal::<ImageEditSignal>(None);
@@ -261,8 +261,6 @@ pub async fn get_images(post_id: String) -> Result<Vec<PostImageData>, ServerFnE
 }
 
 pub type ImagesOrderUpdateResult = Result<(), ImageLoadError>;
-pub type ImagesOrderUpdateAction =
-    Action<ImagesOrderUpdate, Result<ImagesOrderUpdateResult, ServerFnError>>;
 #[server(ImagesOrderUpdate, "/api")]
 pub async fn images_order_update(
     ids: Vec<String>,
@@ -294,7 +292,6 @@ pub struct ImageMakeHeroData {
     pub not_hero: Option<String>,
 }
 pub type ImageMakeHeroResult = Result<ImageMakeHeroData, ImageLoadError>;
-pub type ImageMakeHeroAction = Action<ImageMakeHero, Result<ImageMakeHeroResult, ServerFnError>>;
 #[server(ImageMakeHero, "/api")]
 pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFnError> {
     use prisma_client::db;

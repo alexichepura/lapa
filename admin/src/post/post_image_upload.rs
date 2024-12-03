@@ -3,10 +3,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{form::FormFooter, image::ImageUploadError, upload::InputImage};
 
-pub type ImageUploadAction = Action<ImageUpload, Result<ImageUploadResult, ServerFnError>>;
-
 #[component]
-pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl IntoView {
+pub fn ImageUpload(post_id: String, image_upload: ServerAction<ImageUpload>) -> impl IntoView {
     let pending = image_upload.pending();
     let (_file_name, set_file_name) = signal(None::<String>);
     let (save_byte_vec, set_save_byte_vec) = signal(None::<Vec<u8>>);
