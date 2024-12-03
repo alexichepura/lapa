@@ -33,7 +33,7 @@ pub fn hydrate() {
 
     tracing::info!("SETTINGS: {:?}", settings);
 
-    leptos::mount_to_body(move || {
-        view! { <App settings=settings.clone()/> }
+    hydrate_body(move || {
+        view! { <App settings=settings.clone() /> }
     });
 }
