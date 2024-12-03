@@ -24,7 +24,7 @@ pub fn PostDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
     let (input_slug, set_input_slug) = create_signal::<String>("".to_string());
     let disabled = create_memo(move |_| input_slug() != slug());
     view! {
-        <fieldset disabled=move || pending()>
+        <fieldset prop:disabled=move || pending()>
             <legend>Danger zone. Delete post.</legend>
             <ActionForm action=post_delete>
                 <input type="hidden" name="id" value=id.clone() />

@@ -14,7 +14,7 @@ pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl Int
     let (_save_file, set_save_file) = create_signal(None::<String>);
     let (obj_url, set_obj_url) = create_signal(None::<String>);
     view! {
-        <fieldset disabled=move || pending()>
+        <fieldset prop:disabled=move || pending()>
             <legend>Image upload</legend>
             <div class="Grid-fluid-2">
                 <div>

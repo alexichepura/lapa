@@ -20,7 +20,7 @@ pub fn SettingsImagesForm(settings: SettingsImages) -> impl IntoView {
     let pending = settings_upsert.pending();
 
     view! {
-        <fieldset disabled=move || pending()>
+        <fieldset prop:disabled=move || pending()>
             <legend>Images</legend>
             <ActionForm action=settings_upsert>
                 <div class="Grid-fluid-2">

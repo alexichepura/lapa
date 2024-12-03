@@ -133,7 +133,7 @@ pub fn PostImagesView(
     };
 
     view! {
-        <fieldset disabled=disabled>
+        <fieldset prop:disabled=disabled>
             <legend>Images</legend>
             <ActionForm action=order_action>
                 <For

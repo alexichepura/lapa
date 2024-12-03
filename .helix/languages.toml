@@ -1,8 +1,8 @@
 [[language]]
 name = "rust"
 formatter = { command = "leptosfmt", args = ["--stdin", "--rustfmt"] }
-[language-server.rust-analyzer.config]
-procMacro = { ignored = { leptos_macro = ["server"] } }
+# [language-server.rust-analyzer.config]
+# procMacro = { ignored = { leptos_macro = ["server"] } }
 # [language-server.rust-analyzer.config.check]
 # command = "clippy"
 [language-server.rust-analyzer.config.cargo]

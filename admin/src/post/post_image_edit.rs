@@ -51,7 +51,7 @@ pub fn PostImageModalForm(
             <button on:click=on_delete>Delete</button>
             <hr />
             <ActionForm action=image_update>
-                <fieldset disabled=move || pending()>
+                <fieldset prop:disabled=move || pending()>
                     <input type="hidden" name="id" value=image.id.clone() />
                     <Input name="alt" label="Alt" value=image.alt.clone() />
                     <FormFooter action=image_update submit_text="Update image data" />

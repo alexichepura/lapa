@@ -8,7 +8,7 @@ pub fn ImagesConvertView() -> impl IntoView {
     let pending = images_convert.pending();
 
     view! {
-        <fieldset disabled=move || pending()>
+        <fieldset prop:disabled=move || pending()>
             <legend>Images convert</legend>
             <ActionForm action=images_convert>
                 <FormFooter action=images_convert submit_text="Reconvert images" />

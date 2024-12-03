@@ -119,7 +119,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                 </dl>
             </header>
             <ActionForm action=post_upsert>
-                {id_input} <fieldset disabled=move || pending()>
+                {id_input} <fieldset prop:disabled=move || pending()>
                     <legend>Data</legend>
                     <div class="Grid-fluid-2">
                         <div>
