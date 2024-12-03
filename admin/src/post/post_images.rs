@@ -23,7 +23,7 @@ pub struct PostImageData {
 pub fn PostImages(post_id: String) -> impl IntoView {
     let post_id_clone = post_id.clone();
 
-    let image_delete = Resource::new_blocking::<ImageDelete>();
+    let image_delete = Resource::<ImageDelete>::new_blocking();
     let image_upload = ServerAction::<ImageUpload>::new();
     let image_update = ServerAction::<ImageUpdate>::new();
     let order_action = ServerAction::<ImagesOrderUpdate>::new();
@@ -80,7 +80,7 @@ pub fn PostImagesView(
     order_action: ImagesOrderUpdateAction,
     hero_action: ImageMakeHeroAction,
 ) -> impl IntoView {
-    let dialog_element: NodeRef<Dialog> = create_node_ref();
+    let dialog_element: NodeRef<Dialog> = NodeRef::new();
     let (editing, set_editing) = create_signal::<ImageEditSignal>(None);
 
     let (images_sorted, set_images_sorted) = create_signal(images);

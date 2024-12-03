@@ -75,7 +75,7 @@ pub fn PostPage() -> impl IntoView {
 
 #[component]
 pub fn PostView(post: PostData) -> impl IntoView {
-    let dialog_element: NodeRef<Dialog> = create_node_ref();
+    let dialog_element: NodeRef<Dialog> = NodeRef::new();
     let (dialog_open, set_dialog_open) = create_signal::<DialogSignal>(None);
 
     Effect::new(move |old| {
