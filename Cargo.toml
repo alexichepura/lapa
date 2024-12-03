@@ -14,8 +14,8 @@ members = ["lib", "admin", "cli", "prisma_cli", "prisma_client"]
 [workspace.dependencies]
 lib = { path = "./lib" }
 axum = { version = "0.7.4", features = ["macros", "tracing"] }
-axum_session = { version = "0.14.4", default-features = false }
-axum_session_auth = { version = "0.14.1", default-features = false }
+axum_session = { version = "0.12.4", default-features = false }
+axum_session_auth = { version = "0.12.1", default-features = false }
 bcrypt = { version = "0.15" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
