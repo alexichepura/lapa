@@ -7,7 +7,7 @@ use crate::{
     post::{
         ImageDelete, ImageEditData, ImageEditSignal, ImageUpdate, ImageUpload, PostImageModalForm,
     },
-    util::Loading,
+    util::{AlertDanger, Loading},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -47,27 +47,24 @@ pub fn PostImages(post_id: String) -> impl IntoView {
         <Transition fallback=move || {
             view! { <Loading /> }
         }>
-            {move || {
-                images
-                    .get()
-                    .map(|images| match images {
-                        Err(e) => Either::Left(view! { <p>error {e.to_string()}</p> }),
-                        Ok(images) => {
-                            Either::Right(
-                                view! {
-                                    <PostImagesView
-                                        images
-                                        image_delete
-                                        image_update
-                                        order_action
-                                        hero_action
-                                    />
-                                },
-                            )
-                        }
-                    })
-            }}
-
+            {move || Suspend::new(async move {
+                match images.await {
+                    Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+                    Ok(images) => {
+                        Either::Right(
+                            view! {
+                                <PostImagesView
+                                    images
+                                    image_delete
+                                    image_update
+                                    order_action
+                                    hero_action
+                                />
+                            },
+                        )
+                    }
+                }
+            })}
         </Transition>
     }
 }

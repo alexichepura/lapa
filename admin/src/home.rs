@@ -2,7 +2,7 @@ use leptos::{either::Either, prelude::*};
 use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
 
-use crate::util::Loading;
+use crate::util::{AlertDanger, Loading};
 
 #[component]
 pub fn HomePage() -> impl IntoView {
@@ -30,15 +30,12 @@ pub fn StatsTableTransition(resource: StatsResource, caption: &'static str) -> i
         <Transition fallback=move || {
             view! { <Loading /> }
         }>
-            {move || {
-                resource
-                    .get()
-                    .map(|stats| match stats {
-                        Err(e) => Either::Left(view! { <p>error {e.to_string()}</p> }),
-                        Ok(stats) => Either::Right(view! { <StatsTable caption list=stats.list /> }),
-                    })
-            }}
-
+            {move || Suspend::new(async move {
+                match resource.await {
+                    Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+                    Ok(stats) => Either::Right(view! { <StatsTable caption list=stats.list /> }),
+                }
+            })}
         </Transition>
     }
 }
