@@ -1,9 +1,9 @@
-use leptos::{either::Either, prelude::*};
+use leptos::{either::EitherOf3, prelude::*};
 use leptos_router::{hooks::use_params, params::Params};
 
 use crate::{
     post::{PostError, PostForm, PostFormData},
-    util::Loading,
+    util::{AlertDanger, Loading},
 };
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
@@ -44,11 +44,8 @@ pub fn PostPage() -> impl IntoView {
         move || id(),
         move |id| async move {
             match id {
-                Err(e) => Err(e),
-                Ok(id) => get_post(id)
-                    .await
-                    .map_err(|_| PostError::ServerError)
-                    .flatten(),
+                Err(e) => Ok(Err(e)),
+                Ok(id) => get_post(id).await,
             }
         },
     );
@@ -57,14 +54,13 @@ pub fn PostPage() -> impl IntoView {
         <Suspense fallback=move || {
             view! { <Loading /> }
         }>
-            {move || {
-                post.get()
-                    .map(|post| match post {
-                        Err(e) => Either::Left(view! { <p>{e.to_string()}</p> }),
-                        Ok(post) => Either::Right(view! { <PostForm post=post /> }),
-                    })
-            }}
-
+            {move || Suspend::new(async move {
+                match post.await {
+                    Ok(Ok(post)) => EitherOf3::A(view! { <PostForm post=post /> }),
+                    Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
+                    Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
+                }
+            })}
         </Suspense>
     }
 }
@@ -80,19 +76,18 @@ pub async fn get_post(id: String) -> Result<Result<PostFormData, PostError>, Ser
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;
 
-    Ok(match post {
-        Some(post) => Ok(PostFormData {
-            id: Some(post.id),
-            created_at: post.created_at,
-            published_at: post.published_at,
-            slug: post.slug,
-            title: post.title,
-            description: post.description,
-            text: post.text,
-        }),
-        None => {
-            crate::server::serverr_404();
-            Err(PostError::NotFound)
-        }
-    })
+    let Some(post) = post else {
+        crate::server::serverr_404();
+        return Ok(Err(PostError::NotFound));
+    };
+    let post_data = PostFormData {
+        id: Some(post.id),
+        created_at: post.created_at,
+        published_at: post.published_at,
+        slug: post.slug,
+        title: post.title,
+        description: post.description,
+        text: post.text,
+    };
+    Ok(Ok(post_data))
 }

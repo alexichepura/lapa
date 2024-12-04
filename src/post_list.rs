@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     img::{ImgData, Thumb},
-    util::Loading,
+    util::{AlertDanger, Loading},
 };
 
 #[component]
@@ -16,15 +16,12 @@ pub fn PostList() -> impl IntoView {
         <Suspense fallback=move || {
             view! { <Loading /> }
         }>
-            {move || {
-                posts
-                    .get()
-                    .map(|posts| match posts {
-                        Err(e) => Either::Left(view! { <p>error {e.to_string()}</p> }),
-                        Ok(posts) => Either::Right(view! { <PostListView posts /> }),
-                    })
-            }}
-
+            {move || Suspend::new(async move {
+                match posts.await {
+                    Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+                    Ok(posts) => Either::Right(view! { <PostListView posts /> }),
+                }
+            })}
         </Suspense>
     }
 }

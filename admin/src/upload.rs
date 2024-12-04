@@ -1,4 +1,4 @@
-use leptos::{html, prelude::*, task::spawn_local};
+use leptos::{html, prelude::*};
 
 #[component]
 pub(crate) fn InputImage(
@@ -19,7 +19,7 @@ pub(crate) fn InputImage(
 
             let file_blob_promise = js_sys::Promise::resolve(&file.array_buffer());
             set_file_name(Some(file.name()));
-            spawn_local(async move {
+            leptos::task::spawn_local(async move {
                 let bytes = wasm_bindgen_futures::JsFuture::from(file_blob_promise)
                     .await
                     .unwrap();

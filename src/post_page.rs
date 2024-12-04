@@ -1,4 +1,8 @@
-use leptos::{either::Either, html::Dialog, prelude::*};
+use leptos::{
+    either::{Either, EitherOf3},
+    html::Dialog,
+    prelude::*,
+};
 use leptos_meta::{Meta, Title};
 use leptos_router::{hooks::use_params, params::Params};
 use serde::{Deserialize, Serialize};
@@ -7,7 +11,7 @@ use thiserror::Error;
 use crate::{
     img::{img_url_large, img_url_large_retina, srcset_large},
     settings::{use_settings, use_site_url},
-    util::{Loading, ParagraphsByMultiline},
+    util::{AlertDanger, Loading, ParagraphsByMultiline},
 };
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
@@ -49,11 +53,8 @@ pub fn PostPage() -> impl IntoView {
 
     let post = Resource::new_blocking(slug, move |slug| async move {
         match slug {
-            Err(e) => Err(e),
-            Ok(slug) => get_post(slug)
-                .await
-                .map_err(|_| PostError::ServerError)
-                .flatten(),
+            Err(e) => Ok(Err(e)),
+            Ok(slug) => get_post(slug).await,
         }
     });
 
@@ -61,14 +62,13 @@ pub fn PostPage() -> impl IntoView {
         <Suspense fallback=move || {
             view! { <Loading /> }
         }>
-            {move || {
-                post.get()
-                    .map(|post| match post {
-                        Err(e) => Either::Left(view! { <p>{e.to_string()}</p> }),
-                        Ok(post) => Either::Right(view! { <PostView post=post /> }),
-                    })
-            }}
-
+            {move || Suspend::new(async move {
+                match post.await {
+                    Ok(Ok(post)) => EitherOf3::A(view! { <PostView post=post /> }),
+                    Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
+                    Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
+                }
+            })}
         </Suspense>
     }
 }
@@ -204,51 +204,42 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;
 
-    let result: Option<PostData> = match post {
-        Some(post) => {
-            let published = match post.published_at {
-                Some(published_at) => {
-                    let now = chrono::Utc::now().fixed_offset();
-                    published_at < now
-                }
-                None => false,
-            };
-            match published {
-                true => {
-                    let hero = post
-                        .images
-                        .clone()
-                        .into_iter()
-                        .find(|img| img.is_hero)
-                        .map(|img| img.id);
-                    Some(PostData {
-                        id: post.id,
-                        slug: post.slug,
-                        title: post.title,
-                        description: post.description,
-                        text: post.text,
-                        hero,
-                        images: post
-                            .images
-                            .iter()
-                            .map(|img| ImgData {
-                                id: img.id.clone(),
-                                alt: img.alt.clone(),
-                            })
-                            .collect(),
-                    })
-                }
-                false => None,
-            }
-        }
-        None => None,
+    let Some(post) = post else {
+        crate::server::serverr_404();
+        return Ok(Err(PostError::NotFound));
+    };
+    let Some(published) = post.published_at else {
+        crate::server::serverr_404();
+        return Ok(Err(PostError::NotFound));
+    };
+    let now = chrono::Utc::now().fixed_offset();
+    if published < now {
+        crate::server::serverr_404();
+        return Ok(Err(PostError::NotFound));
+    }
+    let hero = post
+        .images
+        .clone()
+        .into_iter()
+        .find(|img| img.is_hero)
+        .map(|img| img.id);
+
+    let post_data = PostData {
+        id: post.id,
+        slug: post.slug,
+        title: post.title,
+        description: post.description,
+        text: post.text,
+        hero,
+        images: post
+            .images
+            .iter()
+            .map(|img| ImgData {
+                id: img.id.clone(),
+                alt: img.alt.clone(),
+            })
+            .collect(),
     };
 
-    match result {
-        Some(post) => Ok(Ok(post)),
-        None => {
-            crate::server::serverr_404();
-            Ok(Err(PostError::NotFound))
-        }
-    }
+    Ok(Ok(post_data))
 }

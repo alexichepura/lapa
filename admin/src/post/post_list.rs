@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     image::img_url_small,
-    util::{datetime_to_strings, DateTimeStrings, Loading},
+    util::{datetime_to_strings, AlertDanger, DateTimeStrings, Loading},
 };
 
 #[component]
@@ -25,32 +25,29 @@ pub fn PostList() -> impl IntoView {
             <Suspense fallback=move || {
                 view! { <Loading /> }
             }>
-                {move || {
-                    posts
-                        .get()
-                        .map(|posts| match posts {
-                            Err(e) => Either::Left(view! { <p>error {e.to_string()}</p> }),
-                            Ok(posts) => {
-                                Either::Right(
-                                    if posts.is_empty() {
-                                        Either::Left(view! { <p>No posts were found.</p> })
-                                    } else {
-                                        Either::Right(
-                                            posts
-                                                .into_iter()
-                                                .map(|post| {
-                                                    view! { <PostListItem post /> }
-                                                })
-                                                .collect_view(),
-                                        )
-                                    },
-                                )
-                            }
-                        })
-                }}
-
+                {move || Suspend::new(async move {
+                    match posts.await {
+                        Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+                        Ok(posts) => Either::Right(view! { <PostListItems posts /> }),
+                    }
+                })}
             </Suspense>
         </ul>
+    }
+}
+#[component]
+pub fn PostListItems(posts: Vec<PostListItem>) -> impl IntoView {
+    if posts.is_empty() {
+        Either::Left(view! { <p>No posts were found.</p> })
+    } else {
+        Either::Right(
+            posts
+                .into_iter()
+                .map(|post| {
+                    view! { <PostListItem post /> }
+                })
+                .collect_view(),
+        )
     }
 }
 

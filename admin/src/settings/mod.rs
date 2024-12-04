@@ -133,7 +133,6 @@ type SettingsResult = Result<SettingsData, SettingsError>;
 #[server(GetSettings, "/api")]
 pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
     let prisma_client = crate::server::use_prisma()?;
-
     let settings = prisma_client
         .settings()
         .find_first(vec![])
@@ -141,19 +140,19 @@ pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
         .await
         .map_err(|e| lib::emsg(e, "Settings find"))?;
 
-    Ok(match settings {
-        Some(settings) => Ok(SettingsData {
-            robots_txt: settings.robots_txt,
-            site_url: settings.site_url,
-            hero_width: settings.hero_width,
-            hero_height: settings.hero_height,
-            thumb_width: settings.thumb_width,
-            thumb_height: settings.thumb_height,
-            home_text: settings.home_text,
-        }),
-        None => {
-            crate::server::serverr_404();
-            Err(SettingsError::NotFound)
-        }
-    })
+    let Some(settings) = settings else {
+        tracing::error!("settings record not found in database");
+        crate::server::serverr_404();
+        return Ok(Err(SettingsError::NotFound));
+    };
+    let settings = SettingsData {
+        robots_txt: settings.robots_txt,
+        site_url: settings.site_url,
+        hero_width: settings.hero_width,
+        hero_height: settings.hero_height,
+        thumb_width: settings.thumb_width,
+        thumb_height: settings.thumb_height,
+        home_text: settings.home_text,
+    };
+    Ok(Ok(settings))
 }
