@@ -29,6 +29,7 @@ leptos_router = { workspace = true }
 log = { workspace = true, optional = true }
 prisma_client = { workspace = true, optional = true }
 prisma-client-rust = { workspace = true, optional = true }
+reactive_stores.workspace = true
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }

@@ -42,6 +42,7 @@ dependencies = [
  "log",
  "prisma-client-rust",
  "prisma_client",
+ "reactive_stores",
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
