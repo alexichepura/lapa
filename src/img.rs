@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::settings::use_settings;

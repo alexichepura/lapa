@@ -1,20 +1,20 @@
 use chrono::{DateTime, FixedOffset};
-use leptos::*;
+use leptos::{either::Either, prelude::*};
 use leptos_meta::Title;
-use leptos_router::A;
+use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     image::img_url_small,
-    util::{datetime_to_strings, DateTimeStrings, Loading},
+    util::{datetime_to_strings, AlertDanger, DateTimeStrings, Loading},
 };
 
 #[component]
 pub fn PostList() -> impl IntoView {
-    let posts = create_blocking_resource(|| (), move |_| get_posts());
+    let posts = Resource::new_blocking(|| (), move |_| get_posts());
 
     view! {
-        <Title text="Posts"/>
+        <Title text="Posts" />
         <h1>
             <span>Posts</span>
             <small>
@@ -23,30 +23,31 @@ pub fn PostList() -> impl IntoView {
         </h1>
         <ul class="Card Listing">
             <Suspense fallback=move || {
-                view! { <Loading/> }
+                view! { <Loading /> }
             }>
-                {move || {
-                    posts
-                        .get()
-                        .map(|posts| match posts {
-                            Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
-                            Ok(posts) => {
-                                if posts.is_empty() {
-                                    view! { <p>No posts were found.</p> }.into_view()
-                                } else {
-                                    posts
-                                        .into_iter()
-                                        .map(|post| {
-                                            view! { <PostListItem post/> }
-                                        })
-                                        .collect_view()
-                                }
-                            }
-                        })
-                }}
-
+                {move || Suspend::new(async move {
+                    match posts.await {
+                        Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+                        Ok(posts) => Either::Right(view! { <PostListItems posts /> }),
+                    }
+                })}
             </Suspense>
         </ul>
+    }
+}
+#[component]
+pub fn PostListItems(posts: Vec<PostListItem>) -> impl IntoView {
+    if posts.is_empty() {
+        Either::Left(view! { <p>No posts were found.</p> })
+    } else {
+        Either::Right(
+            posts
+                .into_iter()
+                .map(|post| {
+                    view! { <PostListItem post /> }
+                })
+                .collect_view(),
+        )
     }
 }
 
@@ -64,9 +65,9 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
     };
     let hero_view = match post.hero {
         Some(id) => {
-            view! { <img title="Post hero" src=img_url_small(&id) width="36"/> }.into_view()
+            Either::Left(view! { <img title="Post hero" src=img_url_small(&id) width="36" /> })
         }
-        None => view! { <div title="No post hero">?</div> }.into_view(),
+        None => Either::Right(view! { <div title="No post hero">?</div> }),
     };
     view! {
         <li class="PostListItem">
@@ -75,7 +76,7 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
                     {published.local}
                 </div>
                 {hero_view}
-                <span title="Post title">{&post.title}</span>
+                <span title="Post title">{post.title}</span>
                 <div title="Created at" class="PostListItem-created">
                     {created.local}
                 </div>

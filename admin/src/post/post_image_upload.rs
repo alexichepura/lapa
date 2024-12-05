@@ -1,32 +1,29 @@
-use leptos::*;
-use leptos_router::ActionForm;
+use leptos::{either::Either, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::{form::FormFooter, image::ImageUploadError, upload::InputImage};
 
-pub type ImageUploadAction = Action<ImageUpload, Result<ImageUploadResult, ServerFnError>>;
-
 #[component]
-pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl IntoView {
+pub fn ImageUpload(post_id: String, image_upload: ServerAction<ImageUpload>) -> impl IntoView {
     let pending = image_upload.pending();
-    let (_file_name, set_file_name) = create_signal(None::<String>);
-    let (save_byte_vec, set_save_byte_vec) = create_signal(None::<Vec<u8>>);
-    let (_save_file, set_save_file) = create_signal(None::<String>);
-    let (obj_url, set_obj_url) = create_signal(None::<String>);
+    let (_file_name, set_file_name) = signal(None::<String>);
+    let (save_byte_vec, set_save_byte_vec) = signal(None::<Vec<u8>>);
+    let (_save_file, set_save_file) = signal(None::<String>);
+    let (obj_url, set_obj_url) = signal(None::<String>);
     view! {
-        <fieldset disabled=move || pending()>
+        <fieldset prop:disabled=move || pending()>
             <legend>Image upload</legend>
             <div class="Grid-fluid-2">
                 <div>
                     <label>
                         <div>Select image</div>
-                        <InputImage set_file_name set_save_file set_obj_url set_save_byte_vec/>
+                        <InputImage set_file_name set_save_file set_obj_url set_save_byte_vec />
                     </label>
                     <ActionForm action=image_upload>
-                        <input type="hidden" name="post_id" value=post_id/>
+                        <input type="hidden" name="post_id" value=post_id />
                         <label>
                             <span>Alt</span>
-                            <input name="alt"/>
+                            <input name="alt" />
                         </label>
                         <input
                             type="hidden"
@@ -41,10 +38,10 @@ pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl Int
                             }
                         />
 
-                        <FormFooter action=image_upload submit_text="Upload image"/>
+                        <FormFooter action=image_upload submit_text="Upload image" />
                     </ActionForm>
                 </div>
-                <ImageUploadPreview obj_url/>
+                <ImageUploadPreview obj_url />
             </div>
         </fieldset>
     }
@@ -53,8 +50,8 @@ pub fn ImageUpload(post_id: String, image_upload: ImageUploadAction) -> impl Int
 #[component]
 pub fn ImageUploadPreview(obj_url: ReadSignal<Option<String>>) -> impl IntoView {
     let view = move || match obj_url.get() {
-        Some(url) => view! { <img src=url/> }.into_view(),
-        None => view! { <p>Upload preview</p> }.into_view(),
+        Some(url) => Either::Left(view! { <img src=url /> }),
+        None => Either::Right(view! { <p>Upload preview</p> }),
     };
     view! { <div class="ImageUploadPreview">{view}</div> }
 }
@@ -79,7 +76,7 @@ pub async fn upload_img(
     let prisma_client = crate::server::use_prisma()?;
 
     let cursor = std::io::Cursor::new(img_bytes.clone());
-    let img_reader = image::io::Reader::new(cursor.clone()).with_guessed_format();
+    let img_reader = image::ImageReader::new(cursor.clone()).with_guessed_format();
 
     if let Err(e) = img_reader {
         tracing::error!("{e:?}");

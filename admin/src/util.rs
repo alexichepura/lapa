@@ -1,5 +1,5 @@
 use chrono::{DateTime, Duration, FixedOffset, Local, ParseResult};
-use leptos::*;
+use leptos::prelude::*;
 
 #[component]
 pub fn Loading() -> impl IntoView {

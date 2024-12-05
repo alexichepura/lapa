@@ -18,7 +18,7 @@ pub mod util;
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {
     use crate::app::App;
-    use leptos::*;
+    use leptos::prelude::*;
     use wasm_bindgen::JsValue;
 
     tracing_wasm::set_as_global_default();
@@ -33,7 +33,7 @@ pub fn hydrate() {
 
     tracing::info!("SETTINGS: {:?}", settings);
 
-    leptos::mount_to_body(move || {
-        view! { <App settings=settings.clone()/> }
+    hydrate_body(move || {
+        view! { <App settings=settings.clone() /> }
     });
 }

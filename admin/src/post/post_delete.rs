@@ -1,17 +1,15 @@
-use leptos::*;
-use leptos_router::{use_navigate, ActionForm};
-
-use crate::form::FormFooter;
-
 use super::PostError;
+use crate::form::FormFooter;
+use leptos::prelude::*;
+use leptos_router::hooks::use_navigate;
 
 #[component]
 pub fn PostDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
-    let post_delete = create_server_action::<PostDelete>();
+    let post_delete = ServerAction::<PostDelete>::new();
     let pending = post_delete.pending();
     let value = post_delete.value();
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         let v = value();
         if let Some(v) = v {
             let post_result = v.map_err(|_| PostError::ServerError).flatten();
@@ -24,13 +22,13 @@ pub fn PostDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
         }
     });
 
-    let (input_slug, set_input_slug) = create_signal::<String>("".to_string());
-    let disabled = create_memo(move |_| input_slug() != slug());
+    let (input_slug, set_input_slug) = signal::<String>("".to_string());
+    let disabled = Memo::new(move |_| input_slug() != slug());
     view! {
-        <fieldset disabled=move || pending()>
+        <fieldset prop:disabled=move || pending()>
             <legend>Danger zone. Delete post.</legend>
             <ActionForm action=post_delete>
-                <input type="hidden" name="id" value=id.clone()/>
+                <input type="hidden" name="id" value=id.clone() />
                 <label>
                     <div>Slug</div>
                     <input
@@ -42,7 +40,7 @@ pub fn PostDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
                     />
 
                 </label>
-                <FormFooter action=post_delete submit_text="Delete post" disabled/>
+                <FormFooter action=post_delete submit_text="Delete post" disabled />
             </ActionForm>
         </fieldset>
     }

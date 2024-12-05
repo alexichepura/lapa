@@ -1,35 +1,30 @@
-use leptos::*;
+use leptos::{either::Either, html, prelude::*, text_prop::TextProp};
 
 #[component]
 pub fn Checkbox(
     #[prop(optional, into)] name: Option<TextProp>,
+    #[prop(optional, into)] value: Option<TextProp>,
     #[prop(optional, into)] label: Option<TextProp>,
-    #[prop(optional, into)] set: Option<SignalSetter<bool>>,
-    #[prop(optional, into)] checked: Option<MaybeSignal<bool>>,
-    #[prop(attrs)] attrs: Vec<(&'static str, Attribute)>,
+    #[prop(optional, into)] checked: Option<Signal<bool>>,
+    #[prop(optional, into)] bind: Option<RwSignal<bool>>,
 ) -> impl IntoView {
-    let mut inner = html::input().attr("type", "checkbox").attrs(attrs);
+    let inner = html::input()
+        .attr("type", "checkbox")
+        .attr("name", name.map(|v| move || v.get()))
+        .attr("value", value.map(|v| move || v.get()))
+        // .bind(leptos::attr::Checked, checked.unwrap());
+        .prop("checked", checked.unwrap_or_default())
+        .attr("checked", checked.map(|v| move || v.get()));
 
-    if let Some(name) = name {
-        inner = inner.attr("name", name.get());
-    }
-
-    if let Some(checked) = checked {
-        inner = inner.prop("checked", checked);
-        inner = inner.attr("checked", checked);
-    }
-
-    if let Some(set) = set {
-        inner = inner.on(ev::change, move |ev| {
-            let val = event_target_checked(&ev);
-            set(val);
-        })
+    let inner2 = match bind {
+        Some(bind) => Either::Left(inner.bind(leptos::attr::Checked, bind)),
+        _ => Either::Right(inner),
     };
 
-    let label: View = match label {
-        Some(label) => view! { <span>{label.get().into_owned()}</span> }.into_view(),
-        None => ().into_view(),
+    let label = match label {
+        Some(label) => Either::Left(view! { <span>{label.get().into_owned()}</span> }),
+        None => Either::Right(()),
     };
 
-    view! { <label>{inner} {label}</label> }
+    view! { <label>{inner2} {label}</label> }
 }

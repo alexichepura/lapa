@@ -1,24 +1,24 @@
-use leptos::*;
+use leptos::{either::Either, prelude::*};
 use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
 
-use crate::util::Loading;
+use crate::util::{AlertDanger, Loading};
 
 #[component]
 pub fn HomePage() -> impl IntoView {
-    let stats_all = create_blocking_resource(|| (), move |_| get_stats(StatsPeriod::All));
-    let stats_month = create_blocking_resource(|| (), move |_| get_stats(StatsPeriod::Month));
-    let stats_hour = create_blocking_resource(|| (), move |_| get_stats(StatsPeriod::Hour));
+    let stats_all = Resource::new_blocking(|| (), move |_| get_stats(StatsPeriod::All));
+    let stats_month = Resource::new_blocking(|| (), move |_| get_stats(StatsPeriod::Month));
+    let stats_hour = Resource::new_blocking(|| (), move |_| get_stats(StatsPeriod::Hour));
     view! {
-        <Title text="Dashboard"/>
+        <Title text="Dashboard" />
         <div class="HomePage">
             <h1>Dashboard</h1>
-            <hr/>
+            <hr />
             <h2>Stats</h2>
             <section class="Stats">
-                <StatsTableTransition caption="All time" resource=stats_all/>
-                <StatsTableTransition caption="Last month" resource=stats_month/>
-                <StatsTableTransition caption="Last hour" resource=stats_hour/>
+                <StatsTableTransition caption="All time" resource=stats_all />
+                <StatsTableTransition caption="Last month" resource=stats_month />
+                <StatsTableTransition caption="Last hour" resource=stats_hour />
             </section>
         </div>
     }
@@ -28,17 +28,14 @@ pub fn HomePage() -> impl IntoView {
 pub fn StatsTableTransition(resource: StatsResource, caption: &'static str) -> impl IntoView {
     view! {
         <Transition fallback=move || {
-            view! { <Loading/> }
+            view! { <Loading /> }
         }>
-            {move || {
-                resource
-                    .get()
-                    .map(|stats| match stats {
-                        Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
-                        Ok(stats) => view! { <StatsTable caption list=stats.list/> }.into_view(),
-                    })
-            }}
-
+            {move || Suspend::new(async move {
+                match resource.await {
+                    Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+                    Ok(stats) => Either::Right(view! { <StatsTable caption list=stats.list /> }),
+                }
+            })}
         </Transition>
     }
 }
@@ -73,7 +70,7 @@ pub fn StatsTable(caption: &'static str, list: Vec<StatsListItem>) -> impl IntoV
     }
 }
 
-type StatsResource = Resource<(), Result<StatsResult, ServerFnError>>;
+type StatsResource = Resource<Result<StatsResult, ServerFnError>>;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum StatsPeriod {

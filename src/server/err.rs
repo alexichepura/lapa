@@ -1,5 +1,5 @@
 use http::status::StatusCode;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_axum::{ResponseOptions, ResponseParts};
 
 pub fn serverr_404() {

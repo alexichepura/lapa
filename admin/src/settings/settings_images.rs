@@ -1,5 +1,4 @@
-use leptos::*;
-use leptos_router::ActionForm;
+use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -17,11 +16,11 @@ pub struct SettingsImages {
 
 #[component]
 pub fn SettingsImagesForm(settings: SettingsImages) -> impl IntoView {
-    let settings_upsert = create_server_action::<SettingsImagesUpdate>();
+    let settings_upsert = ServerAction::<SettingsImagesUpdate>::new();
     let pending = settings_upsert.pending();
 
     view! {
-        <fieldset disabled=move || pending()>
+        <fieldset prop:disabled=move || pending()>
             <legend>Images</legend>
             <ActionForm action=settings_upsert>
                 <div class="Grid-fluid-2">
@@ -52,7 +51,7 @@ pub fn SettingsImagesForm(settings: SettingsImages) -> impl IntoView {
                         value=settings.thumb_height.to_string()
                     />
                 </div>
-                <FormFooter action=settings_upsert submit_text="Update images settings"/>
+                <FormFooter action=settings_upsert submit_text="Update images settings" />
             </ActionForm>
         </fieldset>
     }

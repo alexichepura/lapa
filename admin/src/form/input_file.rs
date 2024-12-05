@@ -1,38 +1,20 @@
-use leptos::*;
+use leptos::{either::Either, html, prelude::*, text_prop::TextProp};
 
 #[component]
 pub fn FileField(
     #[prop(optional, into)] name: Option<TextProp>,
     #[prop(optional, into)] label: Option<TextProp>,
-    #[prop(optional)] set: Option<WriteSignal<String>>,
-    #[prop(optional, into)] value: Option<MaybeSignal<String>>,
-    #[prop(attrs)] attrs: Vec<(&'static str, Attribute)>,
+    #[prop(optional, into)] value: Option<Signal<String>>,
 ) -> impl IntoView {
-    let mut inner = html::input().attr("type", "file").attrs(attrs);
-
-    if let Some(name) = name {
-        inner = inner.attr("name", name.get());
-    }
-    if let Some(value) = value {
-        match value {
-            MaybeSignal::Static(value) => {
-                inner = inner.attr("value", value);
-            }
-            MaybeSignal::Dynamic(signal) => {
-                inner = inner.attr("value", value);
-                inner = inner.prop("value", signal);
-            }
-        }
-    }
-    if let Some(set) = set {
-        inner = inner.on(ev::input, move |ev| {
-            set(event_target_value(&ev));
-        })
-    };
+    let inner = html::input()
+        .attr("name", name.map(|v| move || v.get()))
+        .attr("type", "file")
+        .attr("value", value)
+        .autocomplete("off");
 
     let label = match label {
-        Some(label) => view! { <span>{label.get().into_owned()}</span> }.into_view(),
-        None => ().into_view(),
+        Some(label) => Either::Left(view! { <span>{label.get().into_owned()}</span> }),
+        None => Either::Right(()),
     };
 
     view! { <label>{label} {inner}</label> }

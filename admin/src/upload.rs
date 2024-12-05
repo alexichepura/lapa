@@ -1,4 +1,4 @@
-use leptos::*;
+use leptos::{html, prelude::*};
 
 #[component]
 pub(crate) fn InputImage(
@@ -9,7 +9,7 @@ pub(crate) fn InputImage(
     #[allow(unused_variables)] set_obj_url: WriteSignal<Option<String>>,
 ) -> impl IntoView {
     #[allow(unused_variables)]
-    let file_input = create_node_ref::<html::Input>();
+    let file_input = NodeRef::<html::Input>::new();
     let on_file_change = move |_ev: leptos::ev::Event| {
         #[cfg(feature = "hydrate")]
         if let Some(files) = file_input.get().map(|fi| fi.files()).flatten() {
@@ -19,7 +19,7 @@ pub(crate) fn InputImage(
 
             let file_blob_promise = js_sys::Promise::resolve(&file.array_buffer());
             set_file_name(Some(file.name()));
-            spawn_local(async move {
+            leptos::task::spawn_local(async move {
                 let bytes = wasm_bindgen_futures::JsFuture::from(file_blob_promise)
                     .await
                     .unwrap();
@@ -36,5 +36,5 @@ pub(crate) fn InputImage(
         }
     };
 
-    view! { <input type="file" on:change=on_file_change node_ref=file_input autocomplete="off"/> }
+    view! { <input type="file" on:change=on_file_change node_ref=file_input autocomplete="off" /> }
 }

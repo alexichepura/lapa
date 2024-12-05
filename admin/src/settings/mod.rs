@@ -13,7 +13,7 @@ pub use settings_images::*;
 pub use settings_images_convert::*;
 pub use settings_site::*;
 
-use leptos::*;
+use leptos::{either::Either, prelude::*};
 use leptos_meta::Title;
 use serde::{Deserialize, Serialize};
 
@@ -78,8 +78,8 @@ impl From<&SettingsData> for SettingsSite {
     }
 }
 
-pub fn create_settings_resource() -> Resource<(), SettingsResult> {
-    let settings = create_blocking_resource(
+pub fn create_settings_resource() -> Resource<SettingsResult> {
+    let settings = Resource::new_blocking(
         || (),
         move |_| async move {
             get_settings()
@@ -96,28 +96,31 @@ pub fn Settings() -> impl IntoView {
     let settings = create_settings_resource();
 
     view! {
-        <Title text="Settings"/>
+        <Title text="Settings" />
         <h1>Settings</h1>
         <Suspense fallback=move || {
-            view! { <Loading/> }
+            view! { <Loading /> }
         }>
             {move || {
                 settings
                     .get()
                     .map(|settings| match settings {
-                        Err(e) => view! { <p>{e.to_string()}</p> }.into_view(),
+                        Err(e) => Either::Left(view! { <p>{e.to_string()}</p> }),
                         Ok(settings) => {
-                            view! {
-                                <div class="Grid-fluid-2">
-                                    <SettingsHomeForm settings=SettingsHome::from(&settings)/>
-                                    <SettingsSiteForm settings=SettingsSite::from(&settings)/>
-                                </div>
-                                <div class="Grid-fluid-2">
-                                    <SettingsImagesForm settings=SettingsImages::from(&settings)/>
-                                    <ImagesConvertView/>
-                                </div>
-                            }
-                                .into_view()
+                            Either::Right(
+                                view! {
+                                    <div class="Grid-fluid-2">
+                                        <SettingsHomeForm settings=SettingsHome::from(&settings) />
+                                        <SettingsSiteForm settings=SettingsSite::from(&settings) />
+                                    </div>
+                                    <div class="Grid-fluid-2">
+                                        <SettingsImagesForm settings=SettingsImages::from(
+                                            &settings,
+                                        ) />
+                                        <ImagesConvertView />
+                                    </div>
+                                },
+                            )
                         }
                     })
             }}
@@ -130,7 +133,6 @@ type SettingsResult = Result<SettingsData, SettingsError>;
 #[server(GetSettings, "/api")]
 pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
     let prisma_client = crate::server::use_prisma()?;
-
     let settings = prisma_client
         .settings()
         .find_first(vec![])
@@ -138,19 +140,19 @@ pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
         .await
         .map_err(|e| lib::emsg(e, "Settings find"))?;
 
-    Ok(match settings {
-        Some(settings) => Ok(SettingsData {
-            robots_txt: settings.robots_txt,
-            site_url: settings.site_url,
-            hero_width: settings.hero_width,
-            hero_height: settings.hero_height,
-            thumb_width: settings.thumb_width,
-            thumb_height: settings.thumb_height,
-            home_text: settings.home_text,
-        }),
-        None => {
-            crate::server::serverr_404();
-            Err(SettingsError::NotFound)
-        }
-    })
+    let Some(settings) = settings else {
+        tracing::error!("settings record not found in database");
+        crate::server::serverr_404();
+        return Ok(Err(SettingsError::NotFound));
+    };
+    let settings = SettingsData {
+        robots_txt: settings.robots_txt,
+        site_url: settings.site_url,
+        hero_width: settings.hero_width,
+        hero_height: settings.hero_height,
+        thumb_width: settings.thumb_width,
+        thumb_height: settings.thumb_height,
+        home_text: settings.home_text,
+    };
+    Ok(Ok(settings))
 }

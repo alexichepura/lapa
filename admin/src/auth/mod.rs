@@ -4,7 +4,7 @@ mod auth_logout;
 mod auth_signup;
 pub use auth_login::Login;
 pub use auth_logout::Logout;
-use leptos::*;
+use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

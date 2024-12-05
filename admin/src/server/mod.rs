@@ -4,11 +4,15 @@ use axum::{
     http::Request,
     response::{IntoResponse, Response},
 };
-use leptos::LeptosOptions;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_axum::handle_server_fns_with_context;
+use leptos_meta::MetaTags;
 
-use crate::{app::App, auth::User, settings::settins_db};
+use crate::{
+    app::App,
+    auth::User,
+    settings::{settins_db, SettingsCx},
+};
 
 use cfg_if::cfg_if;
 cfg_if! {if #[cfg(feature = "ssr")] {
@@ -32,6 +36,28 @@ pub use err::*;
 pub use fileserv::*;
 pub use prisma::*;
 pub use session::*;
+
+pub fn html_shell(
+    options: LeptosOptions,
+    user: Option<User>,
+    settings: SettingsCx,
+) -> impl IntoView {
+    view! {
+        <!DOCTYPE html>
+        <html lang="en">
+            <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <AutoReload options=options.clone() />
+                <HydrationScripts options />
+                <MetaTags />
+            </head>
+            <body>
+                <App settings user />
+            </body>
+        </html>
+    }
+}
 
 #[derive(FromRef, Debug, Clone)]
 pub struct AppState {
@@ -81,13 +107,13 @@ pub async fn leptos_routes_handler(
     let user: Option<User> = auth_session.current_user.clone();
     let prisma_client = app_state.prisma_client.clone();
     let settings = settins_db(prisma_client.clone()).await;
+    let leptos_options = app_state.leptos_options;
     let handler = leptos_axum::render_app_async_with_context(
-        app_state.leptos_options.clone(),
         move || {
             provide_context(app_state.prisma_client.clone());
             provide_context(auth_session.clone());
         },
-        move || view! { <App user=user.clone() settings=settings.clone()/> },
+        move || html_shell(leptos_options.clone(), user.clone(), settings.clone()),
     );
 
     let leptos_res = handler(req).await.into_response();

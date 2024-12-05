@@ -1,15 +1,13 @@
-use leptos::{html::Dialog, *};
-use leptos_router::ActionForm;
+use leptos::{either::Either, html::Dialog, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     form::FormFooter,
     image::{img_url_small, srcset_small, ImageLoadError},
     post::{
-        ImageDelete, ImageDeleteAction, ImageEditData, ImageEditSignal, ImageUpdate,
-        ImageUpdateAction, ImageUpload, PostImageModalForm,
+        ImageDelete, ImageEditData, ImageEditSignal, ImageUpdate, ImageUpload, PostImageModalForm,
     },
-    util::Loading,
+    util::{AlertDanger, Loading},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -24,13 +22,13 @@ pub struct PostImageData {
 pub fn PostImages(post_id: String) -> impl IntoView {
     let post_id_clone = post_id.clone();
 
-    let image_delete = create_server_action::<ImageDelete>();
-    let image_upload = create_server_action::<ImageUpload>();
-    let image_update = create_server_action::<ImageUpdate>();
-    let order_action = create_server_action::<ImagesOrderUpdate>();
-    let hero_action = create_server_action::<ImageMakeHero>();
+    let image_delete = ServerAction::<ImageDelete>::new();
+    let image_upload = ServerAction::<ImageUpload>::new();
+    let image_update = ServerAction::<ImageUpdate>::new();
+    let order_action = ServerAction::<ImagesOrderUpdate>::new();
+    let hero_action = ServerAction::<ImageMakeHero>::new();
 
-    let images = create_blocking_resource(
+    let images = Resource::new_blocking(
         move || {
             (
                 post_id_clone.clone(),
@@ -45,16 +43,15 @@ pub fn PostImages(post_id: String) -> impl IntoView {
     );
 
     view! {
-        <ImageUpload post_id image_upload/>
+        <ImageUpload post_id image_upload />
         <Transition fallback=move || {
-            view! { <Loading/> }
+            view! { <Loading /> }
         }>
-            {move || {
-                images
-                    .get()
-                    .map(|images| match images {
-                        Err(e) => view! { <p>error {e.to_string()}</p> }.into_view(),
-                        Ok(images) => {
+            {move || Suspend::new(async move {
+                match images.await {
+                    Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+                    Ok(images) => {
+                        Either::Right(
                             view! {
                                 <PostImagesView
                                     images
@@ -63,12 +60,11 @@ pub fn PostImages(post_id: String) -> impl IntoView {
                                     order_action
                                     hero_action
                                 />
-                            }
-                                .into_view()
-                        }
-                    })
-            }}
-
+                            },
+                        )
+                    }
+                }
+            })}
         </Transition>
     }
 }
@@ -76,15 +72,15 @@ pub fn PostImages(post_id: String) -> impl IntoView {
 #[component]
 pub fn PostImagesView(
     images: Vec<PostImageData>,
-    image_delete: ImageDeleteAction,
-    image_update: ImageUpdateAction,
-    order_action: ImagesOrderUpdateAction,
-    hero_action: ImageMakeHeroAction,
+    image_delete: ServerAction<ImageDelete>,
+    image_update: ServerAction<ImageUpdate>,
+    order_action: ServerAction<ImagesOrderUpdate>,
+    hero_action: ServerAction<ImageMakeHero>,
 ) -> impl IntoView {
-    let dialog_element: NodeRef<Dialog> = create_node_ref();
-    let (editing, set_editing) = create_signal::<ImageEditSignal>(None);
+    let dialog_element: NodeRef<Dialog> = NodeRef::new();
+    let (editing, set_editing) = signal::<ImageEditSignal>(None);
 
-    let (images_sorted, set_images_sorted) = create_signal(images);
+    let (images_sorted, set_images_sorted) = signal(images);
 
     let on_order = move |id: String, dir: i32| {
         let il = images_sorted.get().clone();
@@ -105,12 +101,12 @@ pub fn PostImagesView(
         });
     };
 
-    create_effect(move |_| {
+    Effect::new(move |_| {
         if let Some(_id) = editing() {
-            let el = dialog_element().expect("<dialog> to exist");
+            let el = dialog_element.get().expect("<dialog> to exist");
             let _modal_result = el.show_modal();
         } else {
-            let el = dialog_element();
+            let el = dialog_element.get();
             if let Some(el) = el {
                 let _modal_result = el.close();
             }
@@ -118,10 +114,10 @@ pub fn PostImagesView(
     });
 
     let edit_view = move || match editing() {
-        Some(image) => {
-            view! { <PostImageModalForm image set_editing image_delete image_update/> }.into_view()
-        }
-        None => ().into_view(),
+        Some(image) => Either::Left(
+            view! { <PostImageModalForm image set_editing image_delete image_update /> },
+        ),
+        None => Either::Right(()),
     };
 
     let order_pending = order_action.pending();
@@ -129,23 +125,23 @@ pub fn PostImagesView(
     let disabled = move || order_pending() || hero_pending();
 
     let no_images = move || match images_sorted().len() {
-        0 => view! { <p>No images were found.</p> }.into_view(),
-        _ => ().into_view(),
+        0 => Either::Left(view! { <p>No images were found.</p> }),
+        _ => Either::Right(()),
     };
 
     view! {
-        <fieldset disabled=disabled>
+        <fieldset prop:disabled=disabled>
             <legend>Images</legend>
             <ActionForm action=order_action>
                 <For
                     each=move || images_sorted()
                     key=|image| format!("{}:{}", image.id, image.order)
                     children=move |image: PostImageData| {
-                        view! { <input type="hidden" name="ids[]" value=image.id/> }
+                        view! { <input type="hidden" name="ids[]" value=image.id /> }
                     }
                 />
 
-                <FormFooter action=order_action submit_text="Save order"/>
+                <FormFooter action=order_action submit_text="Save order" />
             </ActionForm>
             <div class="images">
                 {no_images}
@@ -161,7 +157,7 @@ pub fn PostImagesView(
                                     id: id_to_make_hero.clone(),
                                 });
                         };
-                        view! { <PostImage image set_editing on_order is_last make_hero/> }
+                        view! { <PostImage image set_editing on_order is_last make_hero /> }
                     }
                 />
 
@@ -200,13 +196,13 @@ where
     let is_first = image.order == 0;
 
     let hero_view = match image.is_hero {
-        true => view! { <button disabled>Hero</button> }.into_view(),
-        false => view! { <button on:click=move |_| make_hero()>Make hero</button> }.into_view(),
+        true => Either::Left(view! { <button disabled>Hero</button> }),
+        false => Either::Right(view! { <button on:click=move |_| make_hero()>Make hero</button> }),
     };
 
     view! {
         <figure>
-            <img on:click=on_edit src=src srcset=srcset width=250/>
+            <img on:click=on_edit src=src srcset=srcset width=250 />
             <figcaption>{image.alt}</figcaption>
             <footer>
                 <button
@@ -262,8 +258,6 @@ pub async fn get_images(post_id: String) -> Result<Vec<PostImageData>, ServerFnE
 }
 
 pub type ImagesOrderUpdateResult = Result<(), ImageLoadError>;
-pub type ImagesOrderUpdateAction =
-    Action<ImagesOrderUpdate, Result<ImagesOrderUpdateResult, ServerFnError>>;
 #[server(ImagesOrderUpdate, "/api")]
 pub async fn images_order_update(
     ids: Vec<String>,
@@ -295,7 +289,6 @@ pub struct ImageMakeHeroData {
     pub not_hero: Option<String>,
 }
 pub type ImageMakeHeroResult = Result<ImageMakeHeroData, ImageLoadError>;
-pub type ImageMakeHeroAction = Action<ImageMakeHero, Result<ImageMakeHeroResult, ServerFnError>>;
 #[server(ImageMakeHero, "/api")]
 pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFnError> {
     use prisma_client::db;

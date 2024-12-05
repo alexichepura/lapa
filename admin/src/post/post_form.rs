@@ -1,7 +1,7 @@
 use chrono::{DateTime, FixedOffset, Utc};
-use leptos::*;
+use leptos::{either::Either, prelude::*, reactive::wrappers::write::SignalSetter};
 use leptos_meta::Title;
-use leptos_router::{use_navigate, ActionForm};
+use leptos_router::hooks::use_navigate;
 use serde::{Deserialize, Serialize};
 
 use super::PostError;
@@ -28,18 +28,18 @@ pub struct PostFormData {
 #[component]
 pub fn PostNew() -> impl IntoView {
     let post = PostFormData::default();
-    view! { <PostForm post=post/> }
+    view! { <PostForm post=post /> }
 }
 
 #[component]
 pub fn PostForm(post: PostFormData) -> impl IntoView {
-    let post_upsert = create_server_action::<PostUpsert>();
+    let post_upsert = ServerAction::<PostUpsert>::new();
     let value = post_upsert.value();
     let pending = post_upsert.pending();
     // let has_error = move || value.with(|val| matches!(val, Some(Err(_))));
 
     if let None = post.id {
-        create_effect(move |_| {
+        Effect::new(move |_| {
             let v = value();
             if let Some(v) = v {
                 let post_result = v.map_err(|_| PostError::ServerError).flatten();
@@ -53,7 +53,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
         });
     }
 
-    let post_rw = create_rw_signal(post.clone());
+    let post_rw = RwSignal::new(post.clone());
     let (slug, set_slug) = create_slice(
         post_rw,
         |state| state.slug.clone(),
@@ -75,28 +75,41 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
         None => "".to_string(),
     };
     let id_input = match post.id.clone() {
-        Some(id) => view! { <input type="hidden" name="id" value=id/> }.into_view(),
-        None => ().into_view(),
+        Some(id) => Either::Left(view! { <input type="hidden" name="id" value=id /> }),
+        None => Either::Right(()),
     };
     let gallery_view = match post.id.clone() {
-        Some(id) => view! { <PostImages post_id=id/> }.into_view(),
-        None => view! { <p>Gallery is not available for not saved post</p> }.into_view(),
+        Some(id) => Either::Left(view! { <PostImages post_id=id /> }),
+        None => Either::Right(view! { <p>Gallery is not available for not saved post</p> }),
     };
     let delete_view = match post.id.clone() {
-        Some(id) => view! { <PostDeleteForm id=id.clone() slug/> }.into_view(),
-        None => ().into_view(),
+        Some(id) => Either::Left(view! { <PostDeleteForm id=id.clone() slug /> }),
+        None => Either::Right(()),
     };
 
     let created = datetime_to_strings(post.created_at);
     let site_url = move || use_site_url();
     let href = move || format!("{}/post/{}", &site_url(), &slug());
 
-    let published_at_utc_string = create_memo(move |_| match published_at() {
-        Some(published_at) => datetime_to_string(published_at).into_view(),
-        None => ().into_view(),
-    });
+    // let memo_fn = move |_| match published_at() {
+    //     Some(published_at) => Either::Left(datetime_to_string(published_at).into_any()),
+    //     None => Either::Right(().into_any()),
+    // };
+    // let published_at_utc_string = create_memo(memo_fn);
+    // let published_at_utc_string = Memo::new(move |_| match published_at() {
+    //     Some(published_at) => datetime_to_string(published_at).into_any(),
+    //     None => ().into_any(),
+    // });
+    // let published_at_utc_string = create_memo(move |_| match published_at() {
+    //     Some(published_at) => Either::Left(datetime_to_string(published_at).into_any()),
+    //     None => Either::Right(().into_any()),
+    // });
+    let published_at_utc_string = move || match published_at() {
+        Some(published_at) => Either::Left(datetime_to_string(published_at)),
+        None => Either::Right(()),
+    };
     view! {
-        <Title text=move || format!("Post: {}", title())/>
+        <Title text=move || format!("Post: {}", title()) />
         <section class="PostPage">
             <header>
                 <div>
@@ -108,19 +121,19 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                 <dl>
                     <dt>ID:</dt>
                     <dd>{id_view}</dd>
-                    <br/>
+                    <br />
                     <dt>Created at <small>(Local):</small></dt>
                     <dd>{created.local}</dd>
-                    <br/>
+                    <br />
                     <dt>Created at <small>(UTC):</small></dt>
                     <dd>{created.utc}</dd>
-                    <br/>
+                    <br />
                     <dt>Published at <small>(UTC):</small></dt>
                     <dd>{published_at_utc_string}</dd>
                 </dl>
             </header>
             <ActionForm action=post_upsert>
-                {id_input} <fieldset disabled=move || pending()>
+                {id_input} <fieldset prop:disabled=move || pending()>
                     <legend>Data</legend>
                     <div class="Grid-fluid-2">
                         <div>
@@ -152,19 +165,16 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                             </label>
                         </div>
                         <div>
-                            <PublishedAt published_at set_published_at/>
+                            <PublishedAt published_at set_published_at />
                             <label>
                                 <div>Text</div>
-                                <textarea
-                                    name="text"
-                                    value=&post.text
-                                    prop:value=post.text
-                                    rows="6"
-                                ></textarea>
+                                <textarea name="text" rows="6">
+                                    {post.text}
+                                </textarea>
                             </label>
                         </div>
                     </div>
-                    <FormFooter action=post_upsert submit_text="Submit post data"/>
+                    <FormFooter action=post_upsert submit_text="Submit post data" />
                 </fieldset>
             </ActionForm>
             {gallery_view}
@@ -178,14 +188,16 @@ pub fn PublishedAt(
     published_at: Signal<Option<DateTime<FixedOffset>>>,
     set_published_at: SignalSetter<Option<DateTime<FixedOffset>>>,
 ) -> impl IntoView {
-    let is_published = create_memo(move |_| published_at.with(|p| p.is_some()));
-    let disabled = create_memo(move |_| !is_published());
+    let is_published = Memo::new(move |_| published_at.with(|p| p.is_some()));
+    let disabled = Memo::new(move |_| !is_published());
 
-    let (is_published_signal, set_is_published) =
-        create_signal(published_at.get_untracked().is_some());
+    // let (is_published_signal, set_is_published) = signal(published_at.get_untracked().is_some());
+    let published_at_rw_signal = RwSignal::new(published_at.get_untracked().is_some());
 
-    create_effect(move |old| {
-        let is = is_published_signal();
+    Effect::new(move |old: Option<bool>| {
+        // let is = is_published_signal();
+        let is = published_at_rw_signal.get();
+        tracing::info!("published_at_rw_signal={}", is);
         if old.is_some() {
             if is {
                 set_published_at(Some(Utc::now().fixed_offset()));
@@ -196,18 +208,22 @@ pub fn PublishedAt(
         is
     });
 
-    let html_published_at = create_memo(move |_| match published_at() {
+    let html_published_at = Memo::new(move |_| match published_at() {
         Some(published_at) => datetime_to_local_html(published_at),
         None => String::default(),
     });
-    let published_at_rfc3339 = create_memo(move |_| match published_at() {
+    let published_at_rfc3339 = Memo::new(move |_| match published_at() {
         Some(published_at) => published_at.to_rfc3339(),
         None => String::default(),
     });
 
     view! {
         <div class="Grid-fluid-2">
-            <Checkbox label="Publish" checked=is_published set=set_is_published/>
+            <Checkbox
+                label="Publish"
+                bind=published_at_rw_signal
+                checked=published_at_rw_signal.get_untracked()
+            />
             <label>
                 <div>Published at <small>(Local)</small></div>
                 <input

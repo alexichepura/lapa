@@ -1,3 +1,5 @@
+#![recursion_limit = "256"]
+
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
@@ -15,12 +17,12 @@ async fn main() {
         routing::{get, post},
         Router,
     };
-    use leptos::*;
+    use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use tracing::info;
 
-    let leptopts = get_configuration(None).await.unwrap().leptos_options;
-    let routes = generate_route_list(|| view! { <AdminRouter/> });
+    let leptopts = get_configuration(None).unwrap().leptos_options;
+    let routes = generate_route_list(|| view! { <AdminRouter /> });
     let prisma_client = init_prisma_client().await;
 
     let private_app = Router::new()

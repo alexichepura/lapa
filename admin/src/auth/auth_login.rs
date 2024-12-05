@@ -3,8 +3,7 @@ use crate::{
     auth::use_user_signal,
     form::{Checkbox, FormFooter, Input},
 };
-use leptos::*;
-use leptos_router::ActionForm;
+use leptos::{either::Either, prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -15,22 +14,22 @@ pub struct LoginFormData {
 
 #[component]
 pub fn Login() -> impl IntoView {
-    let login = create_server_action::<Login>();
+    let login = ServerAction::<Login>::new();
     let pending = login.pending();
     let value = login.value();
     let user_signal = use_user_signal();
 
-    let (is_skip_redirect, set_skip_redirect) = create_signal(false);
-    create_effect(move |_| {
+    let (is_skip_redirect, set_skip_redirect) = signal(false);
+    Effect::new(move |_| {
         request_animation_frame(move || {
             set_skip_redirect(true);
         });
     });
     let skip_redirect_view = move || match is_skip_redirect() {
-        true => view! { <input type="hidden" name="skip_redirect" value="1"/> }.into_view(),
-        false => ().into_view(),
+        true => Either::Left(view! { <input type="hidden" name="skip_redirect" value="1" /> }),
+        false => Either::Right(()),
     };
-    create_effect(move |_| {
+    Effect::new(move |_| {
         if let Some(v) = value() {
             let login_result = v.map_err(|_| AuthError::ServerError).flatten();
             if let Ok(login_result) = login_result {
@@ -40,13 +39,13 @@ pub fn Login() -> impl IntoView {
     });
 
     view! {
-        <fieldset disabled=move || pending() class="login-card">
+        <fieldset prop:disabled=move || pending() class="login-card">
             <legend>Log in</legend>
             <ActionForm action=login>
-                {skip_redirect_view} <Input name="username" label="User"/>
-                <Input name="password" label="Password" type_="password"/>
-                <Checkbox name="remember" label="Remember me?"/>
-                <FormFooter action=login submit_text="Login"/>
+                {skip_redirect_view} <Input name="username" label="User" />
+                <Input name="password" label="Password" type_="password" />
+                <Checkbox name="remember" label="Remember me?" />
+                <FormFooter action=login submit_text="Login" />
             </ActionForm>
         </fieldset>
     }

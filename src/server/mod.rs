@@ -5,9 +5,9 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use http::StatusCode;
-use leptos::LeptosOptions;
-use leptos::*;
+use leptos::prelude::*;
 use leptos_axum::handle_server_fns_with_context;
+use leptos_meta::MetaTags;
 use prisma_client::db::{self, PrismaClient};
 use std::sync::Arc;
 
@@ -30,7 +30,28 @@ pub use err::*;
 pub use fileserv::*;
 pub use prisma::*;
 
-use crate::{app::App, settings::settins_db};
+use crate::{
+    app::App,
+    settings::{settins_db, SettingsCx},
+};
+
+pub fn html_shell(options: LeptosOptions, settings: SettingsCx) -> impl IntoView {
+    view! {
+        <!DOCTYPE html>
+        <html lang="en">
+            <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <AutoReload options=options.clone() />
+                <HydrationScripts options />
+                <MetaTags />
+            </head>
+            <body>
+                <App settings />
+            </body>
+        </html>
+    }
+}
 
 #[derive(FromRef, Debug, Clone)]
 pub struct AppState {
@@ -75,13 +96,13 @@ pub async fn leptos_routes_handler(
         }
     });
     let settings = settins_db(prisma_client.clone()).await;
+    let leptos_options = app_state.leptos_options;
 
     let handler = leptos_axum::render_app_async_with_context(
-        app_state.leptos_options.clone(),
         move || {
             provide_context(prisma_client.clone());
         },
-        move || view! { <App settings=settings.clone()/> },
+        move || html_shell(leptos_options.clone(), settings.clone()),
     );
     handler(req).await.into_response()
 }
