@@ -197,6 +197,7 @@ pub fn PublishedAt(
     Effect::new(move |old: Option<bool>| {
         // let is = is_published_signal();
         let is = published_at_rw_signal.get();
+        tracing::info!("published_at_rw_signal={}", is);
         if old.is_some() {
             if is {
                 set_published_at(Some(Utc::now().fixed_offset()));
@@ -218,7 +219,11 @@ pub fn PublishedAt(
 
     view! {
         <div class="Grid-fluid-2">
-            <Checkbox label="Publish" checked=published_at_rw_signal />
+            <Checkbox
+                label="Publish"
+                bind=published_at_rw_signal
+                checked=published_at_rw_signal.get_untracked()
+            />
             <label>
                 <div>Published at <small>(Local)</small></div>
                 <input
