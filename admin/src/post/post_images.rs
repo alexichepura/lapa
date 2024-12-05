@@ -1,4 +1,5 @@
 use leptos::{either::Either, html::Dialog, prelude::*};
+use reactive_stores::{Field, Patch, Store, StoreField, StoreFieldIterator};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -18,60 +19,97 @@ pub struct PostImageData {
     pub is_hero: bool,
 }
 
-#[component]
-pub fn PostImages(post_id: String) -> impl IntoView {
-    let post_id_clone = post_id.clone();
+#[derive(Store, Debug, Clone)]
+pub struct ImagesStore {
+    #[store(key: String = |row| row.id.clone())]
+    pub images: Vec<ImageStore>,
+}
+// impl Store<ImagesStore> {
+//     pub fn set_hero(id: String) {}
+// }
 
+#[derive(Store, Debug, Clone)]
+pub struct ImageStore {
+    pub id: String,
+    pub alt: String,
+    pub order: i32,
+    pub is_hero: bool,
+}
+
+#[component]
+pub fn PostImages(post_id: String, images_store: Store<ImagesStore>) -> impl IntoView {
     let image_delete = ServerAction::<ImageDelete>::new();
     let image_upload = ServerAction::<ImageUpload>::new();
     let image_update = ServerAction::<ImageUpdate>::new();
     let order_action = ServerAction::<ImagesOrderUpdate>::new();
     let hero_action = ServerAction::<ImageMakeHero>::new();
 
-    let images = Resource::new_blocking(
-        move || {
-            (
-                post_id_clone.clone(),
-                image_delete.version().get(),
-                image_upload.version().get(),
-                image_update.version().get(),
-                order_action.version().get(),
-                hero_action.version().get(),
-            )
-        },
-        move |(post_id, _, _, _, _, _)| get_images(post_id),
-    );
+    // let get_images_action = ServerAction::<GetImages>::new();
+    // let get_images_action_value = get_images_action.value();
+
+    // Effect::new(move |prev: Option<()>| {
+    //     tracing::info!("images effect");
+    //     if prev.is_some() {
+    //         let v = get_images_action_value();
+    //         match v {
+    //             Some(Ok(v)) => {
+    //                 images.set(v);
+    //             }
+    //             _ => todo!(),
+    //         }
+    //     }
+    // });
+    let images = images_store.images();
+    Effect::new(move |_| {
+        let v = hero_action.value().get();
+        if let Some(v) = v {
+            match v {
+                Ok(Ok(v)) => {
+                    // let images = images_store.images();
+                    // let current_hero = images
+                    //     .iter_unkeyed()
+                    //     .find(|image| image.id().get() == v.hero);
+                    let current_hero = images
+                        .iter_unkeyed()
+                        .find(|image| image.id().get_untracked() == v.hero);
+                    if let Some(current_hero) = current_hero {
+                        tracing::info!("current_hero={:?}", current_hero);
+                        // current_hero.is_hero().update_untracke(|wtf| false);
+                        // current_hero.is_hero().patch(false);
+                    }
+                }
+                _ => todo!(),
+            }
+        }
+    });
+
+    // let post_id_clone2 = post_id.clone();
+    // Effect::new(move |_| {
+    //     tracing::info!("images effect");
+    //     get_images_action.dispatch(GetImages {
+    //         post_id: post_id_clone2.clone(),
+    //     });
+    //     (
+    //         post_id_clone2.clone(),
+    //         image_delete.version().get(),
+    //         image_upload.version().get(),
+    //         image_update.version().get(),
+    //         order_action.version().get(),
+    //         hero_action.version().get(),
+    //     )
+    // });
 
     view! {
         <ImageUpload post_id image_upload />
-        <Transition fallback=move || {
-            view! { <Loading /> }
-        }>
-            {move || Suspend::new(async move {
-                match images.await {
-                    Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
-                    Ok(images) => {
-                        Either::Right(
-                            view! {
-                                <PostImagesView
-                                    images
-                                    image_delete
-                                    image_update
-                                    order_action
-                                    hero_action
-                                />
-                            },
-                        )
-                    }
-                }
-            })}
-        </Transition>
+        <PostImagesView images_store image_delete image_update order_action hero_action />
     }
 }
 
 #[component]
 pub fn PostImagesView(
-    images: Vec<PostImageData>,
+    // images: Vec<PostImageData>,
+    // images: RwSignal<Vec<PostImageData>>,
+    images_store: Store<ImagesStore>,
     image_delete: ServerAction<ImageDelete>,
     image_update: ServerAction<ImageUpdate>,
     order_action: ServerAction<ImagesOrderUpdate>,
@@ -80,25 +118,26 @@ pub fn PostImagesView(
     let dialog_element: NodeRef<Dialog> = NodeRef::new();
     let (editing, set_editing) = signal::<ImageEditSignal>(None);
 
-    let (images_sorted, set_images_sorted) = signal(images);
+    // let (images_sorted, set_images_sorted) = images.split();
+    // let (images_sorted, set_images_sorted) = signal(images);
 
     let on_order = move |id: String, dir: i32| {
-        let il = images_sorted.get().clone();
-        let from_index = il.iter().position(|item| item.id == id).unwrap();
-        let to_index = from_index as i32 + dir;
-        set_images_sorted.update(|mut_il| {
-            let removed_item = mut_il.remove(from_index);
-            mut_il.insert(to_index as usize, removed_item);
-            let images = mut_il
-                .into_iter()
-                .enumerate()
-                .map(|(i, img)| PostImageData {
-                    order: i as i32,
-                    ..img.clone()
-                })
-                .collect::<Vec<_>>();
-            *mut_il = images;
-        });
+        // let il = images_sorted.get().clone();
+        // let from_index = il.iter().position(|item| item.id == id).unwrap();
+        // let to_index = from_index as i32 + dir;
+        // set_images_sorted.update(|mut_il| {
+        //     let removed_item = mut_il.remove(from_index);
+        //     mut_il.insert(to_index as usize, removed_item);
+        //     let images = mut_il
+        //         .into_iter()
+        //         .enumerate()
+        //         .map(|(i, img)| PostImageData {
+        //             order: i as i32,
+        //             ..img.clone()
+        //         })
+        //         .collect::<Vec<_>>();
+        //     *mut_il = images;
+        // });
     };
 
     Effect::new(move |_| {
@@ -124,7 +163,8 @@ pub fn PostImagesView(
     let hero_pending = hero_action.pending();
     let disabled = move || order_pending() || hero_pending();
 
-    let no_images = move || match images_sorted().len() {
+    let count = move || images_store.images().iter_unkeyed().count();
+    let no_images = move || match count() {
         0 => Either::Left(view! { <p>No images were found.</p> }),
         _ => Either::Right(()),
     };
@@ -134,33 +174,45 @@ pub fn PostImagesView(
             <legend>Images</legend>
             <ActionForm action=order_action>
                 <For
-                    each=move || images_sorted()
-                    key=|image| format!("{}:{}", image.id, image.order)
-                    children=move |image: PostImageData| {
-                        view! { <input type="hidden" name="ids[]" value=image.id /> }
-                    }
-                />
+                    each=move || images_store.images()
+                    // key=|image| image.id().get()
+                    key=|image| image.read().id.clone()
+                    let:item
+                >
+                    // children=move |image| {
+                    // let value = image.value();
+                    // view! { <input type="hidden" name="ids[]" value=move || value.get() /> }
+                    // }
+                    <input type="hidden" name="ids[]" value=item.id().get() />
+                </For>
 
                 <FormFooter action=order_action submit_text="Save order" />
             </ActionForm>
             <div class="images">
+                // <For
+                // each=move || images_sorted()
+                // key=|image| format!("{}:{}", image.id, image.order)
+                // children=move |image: PostImageData| {
                 {no_images}
                 <For
-                    each=move || images_sorted()
-                    key=|image| format!("{}:{}", image.id, image.order)
-                    children=move |image: PostImageData| {
-                        let is_last = image.order + 1 == images_sorted().len() as i32;
-                        let id_to_make_hero = image.id.clone();
+                    each=move || images_store.images()
+                    key=|image| image.read().id.clone()
+                    children=move |image| {
+                        let image_untracked = image.get_untracked();
+                        let order = image_untracked.order;
+                        let id = image_untracked.id;
+                        let is_last = order + 1 == count() as i32;
+                        let id_to_make_hero = id;
                         let make_hero = move || {
                             hero_action
                                 .dispatch(ImageMakeHero {
                                     id: id_to_make_hero.clone(),
                                 });
                         };
+                        // let image_read = image.read();
                         view! { <PostImage image set_editing on_order is_last make_hero /> }
                     }
                 />
-
             </div>
         </fieldset>
         <dialog class="Grid-fluid-2" node_ref=dialog_element>
@@ -171,7 +223,8 @@ pub fn PostImagesView(
 
 #[component]
 pub fn PostImage<F, H>(
-    image: PostImageData,
+    // image: PostImageData,
+    #[prop(into)] image: Field<ImageStore>,
     set_editing: WriteSignal<ImageEditSignal>,
     on_order: F,
     is_last: bool,
@@ -181,6 +234,7 @@ where
     F: Fn(String, i32) + 'static + Clone,
     H: Fn() + 'static + Clone,
 {
+    let image = image.read();
     let id = image.id.clone();
     let alt_clone = image.alt.clone();
     let src = img_url_small(&id);
@@ -203,7 +257,7 @@ where
     view! {
         <figure>
             <img on:click=on_edit src=src srcset=srcset width=250 />
-            <figcaption>{image.alt}</figcaption>
+            <figcaption>{image.alt.clone()}</figcaption>
             <footer>
                 <button
                     disabled=is_first

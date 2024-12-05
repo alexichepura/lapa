@@ -2,9 +2,10 @@ use chrono::{DateTime, FixedOffset, Utc};
 use leptos::{either::Either, prelude::*, reactive::wrappers::write::SignalSetter};
 use leptos_meta::Title;
 use leptos_router::hooks::use_navigate;
+use reactive_stores::Store;
 use serde::{Deserialize, Serialize};
 
-use super::PostError;
+use super::{ImagesStore, PostError};
 use crate::{
     form::{Checkbox, FormFooter},
     post::{PostDeleteForm, PostImages},
@@ -28,11 +29,12 @@ pub struct PostFormData {
 #[component]
 pub fn PostNew() -> impl IntoView {
     let post = PostFormData::default();
-    view! { <PostForm post=post /> }
+    let images_store = Store::new(ImagesStore { images: vec![] });
+    view! { <PostForm post images_store /> }
 }
 
 #[component]
-pub fn PostForm(post: PostFormData) -> impl IntoView {
+pub fn PostForm(post: PostFormData, images_store: Store<ImagesStore>) -> impl IntoView {
     let post_upsert = ServerAction::<PostUpsert>::new();
     let value = post_upsert.value();
     let pending = post_upsert.pending();
@@ -79,7 +81,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
         None => Either::Right(()),
     };
     let gallery_view = match post.id.clone() {
-        Some(id) => Either::Left(view! { <PostImages post_id=id /> }),
+        Some(id) => Either::Left(view! { <PostImages post_id=id images_store /> }),
         None => Either::Right(view! { <p>Gallery is not available for not saved post</p> }),
     };
     let delete_view = match post.id.clone() {
