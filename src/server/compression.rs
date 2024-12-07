@@ -12,8 +12,8 @@ pub fn compression(app: Router, site_pkg_dir: &str, site_root: &str) -> Router {
             ServeDir::new(pkg_dir)
                 .precompressed_br()
                 .precompressed_deflate()
-                .precompressed_gzip()
-                .precompressed_zstd(),
+                .precompressed_gzip(),
+            // .precompressed_zstd(), // zstd brings errors (in ff is not loading, in chrome net::ERR_ZSTD_WINDOW_SIZE_TOO_BIG)
         )
         .route_layer(CompressionLayer::new());
     app.merge(pkg_router).layer(CompressionLayer::new())
