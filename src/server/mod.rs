@@ -7,7 +7,7 @@ use axum::{
 use http::StatusCode;
 use leptos::prelude::*;
 use leptos_axum::handle_server_fns_with_context;
-use leptos_meta::MetaTags;
+use leptos_meta::{HashedStylesheet, Link, MetaTags, Script};
 use prisma_client::db::{self, PrismaClient};
 use std::sync::Arc;
 
@@ -36,20 +36,36 @@ use crate::{
 };
 
 pub fn html_shell(options: LeptosOptions, settings: SettingsCx) -> impl IntoView {
+    let settings_json = serde_json::to_string(&settings).unwrap();
+    let settings_script = format!("window.SETTINGS = {settings_json};");
     view! {
         <!DOCTYPE html>
         <html lang="en">
             <head>
                 <meta charset="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <HashedStylesheet id="leptos" options=options.clone() />
+                <MetaTags />
+                <Favicons />
+                <Script>{settings_script}</Script>
                 <AutoReload options=options.clone() />
                 <HydrationScripts options />
-                <MetaTags />
             </head>
             <body>
                 <App settings />
             </body>
         </html>
+    }
+}
+
+#[component]
+pub fn Favicons() -> impl IntoView {
+    view! {
+        <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico" />
+        <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <Link rel="manifest" href="/site.webmanifest" />
     }
 }
 

@@ -20,24 +20,14 @@ pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
     provide_meta_context();
     let (is_routing, set_is_routing) = signal(false);
 
-    let user_json = serde_json::to_string(&user).unwrap();
-    let user_script = format!("window.USER = {user_json};");
     let user_signal = RwSignal::new(user.clone());
     provide_context(user_signal);
-
-    let settings_json = serde_json::to_string(&settings).unwrap();
-    let settings_script = format!("window.SETTINGS = {settings_json};");
     let settings_signal = RwSignal::new(settings);
     provide_context(settings_signal);
 
     let formatter = |text| format!("{text} - Admin");
-
     view! {
-        <Stylesheet id="leptos" href="/pkg/admin.css" />
         <Title formatter />
-        <Favicons />
-        <Script>{user_script}</Script>
-        <Script>{settings_script}</Script>
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)
@@ -107,16 +97,5 @@ pub fn AdminRouter() -> impl IntoView {
         <Router>
             <AdminRoutes user_signal />
         </Router>
-    }
-}
-
-#[component]
-pub fn Favicons() -> impl IntoView {
-    view! {
-        <Link rel="shortcut icon" type_="image/ico" href="/favicon.ico" />
-        <Link rel="icon" type_="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <Link rel="icon" type_="image/png" sizes="16x16" href="/favicon-16x16.png" />
-        <Link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <Link rel="manifest" href="/site.webmanifest" />
     }
 }
