@@ -213,7 +213,7 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         return Ok(Err(PostError::NotFound));
     };
     let now = chrono::Utc::now().fixed_offset();
-    if published < now {
+    if published > now {
         crate::server::serverr_404();
         return Ok(Err(PostError::NotFound));
     }
