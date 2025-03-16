@@ -222,12 +222,14 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
     //     crate::server::serverr_404();
     //     return Ok(Err(PostError::NotFound));
     // }
-    let hero = post
-        .images
-        .clone()
-        .into_iter()
-        .find(|img| img.is_hero)
-        .map(|img| img.id);
+    let images = post
+        .images()
+        .collect::<Vec<_>>(&db)
+        .await
+        .map_err(|e| crate::server::anyemsg(e, "Post images"))?;
+
+    let images_iter = images.iter();
+    let hero = images_iter.find(|img| img.is_hero).map(|img| img.id);
 
     let post_data = PostData {
         id: post.id.to_string(),
@@ -236,11 +238,9 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         description: post.description,
         text: post.text,
         hero,
-        images: post
-            .images
-            .iter()
+        images: images_iter
             .map(|img| ImgData {
-                id: img.id.clone(),
+                id: img.id.to_string(),
                 alt: img.alt.clone(),
             })
             .collect(),
