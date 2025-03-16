@@ -28,7 +28,7 @@ codegen-units = 16
 codegen-units = 1
 lto = true
 panic = "abort"
-strip = "symbols"
+# strip = "symbols"
 [profile.wasm-release]
 inherits = "release"
 opt-level = 'z'
