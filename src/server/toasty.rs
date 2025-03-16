@@ -40,7 +40,7 @@ pub struct Image {
     #[auto]
     pub id: Id<Self>,
     // created_at DateTime @default(now())
-    // pub is_hero: bool,
+    pub is_hero: i64,
     pub alt: String,
     pub ext: String,
     pub order: i64,

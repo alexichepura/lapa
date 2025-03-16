@@ -55,32 +55,43 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
 
 #[server(GetPosts, "/api")]
 pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-    let now = prisma_client_rust::chrono::Utc::now().fixed_offset();
-    let posts = prisma_client
-        .post()
-        .find_many(vec![db::post::published_at::lt(now)])
-        .include(db::post::include!({
-            images(vec![db::image::is_hero::equals(true)]).take(1): select {
-                id alt
-            }
-        }))
-        .exec()
+    // use prisma_client::db;
+    // let prisma_client = crate::server::use_prisma()?;
+    // let now = prisma_client_rust::chrono::Utc::now().fixed_offset();
+    // let posts = prisma_client
+    //     .post()
+    //     .find_many(vec![db::post::published_at::lt(now)])
+    //     .include(db::post::include!({
+    //         images(vec![db::image::is_hero::equals(true)]).take(1): select {
+    //             id alt
+    //         }
+    //     }))
+    //     .exec()
+    //     .await
+    //     .map_err(|e| lib::emsg(e, "Post find_many"))?;
+    let db = crate::server::use_db()?;
+    let posts = crate::server::Post::filter(crate::server::Post::FIELDS.slug.ne(""))
+        .all(&db)
         .await
-        .map_err(|e| lib::emsg(e, "Post find_many"))?;
+        .map_err(|e| crate::server::anyemsg(e, "Post find all"))?;
+
+    let posts = posts
+        .collect::<Vec<_>>()
+        .await
+        .map_err(|e| crate::server::anyemsg(e, "Posts collect"))?;
 
     let posts: Vec<PostListItem> = posts
-        .iter()
+        .into_iter()
         .map(|data| {
-            let hero = data.images.first().map(|image| ImgData {
-                id: image.id.clone(),
+            let images = data.images.get();
+            let hero = images.first().map(|image| ImgData {
+                id: image.id.to_string(),
                 alt: image.alt.clone(),
             });
             PostListItem {
-                id: data.id.clone(),
-                title: data.title.clone(),
-                slug: data.slug.clone(),
+                id: data.id.to_string(),
+                title: data.title,
+                slug: data.slug,
                 hero,
             }
         })

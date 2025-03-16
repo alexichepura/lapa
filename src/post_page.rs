@@ -228,8 +228,10 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         .await
         .map_err(|e| crate::server::anyemsg(e, "Post images"))?;
 
-    let images_iter = images.iter();
-    let hero = images_iter.find(|img| img.is_hero).map(|img| img.id);
+    let mut images_iter = images.iter();
+    let hero: Option<String> = images_iter
+        .find(|img| img.is_hero != 0)
+        .map(|img| img.id.to_string().to_owned());
 
     let post_data = PostData {
         id: post.id.to_string(),
