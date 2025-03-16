@@ -187,36 +187,41 @@ pub fn PostImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>
 
 #[server(GetPost, "/api")]
 pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
+    // use prisma_client::db;
+    // let prisma_client = crate::server::use_prisma()?;
 
-    let post = prisma_client
-        .post()
-        .find_unique(db::post::slug::equals(slug))
-        .include(db::post::include!({
-            images(vec![]).order_by(db::image::order::order(db::SortOrder::Asc)): select {
-                id
-                alt
-                is_hero
-            }
-        }))
-        .exec()
+    // let post = prisma_client
+    //     .post()
+    //     .find_unique(db::post::slug::equals(slug))
+    //     .include(db::post::include!({
+    //         images(vec![]).order_by(db::image::order::order(db::SortOrder::Asc)): select {
+    //             id
+    //             alt
+    //             is_hero
+    //         }
+    //     }))
+    //     .exec()
+    //     .await
+    //     .map_err(|e| lib::emsg(e, "Post find"))?;
+    let db = crate::server::use_db()?;
+    let post = crate::server::Post::filter(crate::server::Post::FIELDS.slug.eq(slug))
+        .first(&db)
         .await
-        .map_err(|e| lib::emsg(e, "Post find"))?;
+        .map_err(|e| crate::server::anyemsg(e, "Post find"))?;
 
     let Some(post) = post else {
         crate::server::serverr_404();
         return Ok(Err(PostError::NotFound));
     };
-    let Some(published) = post.published_at else {
-        crate::server::serverr_404();
-        return Ok(Err(PostError::NotFound));
-    };
-    let now = chrono::Utc::now().fixed_offset();
-    if published > now {
-        crate::server::serverr_404();
-        return Ok(Err(PostError::NotFound));
-    }
+    // let Some(published) = post.published_at else {
+    //     crate::server::serverr_404();
+    //     return Ok(Err(PostError::NotFound));
+    // };
+    // let now = chrono::Utc::now().fixed_offset();
+    // if published > now {
+    //     crate::server::serverr_404();
+    //     return Ok(Err(PostError::NotFound));
+    // }
     let hero = post
         .images
         .clone()
@@ -225,7 +230,7 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         .map(|img| img.id);
 
     let post_data = PostData {
-        id: post.id,
+        id: post.id.to_string(),
         slug: post.slug,
         title: post.title,
         description: post.description,
