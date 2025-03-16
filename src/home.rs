@@ -48,15 +48,20 @@ pub fn HomePage() -> impl IntoView {
 
 #[server(GetHome, "/api")]
 pub async fn get_home() -> Result<Result<HomeData, AppError>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-    let settings = prisma_client
-        .settings()
-        .find_first(vec![])
-        .select(db::settings::select!({ home_text }))
-        .exec()
+    // use prisma_client::db;
+    // let prisma_client = crate::server::use_prisma()?;
+    // let settings = prisma_client
+    //     .settings()
+    //     .find_first(vec![])
+    //     .select(db::settings::select!({ home_text }))
+    //     .exec()
+    //     .await
+    //     .map_err(|e| lib::emsg(e, "Settings find"))?;
+    let db = crate::server::use_db()?;
+    let settings = crate::server::Settings::filter(crate::server::Settings::FIELDS.id.ne(""))
+        .first(&db)
         .await
-        .map_err(|e| lib::emsg(e, "Settings find"))?;
+        .map_err(|e| crate::server::anyemsg(e, "Settings find"))?;
     let Some(settings) = settings else {
         tracing::error!("settings record not found in database");
         crate::server::serverr_404();
