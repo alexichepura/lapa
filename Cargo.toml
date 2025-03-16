@@ -59,6 +59,7 @@ leptos_axum = { version = "0.7.0" }
 leptos_meta = { version = "0.7.0" }
 leptos_router = { version = "0.7.0", features = ["nightly"] }
 log = "0.4"
+uuid = "1"
 toasty = { git = "https://github.com/tokio-rs/toasty", features = ["sqlite"]}
 # prisma_client = { path = "./prisma_client" }
 # prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e269dee", default-features = false, features = [
@@ -80,7 +81,7 @@ tower = { version = "0.5" }
 tower_governor = { version = "0.4" }
 tower-http = { version = "0.6", features = ["fs", "trace"] }
 tracing = { version = "0.1" }
-tracing-subscriber = { version = "0.3", features = ["tracing-log"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "tracing-log"] }
 tracing-wasm = "0.2.1"
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = [
@@ -107,6 +108,7 @@ leptos_axum = { workspace = true, optional = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
 log = { workspace = true, optional = true }
+uuid.workspace = true
 # prisma_client = { workspace = true, optional = true }
 # prisma-client-rust = { workspace = true, optional = true }
 serde = { workspace = true }
@@ -114,7 +116,7 @@ serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 thiserror = { workspace = true }
 toasty.workspace = true
-tokio = { workspace = true, features = ["rt-multi-thread"] }
+tokio = { workspace = true, features = [] }
 tower = { workspace = true, optional = true }
 tower_governor = { workspace = true, optional = true }
 tower-http = { workspace = true, optional = true }
@@ -134,6 +136,7 @@ hydrate = [
     "dep:log",
     "dep:wasm-bindgen",
     "dep:web-sys",
+    "uuid/js",
     "leptos/hydrate",
 ]
 ssr = [
@@ -145,6 +148,7 @@ ssr = [
     "dep:tower-http",
     "dep:tower",
     "dep:tracing-subscriber",
+    "tokio/rt-multi-thread",
     "leptos_meta/ssr",
     "leptos_router/ssr",
     "leptos/ssr",

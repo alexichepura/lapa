@@ -19,7 +19,7 @@ async fn main() {
     };
     use tracing::info;
 
-    let db = dbuild().await;
+    let db = dbuild().await.unwrap(); // TODO ununwrap
 
     let leptopts = get_configuration(None).unwrap().leptos_options;
     let routes = generate_route_list(|| view! { <GenerateRouteList /> });
@@ -32,7 +32,7 @@ async fn main() {
         .fallback(file_and_error_handler)
         .with_state(AppState {
             leptos_options: leptopts.clone(),
-            db,
+            db: db.into(),
         })
         .layer(tower_http::trace::TraceLayer::new_for_http());
 
