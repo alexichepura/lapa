@@ -115,7 +115,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 thiserror = { workspace = true }
-toasty.workspace = true
+toasty = { workspace = true, optional = true }
 tokio = { workspace = true, features = [] }
 tower = { workspace = true, optional = true }
 tower_governor = { workspace = true, optional = true }
@@ -144,6 +144,7 @@ ssr = [
     "dep:leptos_axum",
     # "dep:prisma_client",
     # "dep:prisma-client-rust",
+    "dep:toasty",
     "dep:tower_governor",
     "dep:tower-http",
     "dep:tower",
