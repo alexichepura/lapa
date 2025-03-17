@@ -2384,7 +2384,6 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 [[package]]
 name = "std-util"
 version = "0.1.0"
-source = "git+https://github.com/tokio-rs/toasty#11c3b3e335e95e18682e3d0e739ccae9cd0172ac"
 dependencies = [
  "heck",
  "pluralizer",
@@ -2538,7 +2537,6 @@ dependencies = [
 [[package]]
 name = "toasty"
 version = "0.1.0"
-source = "git+https://github.com/tokio-rs/toasty#11c3b3e335e95e18682e3d0e739ccae9cd0172ac"
 dependencies = [
  "anyhow",
  "async-stream",
@@ -2555,7 +2553,6 @@ dependencies = [
 [[package]]
 name = "toasty-codegen"
 version = "0.1.0"
-source = "git+https://github.com/tokio-rs/toasty#11c3b3e335e95e18682e3d0e739ccae9cd0172ac"
 dependencies = [
  "indexmap",
  "proc-macro2",
@@ -2568,7 +2565,6 @@ dependencies = [
 [[package]]
 name = "toasty-codegen2"
 version = "0.1.0"
-source = "git+https://github.com/tokio-rs/toasty#11c3b3e335e95e18682e3d0e739ccae9cd0172ac"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2579,7 +2575,6 @@ dependencies = [
 [[package]]
 name = "toasty-core"
 version = "0.1.0"
-source = "git+https://github.com/tokio-rs/toasty#11c3b3e335e95e18682e3d0e739ccae9cd0172ac"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2591,7 +2586,6 @@ dependencies = [
 [[package]]
 name = "toasty-macros"
 version = "0.1.0"
-source = "git+https://github.com/tokio-rs/toasty#11c3b3e335e95e18682e3d0e739ccae9cd0172ac"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2604,7 +2598,6 @@ dependencies = [
 [[package]]
 name = "toasty-sqlite"
 version = "0.1.0"
-source = "git+https://github.com/tokio-rs/toasty#11c3b3e335e95e18682e3d0e739ccae9cd0172ac"
 dependencies = [
  "anyhow",
  "rusqlite",

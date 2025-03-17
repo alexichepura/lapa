@@ -60,7 +60,8 @@ leptos_meta = { version = "0.7.0" }
 leptos_router = { version = "0.7.0", features = ["nightly"] }
 log = "0.4"
 uuid = "1"
-toasty = { git = "https://github.com/tokio-rs/toasty", features = ["sqlite"]}
+# toasty = { git = "https://github.com/tokio-rs/toasty", features = ["sqlite"]}
+toasty = { path = "../toasty/src/toasty", features = ["sqlite"]}
 # prisma_client = { path = "./prisma_client" }
 # prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e269dee", default-features = false, features = [
 #     "sqlite",
