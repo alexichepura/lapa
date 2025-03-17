@@ -69,16 +69,19 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
     //     .exec()
     //     .await
     //     .map_err(|e| lib::emsg(e, "Post find_many"))?;
+    use crate::server::{Image, Post};
     let db = crate::server::use_db()?;
-    let posts = crate::server::Post::filter(crate::server::Post::FIELDS.slug.ne(""))
-        .all(&db)
+    let posts = crate::server::Post::filter(Post::FIELDS.slug.ne(""))
+        .include(Post::FIELDS.images)
+        .collect::<Vec<_>>(&db)
+        // .all(&db)
         .await
         .map_err(|e| crate::server::anyemsg(e, "Post find all"))?;
 
-    let posts = posts
-        .collect::<Vec<_>>()
-        .await
-        .map_err(|e| crate::server::anyemsg(e, "Posts collect"))?;
+    // let posts = posts
+    //     .collect::<Vec<_>>()
+    //     .await
+    //     .map_err(|e| crate::server::anyemsg(e, "Posts collect"))?;
 
     let posts: Vec<PostListItem> = posts
         .into_iter()
@@ -88,6 +91,7 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
                 id: image.id.to_string(),
                 alt: image.alt.clone(),
             });
+            // let hero = None;
             PostListItem {
                 id: data.id.to_string(),
                 title: data.title,
