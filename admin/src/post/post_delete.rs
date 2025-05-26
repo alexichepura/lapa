@@ -10,7 +10,7 @@ pub fn PostDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
     let value = post_delete.value();
 
     Effect::new(move |_| {
-        let v = value();
+        let v = value.get();
         if let Some(v) = v {
             let post_result = v.map_err(|_| PostError::ServerError).flatten();
             if let Ok(_post_result) = post_result {
