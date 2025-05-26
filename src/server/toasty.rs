@@ -1,7 +1,7 @@
 use toasty::{stmt::Id, Db};
 
-#[derive(Debug)]
-#[toasty::model(table = Settings)]
+#[derive(Debug, toasty::Model)]
+// #[table = "Settings"]
 pub struct Settings {
     #[key]
     #[auto]
@@ -15,8 +15,7 @@ pub struct Settings {
     pub thumb_width: i64,
 }
 
-#[derive(Debug)]
-#[toasty::model(table = Post)]
+#[derive(Debug, toasty::Model)]
 pub struct Post {
     #[key]
     #[auto]
@@ -30,11 +29,10 @@ pub struct Post {
     pub text: String,
 
     #[has_many]
-    pub images: [Image],
+    pub images: toasty::HasMany<Image>,
 }
 
-#[derive(Debug)]
-#[toasty::model(table = Image)]
+#[derive(Debug, toasty::Model)]
 pub struct Image {
     #[key]
     #[auto]
@@ -45,11 +43,10 @@ pub struct Image {
     pub ext: String,
     pub order: i64,
 
-    #[index]
-    post_id: Id<Post>,
+    pub post_id: Id<Post>,
 
     #[belongs_to(key = post_id, references = id)]
-    post: Post,
+    post: toasty::BelongsTo<Post>,
 }
 
 pub async fn dbuild() -> toasty::Result<Db> {

@@ -27,7 +27,7 @@ async fn main() {
     let app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .route("/api/{*fn_name}", post(server_fn_handler))
-        .route("/robots.txt", get(robots_txt))
+        // .route("/robots.txt", get(robots_txt))
         .route("/img/{img_name}", get(img_handler))
         .fallback(file_and_error_handler)
         .with_state(AppState {
