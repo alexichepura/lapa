@@ -1,4 +1,4 @@
-use leptos::{either::Either, prelude::*, text_prop::TextProp};
+use leptos::{either::Either, prelude::*, server_fn::Http, text_prop::TextProp};
 use serde::{de::DeserializeOwned, Serialize};
 use server_fn::{codec::PostUrl, ServerFn};
 
@@ -25,7 +25,7 @@ where
 }
 
 #[component]
-pub fn FormFooter<ServFn, O, E>(
+pub fn FormFooter<ServFn, OutputProtocol, O, E>(
     // first result for 5xx, second for 4xx
     action: ServerAction<ServFn>,
     #[prop(optional, into)] submit_text: Option<TextProp>,
@@ -33,7 +33,7 @@ pub fn FormFooter<ServFn, O, E>(
 ) -> impl IntoView
 where
     ServFn: DeserializeOwned
-        + ServerFn<InputEncoding = PostUrl, Output = Result<O, E>>
+        + ServerFn<Protocol = Http<PostUrl, OutputProtocol>, Output = Result<O, E>>
         + Clone
         + Send
         + Sync
@@ -68,7 +68,7 @@ where
                             match result {
                                 Ok(result) => Either::Left(view! { <ResultAlert result=result /> }),
                                 Err(e) => {
-                                    Either::Right(view! { <AlertDanger text=e.to_string() /> })
+                                    Either::Right(view! { <AlertDanger text=format!("{e:?}") /> })
                                 }
                             }
                         }
