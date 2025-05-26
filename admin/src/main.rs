@@ -27,8 +27,8 @@ async fn main() {
 
     let private_app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
-        .route("/api/*fn_name", post(server_fn_private))
-        .route("/auth/*fn_name", post(server_fn_public))
+        .route("/api/{*fn_name}", post(server_fn_private))
+        .route("/auth/{*fn_name}", post(server_fn_public))
         .with_state(AppState {
             leptos_options: leptopts.clone(),
             prisma_client: prisma_client.clone(),
@@ -39,7 +39,7 @@ async fn main() {
 
     let app = Router::new()
         .merge(private_app)
-        .route("/img/:img_name", get(img_handler))
+        .route("/img/{img_name}", get(img_handler))
         .fallback(file_and_error_handler)
         .with_state(AppState {
             leptos_options: leptopts.clone(),

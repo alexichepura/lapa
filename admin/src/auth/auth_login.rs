@@ -30,7 +30,7 @@ pub fn Login() -> impl IntoView {
         false => Either::Right(()),
     };
     Effect::new(move |_| {
-        if let Some(v) = value() {
+        if let Some(v) = value.get() {
             let login_result = v.map_err(|_| AuthError::ServerError).flatten();
             if let Ok(login_result) = login_result {
                 user_signal.set(Some(login_result));
