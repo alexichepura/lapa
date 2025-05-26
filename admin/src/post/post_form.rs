@@ -40,7 +40,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
 
     if let None = post.id {
         Effect::new(move |_| {
-            let v = value();
+            let v = value.get();
             if let Some(v) = v {
                 let post_result = v.map_err(|_| PostError::ServerError).flatten();
                 if let Ok(post_result) = post_result {

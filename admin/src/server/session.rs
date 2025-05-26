@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use axum_session::{
-    DatabasePool, Session, SessionConfig, SessionError, SessionLayer, SessionStore,
+    DatabaseError, DatabasePool, Session, SessionConfig, SessionLayer, SessionStore,
 };
 use prisma_client::db;
 use prisma_client::db::session;
@@ -38,11 +38,11 @@ impl From<ArcPrisma> for SessionPrismaPool {
 
 #[async_trait]
 impl DatabasePool for SessionPrismaPool {
-    async fn initiate(&self, _table_name: &str) -> Result<(), SessionError> {
+    async fn initiate(&self, _table_name: &str) -> Result<(), DatabaseError> {
         Ok(())
     }
 
-    async fn delete_by_expiry(&self, _table_name: &str) -> Result<Vec<String>, SessionError> {
+    async fn delete_by_expiry(&self, _table_name: &str) -> Result<Vec<String>, DatabaseError> {
         let result = self
             .pool
             .session()
@@ -50,7 +50,7 @@ impl DatabasePool for SessionPrismaPool {
             .select(db::session::select!({ id }))
             .exec()
             .await
-            .map_err(|e| SessionError::GenericDeleteError(e.to_string()))?;
+            .map_err(|e| DatabaseError::GenericDeleteError(e.to_string()))?;
 
         let ids: Vec<String> = result.iter().map(|r| r.id.clone()).collect();
 
@@ -61,18 +61,18 @@ impl DatabasePool for SessionPrismaPool {
             .delete_many(vec![session::id::in_vec(ids.clone())])
             .exec()
             .await
-            .map_err(|e| SessionError::GenericDeleteError(e.to_string()))?;
+            .map_err(|e| DatabaseError::GenericDeleteError(e.to_string()))?;
         Ok(ids)
     }
 
-    async fn count(&self, _table_name: &str) -> Result<i64, SessionError> {
+    async fn count(&self, _table_name: &str) -> Result<i64, DatabaseError> {
         let count = self
             .pool
             .session()
             .count(vec![])
             .exec()
             .await
-            .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
+            .map_err(|e| DatabaseError::GenericSelectError(e.to_string()))?;
         tracing::debug!("count_result={}", count);
         return Ok(count);
     }
@@ -83,7 +83,7 @@ impl DatabasePool for SessionPrismaPool {
         session: &str,
         expires: i64,
         _table_name: &str,
-    ) -> Result<(), SessionError> {
+    ) -> Result<(), DatabaseError> {
         self.pool
             .session()
             .upsert(
@@ -97,11 +97,11 @@ impl DatabasePool for SessionPrismaPool {
             )
             .exec()
             .await
-            .map_err(|e| SessionError::GenericCreateError(e.to_string()))?;
+            .map_err(|e| DatabaseError::GenericCreateError(e.to_string()))?;
         Ok(())
     }
 
-    async fn load(&self, id: &str, _table_name: &str) -> Result<Option<String>, SessionError> {
+    async fn load(&self, id: &str, _table_name: &str) -> Result<Option<String>, DatabaseError> {
         let result = self
             .pool
             .session()
@@ -114,7 +114,7 @@ impl DatabasePool for SessionPrismaPool {
             ])
             .exec()
             .await
-            .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
+            .map_err(|e| DatabaseError::GenericSelectError(e.to_string()))?;
 
         Ok(match result {
             Some(result) => Some(result.session),
@@ -122,17 +122,17 @@ impl DatabasePool for SessionPrismaPool {
         })
     }
 
-    async fn delete_one_by_id(&self, id: &str, _table_name: &str) -> Result<(), SessionError> {
+    async fn delete_one_by_id(&self, id: &str, _table_name: &str) -> Result<(), DatabaseError> {
         self.pool
             .session()
             .delete(session::id::equals(id.to_string()))
             .exec()
             .await
-            .map_err(|e| SessionError::GenericDeleteError(e.to_string()))?;
+            .map_err(|e| DatabaseError::GenericDeleteError(e.to_string()))?;
         Ok(())
     }
 
-    async fn exists(&self, id: &str, _table_name: &str) -> Result<bool, SessionError> {
+    async fn exists(&self, id: &str, _table_name: &str) -> Result<bool, DatabaseError> {
         let result = self
             .pool
             .session()
@@ -145,23 +145,23 @@ impl DatabasePool for SessionPrismaPool {
             ])
             .exec()
             .await
-            .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
+            .map_err(|e| DatabaseError::GenericSelectError(e.to_string()))?;
         let exists = result > 0;
         Ok(exists)
     }
 
-    async fn delete_all(&self, _table_name: &str) -> Result<(), SessionError> {
+    async fn delete_all(&self, _table_name: &str) -> Result<(), DatabaseError> {
         tracing::debug!("delete_all");
         self.pool
             .session()
             .delete_many(vec![])
             .exec()
             .await
-            .map_err(|e| SessionError::GenericDeleteError(e.to_string()))?;
+            .map_err(|e| DatabaseError::GenericDeleteError(e.to_string()))?;
         Ok(())
     }
 
-    async fn get_ids(&self, _table_name: &str) -> Result<Vec<String>, SessionError> {
+    async fn get_ids(&self, _table_name: &str) -> Result<Vec<String>, DatabaseError> {
         let result = self
             .pool
             .session()
@@ -172,7 +172,7 @@ impl DatabasePool for SessionPrismaPool {
             .select(db::session::select!({ id }))
             .exec()
             .await
-            .map_err(|e| SessionError::GenericSelectError(e.to_string()))?;
+            .map_err(|e| DatabaseError::GenericSelectError(e.to_string()))?;
 
         let result: Vec<String> = result.iter().map(|data| data.id.clone()).collect();
         Ok(result)

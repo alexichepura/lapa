@@ -9,9 +9,9 @@ crate-type = ["cdylib", "rlib"]
 
 [profile.dev]
 incremental = true
-opt-level = 1
+opt-level = 0
 codegen-units = 256
-debug = 1
+debug = 0
 lto = "off"
 overflow-checks = false
 [profile.dev.package."*"]
@@ -45,19 +45,19 @@ members = [
 
 [workspace.dependencies]
 lib = { path = "./lib" }
-axum = { version = "0.7.4", features = ["macros", "tracing"] }
-axum_session = { version = "0.12.4", default-features = false }
-axum_session_auth = { version = "0.12.1", default-features = false }
+axum = { version = "0.8", features = ["macros", "tracing"] }
+axum_session = { version = "0.16", default-features = false }
+axum_session_auth = { version = "0.16", default-features = false }
 bcrypt = { version = "0.15" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
 console_error_panic_hook = "0.1"
 http = "1.0"
 js-sys = { version = "0.3" }
-leptos = { version = "0.7.0", features = ["nightly", "tracing"] }
-leptos_axum = { version = "0.7.0" }
-leptos_meta = { version = "0.7.0" }
-leptos_router = { version = "0.7.0", features = ["nightly"] }
+leptos = { version = "0.8", features = ["nightly", "tracing"] }
+leptos_axum = { version = "0.8" }
+leptos_meta = { version = "0.8" }
+leptos_router = { version = "0.8", features = ["nightly"] }
 log = "0.4"
 uuid = "1"
 # toasty = { git = "https://github.com/tokio-rs/toasty", features = ["sqlite"]}
@@ -76,10 +76,10 @@ toasty = { path = "../toasty/src/toasty", features = ["sqlite"]}
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde-wasm-bindgen = "0.6.3"
-thiserror = "1.0"
+thiserror = "2"
 tokio = { version = "1.41" }
 tower = { version = "0.5" }
-tower_governor = { version = "0.4" }
+tower_governor = { version = "0.7" }
 tower-http = { version = "0.6", features = ["fs", "trace"] }
 tracing = { version = "0.1" }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "tracing-log"] }

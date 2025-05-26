@@ -7,7 +7,7 @@ pub fn Logout() -> impl IntoView {
     let value = logout.value();
     let user_signal = use_user_signal();
     Effect::new(move |_| {
-        if let Some(v) = value() {
+        if let Some(v) = value.get() {
             tracing::debug!("Logout effect: value: {:?}", &v);
             user_signal.set(None);
         }
