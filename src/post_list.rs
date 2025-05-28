@@ -69,10 +69,11 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
     //     .exec()
     //     .await
     //     .map_err(|e| lib::emsg(e, "Post find_many"))?;
-    use crate::server::{Image, Post};
+    use crate::server::Post;
     let db = crate::server::use_db()?;
     let posts = crate::server::Post::filter(Post::FIELDS.slug.ne(""))
         .include(Post::FIELDS.images)
+        // .order_by(order_by)
         .collect::<Vec<_>>(&db)
         // .all(&db)
         .await

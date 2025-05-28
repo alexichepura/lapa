@@ -1,7 +1,7 @@
 use toasty::{stmt::Id, Db};
 
 #[derive(Debug, toasty::Model)]
-// #[table = "Settings"]
+#[table = "Settings"]
 pub struct Settings {
     #[key]
     #[auto]
@@ -16,6 +16,7 @@ pub struct Settings {
 }
 
 #[derive(Debug, toasty::Model)]
+#[table = "Post"]
 pub struct Post {
     #[key]
     #[auto]
@@ -33,6 +34,7 @@ pub struct Post {
 }
 
 #[derive(Debug, toasty::Model)]
+#[table = "Image"]
 pub struct Image {
     #[key]
     #[auto]
@@ -43,8 +45,8 @@ pub struct Image {
     pub ext: String,
     pub order: i64,
 
+    #[index]
     pub post_id: Id<Post>,
-
     #[belongs_to(key = post_id, references = id)]
     post: toasty::BelongsTo<Post>,
 }
@@ -53,9 +55,8 @@ pub async fn dbuild() -> toasty::Result<Db> {
     // let db_url = std::env::var("TOASTY_CONNECTION_URL")
     //     .as_deref()
     //     .unwrap_or("sqlite::memory:");
-    let db_url = std::env::var("TOASTY_CONNECTION_URL");
+    let db_url = std::env::var("TOASTY_CONNECTION_URL").unwrap_or("sqlite:./site.db".to_owned());
     tracing::trace!("{:?}", db_url);
-    let db_url = db_url.unwrap();
     let db = Db::builder()
         .register::<Settings>()
         .register::<Post>()

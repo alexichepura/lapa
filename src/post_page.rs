@@ -203,14 +203,18 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
     //     .exec()
     //     .await
     //     .map_err(|e| lib::emsg(e, "Post find"))?;
-    let db = crate::server::use_db()?;
-    let post = crate::server::Post::filter(crate::server::Post::FIELDS.slug.eq(slug))
+    use crate::server;
+    let db = server::use_db()?;
+    // let expr = server::Post::FIELDS.slug.eq(slug);
+    // let post = server::Post::filter(expr)
+    let post = server::Post::filter_by_slug(slug)
+        .include(server::Post::FIELDS.images)
         .first(&db)
         .await
-        .map_err(|e| crate::server::anyemsg(e, "Post find"))?;
+        .map_err(|e| server::anyemsg(e, "Post find"))?;
 
     let Some(post) = post else {
-        crate::server::serverr_404();
+        server::serverr_404();
         return Ok(Err(PostError::NotFound));
     };
     // let Some(published) = post.published_at else {
@@ -222,13 +226,13 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
     //     crate::server::serverr_404();
     //     return Ok(Err(PostError::NotFound));
     // }
-    let images = post
-        .images()
-        .collect::<Vec<_>>(&db)
-        .await
-        .map_err(|e| crate::server::anyemsg(e, "Post images"))?;
+    // let images = post
+    //     .images()
+    //     .collect::<Vec<_>>(&db)
+    //     .await
+    //     .map_err(|e| server::anyemsg(e, "Post images"))?;
 
-    let mut images_iter = images.iter();
+    let mut images_iter = post.images.get().into_iter();
     let hero: Option<String> = images_iter
         .find(|img| img.is_hero != 0)
         .map(|img| img.id.to_string().to_owned());
