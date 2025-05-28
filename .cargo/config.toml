@@ -1,3 +1,16 @@
 [alias]
 prisma = "run -p prisma_cli --bin prisma --"
 cli = "run -p cli --"
+
+[target.aarch64-apple-darwin]
+rustflags = [
+  "--cfg",
+  "erase_components",
+]
+
+[target.wasm32-unknown-unknown]
+rustflags = [
+   "--cfg",
+   "erase_components",
+]
+

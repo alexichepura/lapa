@@ -1,10 +1,11 @@
+use std::collections::HashMap;
+
 use leptos::{either::Either, prelude::*};
 use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    img::{ImgData, Thumb},
-    util::{AlertDanger, Loading},
+    img::{ImgData, Thumb}, util::{AlertDanger, Loading}
 };
 
 #[component]
@@ -55,44 +56,38 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
 
 #[server(GetPosts, "/api")]
 pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
-    // use prisma_client::db;
-    // let prisma_client = crate::server::use_prisma()?;
-    // let now = prisma_client_rust::chrono::Utc::now().fixed_offset();
-    // let posts = prisma_client
-    //     .post()
-    //     .find_many(vec![db::post::published_at::lt(now)])
-    //     .include(db::post::include!({
-    //         images(vec![db::image::is_hero::equals(true)]).take(1): select {
-    //             id alt
-    //         }
-    //     }))
-    //     .exec()
-    //     .await
-    //     .map_err(|e| lib::emsg(e, "Post find_many"))?;
-    use crate::server::Post;
-    let db = crate::server::use_db()?;
-    let posts = crate::server::Post::filter(Post::FIELDS.slug.ne(""))
-        .include(Post::FIELDS.images)
-        // .order_by(order_by)
+    use crate::server::{self, Image, Post};
+    let db = server::use_db()?;
+    let posts = Post::all()
+        .order_by(Post::FIELDS.published_at.desc())
+        .paginate(10)
         .collect::<Vec<_>>(&db)
-        // .all(&db)
         .await
-        .map_err(|e| crate::server::anyemsg(e, "Post find all"))?;
-
-    // let posts = posts
-    //     .collect::<Vec<_>>()
-    //     .await
-    //     .map_err(|e| crate::server::anyemsg(e, "Posts collect"))?;
+        .map_err(|e| server::anyemsg(e, "Post find all"))?;
+    dbg!(&posts);
+    let images: HashMap<String, Image> = server::Image::filter(
+            Image::FIELDS.post_id.in_set(
+                posts.iter()
+                    .map(|p| p.id.to_string())
+                    .collect::<Vec<String>>()
+            ).and(Image::FIELDS.is_hero.eq(1))
+        )
+        .collect::<Vec<Image>>(&db)
+        .await
+        .map_err(|e| server::anyemsg(e, "Images find"))?
+        .into_iter()
+        .map(|image| (image.post_id.to_string(), image))
+        .collect();
+    dbg!(&images);
 
     let posts: Vec<PostListItem> = posts
         .into_iter()
         .map(|data| {
-            let images = data.images.get();
-            let hero = images.first().map(|image| ImgData {
-                id: image.id.to_string(),
-                alt: image.alt.clone(),
-            });
-            // let hero = None;
+            let hero = images.get(&data.id.to_string())
+                .map(|image| ImgData {
+                    id: image.id.to_string(),
+                    alt: image.alt.clone(),
+                });
             PostListItem {
                 id: data.id.to_string(),
                 title: data.title,

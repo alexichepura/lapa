@@ -21,6 +21,7 @@ pub struct Post {
     #[key]
     #[auto]
     pub id: Id<Self>,
+    pub published_at: Option<i64>,
 
     #[unique]
     pub slug: String,
