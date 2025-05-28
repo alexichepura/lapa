@@ -42,6 +42,22 @@ pub struct Image {
     // created_at DateTime @default(now())
     pub is_hero: i64,
     pub alt: String,
+    // pub ext: String,
+    pub order: i64,
+    #[index]
+    pub post_id: Id<Post>,
+    #[belongs_to(key = post_id, references = id)]
+    post: toasty::BelongsTo<Post>,
+}
+#[derive(Debug, toasty::Model)]
+#[table = "Image"]
+pub struct ImageWithOrder {
+    #[key]
+    #[auto]
+    pub id: Id<Self>,
+    // created_at DateTime @default(now())
+    pub is_hero: i64,
+    pub alt: String,
     pub ext: String,
     pub order: i64,
 

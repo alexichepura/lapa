@@ -187,9 +187,6 @@ pub fn PostImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>
 
 #[server(GetPost, "/api")]
 pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, ServerFnError> {
-    // use prisma_client::db;
-    // let prisma_client = crate::server::use_prisma()?;
-
     // let post = prisma_client
     //     .post()
     //     .find_unique(db::post::slug::equals(slug))
@@ -200,15 +197,13 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
     //             is_hero
     //         }
     //     }))
-    //     .exec()
-    //     .await
-    //     .map_err(|e| lib::emsg(e, "Post find"))?;
     use crate::server;
     let db = server::use_db()?;
     // let expr = server::Post::FIELDS.slug.eq(slug);
     // let post = server::Post::filter(expr)
     let post = server::Post::filter_by_slug(slug)
-        .include(server::Post::FIELDS.images)
+        // .include(server::Post::FIELDS.images)
+        // .order_by(server::Post::FIELDS.images)
         .first(&db)
         // .get(&db)
         .await
@@ -223,6 +218,14 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         server::serverr_404();
         return Ok(Err(PostError::NotFound));
     };
+
+    let images = post
+        .images()
+        .query(server::Image::FIELDS.id.ne(""))
+        .order_by(server::Image::FIELDS.order.asc())
+        .collect::<Vec<_>>(&db)
+        .await
+        .unwrap();
     // let Some(published) = post.published_at else {
     //     crate::server::serverr_404();
     //     return Ok(Err(PostError::NotFound));
@@ -238,7 +241,8 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
     //     .await
     //     .map_err(|e| server::anyemsg(e, "Post images"))?;
 
-    let images = post.images.get();
+    // let images = post.images.get();
+    tracing::debug!("images={:?}", images);
     let hero: Option<String> = images
         .iter()
         .find(|img| img.is_hero != 0)
