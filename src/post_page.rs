@@ -210,7 +210,13 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
     let post = server::Post::filter_by_slug(slug)
         .include(server::Post::FIELDS.images)
         .first(&db)
+        // .get(&db)
         .await
+        // .map_err(|e| {
+        //     tracing::error!("Post get e={:?}", e);
+        //     server::serverr_404();
+        //     PostError::NotFound
+        // })?;
         .map_err(|e| server::anyemsg(e, "Post find"))?;
 
     let Some(post) = post else {
@@ -232,11 +238,19 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
     //     .await
     //     .map_err(|e| server::anyemsg(e, "Post images"))?;
 
-    let mut images_iter = post.images.get().into_iter();
-    let hero: Option<String> = images_iter
+    let images = post.images.get();
+    let hero: Option<String> = images
+        .iter()
         .find(|img| img.is_hero != 0)
-        .map(|img| img.id.to_string().to_owned());
+        .map(|img| img.id.to_string());
 
+    let images = images
+        .into_iter()
+        .map(|img| ImgData {
+            id: img.id.to_string(),
+            alt: img.alt.clone(),
+        })
+        .collect();
     let post_data = PostData {
         id: post.id.to_string(),
         slug: post.slug,
@@ -244,12 +258,7 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         description: post.description,
         text: post.text,
         hero,
-        images: images_iter
-            .map(|img| ImgData {
-                id: img.id.to_string(),
-                alt: img.alt.clone(),
-            })
-            .collect(),
+        images,
     };
 
     Ok(Ok(post_data))
