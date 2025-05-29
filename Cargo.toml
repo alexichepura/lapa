@@ -87,6 +87,7 @@ web-sys = { version = "0.3", features = [
 ] }
 
 [dependencies]
+clorinde = { path = "clorinde" }
 lib = { workspace = true, features = ["leptos"] }
 axum = { workspace = true, optional = true }
 cfg-if = { workspace = true }

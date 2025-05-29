@@ -4,12 +4,11 @@ use axum::{
     http::Request,
     response::{IntoResponse, Response},
 };
+use clorinde::queries;
 use http::StatusCode;
 use leptos::prelude::*;
 use leptos_axum::handle_server_fns_with_context;
 use leptos_meta::{HashedStylesheet, Link, MetaTags, Script};
-use prisma_client::db::{self, PrismaClient};
-use std::sync::Arc;
 
 use cfg_if::cfg_if;
 cfg_if! {if #[cfg(feature = "ssr")] {
@@ -23,6 +22,7 @@ cfg_if! {if #[cfg(feature = "ssr")] {
     }}
 }}
 
+pub mod db;
 pub mod err;
 pub mod fileserv;
 pub mod prisma;
@@ -32,7 +32,7 @@ pub use prisma::*;
 
 use crate::{
     app::App,
-    settings::{settins_db, SettingsCx},
+    settings::{settings_db, SettingsCx},
 };
 
 pub fn html_shell(options: LeptosOptions, settings: SettingsCx) -> impl IntoView {
@@ -72,7 +72,8 @@ pub fn Favicons() -> impl IntoView {
 #[derive(FromRef, Debug, Clone)]
 pub struct AppState {
     pub leptos_options: LeptosOptions,
-    pub prisma_client: Arc<PrismaClient>,
+    pub pool: clorinde::deadpool_postgres::Pool,
+    // pub prisma_client: Arc<PrismaClient>,
 }
 
 pub async fn server_fn_handler(
@@ -81,7 +82,8 @@ pub async fn server_fn_handler(
 ) -> impl IntoResponse {
     handle_server_fns_with_context(
         move || {
-            provide_context(app_state.prisma_client.clone());
+            // provide_context(app_state.prisma_client.clone());
+            provide_context(app_state.pool.clone());
         },
         request,
     )
@@ -98,25 +100,27 @@ pub async fn leptos_routes_handler(
         Some(ua_header) => Some(ua_header.to_str().unwrap().to_string()),
         _ => None,
     };
-    let prisma_client = app_state.prisma_client.clone();
-    tokio::spawn(async move {
-        let result = app_state
-            .prisma_client
-            .clone()
-            .ssr()
-            .create(path, vec![db::ssr::user_agent::set(user_agent)])
-            .exec()
-            .await;
-        if let Err(query_error) = result {
-            tracing::error!("{query_error:?}");
-        }
-    });
-    let settings = settins_db(prisma_client.clone()).await;
+    // let prisma_client = app_state.prisma_client.clone();
+    let pool = app_state.pool.clone();
+    // tokio::spawn(async move {
+    //     let result = app_state
+    //         .prisma_client
+    //         .clone()
+    //         .ssr()
+    //         .create(path, vec![ssr::user_agent::set(user_agent)])
+    //         .exec()
+    //         .await;
+    //     if let Err(query_error) = result {
+    //         tracing::error!("{query_error:?}");
+    //     }
+    // });
+    let settings = settings_db(pool.clone()).await;
     let leptos_options = app_state.leptos_options;
 
     let handler = leptos_axum::render_app_async_with_context(
         move || {
-            provide_context(prisma_client.clone());
+            // provide_context(prisma_client.clone());
+            provide_context(pool.clone());
         },
         move || html_shell(leptos_options.clone(), settings.clone()),
     );
@@ -124,22 +128,11 @@ pub async fn leptos_routes_handler(
 }
 
 pub async fn robots_txt(State(app_state): State<AppState>) -> Result<String, (StatusCode, String)> {
-    use prisma_client::db;
-    let prisma_client = app_state.prisma_client;
-
-    let settings = prisma_client
-        .settings()
-        .find_first(vec![])
-        .select(db::settings::select!({ robots_txt }))
-        .exec()
-        .await
-        .map_err(|e| {
-            tracing::error!("{e:?}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Server error".to_string(),
-            )
-        })?;
-    let settings = settings.unwrap();
-    Ok(settings.robots_txt)
+    // use prisma_client::db;
+    // let prisma_client = app_state.prisma_client;
+    let client = app_state.pool.clone().get().await.unwrap();
+    let robots = queries::settings::settings_robots().bind(&client).opt().await.unwrap();
+    dbg!(&robots);
+    let robots = robots.unwrap();
+    Ok(robots)
 }
