@@ -23,7 +23,7 @@ async fn main() {
 
     let leptopts = get_configuration(None).unwrap().leptos_options;
     let routes = generate_route_list(|| view! { <AdminRouter /> });
-    let prisma_client = init_prisma_client().await;
+    let pool = db::create_pool().await.unwrap();
 
     let private_app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
@@ -31,7 +31,7 @@ async fn main() {
         .route("/auth/{*fn_name}", post(server_fn_public))
         .with_state(AppState {
             leptos_options: leptopts.clone(),
-            prisma_client: prisma_client.clone(),
+            pool: pool.clone(),
         })
         .layer(auth_session_layer(&prisma_client))
         .layer(session_layer(&prisma_client).await)
@@ -43,7 +43,7 @@ async fn main() {
         .fallback(file_and_error_handler)
         .with_state(AppState {
             leptos_options: leptopts.clone(),
-            prisma_client: prisma_client.clone(),
+            pool: pool.clone(),
         })
         .layer(tower_http::trace::TraceLayer::new_for_http());
 

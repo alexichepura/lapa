@@ -29,6 +29,7 @@ dependencies = [
  "bcrypt",
  "cfg-if",
  "chrono",
+ "clorinde",
  "console_error_panic_hook",
  "http",
  "image",

@@ -94,12 +94,10 @@ Type-safe database access.
 
 ## Run
 
-### Generate prisma client
+### Generate db client
 
 ```sh
-cargo prisma db push # generate client and push schema to db
-# or
-cargo prisma generate # only generate client
+clorinde schema ./schema.sql
 ```
 
 ### Init
@@ -162,17 +160,6 @@ Considering return back to CSS if/when cargo-leptos will support lightningcss co
 
 Sass PR <https://github.com/alexichepura/lapa/pull/24>.
 Ligntningcss bundle with cli proof of concept <https://github.com/alexichepura/lapa/pull/23>.
-
-## Notes on prisma
-
-How initial migration created
-<https://www.prisma.io/docs/guides/migrate/developing-with-prisma-migrate/add-prisma-migrate-to-a-project>
-
-```sh
-mkdir -p prisma/migrations/0_init
-cargo prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql
-cargo prisma migrate resolve --applied 0_init
-```
 
 ## License
 

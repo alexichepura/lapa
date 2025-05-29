@@ -38,6 +38,7 @@ resolver = "2"
 members = ["lib", "admin", "cli"]
 
 [workspace.dependencies]
+clorinde = { path = "./clorinde" }
 lib = { path = "./lib" }
 axum = { version = "0.8", features = ["macros", "tracing"] }
 axum_session = { version = "0.16", default-features = false }
@@ -76,7 +77,7 @@ web-sys = { version = "0.3", features = [
 ] }
 
 [dependencies]
-clorinde = { path = "clorinde", optional = true }
+clorinde = { workspace = true, optional = true }
 lib = { workspace = true, features = ["leptos"] }
 axum = { workspace = true, optional = true }
 cfg-if = { workspace = true }
