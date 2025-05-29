@@ -55,28 +55,18 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
 
 #[server(GetPosts, "/api")]
 pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-    let now = prisma_client_rust::chrono::Utc::now().fixed_offset();
-    let posts = prisma_client
-        .post()
-        .find_many(vec![db::post::published_at::lt(now)])
-        .include(db::post::include!({
-            images(vec![db::image::is_hero::equals(true)]).take(1): select {
-                id alt
-            }
-        }))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let posts = clorinde::queries::post::post_list()
+        .bind(&db).all()
         .await
-        .map_err(|e| lib::emsg(e, "Post find_many"))?;
-
+        .map_err(|e| lib::emsg(e, "Post list find"))?;
     let posts: Vec<PostListItem> = posts
-        .iter()
+        .into_iter()
         .map(|data| {
-            let hero = data.images.first().map(|image| ImgData {
-                id: image.id.clone(),
-                alt: image.alt.clone(),
-            });
+            let hero = match (data.image_id, data.alt) {
+                (Some(id), Some(alt)) => Some(ImgData { id, alt }),
+                _ => None,
+            };
             PostListItem {
                 id: data.id.clone(),
                 title: data.title.clone(),

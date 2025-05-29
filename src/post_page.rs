@@ -187,43 +187,32 @@ pub fn PostImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>
 
 #[server(GetPost, "/api")]
 pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let post = prisma_client
-        .post()
-        .find_unique(db::post::slug::equals(slug))
-        .include(db::post::include!({
-            images(vec![]).order_by(db::image::order::order(db::SortOrder::Asc)): select {
-                id
-                alt
-                is_hero
-            }
-        }))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let post = clorinde::queries::post::post_page()
+        .bind(&db, &slug).opt()
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;
-
     let Some(post) = post else {
         crate::server::serverr_404();
         return Ok(Err(PostError::NotFound));
     };
-    let Some(published) = post.published_at else {
-        crate::server::serverr_404();
-        return Ok(Err(PostError::NotFound));
-    };
-    let now = chrono::Utc::now().fixed_offset();
-    if published > now {
-        crate::server::serverr_404();
-        return Ok(Err(PostError::NotFound));
-    }
-    let hero = post
-        .images
-        .clone()
-        .into_iter()
+    // let Some(published) = post.published_at else {
+    //     crate::server::serverr_404();
+    //     return Ok(Err(PostError::NotFound));
+    // };
+    // let now = chrono::Utc::now().naive_utc();
+    // if published > now {
+    //     crate::server::serverr_404();
+    //     return Ok(Err(PostError::NotFound));
+    // }
+    let images = clorinde::queries::post::post_images()
+        .bind(&db, &post.id).all()
+        .await
+        .map_err(|e| lib::emsg(e, "Post images find"))?;
+    let hero = images
+        .iter()
         .find(|img| img.is_hero)
-        .map(|img| img.id);
-
+        .map(|img| img.id.clone());
     let post_data = PostData {
         id: post.id,
         slug: post.slug,
@@ -231,12 +220,11 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         description: post.description,
         text: post.text,
         hero,
-        images: post
-            .images
-            .iter()
+        images: images
+            .into_iter()
             .map(|img| ImgData {
-                id: img.id.clone(),
-                alt: img.alt.clone(),
+                id: img.id,
+                alt: img.alt,
             })
             .collect(),
     };

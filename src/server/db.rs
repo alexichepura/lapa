@@ -1,7 +1,7 @@
 use leptos::prelude::{use_context, ServerFnError};
-
-use clorinde::deadpool_postgres::{Config, CreatePoolError, Pool, Runtime};
+use clorinde::deadpool_postgres::{Config, CreatePoolError, Object, Pool, Runtime};
 use clorinde::tokio_postgres::NoTls;
+
 pub async fn create_pool() -> Result<Pool, CreatePoolError> {
     let mut cfg = Config::new();
     cfg.user = Some(String::from("postgres"));
@@ -16,4 +16,9 @@ pub fn use_pool() -> Result<Pool, ServerFnError> {
     use_context::<Pool>()
         .ok_or("Pool missing.")
         .map_err(|e| ServerFnError::new(e.to_string()))
+}
+pub async fn use_db() -> Result<Object, ServerFnError> {
+    let pool = use_pool()?;
+    let client = pool.clone().get().await.unwrap();
+    Ok(client)
 }

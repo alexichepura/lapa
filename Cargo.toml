@@ -87,7 +87,7 @@ web-sys = { version = "0.3", features = [
 ] }
 
 [dependencies]
-clorinde = { path = "clorinde" }
+clorinde = { path = "clorinde", optional = true }
 lib = { workspace = true, features = ["leptos"] }
 axum = { workspace = true, optional = true }
 cfg-if = { workspace = true }
@@ -100,8 +100,6 @@ leptos_axum = { workspace = true, optional = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
 log = { workspace = true, optional = true }
-prisma_client = { workspace = true, optional = true }
-prisma-client-rust = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
@@ -131,8 +129,7 @@ hydrate = [
 ssr = [
     "dep:axum",
     "dep:leptos_axum",
-    "dep:prisma_client",
-    "dep:prisma-client-rust",
+    "dep:clorinde",
     "dep:tower_governor",
     "dep:tower-http",
     "dep:tower",

@@ -6,7 +6,7 @@ formatter = { command = "leptosfmt", args = ["--stdin", "--rustfmt"] }
 # [language-server.rust-analyzer.config.check]
 # command = "clippy"
 [language-server.rust-analyzer.config.cargo]
-features = "all"
-# features = ["ssr","hydrate","lib/server","ratelimit","compression","leptos"]
+# features = "all"
+features = ["ssr","hydrate","lib/server","ratelimit","compression","leptos"]
 [language-server.rust-analyzer.environment]
 CARGO_TARGET_DIR = "target/rust-analyzer"

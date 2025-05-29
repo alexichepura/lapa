@@ -25,10 +25,8 @@ cfg_if! {if #[cfg(feature = "ssr")] {
 pub mod db;
 pub mod err;
 pub mod fileserv;
-pub mod prisma;
 pub use err::*;
 pub use fileserv::*;
-pub use prisma::*;
 
 use crate::{
     app::App,
@@ -73,7 +71,6 @@ pub fn Favicons() -> impl IntoView {
 pub struct AppState {
     pub leptos_options: LeptosOptions,
     pub pool: clorinde::deadpool_postgres::Pool,
-    // pub prisma_client: Arc<PrismaClient>,
 }
 
 pub async fn server_fn_handler(
@@ -82,7 +79,6 @@ pub async fn server_fn_handler(
 ) -> impl IntoResponse {
     handle_server_fns_with_context(
         move || {
-            // provide_context(app_state.prisma_client.clone());
             provide_context(app_state.pool.clone());
         },
         request,
@@ -100,7 +96,6 @@ pub async fn leptos_routes_handler(
         Some(ua_header) => Some(ua_header.to_str().unwrap().to_string()),
         _ => None,
     };
-    // let prisma_client = app_state.prisma_client.clone();
     let pool = app_state.pool.clone();
     // tokio::spawn(async move {
     //     let result = app_state
@@ -119,7 +114,6 @@ pub async fn leptos_routes_handler(
 
     let handler = leptos_axum::render_app_async_with_context(
         move || {
-            // provide_context(prisma_client.clone());
             provide_context(pool.clone());
         },
         move || html_shell(leptos_options.clone(), settings.clone()),
@@ -128,8 +122,6 @@ pub async fn leptos_routes_handler(
 }
 
 pub async fn robots_txt(State(app_state): State<AppState>) -> Result<String, (StatusCode, String)> {
-    // use prisma_client::db;
-    // let prisma_client = app_state.prisma_client;
     let client = app_state.pool.clone().get().await.unwrap();
     let robots = queries::settings::settings_robots().bind(&client).opt().await.unwrap();
     dbg!(&robots);

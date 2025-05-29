@@ -7,10 +7,10 @@ publish = false
 [features]
 default = []
 leptos = ["dep:leptos", "dep:http"]
-# server = [
+server = [
 #     "dep:prisma_client",
 #     "dep:prisma-client-rust",
-# ]
+]
 
 [lib]
 crate-type = ["cdylib", "rlib"]

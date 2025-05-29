@@ -13,3 +13,8 @@ FROM "Settings";
 SELECT
     "robots_txt"
 FROM "Settings";
+
+--! settings_home
+SELECT
+    "home_text"
+FROM "Settings";

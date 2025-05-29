@@ -217,3 +217,23 @@ impl SettingsRobotsStmt {
         }
     }
 }
+pub fn settings_home() -> SettingsHomeStmt {
+    SettingsHomeStmt(crate::client::async_::Stmt::new(
+        "SELECT \"home_text\" FROM \"Settings\"",
+    ))
+}
+pub struct SettingsHomeStmt(crate::client::async_::Stmt);
+impl SettingsHomeStmt {
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s mut self,
+        client: &'c C,
+    ) -> StringQuery<'c, 'a, 's, C, String, 0> {
+        StringQuery {
+            client,
+            params: [],
+            stmt: &mut self.0,
+            extractor: |row| Ok(row.try_get(0)?),
+            mapper: |it| it.into(),
+        }
+    }
+}
