@@ -97,21 +97,8 @@ pub async fn leptos_routes_handler(
         _ => None,
     };
     let pool = app_state.pool.clone();
-    // tokio::spawn(async move {
-    //     let result = app_state
-    //         .prisma_client
-    //         .clone()
-    //         .ssr()
-    //         .create(path, vec![ssr::user_agent::set(user_agent)])
-    //         .exec()
-    //         .await;
-    //     if let Err(query_error) = result {
-    //         tracing::error!("{query_error:?}");
-    //     }
-    // });
     let settings = settings_db(pool.clone()).await;
     let leptos_options = app_state.leptos_options;
-
     let handler = leptos_axum::render_app_async_with_context(
         move || {
             provide_context(pool.clone());

@@ -7,10 +7,7 @@ publish = false
 [features]
 default = []
 leptos = ["dep:leptos", "dep:http"]
-server = [
-#     "dep:prisma_client",
-#     "dep:prisma-client-rust",
-]
+server = []
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -19,8 +16,6 @@ crate-type = ["cdylib", "rlib"]
 cfg-if = { workspace = true }
 http = { workspace = true, optional = true }
 leptos = { workspace = true, optional = true }
-# prisma_client = { workspace = true, optional = true }
-# prisma-client-rust = { workspace = true, optional = true }
 # serde = { workspace = true }
 thiserror = { workspace = true }
 # tokio = { workspace = true }
