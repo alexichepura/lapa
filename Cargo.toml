@@ -68,7 +68,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde-wasm-bindgen = "0.6.3"
 thiserror = "2"
-tokio = { version = "1.41" }
+tokio = { version = "1.41", features = ["macros"] }
 tower = { version = "0.5" }
 tower_governor = { version = "0.7" }
 tower-http = { version = "0.6", features = ["fs", "trace"] }
@@ -109,7 +109,7 @@ tower = { workspace = true, optional = true }
 tower_governor = { workspace = true, optional = true }
 tower-http = { workspace = true, optional = true }
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true, optional = true }
+tracing-subscriber = { workspace = true, optional = true, features = ["env-filter"] }
 tracing-wasm = { workspace = true }
 wasm-bindgen = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }
@@ -130,6 +130,7 @@ ssr = [
     "dep:axum",
     "dep:leptos_axum",
     "dep:clorinde",
+    "tokio/rt-multi-thread",
     "dep:tower_governor",
     "dep:tower-http",
     "dep:tower",
