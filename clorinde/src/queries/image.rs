@@ -1,5 +1,10 @@
 // This file was generated with `clorinde`. Do not modify.
 
+#[derive(Debug)]
+pub struct UpdateAltParams<T1: crate::StringSql, T2: crate::StringSql> {
+    pub alt: T1,
+    pub id: T2,
+}
 #[derive(Debug, Clone, PartialEq)]
 pub struct SelectAllForConvert {
     pub id: String,
@@ -132,5 +137,60 @@ impl DeleteManyByIdStmt {
     ) -> Result<u64, tokio_postgres::Error> {
         let stmt = self.0.prepare(client).await?;
         client.execute(stmt, &[ids]).await
+    }
+}
+pub fn delete_by_id() -> DeleteByIdStmt {
+    DeleteByIdStmt(crate::client::async_::Stmt::new(
+        "DELETE FROM \"Image\" WHERE id = $1",
+    ))
+}
+pub struct DeleteByIdStmt(crate::client::async_::Stmt);
+impl DeleteByIdStmt {
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        id: &'a T1,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client.execute(stmt, &[id]).await
+    }
+}
+pub fn update_alt() -> UpdateAltStmt {
+    UpdateAltStmt(crate::client::async_::Stmt::new(
+        "UPDATE \"Image\" SET alt = $1 WHERE id = $2",
+    ))
+}
+pub struct UpdateAltStmt(crate::client::async_::Stmt);
+impl UpdateAltStmt {
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql, T2: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        alt: &'a T1,
+        id: &'a T2,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client.execute(stmt, &[alt, id]).await
+    }
+}
+impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql, T2: crate::StringSql>
+    crate::client::async_::Params<
+        'a,
+        'a,
+        'a,
+        UpdateAltParams<T1, T2>,
+        std::pin::Pin<
+            Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+        >,
+        C,
+    > for UpdateAltStmt
+{
+    fn params(
+        &'a mut self,
+        client: &'a C,
+        params: &'a UpdateAltParams<T1, T2>,
+    ) -> std::pin::Pin<
+        Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+    > {
+        Box::pin(self.bind(client, &params.alt, &params.id))
     }
 }

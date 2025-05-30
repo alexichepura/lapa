@@ -8,3 +8,13 @@ FROM "Image";
 DELETE
 FROM "Image"
 WHERE id = ANY(:ids);
+
+--! delete_by_id
+DELETE
+FROM "Image"
+WHERE id = :id;
+
+--! update_alt
+UPDATE "Image"
+SET alt = :alt
+WHERE id = :id;
