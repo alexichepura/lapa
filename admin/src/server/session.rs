@@ -5,12 +5,12 @@ use axum_session::{
 use chrono::{DateTime};
 use clorinde::{deadpool_postgres::Pool, queries};
 
-pub async fn session_layer(prisma: &Pool) -> SessionLayer<SessionPool> {
+pub async fn session_layer(pool: &Pool) -> SessionLayer<SessionPool> {
     let config = SessionConfig::default()
         .with_table_name("Session")
         .with_session_name("session");
 
-    let store = SessionStore::<SessionPool>::new(Some(prisma.clone().into()), config)
+    let store = SessionStore::<SessionPool>::new(Some(pool.clone().into()), config)
         .await
         .unwrap();
 
