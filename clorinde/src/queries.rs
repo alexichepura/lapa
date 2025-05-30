@@ -4,4 +4,5 @@ pub mod image;
 pub mod post;
 pub mod session;
 pub mod settings;
+pub mod ssr;
 pub mod user;
