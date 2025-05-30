@@ -1,4 +1,4 @@
-use clorinde::deadpool_postgres::{Config, CreatePoolError, Object, Pool, Runtime};
+use clorinde::deadpool_postgres::{Config, CreatePoolError, Pool, Runtime};
 use clorinde::tokio_postgres::NoTls;
 
 pub async fn create_pool() -> Result<Pool, CreatePoolError> {

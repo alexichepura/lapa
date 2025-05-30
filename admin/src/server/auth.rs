@@ -25,7 +25,10 @@ pub fn use_auth() -> Result<AuthSession, ServerFnError> {
 #[async_trait::async_trait]
 impl Authentication<User, String, Pool> for User {
     async fn load_user(userid: String, pool: Option<&Pool>) -> Result<User, anyhow::Error> {
-        let db = crate::server::db::use_db().await.unwrap();
+        let Some(pool) = pool else {
+            return Err(anyhow::anyhow!("no pool"))
+        };
+        let db = pool.clone().get().await.unwrap();
         let username = clorinde::queries::user::user_find_by_id()
             .bind(&db, &userid).opt()
             .await

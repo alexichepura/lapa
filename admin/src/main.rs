@@ -9,8 +9,7 @@ async fn main() {
     use admin::{
         app::AdminRouter,
         server::{
-            auth_session_layer, file_and_error_handler, img_handler, init_prisma_client,
-            leptos_routes_handler, server_fn_private, server_fn_public, session_layer, AppState,
+            auth_session_layer, db, file_and_error_handler, img_handler, leptos_routes_handler, server_fn_private, server_fn_public, session_layer, AppState
         },
     };
     use axum::{
@@ -33,8 +32,8 @@ async fn main() {
             leptos_options: leptopts.clone(),
             pool: pool.clone(),
         })
-        .layer(auth_session_layer(&prisma_client))
-        .layer(session_layer(&prisma_client).await)
+        .layer(auth_session_layer(&pool))
+        .layer(session_layer(&pool).await)
         .layer(tower_http::trace::TraceLayer::new_for_http());
 
     let app = Router::new()

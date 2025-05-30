@@ -259,81 +259,52 @@ pub async fn images_order_update(
     ids: Vec<String>,
 ) -> Result<ImagesOrderUpdateResult, ServerFnError> {
     // TODO how this can be improved? batch, sql?
-    let mut db = crate::server::db::use_db().await?;
+    let mut db_trx = crate::server::db::use_db().await?;
+    let db = crate::server::db::use_db().await?;
     let order_update = ids.into_iter().enumerate();
-    let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Images order transaction init"))?;
+    let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images order transaction init"))?;
     for (i, id) in order_update {
-        let db = crate::server::db::use_db().await?;
         clorinde::queries::image::update_order().bind(&db, &(i as i32), &id).await;
     }
     trx.commit().await.map_err(|e| lib::emsg(e, "Images order transaction"))?;
     Ok(Ok(()))
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct ImageMakeHeroData {
-    pub hero: String,
-    pub not_hero: Option<String>,
-}
-pub type ImageMakeHeroResult = Result<ImageMakeHeroData, ImageLoadError>;
+// #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+// pub struct ImageMakeHeroData {
+//     pub hero: String,
+//     pub not_hero: Option<String>,
+// }
+// pub type ImageMakeHeroResult = Result<ImageMakeHeroData, ImageLoadError>;
+pub type ImageMakeHeroResult = Result<(), ImageLoadError>;
 #[server(ImageMakeHero, "/api")]
 pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFnError> {
-    let current_img = prisma_client
-        .image()
-        .find_unique(db::image::id::equals(id.clone()))
-        .select(db::image::select!({ post_id }))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let current_img = clorinde::queries::image::select_post_id()
+        .bind(&db, &id)
+        .opt()
         .await
         .map_err(|e| lib::emsg(e, "Image find"))?;
     if let None = current_img {
         return Ok(Err(ImageLoadError::NotFound));
     }
     let current_img = current_img.unwrap();
-    let current_hero = prisma_client
-        .image()
-        .find_first(vec![
-            db::image::post_id::equals(current_img.post_id),
-            db::image::is_hero::equals(true),
-        ])
-        .select(db::image::select!({ id }))
-        .exec()
+    let current_hero = clorinde::queries::image::find_hero()
+        .bind(&db, &current_img)
+        .opt()
         .await
-        .map_err(|e| lib::emsg(e, "Image hero find"))?;
+        .map_err(|e| lib::emsg(e, "Image current hero find"))?;
 
-    let data: ImageMakeHeroData = prisma_client
-        ._transaction()
-        .run(|prisma_client| async move {
-            let not_hero = if let Some(current_hero) = current_hero {
-                let not_hero = prisma_client
-                    .image()
-                    .update(
-                        db::image::id::equals(current_hero.id),
-                        vec![db::image::is_hero::set(false)],
-                    )
-                    .select(db::image::select!({ id is_hero }))
-                    .exec()
-                    .await?;
-                Some(not_hero.id)
-            } else {
-                None
-            };
-
-            prisma_client
-                .image()
-                .update(
-                    db::image::id::equals(id),
-                    vec![db::image::is_hero::set(true)],
-                )
-                .select(db::image::select!({ id is_hero }))
-                .exec()
-                .await
-                .map(|hero| ImageMakeHeroData {
-                    hero: hero.id,
-                    not_hero,
-                })
-        })
-        .await
-        .map_err(|e| lib::emsg(e, "Image update"))?;
-
-    Ok(Ok(data))
+    let mut db_trx = crate::server::db::use_db().await?;
+    let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images hero transaction init"))?;
+    clorinde::queries::image::set_hero()
+        .bind(&db, &id)
+        .await;
+    if let Some(current_hero) = current_hero {
+        clorinde::queries::image::unset_hero()
+            .bind(&db, &current_hero)
+            .await;
+    }
+    trx.commit().await.map_err(|e| lib::emsg(e, "Images hero transaction"))?;
+    Ok(Ok(()))
 }

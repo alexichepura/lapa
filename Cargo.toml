@@ -63,7 +63,7 @@ tower = { version = "0.5" }
 tower_governor = { version = "0.7" }
 tower-http = { version = "0.6", features = ["fs", "trace"] }
 tracing = { version = "0.1" }
-tracing-subscriber = { version = "0.3", features = ["tracing-log"] }
+tracing-subscriber = { version = "0.3", features = ["tracing-log", "env-filter"] }
 tracing-wasm = "0.2.1"
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = [
@@ -99,7 +99,7 @@ tower = { workspace = true, optional = true }
 tower_governor = { workspace = true, optional = true }
 tower-http = { workspace = true, optional = true }
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true, optional = true, features = ["env-filter"] }
+tracing-subscriber = { workspace = true, optional = true }
 tracing-wasm = { workspace = true }
 wasm-bindgen = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }

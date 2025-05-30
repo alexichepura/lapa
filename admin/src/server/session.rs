@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use axum_session::{
     DatabaseError, DatabasePool, SessionConfig, SessionLayer, SessionStore,
 };
-use chrono::{DateTime, NaiveDateTime};
+use chrono::{DateTime};
 use clorinde::{deadpool_postgres::Pool, queries};
 
 pub async fn session_layer(prisma: &Pool) -> SessionLayer<SessionPool> {

@@ -305,6 +305,80 @@ impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql>
         Box::pin(self.bind(client, &params.order, &params.id))
     }
 }
+pub fn set_hero() -> SetHeroStmt {
+    SetHeroStmt(crate::client::async_::Stmt::new(
+        "UPDATE \"Image\" SET \"is_hero\" = true WHERE id = $1",
+    ))
+}
+pub struct SetHeroStmt(crate::client::async_::Stmt);
+impl SetHeroStmt {
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        id: &'a T1,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client.execute(stmt, &[id]).await
+    }
+}
+pub fn unset_hero() -> UnsetHeroStmt {
+    UnsetHeroStmt(crate::client::async_::Stmt::new(
+        "UPDATE \"Image\" SET \"is_hero\" = false WHERE id = $1",
+    ))
+}
+pub struct UnsetHeroStmt(crate::client::async_::Stmt);
+impl UnsetHeroStmt {
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        id: &'a T1,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client.execute(stmt, &[id]).await
+    }
+}
+pub fn select_post_id() -> SelectPostIdStmt {
+    SelectPostIdStmt(crate::client::async_::Stmt::new(
+        "SELECT post_id FROM \"Image\" WHERE id = $1",
+    ))
+}
+pub struct SelectPostIdStmt(crate::client::async_::Stmt);
+impl SelectPostIdStmt {
+    pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        id: &'a T1,
+    ) -> StringQuery<'c, 'a, 's, C, String, 1> {
+        StringQuery {
+            client,
+            params: [id],
+            stmt: &mut self.0,
+            extractor: |row| Ok(row.try_get(0)?),
+            mapper: |it| it.into(),
+        }
+    }
+}
+pub fn find_hero() -> FindHeroStmt {
+    FindHeroStmt(crate::client::async_::Stmt::new(
+        "SELECT id FROM \"Image\" WHERE post_id = $1 AND is_hero = true",
+    ))
+}
+pub struct FindHeroStmt(crate::client::async_::Stmt);
+impl FindHeroStmt {
+    pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        post_id: &'a T1,
+    ) -> StringQuery<'c, 'a, 's, C, String, 1> {
+        StringQuery {
+            client,
+            params: [post_id],
+            stmt: &mut self.0,
+            extractor: |row| Ok(row.try_get(0)?),
+            mapper: |it| it.into(),
+        }
+    }
+}
 pub fn create() -> CreateStmt {
     CreateStmt(crate::client::async_::Stmt::new(
         "INSERT INTO \"Image\" (alt, ext, post_id) VALUES ($1, $2, $3) RETURNING id",
