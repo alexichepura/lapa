@@ -72,9 +72,6 @@ pub async fn upload_img(
     }
     let img_bytes = img_bytes.unwrap();
 
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
     let cursor = std::io::Cursor::new(img_bytes.clone());
     let img_reader = image::ImageReader::new(cursor.clone()).with_guessed_format();
 
@@ -93,23 +90,22 @@ pub async fn upload_img(
     let img_format = img_format.unwrap();
     let ext = img_format.extensions_str().first().unwrap();
 
-    let image_upload_data = prisma_client
-        .image()
-        .create(alt, ext.to_string(), db::post::id::equals(post_id), vec![])
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let image_upload_data = clorinde::queries::image::create()
+        .bind(&db, &alt, ext, &post_id)
+        .one()
         .await
         .map_err(|e| lib::emsg(e, "Image create"))?;
 
-    let id = image_upload_data.id;
+    let id = image_upload_data;
     let file_path = crate::image::img_path_upload_ext(&id, &ext.to_string());
     std::fs::write(file_path.clone(), img_bytes).map_err(|e| lib::emsg(e, "Image write"))?;
 
     let img_decoded = img_reader.decode().unwrap();
 
-    let settings = prisma_client
-        .settings()
-        .find_first(vec![])
-        .exec()
+    let settings = clorinde::queries::settings::settings()
+        .bind(&db)
+        .opt()
         .await
         .map_err(|e| lib::emsg(e, "Settings find"))?
         .unwrap();

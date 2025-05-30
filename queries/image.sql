@@ -18,3 +18,8 @@ WHERE id = :id;
 UPDATE "Image"
 SET alt = :alt
 WHERE id = :id;
+
+--! create
+INSERT INTO "Image" (alt, ext, post_id)
+  VALUES (:alt, :ext, :post_id)
+RETURNING id;
