@@ -64,45 +64,19 @@ pub async fn settings_images_update(
     thumb_width: String,
     thumb_height: String,
 ) -> Result<Result<(), SettingsError>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let settings_saved = prisma_client
-        .settings()
-        .find_first(vec![])
-        .select(db::settings::select!({ id }))
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Settings find"))?;
-
-    let id: String;
-    if let Some(settings_saved) = settings_saved {
-        id = settings_saved.id;
-    } else {
+    let db = crate::server::db::use_db().await?;
+    let settings = clorinde::queries::settings::settings().bind(&db).opt().await.map_err(|e| lib::emsg(e, "Settings find"))?;
+    let Some(settings) = settings else {
         return Ok(Err(SettingsError::NotFound));
-    }
-
-    let settings_data = SettingsImages {
-        hero_width: hero_width.parse::<i32>().unwrap_or(0),
-        hero_height: hero_height.parse::<i32>().unwrap_or(0),
-        thumb_width: thumb_width.parse::<i32>().unwrap_or(0),
-        thumb_height: thumb_height.parse::<i32>().unwrap_or(0),
     };
-
-    prisma_client
-        .settings()
-        .update(
-            db::settings::id::equals(id),
-            vec![
-                db::settings::hero_width::set(settings_data.hero_width),
-                db::settings::hero_height::set(settings_data.hero_height),
-                db::settings::thumb_width::set(settings_data.thumb_width),
-                db::settings::thumb_height::set(settings_data.thumb_height),
-            ],
-        )
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Settings update"))?;
-
+    let id = settings.id;
+    let hero_width = hero_width.parse::<i32>().unwrap_or(0);
+    let hero_height = hero_height.parse::<i32>().unwrap_or(0);
+    let thumb_width = thumb_width.parse::<i32>().unwrap_or(0);
+    let thumb_height = thumb_height.parse::<i32>().unwrap_or(0);
+    let res = clorinde::queries::settings::settings_update_images()
+        .bind(&db, &hero_height, &hero_width, &thumb_height, &thumb_width, &id).await;
+    tracing::debug!("Settings update images res={res:?}");
     Ok(Ok(()))
+
 }

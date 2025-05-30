@@ -19,22 +19,11 @@ pub fn ImagesConvertView() -> impl IntoView {
 
 #[server(ImagesConvert, "/api")]
 pub async fn images_convert() -> Result<Result<(), SettingsError>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let settings = prisma_client
-        .settings()
-        .find_first(vec![])
-        .select(db::settings::select!({
-            hero_height
-            hero_width
-            thumb_height
-            thumb_width
-        }))
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Settings find"))?;
-    let settings = settings.unwrap();
+    let db = crate::server::db::use_db().await?;
+    let settings = clorinde::queries::settings::settings().bind(&db).opt().await.map_err(|e| lib::emsg(e, "Settings find"))?;
+    let Some(settings) = settings else {
+        return Ok(Err(SettingsError::NotFound));
+    };
     let convert_settings = crate::image::ConvertSettings {
         hero_height: settings.hero_height as u32,
         hero_width: settings.hero_width as u32,
@@ -42,13 +31,11 @@ pub async fn images_convert() -> Result<Result<(), SettingsError>, ServerFnError
         thumb_width: settings.thumb_width as u32,
     };
 
-    let images = prisma_client
-        .image()
-        .find_many(vec![])
-        .select(db::image::select!({ id ext }))
-        .exec()
+    let images = clorinde::queries::image::select_all_for_convert()
+        .bind(&db)
+        .all()
         .await
-        .map_err(|e| lib::emsg(e, "Image find_many"))?;
+        .map_err(|e| lib::emsg(e, "Images select all for convert"))?;
 
     for image_data in images {
         let path = crate::image::img_path_upload_ext(&image_data.id, &image_data.ext);

@@ -35,33 +35,13 @@ pub fn SettingsHomeForm(settings: SettingsHome) -> impl IntoView {
 pub async fn settings_home_update(
     home_text: String,
 ) -> Result<Result<(), SettingsError>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let settings_saved = prisma_client
-        .settings()
-        .find_first(vec![])
-        .select(db::settings::select!({ id }))
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Settings find"))?;
-
-    let id: String;
-    if let Some(settings_saved) = settings_saved {
-        id = settings_saved.id;
-    } else {
+    let db = crate::server::db::use_db().await?;
+    let settings = clorinde::queries::settings::settings().bind(&db).opt().await.map_err(|e| lib::emsg(e, "Settings find"))?;
+    let Some(settings) = settings else {
         return Ok(Err(SettingsError::NotFound));
-    }
-
-    prisma_client
-        .settings()
-        .update(
-            db::settings::id::equals(id),
-            vec![db::settings::home_text::set(home_text)],
-        )
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Settings update"))?;
-
+    };
+    let id = settings.id;
+    let res = clorinde::queries::settings::settings_update_home().bind(&db, &home_text, &id).await;
+    tracing::debug!("Settings home updated res={res:?}");
     Ok(Ok(()))
 }

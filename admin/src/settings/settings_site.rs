@@ -46,14 +46,12 @@ pub async fn settings_site_update(
     site_url: String,
 ) -> Result<Result<(), SettingsError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let settings = clorinde::queries::settings::settings().bind(&db).opt().await.unwrap();
-
+    let settings = clorinde::queries::settings::settings().bind(&db).opt().await.map_err(|e| lib::emsg(e, "Settings find"))?;
     let Some(settings) = settings else {
         return Ok(Err(SettingsError::NotFound));
     };
     let id = settings.id;
     let res = clorinde::queries::settings::settings_update().bind(&db, &robots_txt, &site_url, &id).await;
     tracing::debug!("Settings updated res={res:?}");
-
     Ok(Ok(()))
 }

@@ -13,6 +13,19 @@ pub struct SettingsUpdateParams<T1: crate::StringSql, T2: crate::StringSql, T3: 
     pub site_url: T2,
     pub id: T3,
 }
+#[derive(Debug)]
+pub struct SettingsUpdateHomeParams<T1: crate::StringSql, T2: crate::StringSql> {
+    pub home_text: T1,
+    pub id: T2,
+}
+#[derive(Debug)]
+pub struct SettingsUpdateImagesParams<T1: crate::StringSql> {
+    pub hero_height: i32,
+    pub hero_width: i32,
+    pub thumb_height: i32,
+    pub thumb_width: i32,
+    pub id: T1,
+}
 #[derive(Debug, Clone, PartialEq)]
 pub struct Settings {
     pub id: String,
@@ -493,5 +506,98 @@ impl<
         Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
     > {
         Box::pin(self.bind(client, &params.robots_txt, &params.site_url, &params.id))
+    }
+}
+pub fn settings_update_home() -> SettingsUpdateHomeStmt {
+    SettingsUpdateHomeStmt(crate::client::async_::Stmt::new(
+        "UPDATE \"Settings\" SET home_text = $1 WHERE id = $2",
+    ))
+}
+pub struct SettingsUpdateHomeStmt(crate::client::async_::Stmt);
+impl SettingsUpdateHomeStmt {
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql, T2: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        home_text: &'a T1,
+        id: &'a T2,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client.execute(stmt, &[home_text, id]).await
+    }
+}
+impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql, T2: crate::StringSql>
+    crate::client::async_::Params<
+        'a,
+        'a,
+        'a,
+        SettingsUpdateHomeParams<T1, T2>,
+        std::pin::Pin<
+            Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+        >,
+        C,
+    > for SettingsUpdateHomeStmt
+{
+    fn params(
+        &'a mut self,
+        client: &'a C,
+        params: &'a SettingsUpdateHomeParams<T1, T2>,
+    ) -> std::pin::Pin<
+        Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+    > {
+        Box::pin(self.bind(client, &params.home_text, &params.id))
+    }
+}
+pub fn settings_update_images() -> SettingsUpdateImagesStmt {
+    SettingsUpdateImagesStmt(crate::client::async_::Stmt::new(
+        "UPDATE \"Settings\" SET hero_height = $1, hero_width = $2, thumb_height = $3, thumb_width = $4 WHERE id = $5",
+    ))
+}
+pub struct SettingsUpdateImagesStmt(crate::client::async_::Stmt);
+impl SettingsUpdateImagesStmt {
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        hero_height: &'a i32,
+        hero_width: &'a i32,
+        thumb_height: &'a i32,
+        thumb_width: &'a i32,
+        id: &'a T1,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client
+            .execute(
+                stmt,
+                &[hero_height, hero_width, thumb_height, thumb_width, id],
+            )
+            .await
+    }
+}
+impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql>
+    crate::client::async_::Params<
+        'a,
+        'a,
+        'a,
+        SettingsUpdateImagesParams<T1>,
+        std::pin::Pin<
+            Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+        >,
+        C,
+    > for SettingsUpdateImagesStmt
+{
+    fn params(
+        &'a mut self,
+        client: &'a C,
+        params: &'a SettingsUpdateImagesParams<T1>,
+    ) -> std::pin::Pin<
+        Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+    > {
+        Box::pin(self.bind(
+            client,
+            &params.hero_height,
+            &params.hero_width,
+            &params.thumb_height,
+            &params.thumb_width,
+            &params.id,
+        ))
     }
 }

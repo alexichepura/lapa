@@ -39,3 +39,13 @@ INSERT INTO "Settings" (hero_height, hero_width, thumb_height, thumb_width)
 UPDATE "Settings"
 SET robots_txt = :robots_txt, site_url = :site_url
 WHERE id = :id; 
+
+--! settings_update_home
+UPDATE "Settings"
+SET home_text = :home_text
+WHERE id = :id; 
+
+--! settings_update_images
+UPDATE "Settings"
+SET hero_height = :hero_height, hero_width = :hero_width, thumb_height = :thumb_height, thumb_width = :thumb_width
+WHERE id = :id; 
