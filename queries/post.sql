@@ -27,6 +27,12 @@ SELECT
 FROM "Post"
 WHERE slug = :slug;
 
+--! admin_post_by_id_check
+SELECT
+    id
+FROM "Post"
+WHERE id = :id;
+
 --! post_create (published_at?) : 
 INSERT INTO "Post" (published_at, title, description, text)
   VALUES (:published_at, :title, :description, :text)
@@ -38,11 +44,20 @@ SET published_at = :published_at, slug = :slug, title = :title, description = :d
 WHERE id = :id
 RETURNING created_at;
 
+--! post_delete
+DELETE FROM "Post" WHERE id = :id;
+
 --! post_images
 SELECT
     id,
     alt,
     is_hero
+FROM "Image"
+WHERE post_id = :post_id;
+
+--! post_images_ids
+SELECT
+    id
 FROM "Image"
 WHERE post_id = :post_id;
 

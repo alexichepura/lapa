@@ -711,6 +711,27 @@ impl AdminPostBySlugStmt {
         }
     }
 }
+pub fn admin_post_by_id_check() -> AdminPostByIdCheckStmt {
+    AdminPostByIdCheckStmt(crate::client::async_::Stmt::new(
+        "SELECT id FROM \"Post\" WHERE id = $1",
+    ))
+}
+pub struct AdminPostByIdCheckStmt(crate::client::async_::Stmt);
+impl AdminPostByIdCheckStmt {
+    pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        id: &'a T1,
+    ) -> StringQuery<'c, 'a, 's, C, String, 1> {
+        StringQuery {
+            client,
+            params: [id],
+            stmt: &mut self.0,
+            extractor: |row| Ok(row.try_get(0)?),
+            mapper: |it| it.into(),
+        }
+    }
+}
 pub fn post_create() -> PostCreateStmt {
     PostCreateStmt(crate::client::async_::Stmt::new(
         "INSERT INTO \"Post\" (published_at, title, description, text) VALUES ($1, $2, $3, $4) RETURNING id, created_at",
@@ -845,6 +866,22 @@ impl<
         )
     }
 }
+pub fn post_delete() -> PostDeleteStmt {
+    PostDeleteStmt(crate::client::async_::Stmt::new(
+        "DELETE FROM \"Post\" WHERE id = $1",
+    ))
+}
+pub struct PostDeleteStmt(crate::client::async_::Stmt);
+impl PostDeleteStmt {
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        id: &'a T1,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client.execute(stmt, &[id]).await
+    }
+}
 pub fn post_images() -> PostImagesStmt {
     PostImagesStmt(crate::client::async_::Stmt::new(
         "SELECT id, alt, is_hero FROM \"Image\" WHERE post_id = $1",
@@ -870,6 +907,27 @@ impl PostImagesStmt {
                     })
                 },
             mapper: |it| PostImages::from(it),
+        }
+    }
+}
+pub fn post_images_ids() -> PostImagesIdsStmt {
+    PostImagesIdsStmt(crate::client::async_::Stmt::new(
+        "SELECT id FROM \"Image\" WHERE post_id = $1",
+    ))
+}
+pub struct PostImagesIdsStmt(crate::client::async_::Stmt);
+impl PostImagesIdsStmt {
+    pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        post_id: &'a T1,
+    ) -> StringQuery<'c, 'a, 's, C, String, 1> {
+        StringQuery {
+            client,
+            params: [post_id],
+            stmt: &mut self.0,
+            extractor: |row| Ok(row.try_get(0)?),
+            mapper: |it| it.into(),
         }
     }
 }

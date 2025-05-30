@@ -273,14 +273,14 @@ pub async fn post_upsert(
                 return Ok(Err(PostError::CreateSlugExists));
             }
         }
-        let post = queries::post::post_update()
+        let post_created_at = queries::post::post_update()
             .bind(&db, &published_at.map(|publ_at| publ_at.naive_utc()), &slug, &title, &description, &text, &id)
             .one()
             .await
             .map_err(|e| lib::emsg(e, "Post update"))?;
         return Ok(Ok(PostFormData {
             id: Some(id),
-            created_at: post.created_at,
+            created_at: post_created_at.and_utc().fixed_offset(),
             published_at: published_at,
             slug: slug,
             title: title,
