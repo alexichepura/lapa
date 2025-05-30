@@ -258,21 +258,15 @@ pub type ImagesOrderUpdateResult = Result<(), ImageLoadError>;
 pub async fn images_order_update(
     ids: Vec<String>,
 ) -> Result<ImagesOrderUpdateResult, ServerFnError> {
-    let order_update = ids.into_iter().enumerate().map(|(i, id)| {
-        prisma_client
-            .image()
-            .update(
-                db::image::id::equals(id),
-                vec![db::image::order::set(i as i32)],
-            )
-            .select(db::image::select!({ id order }))
-    });
-
-    let _images_updated: Vec<_> = prisma_client
-        ._batch(order_update)
-        .await
-        .map_err(|e| lib::emsg(e, "Images update batch"))?;
-
+    // TODO how this can be improved? batch, sql?
+    let mut db = crate::server::db::use_db().await?;
+    let order_update = ids.into_iter().enumerate();
+    let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Images order transaction init"))?;
+    for (i, id) in order_update {
+        let db = crate::server::db::use_db().await?;
+        clorinde::queries::image::update_order().bind(&db, &(i as i32), &id).await;
+    }
+    trx.commit().await.map_err(|e| lib::emsg(e, "Images order transaction"))?;
     Ok(Ok(()))
 }
 

@@ -6,6 +6,11 @@ pub struct UpdateAltParams<T1: crate::StringSql, T2: crate::StringSql> {
     pub id: T2,
 }
 #[derive(Debug)]
+pub struct UpdateOrderParams<T1: crate::StringSql> {
+    pub order: i32,
+    pub id: T1,
+}
+#[derive(Debug)]
 pub struct CreateParams<T1: crate::StringSql, T2: crate::StringSql, T3: crate::StringSql> {
     pub alt: T1,
     pub ext: T2,
@@ -259,6 +264,45 @@ impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql, T2: crate::String
         Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
     > {
         Box::pin(self.bind(client, &params.alt, &params.id))
+    }
+}
+pub fn update_order() -> UpdateOrderStmt {
+    UpdateOrderStmt(crate::client::async_::Stmt::new(
+        "UPDATE \"Image\" SET \"order\" = $1 WHERE id = $2",
+    ))
+}
+pub struct UpdateOrderStmt(crate::client::async_::Stmt);
+impl UpdateOrderStmt {
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        order: &'a i32,
+        id: &'a T1,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client.execute(stmt, &[order, id]).await
+    }
+}
+impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql>
+    crate::client::async_::Params<
+        'a,
+        'a,
+        'a,
+        UpdateOrderParams<T1>,
+        std::pin::Pin<
+            Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+        >,
+        C,
+    > for UpdateOrderStmt
+{
+    fn params(
+        &'a mut self,
+        client: &'a C,
+        params: &'a UpdateOrderParams<T1>,
+    ) -> std::pin::Pin<
+        Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+    > {
+        Box::pin(self.bind(client, &params.order, &params.id))
     }
 }
 pub fn create() -> CreateStmt {

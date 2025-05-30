@@ -19,6 +19,11 @@ UPDATE "Image"
 SET alt = :alt
 WHERE id = :id;
 
+--! update_order
+UPDATE "Image"
+SET "order" = :order
+WHERE id = :id;
+
 --! create
 INSERT INTO "Image" (alt, ext, post_id)
   VALUES (:alt, :ext, :post_id)
