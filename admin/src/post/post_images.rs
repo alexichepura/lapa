@@ -235,18 +235,14 @@ where
 
 #[server(GetImages, "/api")]
 pub async fn get_images(post_id: String) -> Result<Vec<PostImageData>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-    let images = prisma_client
-        .image()
-        .find_many(vec![db::image::post_id::equals(post_id)])
-        .order_by(db::image::order::order(db::SortOrder::Asc))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let images = clorinde::queries::post::admin_images()
+        .bind(&db, &post_id)
+        .all()
         .await
-        .map_err(|e| lib::emsg(e, "Images find_many"))?;
-
+        .map_err(|e| lib::emsg(e, "Post images find"))?;
     let images: Vec<PostImageData> = images
-        .iter()
+        .into_iter()
         .map(|data| PostImageData {
             id: data.id.clone(),
             alt: data.alt.clone(),
@@ -262,9 +258,6 @@ pub type ImagesOrderUpdateResult = Result<(), ImageLoadError>;
 pub async fn images_order_update(
     ids: Vec<String>,
 ) -> Result<ImagesOrderUpdateResult, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
     let order_update = ids.into_iter().enumerate().map(|(i, id)| {
         prisma_client
             .image()
@@ -291,9 +284,6 @@ pub struct ImageMakeHeroData {
 pub type ImageMakeHeroResult = Result<ImageMakeHeroData, ImageLoadError>;
 #[server(ImageMakeHero, "/api")]
 pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
     let current_img = prisma_client
         .image()
         .find_unique(db::image::id::equals(id.clone()))

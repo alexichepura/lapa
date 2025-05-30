@@ -186,6 +186,36 @@ impl<'a> From<PostImagesBorrowed<'a>> for PostImages {
     }
 }
 #[derive(Debug, Clone, PartialEq)]
+pub struct AdminImages {
+    pub id: String,
+    pub alt: String,
+    pub order: i32,
+    pub is_hero: bool,
+}
+pub struct AdminImagesBorrowed<'a> {
+    pub id: &'a str,
+    pub alt: &'a str,
+    pub order: i32,
+    pub is_hero: bool,
+}
+impl<'a> From<AdminImagesBorrowed<'a>> for AdminImages {
+    fn from(
+        AdminImagesBorrowed {
+            id,
+            alt,
+            order,
+            is_hero,
+        }: AdminImagesBorrowed<'a>,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            alt: alt.into(),
+            order,
+            is_hero,
+        }
+    }
+}
+#[derive(Debug, Clone, PartialEq)]
 pub struct AdminList {
     pub id: String,
     pub created_at: crate::types::time::Timestamp,
@@ -661,6 +691,70 @@ where
         Ok(it)
     }
 }
+pub struct AdminImagesQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+    client: &'c C,
+    params: [&'a (dyn postgres_types::ToSql + Sync); N],
+    stmt: &'s mut crate::client::async_::Stmt,
+    extractor: fn(&tokio_postgres::Row) -> Result<AdminImagesBorrowed, tokio_postgres::Error>,
+    mapper: fn(AdminImagesBorrowed) -> T,
+}
+impl<'c, 'a, 's, C, T: 'c, const N: usize> AdminImagesQuery<'c, 'a, 's, C, T, N>
+where
+    C: GenericClient,
+{
+    pub fn map<R>(
+        self,
+        mapper: fn(AdminImagesBorrowed) -> R,
+    ) -> AdminImagesQuery<'c, 'a, 's, C, R, N> {
+        AdminImagesQuery {
+            client: self.client,
+            params: self.params,
+            stmt: self.stmt,
+            extractor: self.extractor,
+            mapper,
+        }
+    }
+    pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let row = self.client.query_one(stmt, &self.params).await?;
+        Ok((self.mapper)((self.extractor)(&row)?))
+    }
+    pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+        self.iter().await?.try_collect().await
+    }
+    pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        Ok(self
+            .client
+            .query_opt(stmt, &self.params)
+            .await?
+            .map(|row| {
+                let extracted = (self.extractor)(&row)?;
+                Ok((self.mapper)(extracted))
+            })
+            .transpose()?)
+    }
+    pub async fn iter(
+        self,
+    ) -> Result<
+        impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'c,
+        tokio_postgres::Error,
+    > {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let it = self
+            .client
+            .query_raw(stmt, crate::slice_iter(&self.params))
+            .await?
+            .map(move |res| {
+                res.and_then(|row| {
+                    let extracted = (self.extractor)(&row)?;
+                    Ok((self.mapper)(extracted))
+                })
+            })
+            .into_stream();
+        Ok(it)
+    }
+}
 pub struct AdminListQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
     client: &'c C,
     params: [&'a (dyn postgres_types::ToSql + Sync); N],
@@ -1034,6 +1128,35 @@ impl PostImagesStmt {
                     })
                 },
             mapper: |it| PostImages::from(it),
+        }
+    }
+}
+pub fn admin_images() -> AdminImagesStmt {
+    AdminImagesStmt(crate::client::async_::Stmt::new(
+        "SELECT id, alt, \"order\", is_hero FROM \"Image\" WHERE post_id = $1 ORDER BY \"order\"",
+    ))
+}
+pub struct AdminImagesStmt(crate::client::async_::Stmt);
+impl AdminImagesStmt {
+    pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        post_id: &'a T1,
+    ) -> AdminImagesQuery<'c, 'a, 's, C, AdminImages, 1> {
+        AdminImagesQuery {
+            client,
+            params: [post_id],
+            stmt: &mut self.0,
+            extractor:
+                |row: &tokio_postgres::Row| -> Result<AdminImagesBorrowed, tokio_postgres::Error> {
+                    Ok(AdminImagesBorrowed {
+                        id: row.try_get(0)?,
+                        alt: row.try_get(1)?,
+                        order: row.try_get(2)?,
+                        is_hero: row.try_get(3)?,
+                    })
+                },
+            mapper: |it| AdminImages::from(it),
         }
     }
 }

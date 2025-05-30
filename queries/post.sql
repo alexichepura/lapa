@@ -73,6 +73,16 @@ SELECT
 FROM "Image"
 WHERE post_id = :post_id;
 
+--! admin_images
+SELECT
+    id,
+    alt,
+    "order",
+    is_hero
+FROM "Image"
+WHERE post_id = :post_id
+ORDER BY "order";
+
 --! post_images_ids
 SELECT
     id
