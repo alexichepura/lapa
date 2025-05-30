@@ -196,15 +196,6 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
         crate::server::serverr_404();
         return Ok(Err(PostError::NotFound));
     };
-    // let Some(published) = post.published_at else {
-    //     crate::server::serverr_404();
-    //     return Ok(Err(PostError::NotFound));
-    // };
-    // let now = chrono::Utc::now().naive_utc();
-    // if published > now {
-    //     crate::server::serverr_404();
-    //     return Ok(Err(PostError::NotFound));
-    // }
     let images = clorinde::queries::post::post_images()
         .bind(&db, &post.id).all()
         .await
