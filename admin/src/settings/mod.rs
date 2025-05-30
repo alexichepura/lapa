@@ -132,11 +132,9 @@ pub fn Settings() -> impl IntoView {
 type SettingsResult = Result<SettingsData, SettingsError>;
 #[server(GetSettings, "/api")]
 pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
-    let prisma_client = crate::server::use_prisma()?;
-    let settings = prisma_client
-        .settings()
-        .find_first(vec![])
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let settings = clorinde::queries::settings::settings_page()
+        .bind(&db).opt()
         .await
         .map_err(|e| lib::emsg(e, "Settings find"))?;
 
