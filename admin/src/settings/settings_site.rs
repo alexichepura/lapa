@@ -45,41 +45,15 @@ pub async fn settings_site_update(
     robots_txt: String,
     site_url: String,
 ) -> Result<Result<(), SettingsError>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
+    let db = crate::server::db::use_db().await?;
+    let settings = clorinde::queries::settings::settings().bind(&db).opt().await.unwrap();
 
-    let settings_saved = prisma_client
-        .settings()
-        .find_first(vec![])
-        .select(db::settings::select!({ id }))
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Settings find"))?;
-
-    let id: String;
-    if let Some(settings_saved) = settings_saved {
-        id = settings_saved.id;
-    } else {
+    let Some(settings) = settings else {
         return Ok(Err(SettingsError::NotFound));
-    }
-
-    let settings_data = SettingsSite {
-        robots_txt,
-        site_url,
     };
-
-    prisma_client
-        .settings()
-        .update(
-            db::settings::id::equals(id),
-            vec![
-                db::settings::robots_txt::set(settings_data.robots_txt),
-                db::settings::site_url::set(settings_data.site_url),
-            ],
-        )
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Settings update"))?;
+    let id = settings.id;
+    let res = clorinde::queries::settings::settings_update().bind(&db, &robots_txt, &site_url, &id).await;
+    tracing::debug!("Settings updated res={res:?}");
 
     Ok(Ok(()))
 }

@@ -11,15 +11,13 @@ use leptos_axum::handle_server_fns_with_context;
 use leptos_meta::{HashedStylesheet, Link, MetaTags, Script};
 
 use cfg_if::cfg_if;
-cfg_if! {if #[cfg(feature = "ssr")] {
-    cfg_if! {if #[cfg(feature = "ratelimit")] {
-        pub mod ratelimit;
-        pub use ratelimit::*;
-    }}
-    cfg_if! {if #[cfg(feature = "compression")] {
-        pub mod compression;
-        pub use compression::*;
-    }}
+cfg_if! {if #[cfg(feature = "ratelimit")] {
+    pub mod ratelimit;
+    pub use ratelimit::*;
+}}
+cfg_if! {if #[cfg(feature = "compression")] {
+    pub mod compression;
+    pub use compression::*;
 }}
 
 pub mod db;

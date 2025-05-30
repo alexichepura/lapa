@@ -15,26 +15,23 @@ use crate::{
 };
 
 use cfg_if::cfg_if;
-cfg_if! {if #[cfg(feature = "ssr")] {
-    cfg_if! {if #[cfg(feature = "ratelimit")] {
-        pub mod ratelimit;
-        pub use ratelimit::*;
-    }}
-    cfg_if! {if #[cfg(feature = "compression")] {
-        pub mod compression;
-        pub use compression::*;
-    }}
+cfg_if! {if #[cfg(feature = "ratelimit")] {
+    pub mod ratelimit;
+    pub use ratelimit::*;
+}}
+cfg_if! {if #[cfg(feature = "compression")] {
+    pub mod compression;
+    pub use compression::*;
 }}
 
+pub mod db;
 pub mod auth;
 pub mod err;
 pub mod fileserv;
-pub mod prisma;
 pub mod session;
 pub use auth::*;
 pub use err::*;
 pub use fileserv::*;
-pub use prisma::*;
 pub use session::*;
 
 pub fn html_shell(

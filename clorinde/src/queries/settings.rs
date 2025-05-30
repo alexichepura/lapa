@@ -7,6 +7,12 @@ pub struct SettingsCreateParams {
     pub thumb_height: i32,
     pub thumb_width: i32,
 }
+#[derive(Debug)]
+pub struct SettingsUpdateParams<T1: crate::StringSql, T2: crate::StringSql, T3: crate::StringSql> {
+    pub robots_txt: T1,
+    pub site_url: T2,
+    pub id: T3,
+}
 #[derive(Debug, Clone, PartialEq)]
 pub struct Settings {
     pub id: String,
@@ -291,5 +297,59 @@ impl<'a, C: GenericClient + Send + Sync>
             &params.thumb_height,
             &params.thumb_width,
         ))
+    }
+}
+pub fn settings_update() -> SettingsUpdateStmt {
+    SettingsUpdateStmt(crate::client::async_::Stmt::new(
+        "UPDATE \"Settings\" SET robots_txt = $1, site_url = $2 WHERE id = $3",
+    ))
+}
+pub struct SettingsUpdateStmt(crate::client::async_::Stmt);
+impl SettingsUpdateStmt {
+    pub async fn bind<
+        'c,
+        'a,
+        's,
+        C: GenericClient,
+        T1: crate::StringSql,
+        T2: crate::StringSql,
+        T3: crate::StringSql,
+    >(
+        &'s mut self,
+        client: &'c C,
+        robots_txt: &'a T1,
+        site_url: &'a T2,
+        id: &'a T3,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client.execute(stmt, &[robots_txt, site_url, id]).await
+    }
+}
+impl<
+    'a,
+    C: GenericClient + Send + Sync,
+    T1: crate::StringSql,
+    T2: crate::StringSql,
+    T3: crate::StringSql,
+>
+    crate::client::async_::Params<
+        'a,
+        'a,
+        'a,
+        SettingsUpdateParams<T1, T2, T3>,
+        std::pin::Pin<
+            Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+        >,
+        C,
+    > for SettingsUpdateStmt
+{
+    fn params(
+        &'a mut self,
+        client: &'a C,
+        params: &'a SettingsUpdateParams<T1, T2, T3>,
+    ) -> std::pin::Pin<
+        Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+    > {
+        Box::pin(self.bind(client, &params.robots_txt, &params.site_url, &params.id))
     }
 }
