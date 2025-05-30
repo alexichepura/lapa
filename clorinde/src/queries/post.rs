@@ -61,6 +61,52 @@ impl<'a> From<PostPageBorrowed<'a>> for PostPage {
     }
 }
 #[derive(Debug, Clone, PartialEq)]
+pub struct PostList {
+    pub id: String,
+    pub published_at: crate::types::time::Timestamp,
+    pub slug: String,
+    pub title: String,
+    pub description: String,
+    pub text: String,
+    pub image_id: Option<String>,
+    pub alt: Option<String>,
+}
+pub struct PostListBorrowed<'a> {
+    pub id: &'a str,
+    pub published_at: crate::types::time::Timestamp,
+    pub slug: &'a str,
+    pub title: &'a str,
+    pub description: &'a str,
+    pub text: &'a str,
+    pub image_id: Option<&'a str>,
+    pub alt: Option<&'a str>,
+}
+impl<'a> From<PostListBorrowed<'a>> for PostList {
+    fn from(
+        PostListBorrowed {
+            id,
+            published_at,
+            slug,
+            title,
+            description,
+            text,
+            image_id,
+            alt,
+        }: PostListBorrowed<'a>,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            published_at,
+            slug: slug.into(),
+            title: title.into(),
+            description: description.into(),
+            text: text.into(),
+            image_id: image_id.map(|v| v.into()),
+            alt: alt.map(|v| v.into()),
+        }
+    }
+}
+#[derive(Debug, Clone, PartialEq)]
 pub struct AdminPostPage {
     pub id: String,
     pub created_at: crate::types::time::Timestamp,
@@ -140,48 +186,36 @@ impl<'a> From<PostImagesBorrowed<'a>> for PostImages {
     }
 }
 #[derive(Debug, Clone, PartialEq)]
-pub struct PostList {
+pub struct AdminList {
     pub id: String,
-    pub published_at: crate::types::time::Timestamp,
-    pub slug: String,
+    pub created_at: crate::types::time::Timestamp,
+    pub published_at: Option<crate::types::time::Timestamp>,
     pub title: String,
-    pub description: String,
-    pub text: String,
     pub image_id: Option<String>,
-    pub alt: Option<String>,
 }
-pub struct PostListBorrowed<'a> {
+pub struct AdminListBorrowed<'a> {
     pub id: &'a str,
-    pub published_at: crate::types::time::Timestamp,
-    pub slug: &'a str,
+    pub created_at: crate::types::time::Timestamp,
+    pub published_at: Option<crate::types::time::Timestamp>,
     pub title: &'a str,
-    pub description: &'a str,
-    pub text: &'a str,
     pub image_id: Option<&'a str>,
-    pub alt: Option<&'a str>,
 }
-impl<'a> From<PostListBorrowed<'a>> for PostList {
+impl<'a> From<AdminListBorrowed<'a>> for AdminList {
     fn from(
-        PostListBorrowed {
+        AdminListBorrowed {
             id,
+            created_at,
             published_at,
-            slug,
             title,
-            description,
-            text,
             image_id,
-            alt,
-        }: PostListBorrowed<'a>,
+        }: AdminListBorrowed<'a>,
     ) -> Self {
         Self {
             id: id.into(),
+            created_at,
             published_at,
-            slug: slug.into(),
             title: title.into(),
-            description: description.into(),
-            text: text.into(),
             image_id: image_id.map(|v| v.into()),
-            alt: alt.map(|v| v.into()),
         }
     }
 }
@@ -200,6 +234,67 @@ where
 {
     pub fn map<R>(self, mapper: fn(PostPageBorrowed) -> R) -> PostPageQuery<'c, 'a, 's, C, R, N> {
         PostPageQuery {
+            client: self.client,
+            params: self.params,
+            stmt: self.stmt,
+            extractor: self.extractor,
+            mapper,
+        }
+    }
+    pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let row = self.client.query_one(stmt, &self.params).await?;
+        Ok((self.mapper)((self.extractor)(&row)?))
+    }
+    pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+        self.iter().await?.try_collect().await
+    }
+    pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        Ok(self
+            .client
+            .query_opt(stmt, &self.params)
+            .await?
+            .map(|row| {
+                let extracted = (self.extractor)(&row)?;
+                Ok((self.mapper)(extracted))
+            })
+            .transpose()?)
+    }
+    pub async fn iter(
+        self,
+    ) -> Result<
+        impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'c,
+        tokio_postgres::Error,
+    > {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let it = self
+            .client
+            .query_raw(stmt, crate::slice_iter(&self.params))
+            .await?
+            .map(move |res| {
+                res.and_then(|row| {
+                    let extracted = (self.extractor)(&row)?;
+                    Ok((self.mapper)(extracted))
+                })
+            })
+            .into_stream();
+        Ok(it)
+    }
+}
+pub struct PostListQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+    client: &'c C,
+    params: [&'a (dyn postgres_types::ToSql + Sync); N],
+    stmt: &'s mut crate::client::async_::Stmt,
+    extractor: fn(&tokio_postgres::Row) -> Result<PostListBorrowed, tokio_postgres::Error>,
+    mapper: fn(PostListBorrowed) -> T,
+}
+impl<'c, 'a, 's, C, T: 'c, const N: usize> PostListQuery<'c, 'a, 's, C, T, N>
+where
+    C: GenericClient,
+{
+    pub fn map<R>(self, mapper: fn(PostListBorrowed) -> R) -> PostListQuery<'c, 'a, 's, C, R, N> {
+        PostListQuery {
             client: self.client,
             params: self.params,
             stmt: self.stmt,
@@ -566,19 +661,19 @@ where
         Ok(it)
     }
 }
-pub struct PostListQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+pub struct AdminListQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
     client: &'c C,
     params: [&'a (dyn postgres_types::ToSql + Sync); N],
     stmt: &'s mut crate::client::async_::Stmt,
-    extractor: fn(&tokio_postgres::Row) -> Result<PostListBorrowed, tokio_postgres::Error>,
-    mapper: fn(PostListBorrowed) -> T,
+    extractor: fn(&tokio_postgres::Row) -> Result<AdminListBorrowed, tokio_postgres::Error>,
+    mapper: fn(AdminListBorrowed) -> T,
 }
-impl<'c, 'a, 's, C, T: 'c, const N: usize> PostListQuery<'c, 'a, 's, C, T, N>
+impl<'c, 'a, 's, C, T: 'c, const N: usize> AdminListQuery<'c, 'a, 's, C, T, N>
 where
     C: GenericClient,
 {
-    pub fn map<R>(self, mapper: fn(PostListBorrowed) -> R) -> PostListQuery<'c, 'a, 's, C, R, N> {
-        PostListQuery {
+    pub fn map<R>(self, mapper: fn(AdminListBorrowed) -> R) -> AdminListQuery<'c, 'a, 's, C, R, N> {
+        AdminListQuery {
             client: self.client,
             params: self.params,
             stmt: self.stmt,
@@ -655,6 +750,38 @@ impl PostPageStmt {
                     })
                 },
             mapper: |it| PostPage::from(it),
+        }
+    }
+}
+pub fn post_list() -> PostListStmt {
+    PostListStmt(crate::client::async_::Stmt::new(
+        "SELECT \"Post\".\"id\", \"Post\".\"published_at\", \"Post\".\"slug\", \"Post\".\"title\", \"Post\".\"description\", \"Post\".\"text\", \"Image\".\"id\" AS \"image_id\", \"Image\".\"alt\" FROM \"Post\" INNER JOIN \"Image\" ON \"Image\".\"post_id\" = \"Post\".\"id\" WHERE \"Post\".\"published_at\" < NOW() AND \"Image\".\"is_hero\" = true LIMIT 10",
+    ))
+}
+pub struct PostListStmt(crate::client::async_::Stmt);
+impl PostListStmt {
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s mut self,
+        client: &'c C,
+    ) -> PostListQuery<'c, 'a, 's, C, PostList, 0> {
+        PostListQuery {
+            client,
+            params: [],
+            stmt: &mut self.0,
+            extractor:
+                |row: &tokio_postgres::Row| -> Result<PostListBorrowed, tokio_postgres::Error> {
+                    Ok(PostListBorrowed {
+                        id: row.try_get(0)?,
+                        published_at: row.try_get(1)?,
+                        slug: row.try_get(2)?,
+                        title: row.try_get(3)?,
+                        description: row.try_get(4)?,
+                        text: row.try_get(5)?,
+                        image_id: row.try_get(6)?,
+                        alt: row.try_get(7)?,
+                    })
+                },
+            mapper: |it| PostList::from(it),
         }
     }
 }
@@ -931,35 +1058,32 @@ impl PostImagesIdsStmt {
         }
     }
 }
-pub fn post_list() -> PostListStmt {
-    PostListStmt(crate::client::async_::Stmt::new(
-        "SELECT \"Post\".\"id\", \"Post\".\"published_at\", \"Post\".\"slug\", \"Post\".\"title\", \"Post\".\"description\", \"Post\".\"text\", \"Image\".\"id\" AS \"image_id\", \"Image\".\"alt\" FROM \"Post\" INNER JOIN \"Image\" ON \"Image\".\"post_id\" = \"Post\".\"id\" WHERE \"Post\".\"published_at\" < NOW() AND \"Image\".\"is_hero\" = true LIMIT 10",
+pub fn admin_list() -> AdminListStmt {
+    AdminListStmt(crate::client::async_::Stmt::new(
+        "SELECT \"Post\".\"id\", \"Post\".\"created_at\", \"Post\".\"published_at\", \"Post\".\"title\", \"Image\".\"id\" AS \"image_id\" FROM \"Post\" INNER JOIN \"Image\" ON \"Image\".\"post_id\" = \"Post\".\"id\" AND \"Image\".\"is_hero\" = true",
     ))
 }
-pub struct PostListStmt(crate::client::async_::Stmt);
-impl PostListStmt {
+pub struct AdminListStmt(crate::client::async_::Stmt);
+impl AdminListStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient>(
         &'s mut self,
         client: &'c C,
-    ) -> PostListQuery<'c, 'a, 's, C, PostList, 0> {
-        PostListQuery {
+    ) -> AdminListQuery<'c, 'a, 's, C, AdminList, 0> {
+        AdminListQuery {
             client,
             params: [],
             stmt: &mut self.0,
             extractor:
-                |row: &tokio_postgres::Row| -> Result<PostListBorrowed, tokio_postgres::Error> {
-                    Ok(PostListBorrowed {
+                |row: &tokio_postgres::Row| -> Result<AdminListBorrowed, tokio_postgres::Error> {
+                    Ok(AdminListBorrowed {
                         id: row.try_get(0)?,
-                        published_at: row.try_get(1)?,
-                        slug: row.try_get(2)?,
+                        created_at: row.try_get(1)?,
+                        published_at: row.try_get(2)?,
                         title: row.try_get(3)?,
-                        description: row.try_get(4)?,
-                        text: row.try_get(5)?,
-                        image_id: row.try_get(6)?,
-                        alt: row.try_get(7)?,
+                        image_id: row.try_get(4)?,
                     })
                 },
-            mapper: |it| PostList::from(it),
+            mapper: |it| AdminList::from(it),
         }
     }
 }

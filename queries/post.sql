@@ -1,3 +1,4 @@
+--- WEB
 --! post_page : (published_at?)
 SELECT
     id,
@@ -9,6 +10,23 @@ SELECT
 FROM "Post"
 WHERE slug = :slug AND published_at < NOW();
 
+--! post_list : (image_id?, alt?)
+SELECT
+    "Post"."id",
+    "Post"."published_at",
+    "Post"."slug",
+    "Post"."title",
+    "Post"."description",
+    "Post"."text",
+    "Image"."id" AS "image_id",
+    "Image"."alt"
+FROM "Post"
+    INNER JOIN "Image" ON "Image"."post_id" = "Post"."id"
+WHERE "Post"."published_at" < NOW()
+AND "Image"."is_hero" = true
+LIMIT 10;
+
+--- ADMIN
 --! admin_post_page : (published_at?)
 SELECT
     id,
@@ -61,18 +79,13 @@ SELECT
 FROM "Image"
 WHERE post_id = :post_id;
 
---! post_list : (image_id?, alt?)
+--! admin_list : (published_at?, image_id?)
 SELECT
     "Post"."id",
+    "Post"."created_at",
     "Post"."published_at",
-    "Post"."slug",
     "Post"."title",
-    "Post"."description",
-    "Post"."text",
-    "Image"."id" AS "image_id",
-    "Image"."alt"
+    "Image"."id" AS "image_id"
 FROM "Post"
     INNER JOIN "Image" ON "Image"."post_id" = "Post"."id"
-WHERE "Post"."published_at" < NOW()
-AND "Image"."is_hero" = true
-LIMIT 10;
+AND "Image"."is_hero" = true;

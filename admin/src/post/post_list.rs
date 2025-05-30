@@ -87,35 +87,26 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
 
 #[server(GetPosts, "/api")]
 pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-    let posts = prisma_client
-        .post()
-        .find_many(vec![])
-        .include(db::post::include!({
-            images(vec![db::image::is_hero::equals(true)]).take(1): select {
-                id
-            }
-        }))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let posts = clorinde::queries::post::admin_list()
+        .bind(&db)
+        .all()
         .await
-        .map_err(|e| lib::emsg(e, "Post find_many"))?;
-
+        .map_err(|e| lib::emsg(e, "Post list find"))?;
     let posts: Vec<PostListItem> = posts
-        .iter()
+        .into_iter()
         .map(|data| {
             let is_published: bool = match data.published_at {
-                Some(published_at) => chrono::Utc::now().fixed_offset() > published_at,
+                Some(published_at) => chrono::Utc::now().fixed_offset() > published_at.and_utc().fixed_offset(),
                 None => false,
             };
-            let hero = data.images.first().map(|image| image.id.clone());
             PostListItem {
-                id: data.id.clone(),
-                title: data.title.clone(),
-                created_at: data.created_at,
-                published_at: data.published_at,
+                id: data.id,
+                title: data.title,
+                created_at: data.created_at.and_utc().fixed_offset(),
+                published_at: data.published_at.map(|dt| dt.and_utc().fixed_offset()),
                 is_published,
-                hero,
+                hero: data.image_id,
             }
         })
         .collect();

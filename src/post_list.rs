@@ -68,9 +68,9 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
                 _ => None,
             };
             PostListItem {
-                id: data.id.clone(),
-                title: data.title.clone(),
-                slug: data.slug.clone(),
+                id: data.id,
+                title: data.title,
+                slug: data.slug,
                 hero,
             }
         })
