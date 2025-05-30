@@ -18,3 +18,7 @@ FROM "Settings";
 SELECT
     "home_text"
 FROM "Settings";
+
+--! settings_create
+INSERT INTO "Settings" (hero_height, hero_width, thumb_height, thumb_width)
+  VALUES (:hero_height, :hero_width, :thumb_height, :thumb_width);

@@ -5,6 +5,7 @@ edition = "2021"
 publish = false
 
 [features]
+all = ["leptos", "server"]
 default = []
 leptos = ["dep:leptos", "dep:http"]
 server = []

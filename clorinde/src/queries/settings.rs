@@ -1,5 +1,12 @@
 // This file was generated with `clorinde`. Do not modify.
 
+#[derive(Clone, Copy, Debug)]
+pub struct SettingsCreateParams {
+    pub hero_height: i32,
+    pub hero_width: i32,
+    pub thumb_height: i32,
+    pub thumb_width: i32,
+}
 #[derive(Debug, Clone, PartialEq)]
 pub struct Settings {
     pub id: String,
@@ -235,5 +242,54 @@ impl SettingsHomeStmt {
             extractor: |row| Ok(row.try_get(0)?),
             mapper: |it| it.into(),
         }
+    }
+}
+pub fn settings_create() -> SettingsCreateStmt {
+    SettingsCreateStmt(crate::client::async_::Stmt::new(
+        "INSERT INTO \"Settings\" (hero_height, hero_width, thumb_height, thumb_width) VALUES ($1, $2, $3, $4)",
+    ))
+}
+pub struct SettingsCreateStmt(crate::client::async_::Stmt);
+impl SettingsCreateStmt {
+    pub async fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s mut self,
+        client: &'c C,
+        hero_height: &'a i32,
+        hero_width: &'a i32,
+        thumb_height: &'a i32,
+        thumb_width: &'a i32,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client
+            .execute(stmt, &[hero_height, hero_width, thumb_height, thumb_width])
+            .await
+    }
+}
+impl<'a, C: GenericClient + Send + Sync>
+    crate::client::async_::Params<
+        'a,
+        'a,
+        'a,
+        SettingsCreateParams,
+        std::pin::Pin<
+            Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+        >,
+        C,
+    > for SettingsCreateStmt
+{
+    fn params(
+        &'a mut self,
+        client: &'a C,
+        params: &'a SettingsCreateParams,
+    ) -> std::pin::Pin<
+        Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+    > {
+        Box::pin(self.bind(
+            client,
+            &params.hero_height,
+            &params.hero_width,
+            &params.thumb_height,
+            &params.thumb_width,
+        ))
     }
 }

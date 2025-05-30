@@ -105,6 +105,7 @@ wasm-bindgen = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }
 
 [features]
+all = ["prod", "hydrate", "ssr"]
 prod = ["compression", "ratelimit"]
 tracing = [] # not used
 compression = ["tower-http?/compression-full"]
