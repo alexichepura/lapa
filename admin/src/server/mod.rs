@@ -125,7 +125,7 @@ pub async fn leptos_routes_handler(
     let leptos_options = app_state.leptos_options;
     let handler = leptos_axum::render_app_async_with_context(
         move || {
-            provide_context(pool);
+            provide_context(pool.clone());
             provide_context(auth_session.clone());
         },
         move || html_shell(leptos_options.clone(), user.clone(), settings.clone()),

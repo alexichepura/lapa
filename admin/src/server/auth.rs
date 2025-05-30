@@ -2,19 +2,19 @@ use axum_session_auth::Authentication;
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
 use leptos::prelude::{use_context, ServerFnError};
 
-use super::SessionPrismaPool;
+use super::SessionPool;
 use crate::auth::User;
-use crate::server::ArcPrisma;
+use clorinde::deadpool_postgres::Pool;
 
-type PrismaAuthSessionLayer = AuthSessionLayer<User, String, SessionPrismaPool, ArcPrisma>;
+type PoolAuthSessionLayer = AuthSessionLayer<User, String, SessionPool, Pool>;
 
-pub fn auth_session_layer(prisma: &ArcPrisma) -> PrismaAuthSessionLayer {
+pub fn auth_session_layer(pool: &Pool) -> PoolAuthSessionLayer {
     let auth_config = AuthConfig::<String>::default();
-    let layer = PrismaAuthSessionLayer::new(Some(prisma.clone())).with_config(auth_config);
+    let layer = PoolAuthSessionLayer::new(Some(pool.clone())).with_config(auth_config);
     layer
 }
 
-pub type AuthSession = axum_session_auth::AuthSession<User, String, SessionPrismaPool, ArcPrisma>;
+pub type AuthSession = axum_session_auth::AuthSession<User, String, SessionPool, Pool>;
 
 pub fn use_auth() -> Result<AuthSession, ServerFnError> {
     use_context::<AuthSession>()
@@ -23,22 +23,19 @@ pub fn use_auth() -> Result<AuthSession, ServerFnError> {
 }
 
 #[async_trait::async_trait]
-impl Authentication<User, String, ArcPrisma> for User {
-    async fn load_user(userid: String, pool: Option<&ArcPrisma>) -> Result<User, anyhow::Error> {
-        let prisma_client = pool.unwrap();
-
-        let db_user = prisma_client
-            .user()
-            .find_unique(prisma_client::db::user::id::equals(userid))
-            .exec()
+impl Authentication<User, String, Pool> for User {
+    async fn load_user(userid: String, pool: Option<&Pool>) -> Result<User, anyhow::Error> {
+        let db = crate::server::db::use_db().await.unwrap();
+        let username = clorinde::queries::user::user_find_by_id()
+            .bind(&db, &userid).opt()
             .await
             .map_err(|e| anyhow::anyhow!(e.to_string()))?
             .ok_or("User does not exist.")
-            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
+            .map_err(|e| anyhow::anyhow!(e.to_string()))?;          
 
         let user = User {
-            id: db_user.id,
-            username: db_user.username,
+            id: userid,
+            username,
         };
         Ok(user)
     }

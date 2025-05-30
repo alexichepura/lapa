@@ -1,20 +1,16 @@
 use async_trait::async_trait;
 use axum_session::{
-    DatabaseError, DatabasePool, Session, SessionConfig, SessionLayer, SessionStore,
+    DatabaseError, DatabasePool, SessionConfig, SessionLayer, SessionStore,
 };
-use prisma_client::db;
-use prisma_client::db::session;
-use prisma_client_rust::chrono::Utc;
+use clorinde::deadpool_postgres::Pool;
 use std::vec;
 
-use super::ArcPrisma;
-
-pub async fn session_layer(prisma: &ArcPrisma) -> SessionLayer<SessionPrismaPool> {
+pub async fn session_layer(prisma: &Pool) -> SessionLayer<SessionPool> {
     let config = SessionConfig::default()
         .with_table_name("Session")
         .with_session_name("session");
 
-    let store = SessionStore::<SessionPrismaPool>::new(Some(prisma.clone().into()), config)
+    let store = SessionStore::<SessionPool>::new(Some(prisma.clone().into()), config)
         .await
         .unwrap();
 
@@ -22,22 +18,19 @@ pub async fn session_layer(prisma: &ArcPrisma) -> SessionLayer<SessionPrismaPool
     layer
 }
 
-pub type SessionPrismaSession = Session<SessionPrismaPool>;
-pub type SessionPrismaSessionStore = SessionStore<SessionPrismaPool>;
-
 #[derive(Debug, Clone)]
-pub struct SessionPrismaPool {
-    pool: ArcPrisma,
+pub struct SessionPool {
+    pool: Pool,
 }
 
-impl From<ArcPrisma> for SessionPrismaPool {
-    fn from(conn: ArcPrisma) -> Self {
-        SessionPrismaPool { pool: conn }
+impl From<Pool> for SessionPool {
+    fn from(pool: Pool) -> Self {
+        SessionPool { pool }
     }
 }
 
 #[async_trait]
-impl DatabasePool for SessionPrismaPool {
+impl DatabasePool for SessionPool {
     async fn initiate(&self, _table_name: &str) -> Result<(), DatabaseError> {
         Ok(())
     }
