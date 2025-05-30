@@ -2,5 +2,6 @@
 
 pub mod image;
 pub mod post;
+pub mod session;
 pub mod settings;
 pub mod user;
