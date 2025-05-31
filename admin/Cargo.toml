@@ -18,10 +18,11 @@ bcrypt = { workspace = true, optional = true }
 cfg-if = { workspace = true }
 chrono = { workspace = true }
 clorinde = { workspace = true, optional = true }
-console_error_panic_hook = { workspace = true }
-cuid2.workspace = true
-dotenvy = { workspace = true, optional = true }
 config = { workspace = true, optional = true }
+console_error_panic_hook = { workspace = true }
+cuid2 = { workspace = true, optional = true }
+deadpool-postgres = { workspace = true, optional = true }
+dotenvy = { workspace = true, optional = true }
 http = { workspace = true }
 image = { version = "0.25.5", optional = true }
 js-sys = { workspace = true, optional = true }
@@ -67,7 +68,9 @@ ssr = [
     "dep:axum",
     "dep:bcrypt",
     "dep:config",
+    "dep:cuid2",
     "dep:dotenvy",
+    "dep:deadpool-postgres",
     "dep:image",
     "dep:kamadak-exif",
     "dep:leptos_axum",

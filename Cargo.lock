@@ -33,6 +33,7 @@ dependencies = [
  "config",
  "console_error_panic_hook",
  "cuid2",
+ "deadpool-postgres",
  "dotenvy",
  "http",
  "image",
