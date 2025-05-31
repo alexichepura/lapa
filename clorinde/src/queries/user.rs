@@ -1,9 +1,10 @@
 // This file was generated with `clorinde`. Do not modify.
 
 #[derive(Debug)]
-pub struct UserCreateParams<T1: crate::StringSql, T2: crate::StringSql> {
-    pub username: T1,
-    pub password: T2,
+pub struct UserCreateParams<T1: crate::StringSql, T2: crate::StringSql, T3: crate::StringSql> {
+    pub id: T1,
+    pub username: T2,
+    pub password: T3,
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct UserFindByUsername {
@@ -152,27 +153,42 @@ where
 }
 pub fn user_create() -> UserCreateStmt {
     UserCreateStmt(crate::client::async_::Stmt::new(
-        "INSERT INTO \"User\" (username, password) VALUES ($1, $2)",
+        "INSERT INTO \"User\" (id, username, password) VALUES ($1, $2, $3)",
     ))
 }
 pub struct UserCreateStmt(crate::client::async_::Stmt);
 impl UserCreateStmt {
-    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql, T2: crate::StringSql>(
+    pub async fn bind<
+        'c,
+        'a,
+        's,
+        C: GenericClient,
+        T1: crate::StringSql,
+        T2: crate::StringSql,
+        T3: crate::StringSql,
+    >(
         &'s mut self,
         client: &'c C,
-        username: &'a T1,
-        password: &'a T2,
+        id: &'a T1,
+        username: &'a T2,
+        password: &'a T3,
     ) -> Result<u64, tokio_postgres::Error> {
         let stmt = self.0.prepare(client).await?;
-        client.execute(stmt, &[username, password]).await
+        client.execute(stmt, &[id, username, password]).await
     }
 }
-impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql, T2: crate::StringSql>
+impl<
+    'a,
+    C: GenericClient + Send + Sync,
+    T1: crate::StringSql,
+    T2: crate::StringSql,
+    T3: crate::StringSql,
+>
     crate::client::async_::Params<
         'a,
         'a,
         'a,
-        UserCreateParams<T1, T2>,
+        UserCreateParams<T1, T2, T3>,
         std::pin::Pin<
             Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
         >,
@@ -182,11 +198,11 @@ impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql, T2: crate::String
     fn params(
         &'a mut self,
         client: &'a C,
-        params: &'a UserCreateParams<T1, T2>,
+        params: &'a UserCreateParams<T1, T2, T3>,
     ) -> std::pin::Pin<
         Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
     > {
-        Box::pin(self.bind(client, &params.username, &params.password))
+        Box::pin(self.bind(client, &params.id, &params.username, &params.password))
     }
 }
 pub fn user_find_by_username() -> UserFindByUsernameStmt {

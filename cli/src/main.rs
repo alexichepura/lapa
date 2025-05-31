@@ -67,7 +67,7 @@ async fn main() {
             let password_hashed = bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap();
             let db = pool.clone().get().await.unwrap();
             let res = queries::user::user_create()
-                .bind(&db,&username, &password_hashed)
+                .bind(&db, &cuid2::create_id(), &username, &password_hashed)
                 .await;
             println!("User created res={res:?}");
         }

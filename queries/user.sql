@@ -1,6 +1,6 @@
 --! user_create
-INSERT INTO "User" (username, password)
-  VALUES (:username, :password);
+INSERT INTO "User" (id, username, password)
+  VALUES (:id, :username, :password);
 
 --! user_find_by_username
 SELECT
