@@ -48,7 +48,7 @@ async fn main() {
         .init();
     let cli = Cli::parse();
 
-    dotenv().ok();
+    dotenv().expect(".env file not found");
     let config = Config::from_env().unwrap();
     let pool = config
         .pg
