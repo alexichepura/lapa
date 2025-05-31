@@ -1,7 +1,24 @@
 use clap::{Args, Parser, Subcommand};
-use clorinde::queries;
+use clorinde::{deadpool_postgres::{self}, queries, tokio_postgres};
+use deadpool_postgres::Runtime;
+use dotenvy::dotenv;
+use serde::Deserialize;
+use config::ConfigError;
 
-mod db;
+#[derive(Debug, Deserialize)]
+struct Config {
+    pg: deadpool_postgres::Config,
+}
+
+impl Config {
+    pub fn from_env() -> Result<Self, ConfigError> {
+        config::Config::builder()
+            .add_source(config::Environment::default().separator("__"))
+            .build()
+            .unwrap()
+            .try_deserialize()
+    }
+}
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -31,7 +48,12 @@ async fn main() {
         .init();
     let cli = Cli::parse();
 
-    let pool = db::create_pool().await.unwrap();
+    dotenv().ok();
+    let config = Config::from_env().unwrap();
+    let pool = config
+        .pg
+        .create_pool(Some(Runtime::Tokio1), tokio_postgres::NoTls)
+        .unwrap();
 
     match &cli.command {
         Commands::Migrate => {

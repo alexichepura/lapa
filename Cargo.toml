@@ -46,7 +46,10 @@ axum_session_auth = { version = "0.16", default-features = false }
 bcrypt = { version = "0.15" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
+config = "0.15.11"
 console_error_panic_hook = "0.1"
+deadpool-postgres = { version = "0.14.1", features = ["serde"] }
+dotenvy = "0.15.7"
 http = "1.0"
 js-sys = { version = "0.3" }
 leptos = { version = "0.8", features = ["nightly", "tracing"] }
@@ -83,6 +86,8 @@ axum = { workspace = true, optional = true }
 cfg-if = { workspace = true }
 chrono = { workspace = true }
 console_error_panic_hook = { workspace = true }
+dotenvy = { workspace = true, optional = true }
+config = { workspace = true, optional = true }
 http = { workspace = true }
 js-sys = { workspace = true, optional = true }
 leptos = { workspace = true }
@@ -121,6 +126,8 @@ ssr = [
     "dep:axum",
     "dep:leptos_axum",
     "dep:clorinde",
+    "dep:config",
+    "dep:dotenvy",
     "tokio/rt-multi-thread",
     "dep:tower_governor",
     "dep:tower-http",
