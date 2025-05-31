@@ -66,31 +66,16 @@ type ImageDeleteResult = Result<(), ImageLoadError>;
 
 #[server(ImageDelete, "/api")]
 pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let found_image = prisma_client
-        .image()
-        .find_unique(db::image::id::equals(id.clone()))
-        .select(db::image::select!({ id }))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let deleted_count = clorinde::queries::image::delete_by_id()
+        .bind(&db, &id)
         .await
-        .map_err(|e| lib::emsg(e, "Image find"))?;
-
-    if found_image.is_none() {
+        .map_err(|e| lib::emsg(e, "Image delete"))?;
+    if deleted_count == 0 {
         crate::server::serverr_404();
         return Ok(Err(ImageLoadError::NotFound));
     }
-
     delete_image_on_server(&id);
-
-    prisma_client
-        .image()
-        .delete(db::image::id::equals(id))
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Image delete"))?;
-
     Ok(Ok(()))
 }
 
@@ -118,28 +103,14 @@ pub fn delete_image_on_server(id: &String) {
 type ImageUpdateResult = Result<(), ImageLoadError>;
 #[server(ImageUpdate, "/api")]
 pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResult, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let found_image = prisma_client
-        .image()
-        .find_unique(db::image::id::equals(id.clone()))
-        .select(db::image::select!({ id }))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let updated_count = clorinde::queries::image::update_alt()
+        .bind(&db, &alt, &id)
         .await
-        .map_err(|e| lib::emsg(e, "Image find"))?;
-
-    if found_image.is_none() {
+        .map_err(|e| lib::emsg(e, "Image alt update"))?;
+    if updated_count == 0 {
         crate::server::serverr_404();
         return Ok(Err(ImageLoadError::NotFound));
     }
-
-    prisma_client
-        .image()
-        .update(db::image::id::equals(id), vec![db::image::alt::set(alt)])
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Image update"))?;
-
     Ok(Ok(()))
 }

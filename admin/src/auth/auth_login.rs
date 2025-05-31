@@ -58,37 +58,31 @@ pub async fn login(
     remember: Option<String>,
     skip_redirect: Option<String>,
 ) -> Result<Result<super::User, AuthError>, ServerFnError> {
-    let prisma_client = crate::server::use_prisma()?;
-    let user = prisma_client
-        .user()
-        .find_unique(prisma_client::db::user::username::equals(username))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let user = clorinde::queries::user::user_find_by_username()
+        .bind(&db, &username).opt()
         .await
         .map_err(|e| lib::emsg(e, "User find"))?;
-
-    Ok(match user {
-        None => {
-            crate::server::serverr_401();
-            Err(AuthError::NoMatch)
-        }
-        Some(user) => {
-            let auth = crate::server::use_auth()?;
-            match bcrypt::verify(password, &user.password)
-                .map_err(|e| ServerFnError::new(e.to_string()))?
-            {
-                true => {
-                    auth.login_user(user.id.clone());
-                    auth.remember_user(remember.is_some());
-                    if skip_redirect.is_none() {
-                        leptos_axum::redirect("/");
-                    }
-                    Ok(super::User {
-                        id: user.id,
-                        username: user.username,
-                    })
-                }
-                false => Err(AuthError::NoMatch),
+    let Some(user) = user else {
+        crate::server::serverr_401();
+        return Ok(Err(AuthError::NoMatch));
+    };
+    let auth = crate::server::use_auth()?;
+    let res = match bcrypt::verify(password, &user.password)
+        .map_err(|e| ServerFnError::new(e.to_string()))?
+    {
+        true => {
+            auth.login_user(user.id.clone());
+            auth.remember_user(remember.is_some());
+            if skip_redirect.is_none() {
+                leptos_axum::redirect("/");
             }
+            Ok(super::User {
+                id: user.id,
+                username,
+            })
         }
-    })
+        false => Err(AuthError::NoMatch),
+    };
+    Ok(res)
 }

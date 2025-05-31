@@ -17,7 +17,12 @@ axum_session_auth = { workspace = true, optional = true }
 bcrypt = { workspace = true, optional = true }
 cfg-if = { workspace = true }
 chrono = { workspace = true }
+clorinde = { workspace = true, optional = true }
+config = { workspace = true, optional = true }
 console_error_panic_hook = { workspace = true }
+cuid2 = { workspace = true, optional = true }
+deadpool-postgres = { workspace = true, optional = true }
+dotenvy = { workspace = true, optional = true }
 http = { workspace = true }
 image = { version = "0.25.5", optional = true }
 js-sys = { workspace = true, optional = true }
@@ -27,8 +32,6 @@ leptos_axum = { workspace = true, optional = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
 log = { workspace = true, optional = true }
-prisma_client = { workspace = true, optional = true }
-prisma-client-rust = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
@@ -45,6 +48,7 @@ wasm-bindgen-futures = { version = "0.4" }
 web-sys = { workspace = true, optional = true }
 
 [features]
+all = ["prod", "hydrate", "ssr"]
 prod = ["compression", "ratelimit"]
 tracing = [] # not used
 compression = ["tower-http?/compression-full"]
@@ -57,16 +61,19 @@ hydrate = [
     "leptos/hydrate",
 ]
 ssr = [
+    "dep:clorinde",
     "dep:async-trait",
     "dep:axum_session_auth",
     "dep:axum_session",
     "dep:axum",
     "dep:bcrypt",
+    "dep:config",
+    "dep:cuid2",
+    "dep:dotenvy",
+    "dep:deadpool-postgres",
     "dep:image",
     "dep:kamadak-exif",
     "dep:leptos_axum",
-    "dep:prisma_client",
-    "dep:prisma-client-rust",
     "dep:tower_governor",
     "dep:tower-http",
     "dep:tower",

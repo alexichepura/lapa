@@ -9,21 +9,45 @@ async fn main() {
     use admin::{
         app::AdminRouter,
         server::{
-            auth_session_layer, file_and_error_handler, img_handler, init_prisma_client,
-            leptos_routes_handler, server_fn_private, server_fn_public, session_layer, AppState,
+            auth_session_layer, file_and_error_handler, img_handler, leptos_routes_handler, server_fn_private, server_fn_public, session_layer, AppState
         },
     };
     use axum::{
         routing::{get, post},
         Router,
     };
+    use clorinde::{deadpool_postgres, tokio_postgres};
+    use deadpool_postgres::Runtime;
+    use dotenvy::dotenv;
     use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
+    use serde::Deserialize;
     use tracing::info;
+    use config::ConfigError;
+
+    dotenv().expect(".env file not found");
+
+    #[derive(Debug, Deserialize)]
+    struct Config {
+        pg: deadpool_postgres::Config,
+    }
+    impl Config {
+        pub fn from_env() -> Result<Self, ConfigError> {
+            config::Config::builder()
+                .add_source(config::Environment::default().separator("__"))
+                .build()
+                .unwrap()
+                .try_deserialize()
+        }
+    }
+    let config = Config::from_env().unwrap();
 
     let leptopts = get_configuration(None).unwrap().leptos_options;
     let routes = generate_route_list(|| view! { <AdminRouter /> });
-    let prisma_client = init_prisma_client().await;
+    let pool = config
+        .pg
+        .create_pool(Some(Runtime::Tokio1), tokio_postgres::NoTls)
+        .unwrap();
 
     let private_app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
@@ -31,10 +55,10 @@ async fn main() {
         .route("/auth/{*fn_name}", post(server_fn_public))
         .with_state(AppState {
             leptos_options: leptopts.clone(),
-            prisma_client: prisma_client.clone(),
+            pool: pool.clone(),
         })
-        .layer(auth_session_layer(&prisma_client))
-        .layer(session_layer(&prisma_client).await)
+        .layer(auth_session_layer(&pool))
+        .layer(session_layer(&pool).await)
         .layer(tower_http::trace::TraceLayer::new_for_http());
 
     let app = Router::new()
@@ -43,7 +67,7 @@ async fn main() {
         .fallback(file_and_error_handler)
         .with_state(AppState {
             leptos_options: leptopts.clone(),
-            prisma_client: prisma_client.clone(),
+            pool: pool.clone(),
         })
         .layer(tower_http::trace::TraceLayer::new_for_http());
 

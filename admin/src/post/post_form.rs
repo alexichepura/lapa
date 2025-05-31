@@ -259,75 +259,60 @@ pub async fn post_upsert(
     description: String,
     text: String,
 ) -> Result<Result<PostFormData, PostError>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let post_by_slug = prisma_client
-        .post()
-        .find_unique(db::post::slug::equals(slug.clone()))
-        .select(db::post::select!({ id }))
-        .exec()
+    use clorinde::queries;
+    let db = crate::server::db::use_db().await?;
+    let post_by_slug_id = clorinde::queries::post::admin_post_by_slug()
+        .bind(&db, &slug).opt()
         .await
-        .map_err(|e| lib::emsg(e, "Post find"))?;
+        .map_err(|e| lib::emsg(e, "Post by slug"))?;
 
     if let Some(id) = id {
-        if let Some(_post_by_slug) = post_by_slug {
-            if id != _post_by_slug.id {
+        if let Some(post_by_slug_id) = post_by_slug_id {
+            if id != post_by_slug_id {
                 tracing::warn!("Post exists for slug={}", slug);
                 return Ok(Err(PostError::CreateSlugExists));
             }
         }
-        let post = prisma_client
-            .post()
-            .update(
-                db::post::id::equals(id),
-                vec![
-                    db::post::published_at::set(published_at),
-                    db::post::slug::set(slug),
-                    db::post::title::set(title),
-                    db::post::description::set(description),
-                    db::post::text::set(text),
-                ],
-            )
-            .exec()
+        let post_created_at = queries::post::post_update()
+            .bind(&db, &published_at.map(|publ_at| publ_at.naive_utc()), &slug, &title, &description, &text, &id)
+            .one()
             .await
             .map_err(|e| lib::emsg(e, "Post update"))?;
         return Ok(Ok(PostFormData {
-            id: Some(post.id),
-            created_at: post.created_at,
-            published_at: post.published_at,
-            slug: post.slug,
-            title: post.title,
-            description: post.description,
-            text: post.text,
+            id: Some(id),
+            created_at: post_created_at.and_utc().fixed_offset(),
+            published_at: published_at,
+            slug: slug,
+            title: title,
+            description: description,
+            text: text,
         }));
     } else {
-        if let Some(_post_by_slug) = post_by_slug {
+        if let Some(_post_by_slug) = post_by_slug_id {
             tracing::warn!("Post exists for slug={}", slug);
             return Ok(Err(PostError::CreateSlugExists));
         }
-        let post = prisma_client
-            .post()
-            .create(
-                slug,
-                vec![
-                    db::post::published_at::set(published_at),
-                    db::post::title::set(title),
-                    db::post::description::set(description),
-                    db::post::text::set(text),
-                ],
+        let id = cuid2::create_id();
+        let post_created_at = queries::post::post_create()
+            .bind(
+                &db,
+                &id,
+                &published_at.map(|publ_at| publ_at.naive_utc()),
+                &title,
+                &description,
+                &text
             )
-            .exec()
+            .one()
             .await
             .map_err(|e| lib::emsg(e, "Post create"))?;
         return Ok(Ok(PostFormData {
-            id: Some(post.id),
-            slug: post.slug,
-            title: post.title,
-            description: post.description,
-            created_at: post.created_at,
-            published_at: post.published_at,
-            text: post.text,
+            id: Some(id),
+            slug: slug,
+            title: title,
+            description: description,
+            created_at: post_created_at.and_utc().fixed_offset(),
+            published_at: published_at,
+            text: text,
         }));
     }
 }

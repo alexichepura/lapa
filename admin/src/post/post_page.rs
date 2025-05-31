@@ -67,23 +67,20 @@ pub fn PostPage() -> impl IntoView {
 
 #[server(GetPost, "/api")]
 pub async fn get_post(id: String) -> Result<Result<PostFormData, PostError>, ServerFnError> {
-    let prisma_client = crate::server::use_prisma()?;
-
-    let post = prisma_client
-        .post()
-        .find_unique(prisma_client::db::post::id::equals(id))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let post = clorinde::queries::post::admin_post_page()
+        .bind(&db, &id)
+        .opt()
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;
-
     let Some(post) = post else {
         crate::server::serverr_404();
         return Ok(Err(PostError::NotFound));
     };
     let post_data = PostFormData {
         id: Some(post.id),
-        created_at: post.created_at,
-        published_at: post.published_at,
+        created_at: post.created_at.and_utc().fixed_offset(),
+        published_at: post.published_at.map(|dt| dt.and_utc().fixed_offset()),
         slug: post.slug,
         title: post.title,
         description: post.description,

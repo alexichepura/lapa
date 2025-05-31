@@ -35,9 +35,10 @@ opt-level = 'z'
 
 [workspace]
 resolver = "2"
-members = ["lib", "admin", "cli", "prisma_cli", "prisma_client"]
+members = ["lib", "admin", "cli"]
 
 [workspace.dependencies]
+clorinde = { path = "./clorinde" }
 lib = { path = "./lib" }
 axum = { version = "0.8", features = ["macros", "tracing"] }
 axum_session = { version = "0.16", default-features = false }
@@ -45,7 +46,11 @@ axum_session_auth = { version = "0.16", default-features = false }
 bcrypt = { version = "0.15" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
+config = "0.15.11"
 console_error_panic_hook = "0.1"
+cuid2 = "0.1.4"
+deadpool-postgres = { version = "0.14.1", features = ["serde"] }
+dotenvy = "0.15.7"
 http = "1.0"
 js-sys = { version = "0.3" }
 leptos = { version = "0.8", features = ["nightly", "tracing"] }
@@ -53,27 +58,16 @@ leptos_axum = { version = "0.8" }
 leptos_meta = { version = "0.8" }
 leptos_router = { version = "0.8", features = ["nightly"] }
 log = "0.4"
-prisma_client = { path = "./prisma_client" }
-prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e269dee", default-features = false, features = [
-    "sqlite",
-    "sqlite-create-many",
-    "migrations",
-] }
-prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust", rev = "e269dee", default-features = false, features = [
-    "sqlite",
-    "sqlite-create-many",
-    "migrations",
-] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde-wasm-bindgen = "0.6.3"
 thiserror = "2"
-tokio = { version = "1.41" }
+tokio = { version = "1.41", features = ["macros"] }
 tower = { version = "0.5" }
 tower_governor = { version = "0.7" }
 tower-http = { version = "0.6", features = ["fs", "trace"] }
 tracing = { version = "0.1" }
-tracing-subscriber = { version = "0.3", features = ["tracing-log"] }
+tracing-subscriber = { version = "0.3", features = ["tracing-log", "env-filter"] }
 tracing-wasm = "0.2.1"
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = [
@@ -87,11 +81,15 @@ web-sys = { version = "0.3", features = [
 ] }
 
 [dependencies]
+clorinde = { workspace = true, optional = true }
 lib = { workspace = true, features = ["leptos"] }
 axum = { workspace = true, optional = true }
 cfg-if = { workspace = true }
 chrono = { workspace = true }
+config = { workspace = true, optional = true }
 console_error_panic_hook = { workspace = true }
+deadpool-postgres = { workspace = true, optional = true }
+dotenvy = { workspace = true, optional = true }
 http = { workspace = true }
 js-sys = { workspace = true, optional = true }
 leptos = { workspace = true }
@@ -99,8 +97,6 @@ leptos_axum = { workspace = true, optional = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
 log = { workspace = true, optional = true }
-prisma_client = { workspace = true, optional = true }
-prisma-client-rust = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
@@ -116,6 +112,7 @@ wasm-bindgen = { workspace = true, optional = true }
 web-sys = { workspace = true, optional = true }
 
 [features]
+all = ["prod", "hydrate", "ssr"]
 prod = ["compression", "ratelimit"]
 tracing = [] # not used
 compression = ["tower-http?/compression-full"]
@@ -130,8 +127,11 @@ hydrate = [
 ssr = [
     "dep:axum",
     "dep:leptos_axum",
-    "dep:prisma_client",
-    "dep:prisma-client-rust",
+    "dep:clorinde",
+    "dep:config",
+    "dep:dotenvy",
+    "dep:deadpool-postgres",
+    "tokio/rt-multi-thread",
     "dep:tower_governor",
     "dep:tower-http",
     "dep:tower",

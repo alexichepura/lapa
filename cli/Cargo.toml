@@ -4,12 +4,18 @@ version = "0.1.0"
 edition = "2021"
 publish = false
 
+[features]
+all = []
+
 [dependencies]
-bcrypt = { workspace = true }
+bcrypt.workspace = true
 clap = { version = "4.5", features = ["derive"] }
-prisma_client = { workspace = true }
-prisma-client-rust = { workspace = true }
-serde = { workspace = true }
-tokio = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
+clorinde.workspace = true
+config.workspace = true
+cuid2.workspace = true
+dotenvy.workspace = true
+deadpool-postgres.workspace = true
+serde.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+tracing.workspace = true
+tracing-subscriber.workspace = true

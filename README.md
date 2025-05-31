@@ -1,6 +1,6 @@
-<img width="128" alt="LAPA Logo" src="https://github.com/alexichepura/lapa/assets/5582266/d13a532e-dd04-48a5-af49-d5f8e9e75c6e">
+<img width="128" alt="Lapa Logo" src="https://github.com/alexichepura/lapa/assets/5582266/d13a532e-dd04-48a5-af49-d5f8e9e75c6e">
 
-# LAPA - Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website
+# Lapa - Leptos Axum starter with Admin dashboard and SSR/SPA website
 
 Intro: <https://youtu.be/6eMWAI1D-XA> \
 Demo site: <https://lapa.chepura.space>
@@ -29,8 +29,6 @@ Some benefits:
 - single bundler (cargo)
 - straight path to WebAssembly
 
-## 3 pillars
-
 ### Leptos
 
 <https://leptos.dev> \
@@ -42,20 +40,13 @@ A cutting-edge, high-performance frontend framework SSR+SPA. Using reactive sign
 [tokio-rs/axum](https://github.com/tokio-rs/axum) \
 Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and modularity.
 
-### Prisma
-
-<https://www.prisma.io> \
-<https://prisma.brendonovich.dev> \
-[Brendonovich/prisma-client-rust](https://github.com/Brendonovich/prisma-client-rust) \
-Type-safe database access.
-
 ## Features
 
 - project
   - SEO site
   - admin dashboard
   - CLI with clap: settings-init, user-add, migrate
-  - prisma schema: user, session, post, image, settings
+  - db schema: user, session, post, image, settings
   - ops scripts: build, upload, run (site, admin, cli)
 - site
   - SSR + SPA hydrated
@@ -67,7 +58,6 @@ Type-safe database access.
 - admin auth and session with
   - axum_session [AscendingCreations/AxumSessions](https://github.com/AscendingCreations/AxumSessions)
   - axum_session_auth [AscendingCreations/AxumSessionsAuth](https://github.com/AscendingCreations/AxumSessionsAuth)
-  - custom prisma DatabasePool
 - post
   - admin CRUDL
   - published_at
@@ -94,19 +84,28 @@ Type-safe database access.
 
 ## Run
 
-### Generate prisma client
+### Generate db client
 
 ```sh
-cargo prisma db push # generate client and push schema to db
-# or
-cargo prisma generate # only generate client
+clorinde schema ./schema.sql
+```
+
+### Local DB
+
+Simplified with postgres user.
+```sh
+psql postgres
+# create database lapa;
+psql -h 127.0.0.1 -U postgres -p 5432 -d lapa < "schema.sql"
+# .env
+PG__URL="postgresql://postgres:postgres@localhost:5432/lapa"
 ```
 
 ### Init
 
 ```sh
-RUST_LOG="debug" cargo lapa settings-init
-RUST_LOG="debug" cargo lapa user-add
+RUST_LOG="debug" cargo cli settings-init
+RUST_LOG="debug" cargo cli user-add
 ```
 
 ### Dev
@@ -151,7 +150,6 @@ Requires <https://github.com/ryanfowler/precompress>
 ```
 
 ```sh
-./ops/prisma-upload.sh # upload prisma folder with migrations to server
 ./ops/cli-deploy.sh # upload cli to server
 ```
 
@@ -162,17 +160,6 @@ Considering return back to CSS if/when cargo-leptos will support lightningcss co
 
 Sass PR <https://github.com/alexichepura/lapa/pull/24>.
 Ligntningcss bundle with cli proof of concept <https://github.com/alexichepura/lapa/pull/23>.
-
-## Notes on prisma
-
-How initial migration created
-<https://www.prisma.io/docs/guides/migrate/developing-with-prisma-migrate/add-prisma-migrate-to-a-project>
-
-```sh
-mkdir -p prisma/migrations/0_init
-cargo prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql
-cargo prisma migrate resolve --applied 0_init
-```
 
 ## License
 

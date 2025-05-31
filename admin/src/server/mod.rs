@@ -11,30 +11,27 @@ use leptos_meta::{HashedStylesheet, Link, MetaTags, Script};
 use crate::{
     app::App,
     auth::User,
-    settings::{settins_db, SettingsCx},
+    settings::{settings_db, SettingsCx},
 };
 
 use cfg_if::cfg_if;
-cfg_if! {if #[cfg(feature = "ssr")] {
-    cfg_if! {if #[cfg(feature = "ratelimit")] {
-        pub mod ratelimit;
-        pub use ratelimit::*;
-    }}
-    cfg_if! {if #[cfg(feature = "compression")] {
-        pub mod compression;
-        pub use compression::*;
-    }}
+cfg_if! {if #[cfg(feature = "ratelimit")] {
+    pub mod ratelimit;
+    pub use ratelimit::*;
+}}
+cfg_if! {if #[cfg(feature = "compression")] {
+    pub mod compression;
+    pub use compression::*;
 }}
 
+pub mod db;
 pub mod auth;
 pub mod err;
 pub mod fileserv;
-pub mod prisma;
 pub mod session;
 pub use auth::*;
 pub use err::*;
 pub use fileserv::*;
-pub use prisma::*;
 pub use session::*;
 
 pub fn html_shell(
@@ -80,7 +77,7 @@ pub fn Favicons() -> impl IntoView {
 #[derive(FromRef, Debug, Clone)]
 pub struct AppState {
     pub leptos_options: LeptosOptions,
-    pub prisma_client: ArcPrisma,
+    pub pool: clorinde::deadpool_postgres::Pool,
 }
 
 pub async fn server_fn_public(
@@ -90,7 +87,7 @@ pub async fn server_fn_public(
 ) -> impl IntoResponse {
     handle_server_fns_with_context(
         move || {
-            provide_context(app_state.prisma_client.clone());
+            provide_context(app_state.pool.clone());
             provide_context(auth_session.clone());
         },
         request,
@@ -108,7 +105,7 @@ pub async fn server_fn_private(
     }
     handle_server_fns_with_context(
         move || {
-            provide_context(app_state.prisma_client.clone());
+            provide_context(app_state.pool.clone());
             provide_context(auth_session.clone());
         },
         request,
@@ -123,12 +120,12 @@ pub async fn leptos_routes_handler(
     req: Request<AxumBody>,
 ) -> Response {
     let user: Option<User> = auth_session.current_user.clone();
-    let prisma_client = app_state.prisma_client.clone();
-    let settings = settins_db(prisma_client.clone()).await;
+    let pool = app_state.pool.clone();
+    let settings = settings_db(pool.clone()).await;
     let leptos_options = app_state.leptos_options;
     let handler = leptos_axum::render_app_async_with_context(
         move || {
-            provide_context(app_state.prisma_client.clone());
+            provide_context(pool.clone());
             provide_context(auth_session.clone());
         },
         move || html_shell(leptos_options.clone(), user.clone(), settings.clone()),

@@ -50,46 +50,37 @@ type PostDeleteResult = Result<(), PostError>;
 
 #[server(PostDelete, "/api")]
 pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let found_post = prisma_client
-        .post()
-        .find_unique(db::post::id::equals(id.clone()))
-        .select(db::post::select!({
-            id
-            images: select {
-                id
-            }
-        }))
-        .exec()
+    let mut db = crate::server::db::use_db().await?;
+    let exists = clorinde::queries::post::admin_post_by_id_check()
+        .bind(&db, &id)
+        .opt()
         .await
-        .map_err(|e| lib::emsg(e, "Post find"))?;
-
-    if found_post.is_none() {
+        .map_err(|e| lib::emsg(e, "Post by id check"))?
+        .is_some();
+    if !exists {
         crate::server::serverr_404();
         return Ok(Err(PostError::NotFound));
     }
-    let found_post = found_post.unwrap();
-    let images_ids: Vec<String> = found_post.images.iter().map(|img| img.id.clone()).collect();
-
-    let _images_delete_result = prisma_client
-        .image()
-        .delete_many(vec![db::image::id::in_vec(images_ids.clone())])
-        .exec()
+    let images_ids = clorinde::queries::post::post_images_ids()
+        .bind(&db, &id)
+        .all()
         .await
-        .map_err(|e| lib::emsg(e, "Image delete"))?;
+        .map_err(|e| lib::emsg(e, "Post images ids"))?;
 
-    prisma_client
-        .post()
-        .delete(db::post::id::equals(id))
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Post delete"))?;
-
+    {
+        let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Post delete transaction init"))?;
+        let _deleted = clorinde::queries::image::delete_many_by_id()
+            .bind(&trx, &images_ids)
+            .await
+            .map_err(|e| lib::emsg(e, "Post images delete"))?;
+        let _deleted = clorinde::queries::post::post_delete()
+            .bind(&trx, &id)
+            .await
+            .map_err(|e| lib::emsg(e, "Post delete"))?;
+        trx.commit().await.map_err(|e| lib::emsg(e, "Post delete transaction"))?;
+    };
     for id in images_ids {
         crate::post::delete_image_on_server(&id);
     }
-
     Ok(Ok(()))
 }

@@ -235,18 +235,14 @@ where
 
 #[server(GetImages, "/api")]
 pub async fn get_images(post_id: String) -> Result<Vec<PostImageData>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-    let images = prisma_client
-        .image()
-        .find_many(vec![db::image::post_id::equals(post_id)])
-        .order_by(db::image::order::order(db::SortOrder::Asc))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let images = clorinde::queries::post::admin_images()
+        .bind(&db, &post_id)
+        .all()
         .await
-        .map_err(|e| lib::emsg(e, "Images find_many"))?;
-
+        .map_err(|e| lib::emsg(e, "Post images find"))?;
     let images: Vec<PostImageData> = images
-        .iter()
+        .into_iter()
         .map(|data| PostImageData {
             id: data.id.clone(),
             alt: data.alt.clone(),
@@ -262,94 +258,53 @@ pub type ImagesOrderUpdateResult = Result<(), ImageLoadError>;
 pub async fn images_order_update(
     ids: Vec<String>,
 ) -> Result<ImagesOrderUpdateResult, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let order_update = ids.into_iter().enumerate().map(|(i, id)| {
-        prisma_client
-            .image()
-            .update(
-                db::image::id::equals(id),
-                vec![db::image::order::set(i as i32)],
-            )
-            .select(db::image::select!({ id order }))
-    });
-
-    let _images_updated: Vec<_> = prisma_client
-        ._batch(order_update)
-        .await
-        .map_err(|e| lib::emsg(e, "Images update batch"))?;
-
+    // TODO how this can be improved? batch, sql?
+    let mut db_trx = crate::server::db::use_db().await?;
+    let db = crate::server::db::use_db().await?;
+    let order_update = ids.into_iter().enumerate();
+    let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images order transaction init"))?;
+    for (i, id) in order_update {
+        clorinde::queries::image::update_order().bind(&db, &(i as i32), &id).await;
+    }
+    trx.commit().await.map_err(|e| lib::emsg(e, "Images order transaction"))?;
     Ok(Ok(()))
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct ImageMakeHeroData {
-    pub hero: String,
-    pub not_hero: Option<String>,
-}
-pub type ImageMakeHeroResult = Result<ImageMakeHeroData, ImageLoadError>;
+// #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+// pub struct ImageMakeHeroData {
+//     pub hero: String,
+//     pub not_hero: Option<String>,
+// }
+// pub type ImageMakeHeroResult = Result<ImageMakeHeroData, ImageLoadError>;
+pub type ImageMakeHeroResult = Result<(), ImageLoadError>;
 #[server(ImageMakeHero, "/api")]
 pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let current_img = prisma_client
-        .image()
-        .find_unique(db::image::id::equals(id.clone()))
-        .select(db::image::select!({ post_id }))
-        .exec()
+    let db = crate::server::db::use_db().await?;
+    let current_img = clorinde::queries::image::select_post_id()
+        .bind(&db, &id)
+        .opt()
         .await
         .map_err(|e| lib::emsg(e, "Image find"))?;
     if let None = current_img {
         return Ok(Err(ImageLoadError::NotFound));
     }
     let current_img = current_img.unwrap();
-    let current_hero = prisma_client
-        .image()
-        .find_first(vec![
-            db::image::post_id::equals(current_img.post_id),
-            db::image::is_hero::equals(true),
-        ])
-        .select(db::image::select!({ id }))
-        .exec()
+    let current_hero = clorinde::queries::image::find_hero()
+        .bind(&db, &current_img)
+        .opt()
         .await
-        .map_err(|e| lib::emsg(e, "Image hero find"))?;
+        .map_err(|e| lib::emsg(e, "Image current hero find"))?;
 
-    let data: ImageMakeHeroData = prisma_client
-        ._transaction()
-        .run(|prisma_client| async move {
-            let not_hero = if let Some(current_hero) = current_hero {
-                let not_hero = prisma_client
-                    .image()
-                    .update(
-                        db::image::id::equals(current_hero.id),
-                        vec![db::image::is_hero::set(false)],
-                    )
-                    .select(db::image::select!({ id is_hero }))
-                    .exec()
-                    .await?;
-                Some(not_hero.id)
-            } else {
-                None
-            };
-
-            prisma_client
-                .image()
-                .update(
-                    db::image::id::equals(id),
-                    vec![db::image::is_hero::set(true)],
-                )
-                .select(db::image::select!({ id is_hero }))
-                .exec()
-                .await
-                .map(|hero| ImageMakeHeroData {
-                    hero: hero.id,
-                    not_hero,
-                })
-        })
-        .await
-        .map_err(|e| lib::emsg(e, "Image update"))?;
-
-    Ok(Ok(data))
+    let mut db_trx = crate::server::db::use_db().await?;
+    let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images hero transaction init"))?;
+    clorinde::queries::image::set_hero()
+        .bind(&db, &id)
+        .await;
+    if let Some(current_hero) = current_hero {
+        clorinde::queries::image::unset_hero()
+            .bind(&db, &current_hero)
+            .await;
+    }
+    trx.commit().await.map_err(|e| lib::emsg(e, "Images hero transaction"))?;
+    Ok(Ok(()))
 }
