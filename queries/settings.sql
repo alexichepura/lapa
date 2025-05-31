@@ -32,8 +32,8 @@ SELECT
 FROM "Settings";
 
 --! settings_create
-INSERT INTO "Settings" (hero_height, hero_width, thumb_height, thumb_width)
-  VALUES (:hero_height, :hero_width, :thumb_height, :thumb_width);
+INSERT INTO "Settings" (id, hero_height, hero_width, thumb_height, thumb_width)
+  VALUES (:id, :hero_height, :hero_width, :thumb_height, :thumb_width);
 
 --! settings_update
 UPDATE "Settings"

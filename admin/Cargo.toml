@@ -19,6 +19,7 @@ cfg-if = { workspace = true }
 chrono = { workspace = true }
 clorinde = { workspace = true, optional = true }
 console_error_panic_hook = { workspace = true }
+cuid2.workspace = true
 dotenvy = { workspace = true, optional = true }
 config = { workspace = true, optional = true }
 http = { workspace = true }

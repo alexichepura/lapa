@@ -1,7 +1,8 @@
 // This file was generated with `clorinde`. Do not modify.
 
-#[derive(Clone, Copy, Debug)]
-pub struct SettingsCreateParams {
+#[derive(Debug)]
+pub struct SettingsCreateParams<T1: crate::StringSql> {
+    pub id: T1,
     pub hero_height: i32,
     pub hero_width: i32,
     pub thumb_height: i32,
@@ -407,14 +408,15 @@ impl SettingsHomeStmt {
 }
 pub fn settings_create() -> SettingsCreateStmt {
     SettingsCreateStmt(crate::client::async_::Stmt::new(
-        "INSERT INTO \"Settings\" (hero_height, hero_width, thumb_height, thumb_width) VALUES ($1, $2, $3, $4)",
+        "INSERT INTO \"Settings\" (id, hero_height, hero_width, thumb_height, thumb_width) VALUES ($1, $2, $3, $4, $5)",
     ))
 }
 pub struct SettingsCreateStmt(crate::client::async_::Stmt);
 impl SettingsCreateStmt {
-    pub async fn bind<'c, 'a, 's, C: GenericClient>(
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
+        id: &'a T1,
         hero_height: &'a i32,
         hero_width: &'a i32,
         thumb_height: &'a i32,
@@ -422,16 +424,19 @@ impl SettingsCreateStmt {
     ) -> Result<u64, tokio_postgres::Error> {
         let stmt = self.0.prepare(client).await?;
         client
-            .execute(stmt, &[hero_height, hero_width, thumb_height, thumb_width])
+            .execute(
+                stmt,
+                &[id, hero_height, hero_width, thumb_height, thumb_width],
+            )
             .await
     }
 }
-impl<'a, C: GenericClient + Send + Sync>
+impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql>
     crate::client::async_::Params<
         'a,
         'a,
         'a,
-        SettingsCreateParams,
+        SettingsCreateParams<T1>,
         std::pin::Pin<
             Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
         >,
@@ -441,12 +446,13 @@ impl<'a, C: GenericClient + Send + Sync>
     fn params(
         &'a mut self,
         client: &'a C,
-        params: &'a SettingsCreateParams,
+        params: &'a SettingsCreateParams<T1>,
     ) -> std::pin::Pin<
         Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
     > {
         Box::pin(self.bind(
             client,
+            &params.id,
             &params.hero_height,
             &params.hero_width,
             &params.thumb_height,

@@ -48,6 +48,7 @@ cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
 config = "0.15.11"
 console_error_panic_hook = "0.1"
+cuid2 = "0.1.4"
 deadpool-postgres = { version = "0.14.1", features = ["serde"] }
 dotenvy = "0.15.7"
 http = "1.0"
