@@ -2,6 +2,14 @@
 
 # Lapa - Leptos Axum starter with Admin dashboard and SSR/SPA website
 
+## Status
+This project is under active development.\
+Recently migrated from Prisma ORM to SQL first approach with Clorinde.\
+Next is to add more CMS like features. Most important one is rich text editor.\
+I have been working on integration with Slate.js and going add it here.
+
+---
+
 Intro: <https://youtu.be/6eMWAI1D-XA> \
 Demo site: <https://lapa.chepura.space>
 
