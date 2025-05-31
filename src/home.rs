@@ -21,9 +21,9 @@ pub fn HomePage() -> impl IntoView {
         <Title text="Home" />
         <Meta
             name="description"
-            content="Leptos Axum Prisma starter with Admin dashboard and SSR/SPA website"
+            content="Leptos Axum starter with Admin dashboard and SSR/SPA website"
         />
-        <h1>Welcome to LAPA</h1>
+        <h1>Welcome to Lapa</h1>
         <Suspense>
             {move || Suspend::new(async move {
                 match home.await {

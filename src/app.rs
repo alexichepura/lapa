@@ -9,7 +9,7 @@ pub fn App(settings: SettingsCx) -> impl IntoView {
     provide_meta_context();
     provide_context(settings.clone());
     let (is_routing, set_is_routing) = signal(false);
-    let formatter = |text| format!("{text} - LAPA");
+    let formatter = |text| format!("{text} - Lapa");
     view! {
         <Title formatter />
         <RoutingProgress

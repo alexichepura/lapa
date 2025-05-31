@@ -1,6 +1,6 @@
-<img width="128" alt="LAPA Logo" src="https://github.com/alexichepura/lapa/assets/5582266/d13a532e-dd04-48a5-af49-d5f8e9e75c6e">
+<img width="128" alt="Lapa Logo" src="https://github.com/alexichepura/lapa/assets/5582266/d13a532e-dd04-48a5-af49-d5f8e9e75c6e">
 
-# LAPA - Leptos Axum starter with Admin dashboard and SSR/SPA website
+# Lapa - Leptos Axum starter with Admin dashboard and SSR/SPA website
 
 Intro: <https://youtu.be/6eMWAI1D-XA> \
 Demo site: <https://lapa.chepura.space>
