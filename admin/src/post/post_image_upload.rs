@@ -91,13 +91,11 @@ pub async fn upload_img(
     let ext = img_format.extensions_str().first().unwrap();
 
     let db = crate::server::db::use_db().await?;
-    let image_upload_data = clorinde::queries::image::create()
-        .bind(&db, &alt, ext, &post_id)
-        .one()
+    let id = cuid2::create_id();
+    let _created = clorinde::queries::image::create()
+        .bind(&db, &id, &alt, ext, &post_id)
         .await
         .map_err(|e| lib::emsg(e, "Image create"))?;
-
-    let id = image_upload_data;
     let file_path = crate::image::img_path_upload_ext(&id, &ext.to_string());
     std::fs::write(file_path.clone(), img_bytes).map_err(|e| lib::emsg(e, "Image write"))?;
 

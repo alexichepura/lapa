@@ -47,6 +47,5 @@ FROM "Image"
 WHERE post_id = :post_id AND is_hero = true;
 
 --! create
-INSERT INTO "Image" (alt, ext, post_id)
-  VALUES (:alt, :ext, :post_id)
-RETURNING id;
+INSERT INTO "Image" (id, alt, ext, post_id)
+  VALUES (:id, :alt, :ext, :post_id);

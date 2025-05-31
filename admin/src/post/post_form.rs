@@ -292,17 +292,25 @@ pub async fn post_upsert(
             tracing::warn!("Post exists for slug={}", slug);
             return Ok(Err(PostError::CreateSlugExists));
         }
-        let post = queries::post::post_create()
-            .bind(&db, &published_at.map(|publ_at| publ_at.naive_utc()), &title, &description, &text)
+        let id = cuid2::create_id();
+        let post_created_at = queries::post::post_create()
+            .bind(
+                &db,
+                &id,
+                &published_at.map(|publ_at| publ_at.naive_utc()),
+                &title,
+                &description,
+                &text
+            )
             .one()
             .await
             .map_err(|e| lib::emsg(e, "Post create"))?;
         return Ok(Ok(PostFormData {
-            id: Some(post.id),
+            id: Some(id),
             slug: slug,
             title: title,
             description: description,
-            created_at: post.created_at.and_utc().fixed_offset(),
+            created_at: post_created_at.and_utc().fixed_offset(),
             published_at: published_at,
             text: text,
         }));

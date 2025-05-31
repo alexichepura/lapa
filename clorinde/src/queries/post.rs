@@ -1,11 +1,17 @@
 // This file was generated with `clorinde`. Do not modify.
 
 #[derive(Debug)]
-pub struct PostCreateParams<T1: crate::StringSql, T2: crate::StringSql, T3: crate::StringSql> {
+pub struct PostCreateParams<
+    T1: crate::StringSql,
+    T2: crate::StringSql,
+    T3: crate::StringSql,
+    T4: crate::StringSql,
+> {
+    pub id: T1,
     pub published_at: Option<crate::types::time::Timestamp>,
-    pub title: T1,
-    pub description: T2,
-    pub text: T3,
+    pub title: T2,
+    pub description: T3,
+    pub text: T4,
 }
 #[derive(Debug)]
 pub struct PostUpdateParams<
@@ -145,23 +151,6 @@ impl<'a> From<AdminPostPageBorrowed<'a>> for AdminPostPage {
             title: title.into(),
             description: description.into(),
             text: text.into(),
-        }
-    }
-}
-#[derive(Debug, Clone, PartialEq)]
-pub struct PostCreate {
-    pub id: String,
-    pub created_at: crate::types::time::Timestamp,
-}
-pub struct PostCreateBorrowed<'a> {
-    pub id: &'a str,
-    pub created_at: crate::types::time::Timestamp,
-}
-impl<'a> From<PostCreateBorrowed<'a>> for PostCreate {
-    fn from(PostCreateBorrowed { id, created_at }: PostCreateBorrowed<'a>) -> Self {
-        Self {
-            id: id.into(),
-            created_at,
         }
     }
 }
@@ -450,70 +439,6 @@ where
 {
     pub fn map<R>(self, mapper: fn(&str) -> R) -> StringQuery<'c, 'a, 's, C, R, N> {
         StringQuery {
-            client: self.client,
-            params: self.params,
-            stmt: self.stmt,
-            extractor: self.extractor,
-            mapper,
-        }
-    }
-    pub async fn one(self) -> Result<T, tokio_postgres::Error> {
-        let stmt = self.stmt.prepare(self.client).await?;
-        let row = self.client.query_one(stmt, &self.params).await?;
-        Ok((self.mapper)((self.extractor)(&row)?))
-    }
-    pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
-        self.iter().await?.try_collect().await
-    }
-    pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
-        let stmt = self.stmt.prepare(self.client).await?;
-        Ok(self
-            .client
-            .query_opt(stmt, &self.params)
-            .await?
-            .map(|row| {
-                let extracted = (self.extractor)(&row)?;
-                Ok((self.mapper)(extracted))
-            })
-            .transpose()?)
-    }
-    pub async fn iter(
-        self,
-    ) -> Result<
-        impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'c,
-        tokio_postgres::Error,
-    > {
-        let stmt = self.stmt.prepare(self.client).await?;
-        let it = self
-            .client
-            .query_raw(stmt, crate::slice_iter(&self.params))
-            .await?
-            .map(move |res| {
-                res.and_then(|row| {
-                    let extracted = (self.extractor)(&row)?;
-                    Ok((self.mapper)(extracted))
-                })
-            })
-            .into_stream();
-        Ok(it)
-    }
-}
-pub struct PostCreateQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
-    client: &'c C,
-    params: [&'a (dyn postgres_types::ToSql + Sync); N],
-    stmt: &'s mut crate::client::async_::Stmt,
-    extractor: fn(&tokio_postgres::Row) -> Result<PostCreateBorrowed, tokio_postgres::Error>,
-    mapper: fn(PostCreateBorrowed) -> T,
-}
-impl<'c, 'a, 's, C, T: 'c, const N: usize> PostCreateQuery<'c, 'a, 's, C, T, N>
-where
-    C: GenericClient,
-{
-    pub fn map<R>(
-        self,
-        mapper: fn(PostCreateBorrowed) -> R,
-    ) -> PostCreateQuery<'c, 'a, 's, C, R, N> {
-        PostCreateQuery {
             client: self.client,
             params: self.params,
             stmt: self.stmt,
@@ -955,7 +880,7 @@ impl AdminPostByIdCheckStmt {
 }
 pub fn post_create() -> PostCreateStmt {
     PostCreateStmt(crate::client::async_::Stmt::new(
-        "INSERT INTO \"Post\" (published_at, title, description, text) VALUES ($1, $2, $3, $4) RETURNING id, created_at",
+        "INSERT INTO \"Post\" (id, published_at, title, description, text) VALUES ($1, $2, $3, $4, $5) RETURNING created_at",
     ))
 }
 pub struct PostCreateStmt(crate::client::async_::Stmt);
@@ -968,46 +893,52 @@ impl PostCreateStmt {
         T1: crate::StringSql,
         T2: crate::StringSql,
         T3: crate::StringSql,
+        T4: crate::StringSql,
     >(
         &'s mut self,
         client: &'c C,
+        id: &'a T1,
         published_at: &'a Option<crate::types::time::Timestamp>,
-        title: &'a T1,
-        description: &'a T2,
-        text: &'a T3,
-    ) -> PostCreateQuery<'c, 'a, 's, C, PostCreate, 4> {
-        PostCreateQuery {
+        title: &'a T2,
+        description: &'a T3,
+        text: &'a T4,
+    ) -> CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 5> {
+        CrateTypesTimeTimestampQuery {
             client,
-            params: [published_at, title, description, text],
+            params: [id, published_at, title, description, text],
             stmt: &mut self.0,
-            extractor:
-                |row: &tokio_postgres::Row| -> Result<PostCreateBorrowed, tokio_postgres::Error> {
-                    Ok(PostCreateBorrowed {
-                        id: row.try_get(0)?,
-                        created_at: row.try_get(1)?,
-                    })
-                },
-            mapper: |it| PostCreate::from(it),
+            extractor: |row| Ok(row.try_get(0)?),
+            mapper: |it| it,
         }
     }
 }
-impl<'c, 'a, 's, C: GenericClient, T1: crate::StringSql, T2: crate::StringSql, T3: crate::StringSql>
+impl<
+    'c,
+    'a,
+    's,
+    C: GenericClient,
+    T1: crate::StringSql,
+    T2: crate::StringSql,
+    T3: crate::StringSql,
+    T4: crate::StringSql,
+>
     crate::client::async_::Params<
         'c,
         'a,
         's,
-        PostCreateParams<T1, T2, T3>,
-        PostCreateQuery<'c, 'a, 's, C, PostCreate, 4>,
+        PostCreateParams<T1, T2, T3, T4>,
+        CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 5>,
         C,
     > for PostCreateStmt
 {
     fn params(
         &'s mut self,
         client: &'c C,
-        params: &'a PostCreateParams<T1, T2, T3>,
-    ) -> PostCreateQuery<'c, 'a, 's, C, PostCreate, 4> {
+        params: &'a PostCreateParams<T1, T2, T3, T4>,
+    ) -> CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 5> {
         self.bind(
             client,
+            &params.id,
             &params.published_at,
             &params.title,
             &params.description,

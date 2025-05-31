@@ -52,9 +52,9 @@ FROM "Post"
 WHERE id = :id;
 
 --! post_create (published_at?) : 
-INSERT INTO "Post" (published_at, title, description, text)
-  VALUES (:published_at, :title, :description, :text)
-  RETURNING id, created_at;
+INSERT INTO "Post" (id, published_at, title, description, text)
+  VALUES (:id, :published_at, :title, :description, :text)
+  RETURNING created_at;
 
 --! post_update (published_at?) :
 UPDATE "Post"
