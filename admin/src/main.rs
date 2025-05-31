@@ -40,10 +40,10 @@ async fn main() {
                 .try_deserialize()
         }
     }
+    let config = Config::from_env().unwrap();
 
     let leptopts = get_configuration(None).unwrap().leptos_options;
     let routes = generate_route_list(|| view! { <AdminRouter /> });
-    let config = Config::from_env().unwrap();
     let pool = config
         .pg
         .create_pool(Some(Runtime::Tokio1), tokio_postgres::NoTls)

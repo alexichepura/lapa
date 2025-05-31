@@ -8,21 +8,45 @@ async fn main() {
         routing::{get, post},
         Router,
     };
+    use clorinde::tokio_postgres;
+    use config::ConfigError;
+    use deadpool_postgres::Runtime;
+    use dotenvy::dotenv;
     use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
+    use serde::Deserialize;
     use site::{
         routes::GenerateRouteList,
         server::{
-            db,
             file_and_error_handler, img_handler, leptos_routes_handler,
             robots_txt, server_fn_handler, AppState,
         },
     };
     use tracing::info;
 
+    dotenv().expect(".env file not found");
+
+    #[derive(Debug, Deserialize)]
+    struct Config {
+        pg: deadpool_postgres::Config,
+    }
+    impl Config {
+        pub fn from_env() -> Result<Self, ConfigError> {
+            config::Config::builder()
+                .add_source(config::Environment::default().separator("__"))
+                .build()
+                .unwrap()
+                .try_deserialize()
+        }
+    }
+    let config = Config::from_env().unwrap();
+
     let leptopts = get_configuration(None).unwrap().leptos_options;
     let routes = generate_route_list(|| view! { <GenerateRouteList /> });
-    let pool = db::create_pool().await.unwrap();
+    let pool = config
+        .pg
+        .create_pool(Some(Runtime::Tokio1), tokio_postgres::NoTls)
+        .unwrap();
 
     let app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))

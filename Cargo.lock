@@ -3576,6 +3576,7 @@ dependencies = [
  "clorinde",
  "config",
  "console_error_panic_hook",
+ "deadpool-postgres",
  "dotenvy",
  "http",
  "js-sys",

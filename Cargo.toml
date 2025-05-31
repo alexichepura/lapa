@@ -86,9 +86,10 @@ lib = { workspace = true, features = ["leptos"] }
 axum = { workspace = true, optional = true }
 cfg-if = { workspace = true }
 chrono = { workspace = true }
-console_error_panic_hook = { workspace = true }
-dotenvy = { workspace = true, optional = true }
 config = { workspace = true, optional = true }
+console_error_panic_hook = { workspace = true }
+deadpool-postgres = { workspace = true, optional = true }
+dotenvy = { workspace = true, optional = true }
 http = { workspace = true }
 js-sys = { workspace = true, optional = true }
 leptos = { workspace = true }
@@ -129,6 +130,7 @@ ssr = [
     "dep:clorinde",
     "dep:config",
     "dep:dotenvy",
+    "dep:deadpool-postgres",
     "tokio/rt-multi-thread",
     "dep:tower_governor",
     "dep:tower-http",
