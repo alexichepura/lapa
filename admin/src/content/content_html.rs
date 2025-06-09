@@ -1,0 +1,119 @@
+use crate::{content::ContentEditor, form::FormFooter};
+use leptos::prelude::*;
+
+use super::ContentError;
+
+#[component]
+pub fn ContentHtml(content_id: String, content_json: String) -> impl IntoView {
+    let post_content_update = ServerAction::<ContentJsonUpdate>::new();
+    let pending = post_content_update.pending();
+
+    let (content, set_content) = signal(String::from(content_json.clone()));
+
+    view! {
+        <fieldset prop:disabled=move || pending()>
+            <legend>Content</legend>
+            <ContentEditor content_id=content_id.clone() content_json set_content />
+            <ActionForm action=post_content_update>
+                <input type="hidden" name="content_id" value=content_id />
+                <input type="hidden" name="json" value=content />
+                <FormFooter action=post_content_update submit_text="Save post content" />
+            </ActionForm>
+        </fieldset>
+    }
+}
+
+#[server(ContentJsonUpdate, "/api")]
+async fn content_json_update(
+    content_id: String,
+    json: String,
+) -> Result<Result<(), ContentError>, ServerFnError> {
+    use prisma_web_client::db;
+    let prisma_web_client = crate::server::use_prisma_web()?;
+
+    use content::{CdnImageFormat, CdnImageSize, SlateBlock, SlateBlocks};
+    let slate_model = serde_json::from_str::<SlateBlocks>(&json)
+        .map_err(|e| lib::emsg(e, "Content json is not sarialisable"))?;
+    let images_ids: Vec<String> = slate_model
+        .into_iter()
+        .filter_map(|block| {
+            if let SlateBlock::Img(img) = block {
+                return Some(img.id);
+            } else {
+                return None;
+            };
+        })
+        .collect();
+    let current_content = prisma_web_client
+        .content()
+        .find_unique(db::content::id::equals(content_id.clone()))
+        .select(db::content::select!({
+            content_image: select {
+                id
+                ext
+            }
+        }))
+        .exec()
+        .await
+        .map_err(|e| lib::emsg(e, "Content find_unique"))?;
+    let Some(current_content) = current_content else {
+        crate::server::serverr_404();
+        return Ok(Err(ContentError::NotFound));
+    };
+    struct ImageToDelete {
+        id: String,
+        ext: String,
+    }
+    let mut images_to_delete: Vec<ImageToDelete> = vec![];
+    for img in current_content.content_image {
+        if !images_ids.contains(&img.id) {
+            images_to_delete.push(ImageToDelete {
+                id: img.id,
+                ext: img.ext,
+            });
+        }
+    }
+
+    let media_config = crate::server::use_media_config()?;
+    for img in &images_to_delete {
+        let path = media_config.content_upload_name_ext(&img.id, &img.ext);
+        let upload_del_result = std::fs::remove_file(&path);
+        if let Err(e) = upload_del_result {
+            tracing::debug!("image upload del {path} e={e}");
+        }
+        for image_format in CdnImageFormat::VALUES {
+            for image_size in CdnImageSize::VALUES {
+                let cdn_path = format!(
+                    "{}/{}_{}.{}",
+                    media_config.content_cdn_path, img.id, image_size, image_format
+                );
+                let cdn_del_result = std::fs::remove_file(&cdn_path);
+                if let Err(e) = cdn_del_result {
+                    tracing::debug!("image cdn del {cdn_path} e={e}");
+                }
+            }
+        }
+    }
+
+    if images_to_delete.len() > 0 {
+        let ids = images_to_delete.into_iter().map(|img| img.id).collect();
+        prisma_web_client
+            .content_image()
+            .delete_many(vec![db::content_image::id::in_vec(ids)])
+            .exec()
+            .await
+            .map_err(|e| lib::emsg(e, "content_image delete_many"))?;
+    }
+
+    let _ = prisma_web_client
+        .content()
+        .update(
+            db::content::id::equals(content_id),
+            vec![db::content::json::set(json)],
+        )
+        .select(db::content::select!({ id }))
+        .exec()
+        .await
+        .map_err(|e| lib::emsg(e, "Content json string update"))?;
+    return Ok(Ok(()));
+}

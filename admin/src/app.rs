@@ -10,6 +10,7 @@ use leptos_router::*;
 use crate::{
     auth::{use_user_signal, Login, User},
     home::HomePage,
+    content::{ContentList, ContentNew, ContentPage},
     layout::Layout,
     post::{PostList, PostNew, PostPage},
     settings::{Settings, SettingsCx},
@@ -78,6 +79,11 @@ pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
                 <ParentRoute path=StaticSegment("posts") view=|| view! { <Outlet /> }>
                     <Route path=StaticSegment("new") view=PostNew />
                     <Route path=ParamSegment("id") view=PostPage />
+                </ParentRoute>
+                <ParentRoute path=StaticSegment("content") view=|| view! { <Outlet /> }>
+                    <Route path=StaticSegment("") view=ContentList />
+                    <Route path=StaticSegment("new") view=ContentNew />
+                    <Route path=ParamSegment("id") view=ContentPage />
                 </ParentRoute>
             </ProtectedParentRoute>
         </Routes>

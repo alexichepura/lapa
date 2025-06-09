@@ -1,0 +1,26 @@
+{
+  "name": "lapa-slate",
+  "version": "1.0.0",
+  "main": "src/index.tsx",
+  "scripts": {
+    "dev": "rspack serve",
+    "build": "rspack build"
+  },
+  "devDependencies": {
+    "@rspack/cli": "^1.1.8",
+    "@rspack/core": "^1.1.8",
+    "@types/is-url": "^1.2.32",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5"
+  },
+  "dependencies": {
+    "is-hotkey": "^0.2.0",
+    "is-url": "^1.2.4",
+    "react": "^19.0.0",
+    "slate": "^0.112.0",
+    "slate-history": "^0.110.3",
+    "slate-hyperscript": "^0.100.0",
+    "slate-react": "^0.112.0",
+    "use-debounce": "^10.0.4"
+  }
+}
