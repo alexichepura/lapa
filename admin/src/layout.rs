@@ -26,6 +26,7 @@ pub fn Layout(user: User) -> impl IntoView {
                         "Dashboard"
                     </A>
                     <A href="/posts">Posts</A>
+                    <A href="/content">Content</A>
                     <A href="/settings">Settings</A>
                 </nav>
             </div>

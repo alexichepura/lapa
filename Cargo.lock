@@ -35,6 +35,7 @@ dependencies = [
  "cuid2",
  "deadpool-postgres",
  "dotenvy",
+ "gloo-utils",
  "http",
  "image",
  "js-sys",
