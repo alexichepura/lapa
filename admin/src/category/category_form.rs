@@ -21,36 +21,27 @@ pub fn CategoryForm(form: CategoryFormData) -> impl IntoView {
                 <input type="hidden" name="id" value=form.id />
                 <div class="Grid-fluid-2">
                     <Input name="slug" label="Slug" value=form.slug />
-                    <Input name="name_en" label="Name en" value=form.name />
+                    <Input name="name" label="Name" value=form.name />
                 </div>
                 <FormFooter action=category_update submit_text="Update category" />
             </fieldset>
         </ActionForm>
     }
 }
-#[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct CategoryUpdateResponse {}
 #[server(CategoryUpdate, "/api")]
 pub async fn category_update(
     id: String,
     slug: String,
-    name_en: String,
-) -> Result<Result<CategoryUpdateResponse, CategoryError>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-    let _category = prisma_client
-        .category()
-        .update(
-            db::category::id::equals(id),
-            vec![
-                db::category::name_en::set(name_en),
-                db::category::slug::set(slug),
-            ],
-        )
-        .select(db::category::select!({ slug }))
-        .exec()
+    name: String,
+    // title: String,
+    // description: String,
+) -> Result<Result<(), CategoryError>, ServerFnError> {
+    let db = crate::server::db::use_db().await?;
+    let title = "";
+    let description = "";
+    clorinde::queries::admin_post_category::update()
+        .bind(&db, &slug, &name, &title, &description, &id)
         .await
-        .map_err(|e| lib::emsg(e, "Category update"))?;
-
-    return Ok(Ok(CategoryUpdateResponse {}));
+        .map_err(|e| lib::emsg(e, "Post category update"))?;
+    return Ok(Ok(()));
 }
