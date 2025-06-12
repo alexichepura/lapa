@@ -11,7 +11,7 @@ pub mod form;
 pub mod home;
 pub mod image;
 pub mod layout;
-pub mod post;
+pub mod product;
 pub mod settings;
 pub mod upload;
 pub mod util;

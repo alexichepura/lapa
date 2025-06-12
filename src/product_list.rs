@@ -8,7 +8,7 @@ use crate::{
 };
 
 #[component]
-pub fn PostList() -> impl IntoView {
+pub fn ProductList() -> impl IntoView {
     let posts = Resource::new_blocking(|| (), move |_| get_posts());
 
     view! {
@@ -56,7 +56,7 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
 #[server(GetPosts, "/api")]
 pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let posts = clorinde::queries::post::post_list()
+    let posts = clorinde::queries::product::product_list()
         .bind(&db).all()
         .await
         .map_err(|e| lib::emsg(e, "Post list find"))?;
@@ -69,7 +69,7 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
             };
             PostListItem {
                 id: data.id,
-                title: data.title,
+                title: data.meta_title,
                 slug: data.slug,
                 hero,
             }

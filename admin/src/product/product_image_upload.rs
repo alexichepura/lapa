@@ -92,7 +92,7 @@ pub async fn upload_img(
 
     let db = crate::server::db::use_db().await?;
     let id = cuid2::create_id();
-    let _created = clorinde::queries::image::create()
+    let _created = clorinde::queries::product_image::create()
         .bind(&db, &id, &alt, ext, &post_id)
         .await
         .map_err(|e| lib::emsg(e, "Image create"))?;

@@ -2,7 +2,7 @@ use leptos::{either::EitherOf3, prelude::*};
 use leptos_router::{hooks::use_params, params::Params};
 
 use crate::{
-    post::{PostError, PostForm, PostFormData},
+    product::{ProductError, PostForm, ProductFormData},
     util::{AlertDanger, Loading},
 };
 
@@ -12,7 +12,7 @@ pub struct PostParams {
 }
 
 #[component]
-pub fn PostPage() -> impl IntoView {
+pub fn ProductPage() -> impl IntoView {
     let params = use_params::<PostParams>();
     // let id = move || {
     //     params.with(|q| {
@@ -23,7 +23,7 @@ pub fn PostPage() -> impl IntoView {
     //             .map_err(|_| PostError::InvalidId)
     //     })
     // };
-    let id = Memo::new(move |prev: Option<&Result<String, PostError>>| {
+    let id = Memo::new(move |prev: Option<&Result<String, ProductError>>| {
         params.with(|q| {
             // Memo to fix Err(MissingParam("id")) when navigating away from page inside <Outlet />
             // log!("{:?}", q);
@@ -33,7 +33,7 @@ pub fn PostPage() -> impl IntoView {
                     if let Some(Ok(prev)) = prev {
                         Ok(prev.to_owned())
                     } else {
-                        Err(PostError::InvalidId)
+                        Err(ProductError::InvalidId)
                     }
                 }
             }
@@ -66,25 +66,24 @@ pub fn PostPage() -> impl IntoView {
 }
 
 #[server(GetPost, "/api")]
-pub async fn get_post(id: String) -> Result<Result<PostFormData, PostError>, ServerFnError> {
+pub async fn get_post(id: String) -> Result<Result<ProductFormData, ProductError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let post = clorinde::queries::post::admin_post_page()
+    let post = clorinde::queries::product::admin_product_page()
         .bind(&db, &id)
         .opt()
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;
     let Some(post) = post else {
         crate::server::serverr_404();
-        return Ok(Err(PostError::NotFound));
+        return Ok(Err(ProductError::NotFound));
     };
-    let post_data = PostFormData {
+    let post_data = ProductFormData {
         id: Some(post.id),
         created_at: post.created_at.and_utc().fixed_offset(),
-        published_at: post.published_at.map(|dt| dt.and_utc().fixed_offset()),
+        publish_at: post.publish_at.map(|dt| dt.and_utc().fixed_offset()),
         slug: post.slug,
-        title: post.title,
-        description: post.description,
-        text: post.text,
+        title: post.meta_title,
+        description: post.meta_description,
     };
     Ok(Ok(post_data))
 }

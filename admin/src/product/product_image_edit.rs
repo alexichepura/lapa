@@ -67,7 +67,7 @@ type ImageDeleteResult = Result<(), ImageLoadError>;
 #[server(ImageDelete, "/api")]
 pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let deleted_count = clorinde::queries::image::delete_by_id()
+    let deleted_count = clorinde::queries::product_image::delete_by_id()
         .bind(&db, &id)
         .await
         .map_err(|e| lib::emsg(e, "Image delete"))?;
@@ -104,7 +104,7 @@ type ImageUpdateResult = Result<(), ImageLoadError>;
 #[server(ImageUpdate, "/api")]
 pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let updated_count = clorinde::queries::image::update_alt()
+    let updated_count = clorinde::queries::product_image::update_alt()
         .bind(&db, &alt, &id)
         .await
         .map_err(|e| lib::emsg(e, "Image alt update"))?;

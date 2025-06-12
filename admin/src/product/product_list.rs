@@ -10,7 +10,7 @@ use crate::{
 };
 
 #[component]
-pub fn PostList() -> impl IntoView {
+pub fn ProductList() -> impl IntoView {
     let posts = Resource::new_blocking(|| (), move |_| get_posts());
 
     view! {
@@ -88,7 +88,7 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
 #[server(GetPosts, "/api")]
 pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let posts = clorinde::queries::post::admin_list()
+    let posts = clorinde::queries::product::admin_product_list()
         .bind(&db)
         .all()
         .await
@@ -96,15 +96,15 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
     let posts: Vec<PostListItem> = posts
         .into_iter()
         .map(|data| {
-            let is_published: bool = match data.published_at {
+            let is_published: bool = match data.publish_at {
                 Some(published_at) => chrono::Utc::now().fixed_offset() > published_at.and_utc().fixed_offset(),
                 None => false,
             };
             PostListItem {
                 id: data.id,
-                title: data.title,
+                title: data.meta_title,
                 created_at: data.created_at.and_utc().fixed_offset(),
-                published_at: data.published_at.map(|dt| dt.and_utc().fixed_offset()),
+                published_at: data.publish_at.map(|dt| dt.and_utc().fixed_offset()),
                 is_published,
                 hero: data.image_id,
             }

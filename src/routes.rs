@@ -4,7 +4,7 @@ use leptos_router::{
     ParamSegment, StaticSegment,
 };
 
-use crate::{home::HomePage, post_page::PostPage};
+use crate::{home::HomePage, product_page::ProductPage};
 
 #[component]
 pub fn FrontRoutes() -> impl IntoView {
@@ -19,7 +19,7 @@ pub fn FrontRoutes() -> impl IntoView {
             <Route
                 path=(StaticSegment("post"), ParamSegment("slug"))
                 view=|| {
-                    view! { <PostPage /> }
+                    view! { <ProductPage /> }
                 }
             />
         </Routes>

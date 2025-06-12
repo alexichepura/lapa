@@ -10,7 +10,7 @@ use thiserror::Error;
 
 use crate::{
     img::{img_url_large, img_url_large_retina, srcset_large},
-    settings::{use_settings, use_site_url},
+    settings::{use_site_url},
     util::{AlertDanger, Loading, ParagraphsByMultiline},
 };
 
@@ -20,7 +20,7 @@ pub struct PostParams {
 }
 
 #[derive(Error, Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PostError {
+pub enum ProductError {
     #[error("Invalid post ID.")]
     InvalidId,
     #[error("Post not found.")]
@@ -35,7 +35,7 @@ pub struct PostData {
     pub slug: String,
     pub title: String,
     pub description: String,
-    pub text: String,
+    pub content: String,
     pub images: Vec<ImgData>,
     pub hero: Option<String>,
 }
@@ -47,7 +47,7 @@ pub fn PostPage() -> impl IntoView {
         params.with(|q| {
             q.as_ref()
                 .map(|q| q.slug.clone())
-                .map_err(|_| PostError::InvalidId)
+                .map_err(|_| ProductError::InvalidId)
         })
     };
 
@@ -118,7 +118,7 @@ pub fn PostView(post: PostData) -> impl IntoView {
         {hero_og}
         <h1>{post.title}</h1>
         <section>
-            <ParagraphsByMultiline text=post.text />
+            <ParagraphsByMultiline text=post.content />
         </section>
         <hr />
         <div class="post-images">
@@ -144,7 +144,6 @@ pub struct ImgData {
 type DialogSignal = Option<ImgData>;
 #[component]
 pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl IntoView {
-    let settings = use_settings();
     let id = image.id.clone();
     let alt = image.alt.clone();
 
@@ -159,13 +158,7 @@ pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl
     let srcset = format!("/img/{}-s2.webp 2x", image.id);
     view! {
         <figure>
-            <img
-                on:click=on_edit
-                src=src
-                srcset=srcset
-                width=settings.thumb_width
-                height=settings.thumb_height
-            />
+            <img on:click=on_edit src=src srcset=srcset />
             <figcaption>{image.alt}</figcaption>
         </figure>
     }
@@ -186,17 +179,17 @@ pub fn PostImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>
 }
 
 #[server(GetPost, "/api")]
-pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, ServerFnError> {
+pub async fn get_post(slug: String) -> Result<Result<PostData, ProductError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let post = clorinde::queries::post::post_page()
+    let post = clorinde::queries::product::product_page()
         .bind(&db, &slug).opt()
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;
     let Some(post) = post else {
         crate::server::serverr_404();
-        return Ok(Err(PostError::NotFound));
+        return Ok(Err(ProductError::NotFound));
     };
-    let images = clorinde::queries::post::post_images()
+    let images = clorinde::queries::product::product_images()
         .bind(&db, &post.id).all()
         .await
         .map_err(|e| lib::emsg(e, "Post images find"))?;
@@ -207,9 +200,9 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, PostError>, Serve
     let post_data = PostData {
         id: post.id,
         slug: post.slug,
-        title: post.title,
-        description: post.description,
-        text: post.text,
+        title: post.meta_title,
+        description: post.meta_description,
+        content: "".into(),
         hero,
         images: images
             .into_iter()

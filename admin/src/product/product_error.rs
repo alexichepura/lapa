@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Error, Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum PostError {
+pub enum ProductError {
     #[error("Invalid post ID.")]
     InvalidId,
     #[error("Post not found.")]

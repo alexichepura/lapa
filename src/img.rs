@@ -1,8 +1,6 @@
 use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::settings::use_settings;
-
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ImgData {
     pub id: String,
@@ -11,17 +9,9 @@ pub struct ImgData {
 
 #[component]
 pub fn Thumb(image: ImgData) -> impl IntoView {
-    let settings = use_settings();
-
     let src = format!("/img/{}-s.webp", image.id);
     let srcset = format!("/img/{}-s2.webp 2x", image.id);
-    view! { <img
-        src=src
-        srcset=srcset
-        width=settings.thumb_width
-        height=settings.thumb_height
-        alt=image.alt
-    /> }
+    view! { <img src=src srcset=srcset alt=image.alt /> }
 }
 
 pub fn img_path_small(id: &String) -> String {

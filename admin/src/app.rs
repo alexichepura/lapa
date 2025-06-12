@@ -10,9 +10,8 @@ use leptos_router::*;
 use crate::{
     auth::{use_user_signal, Login, User},
     home::HomePage,
-    content::{ContentList, ContentNew, ContentPage},
     layout::Layout,
-    post::{PostList, PostNew, PostPage},
+    product::{ProductList, ProductNew, ProductPage},
     settings::{Settings, SettingsCx},
 };
 
@@ -75,16 +74,21 @@ pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
             >
                 <Route path=StaticSegment("/") view=HomePage />
                 <Route path=StaticSegment("settings") view=Settings />
-                <Route path=StaticSegment("posts") view=PostList />
-                <ParentRoute path=StaticSegment("posts") view=|| view! { <Outlet /> }>
-                    <Route path=StaticSegment("new") view=PostNew />
-                    <Route path=ParamSegment("id") view=PostPage />
+                // <Route path=StaticSegment("post") view=PostList />
+                // <ParentRoute path=StaticSegment("posts") view=|| view! { <Outlet /> }>
+                // <Route path=StaticSegment("new") view=PostNew />
+                // <Route path=ParamSegment("id") view=PostPage />
+                // </ParentRoute>
+                <ParentRoute path=StaticSegment("product") view=|| view! { <Outlet /> }>
+                    <Route path=StaticSegment("") view=ProductList />
+                    <Route path=StaticSegment("new") view=ProductNew />
+                    <Route path=ParamSegment("id") view=ProductPage />
                 </ParentRoute>
-                <ParentRoute path=StaticSegment("content") view=|| view! { <Outlet /> }>
-                    <Route path=StaticSegment("") view=ContentList />
-                    <Route path=StaticSegment("new") view=ContentNew />
-                    <Route path=ParamSegment("id") view=ContentPage />
-                </ParentRoute>
+            // <ParentRoute path=StaticSegment("content") view=|| view! { <Outlet /> }>
+            // <Route path=StaticSegment("") view=ContentList />
+            // <Route path=StaticSegment("new") view=ContentNew />
+            // <Route path=ParamSegment("id") view=ContentPage />
+            // </ParentRoute>
             </ProtectedParentRoute>
         </Routes>
     }

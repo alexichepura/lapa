@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     form::FormFooter,
     image::{img_url_small, srcset_small, ImageLoadError},
-    post::{
+    product::{
         ImageDelete, ImageEditData, ImageEditSignal, ImageUpdate, ImageUpload, PostImageModalForm,
     },
     util::{AlertDanger, Loading},
@@ -236,7 +236,7 @@ where
 #[server(GetImages, "/api")]
 pub async fn get_images(post_id: String) -> Result<Vec<PostImageData>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let images = clorinde::queries::post::admin_images()
+    let images = clorinde::queries::product::admin_product_images()
         .bind(&db, &post_id)
         .all()
         .await
@@ -264,7 +264,7 @@ pub async fn images_order_update(
     let order_update = ids.into_iter().enumerate();
     let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images order transaction init"))?;
     for (i, id) in order_update {
-        clorinde::queries::image::update_order().bind(&db, &(i as i32), &id).await;
+        clorinde::queries::product_image::update_order().bind(&db, &(i as i32), &id).await;
     }
     trx.commit().await.map_err(|e| lib::emsg(e, "Images order transaction"))?;
     Ok(Ok(()))
@@ -280,7 +280,7 @@ pub type ImageMakeHeroResult = Result<(), ImageLoadError>;
 #[server(ImageMakeHero, "/api")]
 pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let current_img = clorinde::queries::image::select_post_id()
+    let current_img = clorinde::queries::product_image::select_product_id()
         .bind(&db, &id)
         .opt()
         .await
@@ -289,7 +289,7 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
         return Ok(Err(ImageLoadError::NotFound));
     }
     let current_img = current_img.unwrap();
-    let current_hero = clorinde::queries::image::find_hero()
+    let current_hero = clorinde::queries::product_image::find_hero()
         .bind(&db, &current_img)
         .opt()
         .await
@@ -297,11 +297,11 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
 
     let mut db_trx = crate::server::db::use_db().await?;
     let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images hero transaction init"))?;
-    clorinde::queries::image::set_hero()
+    clorinde::queries::product_image::set_hero()
         .bind(&db, &id)
         .await;
     if let Some(current_hero) = current_hero {
-        clorinde::queries::image::unset_hero()
+        clorinde::queries::product_image::unset_hero()
             .bind(&db, &current_hero)
             .await;
     }

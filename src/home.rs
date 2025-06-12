@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     err::AppError,
-    post_list::PostList,
+    product_list::ProductList,
     util::{AlertDanger, ParagraphsByMultiline},
 };
 
@@ -42,7 +42,7 @@ pub fn HomePage() -> impl IntoView {
             })}
         </Suspense>
         <hr />
-        <PostList />
+        <ProductList />
     }
 }
 
