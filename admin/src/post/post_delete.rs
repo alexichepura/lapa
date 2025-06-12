@@ -1,4 +1,4 @@
-use super::ProductError;
+use super::PostError;
 use crate::form::FormFooter;
 use leptos::prelude::*;
 use leptos_router::hooks::use_navigate;
@@ -12,7 +12,7 @@ pub fn PostDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
     Effect::new(move |_| {
         let v = value.get();
         if let Some(v) = v {
-            let post_result = v.map_err(|_| ProductError::ServerError).flatten();
+            let post_result = v.map_err(|_| PostError::ServerError).flatten();
             if let Ok(_post_result) = post_result {
                 tracing::info!("navigate post_result ok");
                 let navigate = use_navigate();
@@ -46,12 +46,12 @@ pub fn PostDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
     }
 }
 
-type PostDeleteResult = Result<(), ProductError>;
+type PostDeleteResult = Result<(), PostError>;
 
 #[server(PostDelete, "/api")]
 pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> {
     let mut db = crate::server::db::use_db().await?;
-    let exists = clorinde::queries::admin_product::by_id_check()
+    let exists = clorinde::queries::admin_post::by_id_check()
         .bind(&db, &id)
         .opt()
         .await
@@ -59,28 +59,15 @@ pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> 
         .is_some();
     if !exists {
         crate::server::serverr_404();
-        return Ok(Err(ProductError::NotFound));
+        return Ok(Err(PostError::NotFound));
     }
-    let images_ids = clorinde::queries::admin_product::images_ids()
-        .bind(&db, &id)
-        .all()
-        .await
-        .map_err(|e| lib::emsg(e, "Post images ids"))?;
-
     {
         let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Post delete transaction init"))?;
-        let _deleted = clorinde::queries::product_image::delete_many_by_id()
-            .bind(&trx, &images_ids)
-            .await
-            .map_err(|e| lib::emsg(e, "Post images delete"))?;
-        let _deleted = clorinde::queries::product::product_delete()
+        let _deleted = clorinde::queries::admin_post::delete()
             .bind(&trx, &id)
             .await
             .map_err(|e| lib::emsg(e, "Post delete"))?;
         trx.commit().await.map_err(|e| lib::emsg(e, "Post delete transaction"))?;
     };
-    for id in images_ids {
-        crate::product::delete_image_on_server(&id);
-    }
     Ok(Ok(()))
 }

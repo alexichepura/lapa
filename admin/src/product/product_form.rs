@@ -74,7 +74,6 @@ pub async fn product_create(
             &title,
             &description,
         )
-        .one()
         .await
         .map_err(|e| lib::emsg(e, "Product create"))?;
     Ok(Ok(id))
@@ -195,7 +194,7 @@ pub fn PublishAt(
 
     Effect::new(move |old: Option<bool>| {
         let is = publish_at_rw_signal.get();
-        tracing::info!("published_at_rw_signal={}", is);
+        tracing::info!("publish_at_rw_signal={}", is);
         if old.is_some() {
             if is {
                 set_publish_at(Some(Utc::now().fixed_offset()));
@@ -260,7 +259,6 @@ pub async fn product_update(
     let db = crate::server::db::use_db().await?;
     queries::admin_product::update()
         .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &title, &description, &id)
-        .one()
         .await
         .map_err(|e| lib::emsg(e, "Product update"))?;
     return Ok(Ok(()));

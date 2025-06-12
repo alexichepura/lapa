@@ -7,13 +7,13 @@ use crate::{
 };
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
-pub struct PostParams {
+pub struct ProductParams {
     id: String,
 }
 
 #[component]
 pub fn ProductPage() -> impl IntoView {
-    let params = use_params::<PostParams>();
+    let params = use_params::<ProductParams>();
     // let id = move || {
     //     params.with(|q| {
     //         log!("{:?}", q);
@@ -68,7 +68,7 @@ pub fn ProductPage() -> impl IntoView {
 #[server(GetPost, "/api")]
 pub async fn get_post(id: String) -> Result<Result<ProductFormData, ProductError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let post = clorinde::queries::product::admin_product_page()
+    let post = clorinde::queries::admin_product::page()
         .bind(&db, &id)
         .opt()
         .await
@@ -78,7 +78,7 @@ pub async fn get_post(id: String) -> Result<Result<ProductFormData, ProductError
         return Ok(Err(ProductError::NotFound));
     };
     let post_data = ProductFormData {
-        id: Some(post.id),
+        id: post.id,
         created_at: post.created_at.and_utc().fixed_offset(),
         publish_at: post.publish_at.map(|dt| dt.and_utc().fixed_offset()),
         slug: post.slug,

@@ -11,14 +11,14 @@ use crate::{
 
 #[component]
 pub fn ProductList() -> impl IntoView {
-    let posts = Resource::new_blocking(|| (), move |_| get_posts());
+    let products = Resource::new_blocking(|| (), move |_| get_products());
 
     view! {
-        <Title text="Posts" />
+        <Title text="Products" />
         <h1>
-            <span>Posts</span>
+            <span>Products</span>
             <small>
-                <A href="/posts/new">Create</A>
+                <A href="/product/new">Create</A>
             </small>
         </h1>
         <ul class="Card Listing">
@@ -26,9 +26,9 @@ pub fn ProductList() -> impl IntoView {
                 view! { <Loading /> }
             }>
                 {move || Suspend::new(async move {
-                    match posts.await {
+                    match products.await {
                         Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
-                        Ok(posts) => Either::Right(view! { <PostListItems posts /> }),
+                        Ok(products) => Either::Right(view! { <PostListItems products /> }),
                     }
                 })}
             </Suspense>
@@ -36,15 +36,15 @@ pub fn ProductList() -> impl IntoView {
     }
 }
 #[component]
-pub fn PostListItems(posts: Vec<PostListItem>) -> impl IntoView {
-    if posts.is_empty() {
+pub fn PostListItems(products: Vec<ProductListItem>) -> impl IntoView {
+    if products.is_empty() {
         Either::Left(view! { <p>No posts were found.</p> })
     } else {
         Either::Right(
-            posts
+            products
                 .into_iter()
-                .map(|post| {
-                    view! { <PostListItem post /> }
+                .map(|product| {
+                    view! { <ProductListItem product /> }
                 })
                 .collect_view(),
         )
@@ -52,18 +52,18 @@ pub fn PostListItems(posts: Vec<PostListItem>) -> impl IntoView {
 }
 
 #[component]
-pub fn PostListItem(post: PostListItem) -> impl IntoView {
-    let created = datetime_to_strings(post.created_at);
+pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
+    let created = datetime_to_strings(product.created_at);
 
-    let published = match post.published_at {
+    let published = match product.published_at {
         Some(published_at) => datetime_to_strings(published_at),
         None => DateTimeStrings::draft(),
     };
-    let class = match post.is_published {
+    let class = match product.is_published {
         true => "published",
         false => "not-published",
     };
-    let hero_view = match post.hero {
+    let hero_view = match product.hero {
         Some(id) => {
             Either::Left(view! { <img title="Post hero" src=img_url_small(&id) width="36" /> })
         }
@@ -71,12 +71,12 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
     };
     view! {
         <li class="PostListItem">
-            <A href=format!("/posts/{}", post.id)>
+            <A href=format!("/product/{}", product.id)>
                 <div title="Published at" class=format!("PostListItem-status {}", class)>
                     {published.local}
                 </div>
                 {hero_view}
-                <span title="Post title">{post.title}</span>
+                <span title="Post title">{product.title}</span>
                 <div title="Created at" class="PostListItem-created">
                     {created.local}
                 </div>
@@ -85,22 +85,22 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
     }
 }
 
-#[server(GetPosts, "/api")]
-pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
+#[server(GetProducts, "/api")]
+pub async fn get_products() -> Result<Vec<ProductListItem>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let posts = clorinde::queries::product::admin_product_list()
+    let products = clorinde::queries::admin_product::list()
         .bind(&db)
         .all()
         .await
         .map_err(|e| lib::emsg(e, "Post list find"))?;
-    let posts: Vec<PostListItem> = posts
+    let products: Vec<ProductListItem> = products
         .into_iter()
         .map(|data| {
             let is_published: bool = match data.publish_at {
                 Some(published_at) => chrono::Utc::now().fixed_offset() > published_at.and_utc().fixed_offset(),
                 None => false,
             };
-            PostListItem {
+            ProductListItem {
                 id: data.id,
                 title: data.meta_title,
                 created_at: data.created_at.and_utc().fixed_offset(),
@@ -110,11 +110,11 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
             }
         })
         .collect();
-    Ok(posts)
+    Ok(products)
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct PostListItem {
+pub struct ProductListItem {
     pub id: String,
     pub title: String,
     pub created_at: DateTime<FixedOffset>,

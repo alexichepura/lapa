@@ -23,14 +23,12 @@ WHERE id = :id;
 
 --! create 
 INSERT INTO "Product" (id, slug, meta_title, meta_description)
-  VALUES (:id, :slug, :meta_title, :meta_description)
-  RETURNING created_at;
+  VALUES (:id, :slug, :meta_title, :meta_description);
 
 --! update (publish_at?) :
 UPDATE "Product"
 SET publish_at = :publish_at, slug = :slug, meta_title = :meta_title, meta_description = :meta_description
-WHERE id = :id
-RETURNING created_at;
+WHERE id = :id;
 
 --! delete
 DELETE FROM "Product" WHERE id = :id;
