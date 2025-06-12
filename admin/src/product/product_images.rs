@@ -11,7 +11,7 @@ use crate::{
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct PostImageData {
+pub struct ProductImageData {
     pub id: String,
     pub alt: String,
     pub order: i32,
@@ -19,8 +19,8 @@ pub struct PostImageData {
 }
 
 #[component]
-pub fn PostImages(post_id: String) -> impl IntoView {
-    let post_id_clone = post_id.clone();
+pub fn ProductImages(product_id: String) -> impl IntoView {
+    let post_id_clone = product_id.clone();
 
     let image_delete = ServerAction::<ImageDelete>::new();
     let image_upload = ServerAction::<ImageUpload>::new();
@@ -43,7 +43,7 @@ pub fn PostImages(post_id: String) -> impl IntoView {
     );
 
     view! {
-        <ImageUpload post_id image_upload />
+        <ImageUpload product_id image_upload />
         <Transition fallback=move || {
             view! { <Loading /> }
         }>
@@ -53,7 +53,7 @@ pub fn PostImages(post_id: String) -> impl IntoView {
                     Ok(images) => {
                         Either::Right(
                             view! {
-                                <PostImagesView
+                                <ProductImagesView
                                     images
                                     image_delete
                                     image_update
@@ -70,8 +70,8 @@ pub fn PostImages(post_id: String) -> impl IntoView {
 }
 
 #[component]
-pub fn PostImagesView(
-    images: Vec<PostImageData>,
+fn ProductImagesView(
+    images: Vec<ProductImageData>,
     image_delete: ServerAction<ImageDelete>,
     image_update: ServerAction<ImageUpdate>,
     order_action: ServerAction<ImagesOrderUpdate>,
@@ -92,7 +92,7 @@ pub fn PostImagesView(
             let images = mut_il
                 .into_iter()
                 .enumerate()
-                .map(|(i, img)| PostImageData {
+                .map(|(i, img)| ProductImageData {
                     order: i as i32,
                     ..img.clone()
                 })
@@ -136,7 +136,7 @@ pub fn PostImagesView(
                 <For
                     each=move || images_sorted()
                     key=|image| format!("{}:{}", image.id, image.order)
-                    children=move |image: PostImageData| {
+                    children=move |image: ProductImageData| {
                         view! { <input type="hidden" name="ids[]" value=image.id /> }
                     }
                 />
@@ -148,7 +148,7 @@ pub fn PostImagesView(
                 <For
                     each=move || images_sorted()
                     key=|image| format!("{}:{}", image.id, image.order)
-                    children=move |image: PostImageData| {
+                    children=move |image: ProductImageData| {
                         let is_last = image.order + 1 == images_sorted().len() as i32;
                         let id_to_make_hero = image.id.clone();
                         let make_hero = move || {
@@ -157,7 +157,7 @@ pub fn PostImagesView(
                                     id: id_to_make_hero.clone(),
                                 });
                         };
-                        view! { <PostImage image set_editing on_order is_last make_hero /> }
+                        view! { <ProductImage image set_editing on_order is_last make_hero /> }
                     }
                 />
 
@@ -170,8 +170,8 @@ pub fn PostImagesView(
 }
 
 #[component]
-pub fn PostImage<F, H>(
-    image: PostImageData,
+pub fn ProductImage<F, H>(
+    image: ProductImageData,
     set_editing: WriteSignal<ImageEditSignal>,
     on_order: F,
     is_last: bool,
@@ -234,16 +234,16 @@ where
 }
 
 #[server(GetImages, "/api")]
-pub async fn get_images(post_id: String) -> Result<Vec<PostImageData>, ServerFnError> {
+pub async fn get_images(post_id: String) -> Result<Vec<ProductImageData>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let images = clorinde::queries::product::admin_product_images()
+    let images = clorinde::queries::admin_product::images()
         .bind(&db, &post_id)
         .all()
         .await
-        .map_err(|e| lib::emsg(e, "Post images find"))?;
-    let images: Vec<PostImageData> = images
+        .map_err(|e| lib::emsg(e, "Product images find"))?;
+    let images: Vec<ProductImageData> = images
         .into_iter()
-        .map(|data| PostImageData {
+        .map(|data| ProductImageData {
             id: data.id.clone(),
             alt: data.alt.clone(),
             order: data.order,

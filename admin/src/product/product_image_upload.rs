@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::{form::FormFooter, image::ImageUploadError, upload::InputImage};
 
 #[component]
-pub fn ImageUpload(post_id: String, image_upload: ServerAction<ImageUpload>) -> impl IntoView {
+pub fn ImageUpload(product_id: String, image_upload: ServerAction<ImageUpload>) -> impl IntoView {
     let pending = image_upload.pending();
     let (_file_name, set_file_name) = signal(None::<String>);
     let (save_byte_vec, set_save_byte_vec) = signal(None::<Vec<u8>>);
@@ -20,7 +20,7 @@ pub fn ImageUpload(post_id: String, image_upload: ServerAction<ImageUpload>) -> 
                         <InputImage set_file_name set_save_file set_obj_url set_save_byte_vec />
                     </label>
                     <ActionForm action=image_upload>
-                        <input type="hidden" name="post_id" value=post_id />
+                        <input type="hidden" name="post_id" value=product_id />
                         <label>
                             <span>Alt</span>
                             <input name="alt" />

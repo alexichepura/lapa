@@ -30,7 +30,7 @@ pub fn CategoryNew() -> impl IntoView {
                 <legend>Data</legend>
                 <div class="Grid-fluid-2">
                     <Input name="slug" label="Slug" />
-                    <Input name="name_en" label="Name EN" />
+                    <Input name="name" label="Name" />
                 </div>
                 <FormFooter action=category_create submit_text="Create category" />
             </fieldset>

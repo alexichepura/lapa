@@ -51,7 +51,7 @@ type PostDeleteResult = Result<(), ProductError>;
 #[server(PostDelete, "/api")]
 pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> {
     let mut db = crate::server::db::use_db().await?;
-    let exists = clorinde::queries::product::admin_product_by_id_check()
+    let exists = clorinde::queries::admin_product::by_id_check()
         .bind(&db, &id)
         .opt()
         .await
@@ -61,7 +61,7 @@ pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> 
         crate::server::serverr_404();
         return Ok(Err(ProductError::NotFound));
     }
-    let images_ids = clorinde::queries::product::product_images_ids()
+    let images_ids = clorinde::queries::admin_product::images_ids()
         .bind(&db, &id)
         .all()
         .await

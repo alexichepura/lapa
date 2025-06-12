@@ -2,7 +2,7 @@ use leptos::{either::EitherOf3, prelude::*};
 use leptos_router::{hooks::use_params, params::Params};
 
 use crate::{
-    product::{ProductError, PostForm, ProductFormData},
+    product::{ProductError, ProductForm, ProductFormData},
     util::{AlertDanger, Loading},
 };
 
@@ -56,7 +56,7 @@ pub fn ProductPage() -> impl IntoView {
         }>
             {move || Suspend::new(async move {
                 match post.await {
-                    Ok(Ok(post)) => EitherOf3::A(view! { <PostForm post=post /> }),
+                    Ok(Ok(post)) => EitherOf3::A(view! { <ProductForm product=post /> }),
                     Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
                     Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
                 }

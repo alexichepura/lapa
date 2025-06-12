@@ -88,7 +88,7 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
 #[server(GetPosts, "/api")]
 pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let posts = clorinde::queries::product::admin_product_list()
+    let posts = clorinde::queries::admin_product::list()
         .bind(&db)
         .all()
         .await

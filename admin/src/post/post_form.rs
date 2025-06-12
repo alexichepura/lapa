@@ -7,7 +7,6 @@ use serde::{Deserialize, Serialize};
 use super::ProductError;
 use crate::{
     form::{Checkbox, FormFooter},
-    product::{PostDeleteForm, PostImages},
     settings::use_site_url,
     util::{
         datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
@@ -82,7 +81,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
         None => Either::Right(view! { <p>Gallery is not available for not saved post</p> }),
     };
     let delete_view = match post.id.clone() {
-        Some(id) => Either::Left(view! { <PostDeleteForm id=id.clone() slug /> }),
+        Some(id) => Either::Left(view! { <ProductDeleteForm id=id.clone() slug /> }),
         None => Either::Right(()),
     };
 
