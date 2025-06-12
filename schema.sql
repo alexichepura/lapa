@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS "PostCategory" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "slug" TEXT NOT NULL,
-    "name_en" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "meta_title" TEXT NOT NULL DEFAULT '',
     "meta_description" TEXT NOT NULL DEFAULT '',
     "content_id" TEXT NOT NULL,

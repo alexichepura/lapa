@@ -78,7 +78,7 @@ async fn main() {
                 panic!("Settings found {:?}", settings);
             }
             let res = queries::settings::settings_create()
-                .bind(&db, &cuid2::create_id(), &480,&640,&240,&320)
+                .bind(&db, &cuid2::create_id())
                 .await;
             println!("Settings created res={res:?}");
         }

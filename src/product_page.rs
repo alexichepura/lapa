@@ -41,7 +41,7 @@ pub struct PostData {
 }
 
 #[component]
-pub fn PostPage() -> impl IntoView {
+pub fn ProductPage() -> impl IntoView {
     let params = use_params::<PostParams>();
     let slug = move || {
         params.with(|q| {
