@@ -16,35 +16,71 @@ CREATE TABLE IF NOT EXISTS "Session" (
     "session" TEXT NOT NULL,
     "expires" TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS "Post" (
+CREATE TABLE IF NOT EXISTS "Settings" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "published_at" TIMESTAMP,
-    "slug" TEXT NOT NULL,
-    "title" TEXT NOT NULL DEFAULT '',
-    "description" TEXT NOT NULL DEFAULT '',
-    "text" TEXT NOT NULL DEFAULT ''
+    "site_url" TEXT NOT NULL DEFAULT '',
+    "robots_txt" TEXT NOT NULL DEFAULT '',
+    "home_text" TEXT NOT NULL DEFAULT ''
 );
-CREATE TABLE IF NOT EXISTS "Image" (
+CREATE TABLE IF NOT EXISTS "Content" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "json" TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE IF NOT EXISTS "ContentImage" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "alt" TEXT NOT NULL,
+    "ext" TEXT NOT NULL,
+    "content_id" TEXT NOT NULL,
+    CONSTRAINT "ContentImage_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE IF NOT EXISTS "Product" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "publish_at" TIMESTAMP,
+    "slug" TEXT NOT NULL,
+    "meta_title" TEXT NOT NULL DEFAULT '',
+    "meta_description" TEXT NOT NULL DEFAULT '',
+    "content_id" TEXT NOT NULL,
+    CONSTRAINT "Product_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+CREATE TABLE IF NOT EXISTS "ProductImage" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "alt" TEXT NOT NULL,
     "ext" TEXT NOT NULL,
     "is_hero" BOOLEAN NOT NULL DEFAULT false,
     "order" INTEGER NOT NULL DEFAULT 0,
-    "post_id" TEXT NOT NULL,
-    CONSTRAINT "Image_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "Post" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "product_id" TEXT NOT NULL,
+    CONSTRAINT "Image_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Product" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
-CREATE TABLE IF NOT EXISTS "Settings" (
+CREATE TABLE IF NOT EXISTS "PostCategory" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "site_url" TEXT NOT NULL DEFAULT '',
-    "robots_txt" TEXT NOT NULL DEFAULT '',
-    "hero_width" INTEGER NOT NULL,
-    "hero_height" INTEGER NOT NULL,
-    "thumb_width" INTEGER NOT NULL,
-    "thumb_height" INTEGER NOT NULL,
-    "home_text" TEXT NOT NULL DEFAULT ''
+    "slug" TEXT NOT NULL,
+    "name_en" TEXT NOT NULL,
+    "meta_title" TEXT NOT NULL DEFAULT '',
+    "meta_description" TEXT NOT NULL DEFAULT '',
+    "content_id" TEXT NOT NULL,
+    CONSTRAINT "PostCategory_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+CREATE TABLE IF NOT EXISTS "Post" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "publish_at" TIMESTAMP,
+    "slug" TEXT NOT NULL,
+    "meta_title" TEXT NOT NULL DEFAULT '',
+    "meta_description" TEXT NOT NULL DEFAULT '',
+    "category_id" TEXT NOT NULL,
+    "content_id" TEXT NOT NULL,
+    CONSTRAINT "Post_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "PostCategory" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "Post_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
-CREATE UNIQUE INDEX "Post_slug_key" ON "Post"("slug");
+CREATE UNIQUE INDEX "Product_slug_key" ON "Post"("slug");
+CREATE UNIQUE INDEX "Category_slug_key" ON "PostCategory"("slug");
+CREATE UNIQUE INDEX "Category_content_id_key" ON "PostCategory"("content_id");
+CREATE UNIQUE INDEX "Post_content_id_key" ON "Post"("content_id");
+CREATE UNIQUE INDEX "Post_category_id_slug_key" ON "Post"("category_id", "slug");

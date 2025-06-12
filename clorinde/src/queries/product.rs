@@ -1,172 +1,152 @@
 // This file was generated with `clorinde`. Do not modify.
 
 #[derive(Debug)]
-pub struct PostCreateParams<
-    T1: crate::StringSql,
-    T2: crate::StringSql,
-    T3: crate::StringSql,
-    T4: crate::StringSql,
-> {
+pub struct ProductCreateParams<T1: crate::StringSql, T2: crate::StringSql, T3: crate::StringSql> {
     pub id: T1,
-    pub published_at: Option<crate::types::time::Timestamp>,
-    pub title: T2,
-    pub description: T3,
-    pub text: T4,
+    pub publish_at: Option<crate::types::time::Timestamp>,
+    pub meta_title: T2,
+    pub meta_description: T3,
 }
 #[derive(Debug)]
-pub struct PostUpdateParams<
+pub struct ProductUpdateParams<
     T1: crate::StringSql,
     T2: crate::StringSql,
     T3: crate::StringSql,
     T4: crate::StringSql,
-    T5: crate::StringSql,
 > {
-    pub published_at: Option<crate::types::time::Timestamp>,
+    pub publish_at: Option<crate::types::time::Timestamp>,
     pub slug: T1,
-    pub title: T2,
-    pub description: T3,
-    pub text: T4,
-    pub id: T5,
+    pub meta_title: T2,
+    pub meta_description: T3,
+    pub id: T4,
 }
 #[derive(Debug, Clone, PartialEq)]
-pub struct PostPage {
+pub struct ProductPage {
     pub id: String,
-    pub published_at: Option<crate::types::time::Timestamp>,
+    pub publish_at: Option<crate::types::time::Timestamp>,
     pub slug: String,
-    pub title: String,
-    pub description: String,
-    pub text: String,
+    pub meta_title: String,
+    pub meta_description: String,
 }
-pub struct PostPageBorrowed<'a> {
+pub struct ProductPageBorrowed<'a> {
     pub id: &'a str,
-    pub published_at: Option<crate::types::time::Timestamp>,
+    pub publish_at: Option<crate::types::time::Timestamp>,
     pub slug: &'a str,
-    pub title: &'a str,
-    pub description: &'a str,
-    pub text: &'a str,
+    pub meta_title: &'a str,
+    pub meta_description: &'a str,
 }
-impl<'a> From<PostPageBorrowed<'a>> for PostPage {
+impl<'a> From<ProductPageBorrowed<'a>> for ProductPage {
     fn from(
-        PostPageBorrowed {
+        ProductPageBorrowed {
             id,
-            published_at,
+            publish_at,
             slug,
-            title,
-            description,
-            text,
-        }: PostPageBorrowed<'a>,
+            meta_title,
+            meta_description,
+        }: ProductPageBorrowed<'a>,
     ) -> Self {
         Self {
             id: id.into(),
-            published_at,
+            publish_at,
             slug: slug.into(),
-            title: title.into(),
-            description: description.into(),
-            text: text.into(),
+            meta_title: meta_title.into(),
+            meta_description: meta_description.into(),
         }
     }
 }
 #[derive(Debug, Clone, PartialEq)]
-pub struct PostList {
+pub struct ProductList {
     pub id: String,
-    pub published_at: crate::types::time::Timestamp,
+    pub publish_at: crate::types::time::Timestamp,
     pub slug: String,
-    pub title: String,
-    pub description: String,
-    pub text: String,
+    pub meta_title: String,
+    pub meta_description: String,
     pub image_id: Option<String>,
     pub alt: Option<String>,
 }
-pub struct PostListBorrowed<'a> {
+pub struct ProductListBorrowed<'a> {
     pub id: &'a str,
-    pub published_at: crate::types::time::Timestamp,
+    pub publish_at: crate::types::time::Timestamp,
     pub slug: &'a str,
-    pub title: &'a str,
-    pub description: &'a str,
-    pub text: &'a str,
+    pub meta_title: &'a str,
+    pub meta_description: &'a str,
     pub image_id: Option<&'a str>,
     pub alt: Option<&'a str>,
 }
-impl<'a> From<PostListBorrowed<'a>> for PostList {
+impl<'a> From<ProductListBorrowed<'a>> for ProductList {
     fn from(
-        PostListBorrowed {
+        ProductListBorrowed {
             id,
-            published_at,
+            publish_at,
             slug,
-            title,
-            description,
-            text,
+            meta_title,
+            meta_description,
             image_id,
             alt,
-        }: PostListBorrowed<'a>,
+        }: ProductListBorrowed<'a>,
     ) -> Self {
         Self {
             id: id.into(),
-            published_at,
+            publish_at,
             slug: slug.into(),
-            title: title.into(),
-            description: description.into(),
-            text: text.into(),
+            meta_title: meta_title.into(),
+            meta_description: meta_description.into(),
             image_id: image_id.map(|v| v.into()),
             alt: alt.map(|v| v.into()),
         }
     }
 }
 #[derive(Debug, Clone, PartialEq)]
-pub struct AdminPostPage {
+pub struct AdminProductPage {
     pub id: String,
     pub created_at: crate::types::time::Timestamp,
-    pub published_at: Option<crate::types::time::Timestamp>,
+    pub publish_at: Option<crate::types::time::Timestamp>,
     pub slug: String,
-    pub title: String,
-    pub description: String,
-    pub text: String,
+    pub meta_title: String,
+    pub meta_description: String,
 }
-pub struct AdminPostPageBorrowed<'a> {
+pub struct AdminProductPageBorrowed<'a> {
     pub id: &'a str,
     pub created_at: crate::types::time::Timestamp,
-    pub published_at: Option<crate::types::time::Timestamp>,
+    pub publish_at: Option<crate::types::time::Timestamp>,
     pub slug: &'a str,
-    pub title: &'a str,
-    pub description: &'a str,
-    pub text: &'a str,
+    pub meta_title: &'a str,
+    pub meta_description: &'a str,
 }
-impl<'a> From<AdminPostPageBorrowed<'a>> for AdminPostPage {
+impl<'a> From<AdminProductPageBorrowed<'a>> for AdminProductPage {
     fn from(
-        AdminPostPageBorrowed {
+        AdminProductPageBorrowed {
             id,
             created_at,
-            published_at,
+            publish_at,
             slug,
-            title,
-            description,
-            text,
-        }: AdminPostPageBorrowed<'a>,
+            meta_title,
+            meta_description,
+        }: AdminProductPageBorrowed<'a>,
     ) -> Self {
         Self {
             id: id.into(),
             created_at,
-            published_at,
+            publish_at,
             slug: slug.into(),
-            title: title.into(),
-            description: description.into(),
-            text: text.into(),
+            meta_title: meta_title.into(),
+            meta_description: meta_description.into(),
         }
     }
 }
 #[derive(Debug, Clone, PartialEq)]
-pub struct PostImages {
+pub struct ProductImages {
     pub id: String,
     pub alt: String,
     pub is_hero: bool,
 }
-pub struct PostImagesBorrowed<'a> {
+pub struct ProductImagesBorrowed<'a> {
     pub id: &'a str,
     pub alt: &'a str,
     pub is_hero: bool,
 }
-impl<'a> From<PostImagesBorrowed<'a>> for PostImages {
-    fn from(PostImagesBorrowed { id, alt, is_hero }: PostImagesBorrowed<'a>) -> Self {
+impl<'a> From<ProductImagesBorrowed<'a>> for ProductImages {
+    fn from(ProductImagesBorrowed { id, alt, is_hero }: ProductImagesBorrowed<'a>) -> Self {
         Self {
             id: id.into(),
             alt: alt.into(),
@@ -175,26 +155,26 @@ impl<'a> From<PostImagesBorrowed<'a>> for PostImages {
     }
 }
 #[derive(Debug, Clone, PartialEq)]
-pub struct AdminImages {
+pub struct AdminProductImages {
     pub id: String,
     pub alt: String,
     pub order: i32,
     pub is_hero: bool,
 }
-pub struct AdminImagesBorrowed<'a> {
+pub struct AdminProductImagesBorrowed<'a> {
     pub id: &'a str,
     pub alt: &'a str,
     pub order: i32,
     pub is_hero: bool,
 }
-impl<'a> From<AdminImagesBorrowed<'a>> for AdminImages {
+impl<'a> From<AdminProductImagesBorrowed<'a>> for AdminProductImages {
     fn from(
-        AdminImagesBorrowed {
+        AdminProductImagesBorrowed {
             id,
             alt,
             order,
             is_hero,
-        }: AdminImagesBorrowed<'a>,
+        }: AdminProductImagesBorrowed<'a>,
     ) -> Self {
         Self {
             id: id.into(),
@@ -205,179 +185,185 @@ impl<'a> From<AdminImagesBorrowed<'a>> for AdminImages {
     }
 }
 #[derive(Debug, Clone, PartialEq)]
-pub struct AdminList {
+pub struct AdminProductList {
     pub id: String,
     pub created_at: crate::types::time::Timestamp,
-    pub published_at: Option<crate::types::time::Timestamp>,
-    pub title: String,
+    pub publish_at: Option<crate::types::time::Timestamp>,
+    pub meta_title: String,
     pub image_id: Option<String>,
 }
-pub struct AdminListBorrowed<'a> {
+pub struct AdminProductListBorrowed<'a> {
     pub id: &'a str,
     pub created_at: crate::types::time::Timestamp,
-    pub published_at: Option<crate::types::time::Timestamp>,
-    pub title: &'a str,
+    pub publish_at: Option<crate::types::time::Timestamp>,
+    pub meta_title: &'a str,
     pub image_id: Option<&'a str>,
 }
-impl<'a> From<AdminListBorrowed<'a>> for AdminList {
+impl<'a> From<AdminProductListBorrowed<'a>> for AdminProductList {
     fn from(
-        AdminListBorrowed {
+        AdminProductListBorrowed {
             id,
             created_at,
-            published_at,
-            title,
+            publish_at,
+            meta_title,
             image_id,
-        }: AdminListBorrowed<'a>,
+        }: AdminProductListBorrowed<'a>,
     ) -> Self {
         Self {
             id: id.into(),
             created_at,
-            published_at,
-            title: title.into(),
+            publish_at,
+            meta_title: meta_title.into(),
             image_id: image_id.map(|v| v.into()),
         }
     }
 }
 use crate::client::async_::GenericClient;
 use futures::{self, StreamExt, TryStreamExt};
-pub struct PostPageQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+pub struct ProductPageQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
     client: &'c C,
     params: [&'a (dyn postgres_types::ToSql + Sync); N],
     stmt: &'s mut crate::client::async_::Stmt,
-    extractor: fn(&tokio_postgres::Row) -> Result<PostPageBorrowed, tokio_postgres::Error>,
-    mapper: fn(PostPageBorrowed) -> T,
+    extractor: fn(&tokio_postgres::Row) -> Result<ProductPageBorrowed, tokio_postgres::Error>,
+    mapper: fn(ProductPageBorrowed) -> T,
 }
-impl<'c, 'a, 's, C, T: 'c, const N: usize> PostPageQuery<'c, 'a, 's, C, T, N>
-where
-    C: GenericClient,
-{
-    pub fn map<R>(self, mapper: fn(PostPageBorrowed) -> R) -> PostPageQuery<'c, 'a, 's, C, R, N> {
-        PostPageQuery {
-            client: self.client,
-            params: self.params,
-            stmt: self.stmt,
-            extractor: self.extractor,
-            mapper,
-        }
-    }
-    pub async fn one(self) -> Result<T, tokio_postgres::Error> {
-        let stmt = self.stmt.prepare(self.client).await?;
-        let row = self.client.query_one(stmt, &self.params).await?;
-        Ok((self.mapper)((self.extractor)(&row)?))
-    }
-    pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
-        self.iter().await?.try_collect().await
-    }
-    pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
-        let stmt = self.stmt.prepare(self.client).await?;
-        Ok(self
-            .client
-            .query_opt(stmt, &self.params)
-            .await?
-            .map(|row| {
-                let extracted = (self.extractor)(&row)?;
-                Ok((self.mapper)(extracted))
-            })
-            .transpose()?)
-    }
-    pub async fn iter(
-        self,
-    ) -> Result<
-        impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'c,
-        tokio_postgres::Error,
-    > {
-        let stmt = self.stmt.prepare(self.client).await?;
-        let it = self
-            .client
-            .query_raw(stmt, crate::slice_iter(&self.params))
-            .await?
-            .map(move |res| {
-                res.and_then(|row| {
-                    let extracted = (self.extractor)(&row)?;
-                    Ok((self.mapper)(extracted))
-                })
-            })
-            .into_stream();
-        Ok(it)
-    }
-}
-pub struct PostListQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
-    client: &'c C,
-    params: [&'a (dyn postgres_types::ToSql + Sync); N],
-    stmt: &'s mut crate::client::async_::Stmt,
-    extractor: fn(&tokio_postgres::Row) -> Result<PostListBorrowed, tokio_postgres::Error>,
-    mapper: fn(PostListBorrowed) -> T,
-}
-impl<'c, 'a, 's, C, T: 'c, const N: usize> PostListQuery<'c, 'a, 's, C, T, N>
-where
-    C: GenericClient,
-{
-    pub fn map<R>(self, mapper: fn(PostListBorrowed) -> R) -> PostListQuery<'c, 'a, 's, C, R, N> {
-        PostListQuery {
-            client: self.client,
-            params: self.params,
-            stmt: self.stmt,
-            extractor: self.extractor,
-            mapper,
-        }
-    }
-    pub async fn one(self) -> Result<T, tokio_postgres::Error> {
-        let stmt = self.stmt.prepare(self.client).await?;
-        let row = self.client.query_one(stmt, &self.params).await?;
-        Ok((self.mapper)((self.extractor)(&row)?))
-    }
-    pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
-        self.iter().await?.try_collect().await
-    }
-    pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
-        let stmt = self.stmt.prepare(self.client).await?;
-        Ok(self
-            .client
-            .query_opt(stmt, &self.params)
-            .await?
-            .map(|row| {
-                let extracted = (self.extractor)(&row)?;
-                Ok((self.mapper)(extracted))
-            })
-            .transpose()?)
-    }
-    pub async fn iter(
-        self,
-    ) -> Result<
-        impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'c,
-        tokio_postgres::Error,
-    > {
-        let stmt = self.stmt.prepare(self.client).await?;
-        let it = self
-            .client
-            .query_raw(stmt, crate::slice_iter(&self.params))
-            .await?
-            .map(move |res| {
-                res.and_then(|row| {
-                    let extracted = (self.extractor)(&row)?;
-                    Ok((self.mapper)(extracted))
-                })
-            })
-            .into_stream();
-        Ok(it)
-    }
-}
-pub struct AdminPostPageQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
-    client: &'c C,
-    params: [&'a (dyn postgres_types::ToSql + Sync); N],
-    stmt: &'s mut crate::client::async_::Stmt,
-    extractor: fn(&tokio_postgres::Row) -> Result<AdminPostPageBorrowed, tokio_postgres::Error>,
-    mapper: fn(AdminPostPageBorrowed) -> T,
-}
-impl<'c, 'a, 's, C, T: 'c, const N: usize> AdminPostPageQuery<'c, 'a, 's, C, T, N>
+impl<'c, 'a, 's, C, T: 'c, const N: usize> ProductPageQuery<'c, 'a, 's, C, T, N>
 where
     C: GenericClient,
 {
     pub fn map<R>(
         self,
-        mapper: fn(AdminPostPageBorrowed) -> R,
-    ) -> AdminPostPageQuery<'c, 'a, 's, C, R, N> {
-        AdminPostPageQuery {
+        mapper: fn(ProductPageBorrowed) -> R,
+    ) -> ProductPageQuery<'c, 'a, 's, C, R, N> {
+        ProductPageQuery {
+            client: self.client,
+            params: self.params,
+            stmt: self.stmt,
+            extractor: self.extractor,
+            mapper,
+        }
+    }
+    pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let row = self.client.query_one(stmt, &self.params).await?;
+        Ok((self.mapper)((self.extractor)(&row)?))
+    }
+    pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+        self.iter().await?.try_collect().await
+    }
+    pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        Ok(self
+            .client
+            .query_opt(stmt, &self.params)
+            .await?
+            .map(|row| {
+                let extracted = (self.extractor)(&row)?;
+                Ok((self.mapper)(extracted))
+            })
+            .transpose()?)
+    }
+    pub async fn iter(
+        self,
+    ) -> Result<
+        impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'c,
+        tokio_postgres::Error,
+    > {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let it = self
+            .client
+            .query_raw(stmt, crate::slice_iter(&self.params))
+            .await?
+            .map(move |res| {
+                res.and_then(|row| {
+                    let extracted = (self.extractor)(&row)?;
+                    Ok((self.mapper)(extracted))
+                })
+            })
+            .into_stream();
+        Ok(it)
+    }
+}
+pub struct ProductListQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+    client: &'c C,
+    params: [&'a (dyn postgres_types::ToSql + Sync); N],
+    stmt: &'s mut crate::client::async_::Stmt,
+    extractor: fn(&tokio_postgres::Row) -> Result<ProductListBorrowed, tokio_postgres::Error>,
+    mapper: fn(ProductListBorrowed) -> T,
+}
+impl<'c, 'a, 's, C, T: 'c, const N: usize> ProductListQuery<'c, 'a, 's, C, T, N>
+where
+    C: GenericClient,
+{
+    pub fn map<R>(
+        self,
+        mapper: fn(ProductListBorrowed) -> R,
+    ) -> ProductListQuery<'c, 'a, 's, C, R, N> {
+        ProductListQuery {
+            client: self.client,
+            params: self.params,
+            stmt: self.stmt,
+            extractor: self.extractor,
+            mapper,
+        }
+    }
+    pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let row = self.client.query_one(stmt, &self.params).await?;
+        Ok((self.mapper)((self.extractor)(&row)?))
+    }
+    pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+        self.iter().await?.try_collect().await
+    }
+    pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        Ok(self
+            .client
+            .query_opt(stmt, &self.params)
+            .await?
+            .map(|row| {
+                let extracted = (self.extractor)(&row)?;
+                Ok((self.mapper)(extracted))
+            })
+            .transpose()?)
+    }
+    pub async fn iter(
+        self,
+    ) -> Result<
+        impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'c,
+        tokio_postgres::Error,
+    > {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let it = self
+            .client
+            .query_raw(stmt, crate::slice_iter(&self.params))
+            .await?
+            .map(move |res| {
+                res.and_then(|row| {
+                    let extracted = (self.extractor)(&row)?;
+                    Ok((self.mapper)(extracted))
+                })
+            })
+            .into_stream();
+        Ok(it)
+    }
+}
+pub struct AdminProductPageQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+    client: &'c C,
+    params: [&'a (dyn postgres_types::ToSql + Sync); N],
+    stmt: &'s mut crate::client::async_::Stmt,
+    extractor: fn(&tokio_postgres::Row) -> Result<AdminProductPageBorrowed, tokio_postgres::Error>,
+    mapper: fn(AdminProductPageBorrowed) -> T,
+}
+impl<'c, 'a, 's, C, T: 'c, const N: usize> AdminProductPageQuery<'c, 'a, 's, C, T, N>
+where
+    C: GenericClient,
+{
+    pub fn map<R>(
+        self,
+        mapper: fn(AdminProductPageBorrowed) -> R,
+    ) -> AdminProductPageQuery<'c, 'a, 's, C, R, N> {
+        AdminProductPageQuery {
             client: self.client,
             params: self.params,
             stmt: self.stmt,
@@ -552,22 +538,22 @@ where
         Ok(it)
     }
 }
-pub struct PostImagesQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+pub struct ProductImagesQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
     client: &'c C,
     params: [&'a (dyn postgres_types::ToSql + Sync); N],
     stmt: &'s mut crate::client::async_::Stmt,
-    extractor: fn(&tokio_postgres::Row) -> Result<PostImagesBorrowed, tokio_postgres::Error>,
-    mapper: fn(PostImagesBorrowed) -> T,
+    extractor: fn(&tokio_postgres::Row) -> Result<ProductImagesBorrowed, tokio_postgres::Error>,
+    mapper: fn(ProductImagesBorrowed) -> T,
 }
-impl<'c, 'a, 's, C, T: 'c, const N: usize> PostImagesQuery<'c, 'a, 's, C, T, N>
+impl<'c, 'a, 's, C, T: 'c, const N: usize> ProductImagesQuery<'c, 'a, 's, C, T, N>
 where
     C: GenericClient,
 {
     pub fn map<R>(
         self,
-        mapper: fn(PostImagesBorrowed) -> R,
-    ) -> PostImagesQuery<'c, 'a, 's, C, R, N> {
-        PostImagesQuery {
+        mapper: fn(ProductImagesBorrowed) -> R,
+    ) -> ProductImagesQuery<'c, 'a, 's, C, R, N> {
+        ProductImagesQuery {
             client: self.client,
             params: self.params,
             stmt: self.stmt,
@@ -616,22 +602,23 @@ where
         Ok(it)
     }
 }
-pub struct AdminImagesQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+pub struct AdminProductImagesQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
     client: &'c C,
     params: [&'a (dyn postgres_types::ToSql + Sync); N],
     stmt: &'s mut crate::client::async_::Stmt,
-    extractor: fn(&tokio_postgres::Row) -> Result<AdminImagesBorrowed, tokio_postgres::Error>,
-    mapper: fn(AdminImagesBorrowed) -> T,
+    extractor:
+        fn(&tokio_postgres::Row) -> Result<AdminProductImagesBorrowed, tokio_postgres::Error>,
+    mapper: fn(AdminProductImagesBorrowed) -> T,
 }
-impl<'c, 'a, 's, C, T: 'c, const N: usize> AdminImagesQuery<'c, 'a, 's, C, T, N>
+impl<'c, 'a, 's, C, T: 'c, const N: usize> AdminProductImagesQuery<'c, 'a, 's, C, T, N>
 where
     C: GenericClient,
 {
     pub fn map<R>(
         self,
-        mapper: fn(AdminImagesBorrowed) -> R,
-    ) -> AdminImagesQuery<'c, 'a, 's, C, R, N> {
-        AdminImagesQuery {
+        mapper: fn(AdminProductImagesBorrowed) -> R,
+    ) -> AdminProductImagesQuery<'c, 'a, 's, C, R, N> {
+        AdminProductImagesQuery {
             client: self.client,
             params: self.params,
             stmt: self.stmt,
@@ -680,19 +667,22 @@ where
         Ok(it)
     }
 }
-pub struct AdminListQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+pub struct AdminProductListQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
     client: &'c C,
     params: [&'a (dyn postgres_types::ToSql + Sync); N],
     stmt: &'s mut crate::client::async_::Stmt,
-    extractor: fn(&tokio_postgres::Row) -> Result<AdminListBorrowed, tokio_postgres::Error>,
-    mapper: fn(AdminListBorrowed) -> T,
+    extractor: fn(&tokio_postgres::Row) -> Result<AdminProductListBorrowed, tokio_postgres::Error>,
+    mapper: fn(AdminProductListBorrowed) -> T,
 }
-impl<'c, 'a, 's, C, T: 'c, const N: usize> AdminListQuery<'c, 'a, 's, C, T, N>
+impl<'c, 'a, 's, C, T: 'c, const N: usize> AdminProductListQuery<'c, 'a, 's, C, T, N>
 where
     C: GenericClient,
 {
-    pub fn map<R>(self, mapper: fn(AdminListBorrowed) -> R) -> AdminListQuery<'c, 'a, 's, C, R, N> {
-        AdminListQuery {
+    pub fn map<R>(
+        self,
+        mapper: fn(AdminProductListBorrowed) -> R,
+    ) -> AdminProductListQuery<'c, 'a, 's, C, R, N> {
+        AdminProductListQuery {
             client: self.client,
             params: self.params,
             stmt: self.stmt,
@@ -741,108 +731,106 @@ where
         Ok(it)
     }
 }
-pub fn post_page() -> PostPageStmt {
-    PostPageStmt(crate::client::async_::Stmt::new(
-        "SELECT id, published_at, slug, title, description, text FROM \"Post\" WHERE slug = $1 AND published_at < NOW()",
+pub fn product_page() -> ProductPageStmt {
+    ProductPageStmt(crate::client::async_::Stmt::new(
+        "SELECT id, publish_at, slug, meta_title, meta_description FROM \"Product\" WHERE slug = $1 AND publish_at < NOW()",
     ))
 }
-pub struct PostPageStmt(crate::client::async_::Stmt);
-impl PostPageStmt {
+pub struct ProductPageStmt(crate::client::async_::Stmt);
+impl ProductPageStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
         slug: &'a T1,
-    ) -> PostPageQuery<'c, 'a, 's, C, PostPage, 1> {
-        PostPageQuery {
+    ) -> ProductPageQuery<'c, 'a, 's, C, ProductPage, 1> {
+        ProductPageQuery {
             client,
             params: [slug],
             stmt: &mut self.0,
             extractor:
-                |row: &tokio_postgres::Row| -> Result<PostPageBorrowed, tokio_postgres::Error> {
-                    Ok(PostPageBorrowed {
+                |row: &tokio_postgres::Row| -> Result<ProductPageBorrowed, tokio_postgres::Error> {
+                    Ok(ProductPageBorrowed {
                         id: row.try_get(0)?,
-                        published_at: row.try_get(1)?,
+                        publish_at: row.try_get(1)?,
                         slug: row.try_get(2)?,
-                        title: row.try_get(3)?,
-                        description: row.try_get(4)?,
-                        text: row.try_get(5)?,
+                        meta_title: row.try_get(3)?,
+                        meta_description: row.try_get(4)?,
                     })
                 },
-            mapper: |it| PostPage::from(it),
+            mapper: |it| ProductPage::from(it),
         }
     }
 }
-pub fn post_list() -> PostListStmt {
-    PostListStmt(crate::client::async_::Stmt::new(
-        "SELECT \"Post\".\"id\", \"Post\".\"published_at\", \"Post\".\"slug\", \"Post\".\"title\", \"Post\".\"description\", \"Post\".\"text\", \"Image\".\"id\" AS \"image_id\", \"Image\".\"alt\" FROM \"Post\" INNER JOIN \"Image\" ON \"Image\".\"post_id\" = \"Post\".\"id\" WHERE \"Post\".\"published_at\" < NOW() AND \"Image\".\"is_hero\" = true LIMIT 10",
+pub fn product_list() -> ProductListStmt {
+    ProductListStmt(crate::client::async_::Stmt::new(
+        "SELECT \"Product\".\"id\", \"Product\".\"publish_at\", \"Product\".\"slug\", \"Product\".\"meta_title\", \"Product\".\"meta_description\", \"ProductImage\".\"id\" AS \"image_id\", \"ProductImage\".\"alt\" FROM \"Product\" INNER JOIN \"ProductImage\" ON \"ProductImage\".\"product_id\" = \"Product\".\"id\" WHERE \"Product\".\"publish_at\" < NOW() AND \"ProductImage\".\"is_hero\" = true LIMIT 10",
     ))
 }
-pub struct PostListStmt(crate::client::async_::Stmt);
-impl PostListStmt {
+pub struct ProductListStmt(crate::client::async_::Stmt);
+impl ProductListStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient>(
         &'s mut self,
         client: &'c C,
-    ) -> PostListQuery<'c, 'a, 's, C, PostList, 0> {
-        PostListQuery {
+    ) -> ProductListQuery<'c, 'a, 's, C, ProductList, 0> {
+        ProductListQuery {
             client,
             params: [],
             stmt: &mut self.0,
             extractor:
-                |row: &tokio_postgres::Row| -> Result<PostListBorrowed, tokio_postgres::Error> {
-                    Ok(PostListBorrowed {
+                |row: &tokio_postgres::Row| -> Result<ProductListBorrowed, tokio_postgres::Error> {
+                    Ok(ProductListBorrowed {
                         id: row.try_get(0)?,
-                        published_at: row.try_get(1)?,
+                        publish_at: row.try_get(1)?,
                         slug: row.try_get(2)?,
-                        title: row.try_get(3)?,
-                        description: row.try_get(4)?,
-                        text: row.try_get(5)?,
-                        image_id: row.try_get(6)?,
-                        alt: row.try_get(7)?,
+                        meta_title: row.try_get(3)?,
+                        meta_description: row.try_get(4)?,
+                        image_id: row.try_get(5)?,
+                        alt: row.try_get(6)?,
                     })
                 },
-            mapper: |it| PostList::from(it),
+            mapper: |it| ProductList::from(it),
         }
     }
 }
-pub fn admin_post_page() -> AdminPostPageStmt {
-    AdminPostPageStmt(crate::client::async_::Stmt::new(
-        "SELECT id, created_at, published_at, slug, title, description, text FROM \"Post\" WHERE id = $1",
+pub fn admin_product_page() -> AdminProductPageStmt {
+    AdminProductPageStmt(crate::client::async_::Stmt::new(
+        "SELECT id, created_at, publish_at, slug, meta_title, meta_description FROM \"Product\" WHERE id = $1",
     ))
 }
-pub struct AdminPostPageStmt(crate::client::async_::Stmt);
-impl AdminPostPageStmt {
+pub struct AdminProductPageStmt(crate::client::async_::Stmt);
+impl AdminProductPageStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
         id: &'a T1,
-    ) -> AdminPostPageQuery<'c, 'a, 's, C, AdminPostPage, 1> {
-        AdminPostPageQuery {
+    ) -> AdminProductPageQuery<'c, 'a, 's, C, AdminProductPage, 1> {
+        AdminProductPageQuery {
             client,
             params: [id],
             stmt: &mut self.0,
-            extractor:
-                |row: &tokio_postgres::Row| -> Result<AdminPostPageBorrowed, tokio_postgres::Error> {
-                    Ok(AdminPostPageBorrowed {
-                        id: row.try_get(0)?,
-                        created_at: row.try_get(1)?,
-                        published_at: row.try_get(2)?,
-                        slug: row.try_get(3)?,
-                        title: row.try_get(4)?,
-                        description: row.try_get(5)?,
-                        text: row.try_get(6)?,
-                    })
-                },
-            mapper: |it| AdminPostPage::from(it),
+            extractor: |
+                row: &tokio_postgres::Row,
+            | -> Result<AdminProductPageBorrowed, tokio_postgres::Error> {
+                Ok(AdminProductPageBorrowed {
+                    id: row.try_get(0)?,
+                    created_at: row.try_get(1)?,
+                    publish_at: row.try_get(2)?,
+                    slug: row.try_get(3)?,
+                    meta_title: row.try_get(4)?,
+                    meta_description: row.try_get(5)?,
+                })
+            },
+            mapper: |it| AdminProductPage::from(it),
         }
     }
 }
-pub fn admin_post_by_slug() -> AdminPostBySlugStmt {
-    AdminPostBySlugStmt(crate::client::async_::Stmt::new(
-        "SELECT id FROM \"Post\" WHERE slug = $1",
+pub fn admin_product_by_slug() -> AdminProductBySlugStmt {
+    AdminProductBySlugStmt(crate::client::async_::Stmt::new(
+        "SELECT id FROM \"Product\" WHERE slug = $1",
     ))
 }
-pub struct AdminPostBySlugStmt(crate::client::async_::Stmt);
-impl AdminPostBySlugStmt {
+pub struct AdminProductBySlugStmt(crate::client::async_::Stmt);
+impl AdminProductBySlugStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
@@ -857,13 +845,13 @@ impl AdminPostBySlugStmt {
         }
     }
 }
-pub fn admin_post_by_id_check() -> AdminPostByIdCheckStmt {
-    AdminPostByIdCheckStmt(crate::client::async_::Stmt::new(
-        "SELECT id FROM \"Post\" WHERE id = $1",
+pub fn admin_product_by_id_check() -> AdminProductByIdCheckStmt {
+    AdminProductByIdCheckStmt(crate::client::async_::Stmt::new(
+        "SELECT id FROM \"Product\" WHERE id = $1",
     ))
 }
-pub struct AdminPostByIdCheckStmt(crate::client::async_::Stmt);
-impl AdminPostByIdCheckStmt {
+pub struct AdminProductByIdCheckStmt(crate::client::async_::Stmt);
+impl AdminProductByIdCheckStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
@@ -878,13 +866,13 @@ impl AdminPostByIdCheckStmt {
         }
     }
 }
-pub fn post_create() -> PostCreateStmt {
-    PostCreateStmt(crate::client::async_::Stmt::new(
-        "INSERT INTO \"Post\" (id, published_at, title, description, text) VALUES ($1, $2, $3, $4, $5) RETURNING created_at",
+pub fn product_create() -> ProductCreateStmt {
+    ProductCreateStmt(crate::client::async_::Stmt::new(
+        "INSERT INTO \"Product\" (id, publish_at, meta_title, meta_description) VALUES ($1, $2, $3, $4) RETURNING created_at",
     ))
 }
-pub struct PostCreateStmt(crate::client::async_::Stmt);
-impl PostCreateStmt {
+pub struct ProductCreateStmt(crate::client::async_::Stmt);
+impl ProductCreateStmt {
     pub fn bind<
         'c,
         'a,
@@ -893,66 +881,54 @@ impl PostCreateStmt {
         T1: crate::StringSql,
         T2: crate::StringSql,
         T3: crate::StringSql,
-        T4: crate::StringSql,
     >(
         &'s mut self,
         client: &'c C,
         id: &'a T1,
-        published_at: &'a Option<crate::types::time::Timestamp>,
-        title: &'a T2,
-        description: &'a T3,
-        text: &'a T4,
-    ) -> CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 5> {
+        publish_at: &'a Option<crate::types::time::Timestamp>,
+        meta_title: &'a T2,
+        meta_description: &'a T3,
+    ) -> CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 4> {
         CrateTypesTimeTimestampQuery {
             client,
-            params: [id, published_at, title, description, text],
+            params: [id, publish_at, meta_title, meta_description],
             stmt: &mut self.0,
             extractor: |row| Ok(row.try_get(0)?),
             mapper: |it| it,
         }
     }
 }
-impl<
-    'c,
-    'a,
-    's,
-    C: GenericClient,
-    T1: crate::StringSql,
-    T2: crate::StringSql,
-    T3: crate::StringSql,
-    T4: crate::StringSql,
->
+impl<'c, 'a, 's, C: GenericClient, T1: crate::StringSql, T2: crate::StringSql, T3: crate::StringSql>
     crate::client::async_::Params<
         'c,
         'a,
         's,
-        PostCreateParams<T1, T2, T3, T4>,
-        CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 5>,
+        ProductCreateParams<T1, T2, T3>,
+        CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 4>,
         C,
-    > for PostCreateStmt
+    > for ProductCreateStmt
 {
     fn params(
         &'s mut self,
         client: &'c C,
-        params: &'a PostCreateParams<T1, T2, T3, T4>,
-    ) -> CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 5> {
+        params: &'a ProductCreateParams<T1, T2, T3>,
+    ) -> CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 4> {
         self.bind(
             client,
             &params.id,
-            &params.published_at,
-            &params.title,
-            &params.description,
-            &params.text,
+            &params.publish_at,
+            &params.meta_title,
+            &params.meta_description,
         )
     }
 }
-pub fn post_update() -> PostUpdateStmt {
-    PostUpdateStmt(crate::client::async_::Stmt::new(
-        "UPDATE \"Post\" SET published_at = $1, slug = $2, title = $3, description = $4, text = $5 WHERE id = $6 RETURNING created_at",
+pub fn product_update() -> ProductUpdateStmt {
+    ProductUpdateStmt(crate::client::async_::Stmt::new(
+        "UPDATE \"Product\" SET publish_at = $1, slug = $2, meta_title = $3, meta_description = $4 WHERE id = $5 RETURNING created_at",
     ))
 }
-pub struct PostUpdateStmt(crate::client::async_::Stmt);
-impl PostUpdateStmt {
+pub struct ProductUpdateStmt(crate::client::async_::Stmt);
+impl ProductUpdateStmt {
     pub fn bind<
         'c,
         'a,
@@ -962,20 +938,18 @@ impl PostUpdateStmt {
         T2: crate::StringSql,
         T3: crate::StringSql,
         T4: crate::StringSql,
-        T5: crate::StringSql,
     >(
         &'s mut self,
         client: &'c C,
-        published_at: &'a Option<crate::types::time::Timestamp>,
+        publish_at: &'a Option<crate::types::time::Timestamp>,
         slug: &'a T1,
-        title: &'a T2,
-        description: &'a T3,
-        text: &'a T4,
-        id: &'a T5,
-    ) -> CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 6> {
+        meta_title: &'a T2,
+        meta_description: &'a T3,
+        id: &'a T4,
+    ) -> CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 5> {
         CrateTypesTimeTimestampQuery {
             client,
-            params: [published_at, slug, title, description, text, id],
+            params: [publish_at, slug, meta_title, meta_description, id],
             stmt: &mut self.0,
             extractor: |row| Ok(row.try_get(0)?),
             mapper: |it| it,
@@ -991,40 +965,38 @@ impl<
     T2: crate::StringSql,
     T3: crate::StringSql,
     T4: crate::StringSql,
-    T5: crate::StringSql,
 >
     crate::client::async_::Params<
         'c,
         'a,
         's,
-        PostUpdateParams<T1, T2, T3, T4, T5>,
-        CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 6>,
+        ProductUpdateParams<T1, T2, T3, T4>,
+        CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 5>,
         C,
-    > for PostUpdateStmt
+    > for ProductUpdateStmt
 {
     fn params(
         &'s mut self,
         client: &'c C,
-        params: &'a PostUpdateParams<T1, T2, T3, T4, T5>,
-    ) -> CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 6> {
+        params: &'a ProductUpdateParams<T1, T2, T3, T4>,
+    ) -> CrateTypesTimeTimestampQuery<'c, 'a, 's, C, crate::types::time::Timestamp, 5> {
         self.bind(
             client,
-            &params.published_at,
+            &params.publish_at,
             &params.slug,
-            &params.title,
-            &params.description,
-            &params.text,
+            &params.meta_title,
+            &params.meta_description,
             &params.id,
         )
     }
 }
-pub fn post_delete() -> PostDeleteStmt {
-    PostDeleteStmt(crate::client::async_::Stmt::new(
-        "DELETE FROM \"Post\" WHERE id = $1",
+pub fn product_delete() -> ProductDeleteStmt {
+    ProductDeleteStmt(crate::client::async_::Stmt::new(
+        "DELETE FROM \"Product\" WHERE id = $1",
     ))
 }
-pub struct PostDeleteStmt(crate::client::async_::Stmt);
-impl PostDeleteStmt {
+pub struct ProductDeleteStmt(crate::client::async_::Stmt);
+impl ProductDeleteStmt {
     pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
@@ -1034,110 +1006,112 @@ impl PostDeleteStmt {
         client.execute(stmt, &[id]).await
     }
 }
-pub fn post_images() -> PostImagesStmt {
-    PostImagesStmt(crate::client::async_::Stmt::new(
-        "SELECT id, alt, is_hero FROM \"Image\" WHERE post_id = $1",
+pub fn product_images() -> ProductImagesStmt {
+    ProductImagesStmt(crate::client::async_::Stmt::new(
+        "SELECT id, alt, is_hero FROM \"ProductImage\" WHERE product_id = $1",
     ))
 }
-pub struct PostImagesStmt(crate::client::async_::Stmt);
-impl PostImagesStmt {
+pub struct ProductImagesStmt(crate::client::async_::Stmt);
+impl ProductImagesStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
-        post_id: &'a T1,
-    ) -> PostImagesQuery<'c, 'a, 's, C, PostImages, 1> {
-        PostImagesQuery {
+        product_id: &'a T1,
+    ) -> ProductImagesQuery<'c, 'a, 's, C, ProductImages, 1> {
+        ProductImagesQuery {
             client,
-            params: [post_id],
+            params: [product_id],
             stmt: &mut self.0,
             extractor:
-                |row: &tokio_postgres::Row| -> Result<PostImagesBorrowed, tokio_postgres::Error> {
-                    Ok(PostImagesBorrowed {
+                |row: &tokio_postgres::Row| -> Result<ProductImagesBorrowed, tokio_postgres::Error> {
+                    Ok(ProductImagesBorrowed {
                         id: row.try_get(0)?,
                         alt: row.try_get(1)?,
                         is_hero: row.try_get(2)?,
                     })
                 },
-            mapper: |it| PostImages::from(it),
+            mapper: |it| ProductImages::from(it),
         }
     }
 }
-pub fn admin_images() -> AdminImagesStmt {
-    AdminImagesStmt(crate::client::async_::Stmt::new(
-        "SELECT id, alt, \"order\", is_hero FROM \"Image\" WHERE post_id = $1 ORDER BY \"order\"",
+pub fn admin_product_images() -> AdminProductImagesStmt {
+    AdminProductImagesStmt(crate::client::async_::Stmt::new(
+        "SELECT id, alt, \"order\", is_hero FROM \"ProductImage\" WHERE product_id = $1 ORDER BY \"order\"",
     ))
 }
-pub struct AdminImagesStmt(crate::client::async_::Stmt);
-impl AdminImagesStmt {
+pub struct AdminProductImagesStmt(crate::client::async_::Stmt);
+impl AdminProductImagesStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
-        post_id: &'a T1,
-    ) -> AdminImagesQuery<'c, 'a, 's, C, AdminImages, 1> {
-        AdminImagesQuery {
+        product_id: &'a T1,
+    ) -> AdminProductImagesQuery<'c, 'a, 's, C, AdminProductImages, 1> {
+        AdminProductImagesQuery {
             client,
-            params: [post_id],
+            params: [product_id],
             stmt: &mut self.0,
-            extractor:
-                |row: &tokio_postgres::Row| -> Result<AdminImagesBorrowed, tokio_postgres::Error> {
-                    Ok(AdminImagesBorrowed {
-                        id: row.try_get(0)?,
-                        alt: row.try_get(1)?,
-                        order: row.try_get(2)?,
-                        is_hero: row.try_get(3)?,
-                    })
-                },
-            mapper: |it| AdminImages::from(it),
+            extractor: |
+                row: &tokio_postgres::Row,
+            | -> Result<AdminProductImagesBorrowed, tokio_postgres::Error> {
+                Ok(AdminProductImagesBorrowed {
+                    id: row.try_get(0)?,
+                    alt: row.try_get(1)?,
+                    order: row.try_get(2)?,
+                    is_hero: row.try_get(3)?,
+                })
+            },
+            mapper: |it| AdminProductImages::from(it),
         }
     }
 }
-pub fn post_images_ids() -> PostImagesIdsStmt {
-    PostImagesIdsStmt(crate::client::async_::Stmt::new(
-        "SELECT id FROM \"Image\" WHERE post_id = $1",
+pub fn product_images_ids() -> ProductImagesIdsStmt {
+    ProductImagesIdsStmt(crate::client::async_::Stmt::new(
+        "SELECT id FROM \"ProductImage\" WHERE product_id = $1",
     ))
 }
-pub struct PostImagesIdsStmt(crate::client::async_::Stmt);
-impl PostImagesIdsStmt {
+pub struct ProductImagesIdsStmt(crate::client::async_::Stmt);
+impl ProductImagesIdsStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
-        post_id: &'a T1,
+        product_id: &'a T1,
     ) -> StringQuery<'c, 'a, 's, C, String, 1> {
         StringQuery {
             client,
-            params: [post_id],
+            params: [product_id],
             stmt: &mut self.0,
             extractor: |row| Ok(row.try_get(0)?),
             mapper: |it| it.into(),
         }
     }
 }
-pub fn admin_list() -> AdminListStmt {
-    AdminListStmt(crate::client::async_::Stmt::new(
-        "SELECT \"Post\".\"id\", \"Post\".\"created_at\", \"Post\".\"published_at\", \"Post\".\"title\", \"Image\".\"id\" AS \"image_id\" FROM \"Post\" INNER JOIN \"Image\" ON \"Image\".\"post_id\" = \"Post\".\"id\" AND \"Image\".\"is_hero\" = true",
+pub fn admin_product_list() -> AdminProductListStmt {
+    AdminProductListStmt(crate::client::async_::Stmt::new(
+        "SELECT \"Product\".\"id\", \"Product\".\"created_at\", \"Product\".\"publish_at\", \"Product\".\"meta_title\", \"ProductImage\".\"id\" AS \"image_id\" FROM \"Product\" INNER JOIN \"ProductImage\" ON \"ProductImage\".\"product_id\" = \"Product\".\"id\" AND \"ProductImage\".\"is_hero\" = true",
     ))
 }
-pub struct AdminListStmt(crate::client::async_::Stmt);
-impl AdminListStmt {
+pub struct AdminProductListStmt(crate::client::async_::Stmt);
+impl AdminProductListStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient>(
         &'s mut self,
         client: &'c C,
-    ) -> AdminListQuery<'c, 'a, 's, C, AdminList, 0> {
-        AdminListQuery {
+    ) -> AdminProductListQuery<'c, 'a, 's, C, AdminProductList, 0> {
+        AdminProductListQuery {
             client,
             params: [],
             stmt: &mut self.0,
-            extractor:
-                |row: &tokio_postgres::Row| -> Result<AdminListBorrowed, tokio_postgres::Error> {
-                    Ok(AdminListBorrowed {
-                        id: row.try_get(0)?,
-                        created_at: row.try_get(1)?,
-                        published_at: row.try_get(2)?,
-                        title: row.try_get(3)?,
-                        image_id: row.try_get(4)?,
-                    })
-                },
-            mapper: |it| AdminList::from(it),
+            extractor: |
+                row: &tokio_postgres::Row,
+            | -> Result<AdminProductListBorrowed, tokio_postgres::Error> {
+                Ok(AdminProductListBorrowed {
+                    id: row.try_get(0)?,
+                    created_at: row.try_get(1)?,
+                    publish_at: row.try_get(2)?,
+                    meta_title: row.try_get(3)?,
+                    image_id: row.try_get(4)?,
+                })
+            },
+            mapper: |it| AdminProductList::from(it),
         }
     }
 }

@@ -1,14 +1,6 @@
 // This file was generated with `clorinde`. Do not modify.
 
 #[derive(Debug)]
-pub struct SettingsCreateParams<T1: crate::StringSql> {
-    pub id: T1,
-    pub hero_height: i32,
-    pub hero_width: i32,
-    pub thumb_height: i32,
-    pub thumb_width: i32,
-}
-#[derive(Debug)]
 pub struct SettingsUpdateParams<T1: crate::StringSql, T2: crate::StringSql, T3: crate::StringSql> {
     pub robots_txt: T1,
     pub site_url: T2,
@@ -19,32 +11,16 @@ pub struct SettingsUpdateHomeParams<T1: crate::StringSql, T2: crate::StringSql> 
     pub home_text: T1,
     pub id: T2,
 }
-#[derive(Debug)]
-pub struct SettingsUpdateImagesParams<T1: crate::StringSql> {
-    pub hero_height: i32,
-    pub hero_width: i32,
-    pub thumb_height: i32,
-    pub thumb_width: i32,
-    pub id: T1,
-}
 #[derive(Debug, Clone, PartialEq)]
 pub struct Settings {
     pub id: String,
     pub home_text: String,
     pub site_url: String,
-    pub hero_height: i32,
-    pub hero_width: i32,
-    pub thumb_height: i32,
-    pub thumb_width: i32,
 }
 pub struct SettingsBorrowed<'a> {
     pub id: &'a str,
     pub home_text: &'a str,
     pub site_url: &'a str,
-    pub hero_height: i32,
-    pub hero_width: i32,
-    pub thumb_height: i32,
-    pub thumb_width: i32,
 }
 impl<'a> From<SettingsBorrowed<'a>> for Settings {
     fn from(
@@ -52,20 +28,12 @@ impl<'a> From<SettingsBorrowed<'a>> for Settings {
             id,
             home_text,
             site_url,
-            hero_height,
-            hero_width,
-            thumb_height,
-            thumb_width,
         }: SettingsBorrowed<'a>,
     ) -> Self {
         Self {
             id: id.into(),
             home_text: home_text.into(),
             site_url: site_url.into(),
-            hero_height,
-            hero_width,
-            thumb_height,
-            thumb_width,
         }
     }
 }
@@ -75,20 +43,12 @@ pub struct SettingsPage {
     pub robots_txt: String,
     pub home_text: String,
     pub site_url: String,
-    pub hero_height: i32,
-    pub hero_width: i32,
-    pub thumb_height: i32,
-    pub thumb_width: i32,
 }
 pub struct SettingsPageBorrowed<'a> {
     pub id: &'a str,
     pub robots_txt: &'a str,
     pub home_text: &'a str,
     pub site_url: &'a str,
-    pub hero_height: i32,
-    pub hero_width: i32,
-    pub thumb_height: i32,
-    pub thumb_width: i32,
 }
 impl<'a> From<SettingsPageBorrowed<'a>> for SettingsPage {
     fn from(
@@ -97,10 +57,6 @@ impl<'a> From<SettingsPageBorrowed<'a>> for SettingsPage {
             robots_txt,
             home_text,
             site_url,
-            hero_height,
-            hero_width,
-            thumb_height,
-            thumb_width,
         }: SettingsPageBorrowed<'a>,
     ) -> Self {
         Self {
@@ -108,10 +64,6 @@ impl<'a> From<SettingsPageBorrowed<'a>> for SettingsPage {
             robots_txt: robots_txt.into(),
             home_text: home_text.into(),
             site_url: site_url.into(),
-            hero_height,
-            hero_width,
-            thumb_height,
-            thumb_width,
         }
     }
 }
@@ -305,7 +257,7 @@ where
 }
 pub fn settings() -> SettingsStmt {
     SettingsStmt(crate::client::async_::Stmt::new(
-        "SELECT \"id\", \"home_text\", \"site_url\", \"hero_height\", \"hero_width\", \"thumb_height\", \"thumb_width\" FROM \"Settings\"",
+        "SELECT \"id\", \"home_text\", \"site_url\" FROM \"Settings\"",
     ))
 }
 pub struct SettingsStmt(crate::client::async_::Stmt);
@@ -324,10 +276,6 @@ impl SettingsStmt {
                         id: row.try_get(0)?,
                         home_text: row.try_get(1)?,
                         site_url: row.try_get(2)?,
-                        hero_height: row.try_get(3)?,
-                        hero_width: row.try_get(4)?,
-                        thumb_height: row.try_get(5)?,
-                        thumb_width: row.try_get(6)?,
                     })
                 },
             mapper: |it| Settings::from(it),
@@ -336,7 +284,7 @@ impl SettingsStmt {
 }
 pub fn settings_page() -> SettingsPageStmt {
     SettingsPageStmt(crate::client::async_::Stmt::new(
-        "SELECT \"id\", \"robots_txt\", \"home_text\", \"site_url\", \"hero_height\", \"hero_width\", \"thumb_height\", \"thumb_width\" FROM \"Settings\"",
+        "SELECT \"id\", \"robots_txt\", \"home_text\", \"site_url\" FROM \"Settings\"",
     ))
 }
 pub struct SettingsPageStmt(crate::client::async_::Stmt);
@@ -356,10 +304,6 @@ impl SettingsPageStmt {
                         robots_txt: row.try_get(1)?,
                         home_text: row.try_get(2)?,
                         site_url: row.try_get(3)?,
-                        hero_height: row.try_get(4)?,
-                        hero_width: row.try_get(5)?,
-                        thumb_height: row.try_get(6)?,
-                        thumb_width: row.try_get(7)?,
                     })
                 },
             mapper: |it| SettingsPage::from(it),
@@ -408,7 +352,7 @@ impl SettingsHomeStmt {
 }
 pub fn settings_create() -> SettingsCreateStmt {
     SettingsCreateStmt(crate::client::async_::Stmt::new(
-        "INSERT INTO \"Settings\" (id, hero_height, hero_width, thumb_height, thumb_width) VALUES ($1, $2, $3, $4, $5)",
+        "INSERT INTO \"Settings\" (id) VALUES ($1)",
     ))
 }
 pub struct SettingsCreateStmt(crate::client::async_::Stmt);
@@ -417,47 +361,9 @@ impl SettingsCreateStmt {
         &'s mut self,
         client: &'c C,
         id: &'a T1,
-        hero_height: &'a i32,
-        hero_width: &'a i32,
-        thumb_height: &'a i32,
-        thumb_width: &'a i32,
     ) -> Result<u64, tokio_postgres::Error> {
         let stmt = self.0.prepare(client).await?;
-        client
-            .execute(
-                stmt,
-                &[id, hero_height, hero_width, thumb_height, thumb_width],
-            )
-            .await
-    }
-}
-impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql>
-    crate::client::async_::Params<
-        'a,
-        'a,
-        'a,
-        SettingsCreateParams<T1>,
-        std::pin::Pin<
-            Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
-        >,
-        C,
-    > for SettingsCreateStmt
-{
-    fn params(
-        &'a mut self,
-        client: &'a C,
-        params: &'a SettingsCreateParams<T1>,
-    ) -> std::pin::Pin<
-        Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
-    > {
-        Box::pin(self.bind(
-            client,
-            &params.id,
-            &params.hero_height,
-            &params.hero_width,
-            &params.thumb_height,
-            &params.thumb_width,
-        ))
+        client.execute(stmt, &[id]).await
     }
 }
 pub fn settings_update() -> SettingsUpdateStmt {
@@ -551,59 +457,5 @@ impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql, T2: crate::String
         Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
     > {
         Box::pin(self.bind(client, &params.home_text, &params.id))
-    }
-}
-pub fn settings_update_images() -> SettingsUpdateImagesStmt {
-    SettingsUpdateImagesStmt(crate::client::async_::Stmt::new(
-        "UPDATE \"Settings\" SET hero_height = $1, hero_width = $2, thumb_height = $3, thumb_width = $4 WHERE id = $5",
-    ))
-}
-pub struct SettingsUpdateImagesStmt(crate::client::async_::Stmt);
-impl SettingsUpdateImagesStmt {
-    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
-        &'s mut self,
-        client: &'c C,
-        hero_height: &'a i32,
-        hero_width: &'a i32,
-        thumb_height: &'a i32,
-        thumb_width: &'a i32,
-        id: &'a T1,
-    ) -> Result<u64, tokio_postgres::Error> {
-        let stmt = self.0.prepare(client).await?;
-        client
-            .execute(
-                stmt,
-                &[hero_height, hero_width, thumb_height, thumb_width, id],
-            )
-            .await
-    }
-}
-impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql>
-    crate::client::async_::Params<
-        'a,
-        'a,
-        'a,
-        SettingsUpdateImagesParams<T1>,
-        std::pin::Pin<
-            Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
-        >,
-        C,
-    > for SettingsUpdateImagesStmt
-{
-    fn params(
-        &'a mut self,
-        client: &'a C,
-        params: &'a SettingsUpdateImagesParams<T1>,
-    ) -> std::pin::Pin<
-        Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
-    > {
-        Box::pin(self.bind(
-            client,
-            &params.hero_height,
-            &params.hero_width,
-            &params.thumb_height,
-            &params.thumb_width,
-            &params.id,
-        ))
     }
 }

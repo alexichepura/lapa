@@ -20,7 +20,7 @@ pub struct CreateParams<
     pub id: T1,
     pub alt: T2,
     pub ext: T3,
-    pub post_id: T4,
+    pub product_id: T4,
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct SelectAllForConvert {
@@ -169,7 +169,7 @@ where
 }
 pub fn select_all_for_convert() -> SelectAllForConvertStmt {
     SelectAllForConvertStmt(crate::client::async_::Stmt::new(
-        "SELECT id, ext FROM \"Image\"",
+        "SELECT id, ext FROM \"ProductImage\"",
     ))
 }
 pub struct SelectAllForConvertStmt(crate::client::async_::Stmt);
@@ -196,7 +196,7 @@ impl SelectAllForConvertStmt {
 }
 pub fn delete_many_by_id() -> DeleteManyByIdStmt {
     DeleteManyByIdStmt(crate::client::async_::Stmt::new(
-        "DELETE FROM \"Image\" WHERE id = ANY($1)",
+        "DELETE FROM \"ProductImage\" WHERE id = ANY($1)",
     ))
 }
 pub struct DeleteManyByIdStmt(crate::client::async_::Stmt);
@@ -219,7 +219,7 @@ impl DeleteManyByIdStmt {
 }
 pub fn delete_by_id() -> DeleteByIdStmt {
     DeleteByIdStmt(crate::client::async_::Stmt::new(
-        "DELETE FROM \"Image\" WHERE id = $1",
+        "DELETE FROM \"ProductImage\" WHERE id = $1",
     ))
 }
 pub struct DeleteByIdStmt(crate::client::async_::Stmt);
@@ -235,7 +235,7 @@ impl DeleteByIdStmt {
 }
 pub fn update_alt() -> UpdateAltStmt {
     UpdateAltStmt(crate::client::async_::Stmt::new(
-        "UPDATE \"Image\" SET alt = $1 WHERE id = $2",
+        "UPDATE \"ProductImage\" SET alt = $1 WHERE id = $2",
     ))
 }
 pub struct UpdateAltStmt(crate::client::async_::Stmt);
@@ -274,7 +274,7 @@ impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql, T2: crate::String
 }
 pub fn update_order() -> UpdateOrderStmt {
     UpdateOrderStmt(crate::client::async_::Stmt::new(
-        "UPDATE \"Image\" SET \"order\" = $1 WHERE id = $2",
+        "UPDATE \"ProductImage\" SET \"order\" = $1 WHERE id = $2",
     ))
 }
 pub struct UpdateOrderStmt(crate::client::async_::Stmt);
@@ -313,7 +313,7 @@ impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql>
 }
 pub fn set_hero() -> SetHeroStmt {
     SetHeroStmt(crate::client::async_::Stmt::new(
-        "UPDATE \"Image\" SET \"is_hero\" = true WHERE id = $1",
+        "UPDATE \"ProductImage\" SET \"is_hero\" = true WHERE id = $1",
     ))
 }
 pub struct SetHeroStmt(crate::client::async_::Stmt);
@@ -329,7 +329,7 @@ impl SetHeroStmt {
 }
 pub fn unset_hero() -> UnsetHeroStmt {
     UnsetHeroStmt(crate::client::async_::Stmt::new(
-        "UPDATE \"Image\" SET \"is_hero\" = false WHERE id = $1",
+        "UPDATE \"ProductImage\" SET \"is_hero\" = false WHERE id = $1",
     ))
 }
 pub struct UnsetHeroStmt(crate::client::async_::Stmt);
@@ -343,13 +343,13 @@ impl UnsetHeroStmt {
         client.execute(stmt, &[id]).await
     }
 }
-pub fn select_post_id() -> SelectPostIdStmt {
-    SelectPostIdStmt(crate::client::async_::Stmt::new(
-        "SELECT post_id FROM \"Image\" WHERE id = $1",
+pub fn select_product_id() -> SelectProductIdStmt {
+    SelectProductIdStmt(crate::client::async_::Stmt::new(
+        "SELECT product_id FROM \"ProductImage\" WHERE id = $1",
     ))
 }
-pub struct SelectPostIdStmt(crate::client::async_::Stmt);
-impl SelectPostIdStmt {
+pub struct SelectProductIdStmt(crate::client::async_::Stmt);
+impl SelectProductIdStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
@@ -366,7 +366,7 @@ impl SelectPostIdStmt {
 }
 pub fn find_hero() -> FindHeroStmt {
     FindHeroStmt(crate::client::async_::Stmt::new(
-        "SELECT id FROM \"Image\" WHERE post_id = $1 AND is_hero = true",
+        "SELECT id FROM \"ProductImage\" WHERE product_id = $1 AND is_hero = true",
     ))
 }
 pub struct FindHeroStmt(crate::client::async_::Stmt);
@@ -374,11 +374,11 @@ impl FindHeroStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
-        post_id: &'a T1,
+        product_id: &'a T1,
     ) -> StringQuery<'c, 'a, 's, C, String, 1> {
         StringQuery {
             client,
-            params: [post_id],
+            params: [product_id],
             stmt: &mut self.0,
             extractor: |row| Ok(row.try_get(0)?),
             mapper: |it| it.into(),
@@ -387,7 +387,7 @@ impl FindHeroStmt {
 }
 pub fn create() -> CreateStmt {
     CreateStmt(crate::client::async_::Stmt::new(
-        "INSERT INTO \"Image\" (id, alt, ext, post_id) VALUES ($1, $2, $3, $4)",
+        "INSERT INTO \"ProductImage\" (id, alt, ext, product_id) VALUES ($1, $2, $3, $4)",
     ))
 }
 pub struct CreateStmt(crate::client::async_::Stmt);
@@ -407,10 +407,10 @@ impl CreateStmt {
         id: &'a T1,
         alt: &'a T2,
         ext: &'a T3,
-        post_id: &'a T4,
+        product_id: &'a T4,
     ) -> Result<u64, tokio_postgres::Error> {
         let stmt = self.0.prepare(client).await?;
-        client.execute(stmt, &[id, alt, ext, post_id]).await
+        client.execute(stmt, &[id, alt, ext, product_id]).await
     }
 }
 impl<
@@ -444,7 +444,7 @@ impl<
             &params.id,
             &params.alt,
             &params.ext,
-            &params.post_id,
+            &params.product_id,
         ))
     }
 }

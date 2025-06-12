@@ -2,11 +2,7 @@
 SELECT
     "id",
     "home_text",
-    "site_url",
-    "hero_height",
-    "hero_width",
-    "thumb_height",
-    "thumb_width"
+    "site_url"
 FROM "Settings";
 
 --! settings_page
@@ -14,11 +10,7 @@ SELECT
     "id",
     "robots_txt",
     "home_text",
-    "site_url",
-    "hero_height",
-    "hero_width",
-    "thumb_height",
-    "thumb_width"
+    "site_url"
 FROM "Settings";
 
 --! settings_robots
@@ -32,8 +24,8 @@ SELECT
 FROM "Settings";
 
 --! settings_create
-INSERT INTO "Settings" (id, hero_height, hero_width, thumb_height, thumb_width)
-  VALUES (:id, :hero_height, :hero_width, :thumb_height, :thumb_width);
+INSERT INTO "Settings" (id)
+  VALUES (:id);
 
 --! settings_update
 UPDATE "Settings"
@@ -43,9 +35,4 @@ WHERE id = :id;
 --! settings_update_home
 UPDATE "Settings"
 SET home_text = :home_text
-WHERE id = :id; 
-
---! settings_update_images
-UPDATE "Settings"
-SET hero_height = :hero_height, hero_width = :hero_width, thumb_height = :thumb_height, thumb_width = :thumb_width
 WHERE id = :id; 
