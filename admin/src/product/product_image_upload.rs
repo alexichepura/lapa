@@ -101,28 +101,28 @@ pub async fn upload_img(
 
     let img_decoded = img_reader.decode().unwrap();
 
-    let settings = clorinde::queries::settings::settings()
-        .bind(&db)
-        .opt()
-        .await
-        .map_err(|e| lib::emsg(e, "Settings find"))?
-        .unwrap();
+    // let settings = clorinde::queries::settings::settings()
+    //     .bind(&db)
+    //     .opt()
+    //     .await
+    //     .map_err(|e| lib::emsg(e, "Settings find"))?
+    //     .unwrap();
 
-    let convert_settings = crate::image::ConvertSettings {
-        hero_height: settings.hero_height as u32,
-        hero_width: settings.hero_width as u32,
-        thumb_height: settings.thumb_height as u32,
-        thumb_width: settings.thumb_width as u32,
-    };
+    // let convert_settings = crate::image::ConvertSettings {
+    //     hero_height: settings.hero_height as u32,
+    //     hero_width: settings.hero_width as u32,
+    //     thumb_height: settings.thumb_height as u32,
+    //     thumb_width: settings.thumb_width as u32,
+    // };
 
-    let buffered_read = std::io::BufReader::new(cursor);
-    crate::image::create_image_variants_from_buf(
-        buffered_read,
-        img_decoded,
-        &convert_settings,
-        &id,
-    )
-    .map_err(|e| lib::emsg(e, "Image create variants"))?;
+    // let buffered_read = std::io::BufReader::new(cursor);
+    // crate::image::create_image_variants_from_buf(
+    //     buffered_read,
+    //     img_decoded,
+    //     &convert_settings,
+    //     &id,
+    // )
+    // .map_err(|e| lib::emsg(e, "Image create variants"))?;
 
     Ok(Ok(ImageResult { id }))
 }
