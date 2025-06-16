@@ -68,6 +68,7 @@ pub async fn post_create(
                 &title,
                 &description,
                 &content_id,
+                &category_id,
             )
             .await
             .map_err(|e| lib::emsg(e, "Post create"))?;

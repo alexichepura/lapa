@@ -59,6 +59,26 @@ impl<'a> From<ListBorrowed<'a>> for List {
     }
 }
 #[derive(Debug, Clone, PartialEq)]
+pub struct ListForSelect {
+    pub id: String,
+    pub slug: String,
+    pub name: String,
+}
+pub struct ListForSelectBorrowed<'a> {
+    pub id: &'a str,
+    pub slug: &'a str,
+    pub name: &'a str,
+}
+impl<'a> From<ListForSelectBorrowed<'a>> for ListForSelect {
+    fn from(ListForSelectBorrowed { id, slug, name }: ListForSelectBorrowed<'a>) -> Self {
+        Self {
+            id: id.into(),
+            slug: slug.into(),
+            name: name.into(),
+        }
+    }
+}
+#[derive(Debug, Clone, PartialEq)]
 pub struct Page {
     pub id: String,
     pub created_at: crate::types::time::Timestamp,
@@ -111,6 +131,70 @@ where
 {
     pub fn map<R>(self, mapper: fn(ListBorrowed) -> R) -> ListQuery<'c, 'a, 's, C, R, N> {
         ListQuery {
+            client: self.client,
+            params: self.params,
+            stmt: self.stmt,
+            extractor: self.extractor,
+            mapper,
+        }
+    }
+    pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let row = self.client.query_one(stmt, &self.params).await?;
+        Ok((self.mapper)((self.extractor)(&row)?))
+    }
+    pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+        self.iter().await?.try_collect().await
+    }
+    pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        Ok(self
+            .client
+            .query_opt(stmt, &self.params)
+            .await?
+            .map(|row| {
+                let extracted = (self.extractor)(&row)?;
+                Ok((self.mapper)(extracted))
+            })
+            .transpose()?)
+    }
+    pub async fn iter(
+        self,
+    ) -> Result<
+        impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'c,
+        tokio_postgres::Error,
+    > {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let it = self
+            .client
+            .query_raw(stmt, crate::slice_iter(&self.params))
+            .await?
+            .map(move |res| {
+                res.and_then(|row| {
+                    let extracted = (self.extractor)(&row)?;
+                    Ok((self.mapper)(extracted))
+                })
+            })
+            .into_stream();
+        Ok(it)
+    }
+}
+pub struct ListForSelectQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+    client: &'c C,
+    params: [&'a (dyn postgres_types::ToSql + Sync); N],
+    stmt: &'s mut crate::client::async_::Stmt,
+    extractor: fn(&tokio_postgres::Row) -> Result<ListForSelectBorrowed, tokio_postgres::Error>,
+    mapper: fn(ListForSelectBorrowed) -> T,
+}
+impl<'c, 'a, 's, C, T: 'c, const N: usize> ListForSelectQuery<'c, 'a, 's, C, T, N>
+where
+    C: GenericClient,
+{
+    pub fn map<R>(
+        self,
+        mapper: fn(ListForSelectBorrowed) -> R,
+    ) -> ListForSelectQuery<'c, 'a, 's, C, R, N> {
+        ListForSelectQuery {
             client: self.client,
             params: self.params,
             stmt: self.stmt,
@@ -309,6 +393,33 @@ impl ListStmt {
                 })
             },
             mapper: |it| List::from(it),
+        }
+    }
+}
+pub fn list_for_select() -> ListForSelectStmt {
+    ListForSelectStmt(crate::client::async_::Stmt::new(
+        "SELECT id, slug, name FROM \"PostCategory\"",
+    ))
+}
+pub struct ListForSelectStmt(crate::client::async_::Stmt);
+impl ListForSelectStmt {
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s mut self,
+        client: &'c C,
+    ) -> ListForSelectQuery<'c, 'a, 's, C, ListForSelect, 0> {
+        ListForSelectQuery {
+            client,
+            params: [],
+            stmt: &mut self.0,
+            extractor:
+                |row: &tokio_postgres::Row| -> Result<ListForSelectBorrowed, tokio_postgres::Error> {
+                    Ok(ListForSelectBorrowed {
+                        id: row.try_get(0)?,
+                        slug: row.try_get(1)?,
+                        name: row.try_get(2)?,
+                    })
+                },
+            mapper: |it| ListForSelect::from(it),
         }
     }
 }

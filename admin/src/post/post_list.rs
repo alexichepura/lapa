@@ -56,26 +56,26 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
     let created = datetime_to_strings(post.created_at);
 
     let published = match post.publish_at {
-        Some(published_at) => datetime_to_strings(published_at),
+        Some(publish_at) => datetime_to_strings(publish_at),
         None => DateTimeStrings::draft(),
     };
     let class = match post.is_published {
         true => "published",
         false => "not-published",
     };
-    let hero_view = match post.hero {
-        Some(id) => {
-            Either::Left(view! { <img title="Post hero" src=img_url_small(&id) width="36" /> })
-        }
-        None => Either::Right(view! { <div title="No post hero">?</div> }),
-    };
+    // let hero_view = match post.hero {
+    //     Some(id) => {
+    //         Either::Left(view! { <img title="Post hero" src=img_url_small(&id) width="36" /> })
+    //     }
+    //     None => Either::Right(view! { <div title="No post hero">?</div> }),
+    // };
     view! {
         <li class="PostListItem">
-            <A href=format!("/posts/{}", post.id)>
+            <A href=format!("/post/{}", post.id)>
                 <div title="Published at" class=format!("PostListItem-status {}", class)>
                     {published.local}
                 </div>
-                {hero_view}
+                // {hero_view}
                 <span title="Post title">{post.title}</span>
                 <div title="Created at" class="PostListItem-created">
                     {created.local}
@@ -88,7 +88,7 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
 #[server(GetPosts, "/api")]
 pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let posts = clorinde::queries::admin_product::list()
+    let posts = clorinde::queries::admin_post::list()
         .bind(&db)
         .all()
         .await
@@ -106,7 +106,7 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
                 created_at: data.created_at.and_utc().fixed_offset(),
                 publish_at: data.publish_at.map(|dt| dt.and_utc().fixed_offset()),
                 is_published,
-                hero: data.image_id,
+                // hero: data.image_id,
             }
         })
         .collect();
@@ -120,5 +120,5 @@ pub struct PostListItem {
     pub created_at: DateTime<FixedOffset>,
     pub publish_at: Option<DateTime<FixedOffset>>,
     pub is_published: bool,
-    pub hero: Option<String>,
+    // pub hero: Option<String>,
 }

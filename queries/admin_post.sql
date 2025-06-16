@@ -32,3 +32,11 @@ WHERE id = :id;
 
 --! delete
 DELETE FROM "Post" WHERE id = :id;
+
+--! list : (publish_at?)
+SELECT
+    id,
+    created_at,
+    publish_at,
+    meta_title
+FROM "Post";

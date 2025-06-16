@@ -7,12 +7,14 @@ pub struct CreateParams<
     T3: crate::StringSql,
     T4: crate::StringSql,
     T5: crate::StringSql,
+    T6: crate::StringSql,
 > {
     pub id: T1,
     pub slug: T2,
     pub meta_title: T3,
     pub meta_description: T4,
     pub content_id: T5,
+    pub category_id: T6,
 }
 #[derive(Debug)]
 pub struct UpdateParams<
@@ -62,6 +64,36 @@ impl<'a> From<PageBorrowed<'a>> for Page {
             slug: slug.into(),
             meta_title: meta_title.into(),
             meta_description: meta_description.into(),
+        }
+    }
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct List {
+    pub id: String,
+    pub created_at: crate::types::time::Timestamp,
+    pub publish_at: Option<crate::types::time::Timestamp>,
+    pub meta_title: String,
+}
+pub struct ListBorrowed<'a> {
+    pub id: &'a str,
+    pub created_at: crate::types::time::Timestamp,
+    pub publish_at: Option<crate::types::time::Timestamp>,
+    pub meta_title: &'a str,
+}
+impl<'a> From<ListBorrowed<'a>> for List {
+    fn from(
+        ListBorrowed {
+            id,
+            created_at,
+            publish_at,
+            meta_title,
+        }: ListBorrowed<'a>,
+    ) -> Self {
+        Self {
+            id: id.into(),
+            created_at,
+            publish_at,
+            meta_title: meta_title.into(),
         }
     }
 }
@@ -189,6 +221,67 @@ where
         Ok(it)
     }
 }
+pub struct ListQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+    client: &'c C,
+    params: [&'a (dyn postgres_types::ToSql + Sync); N],
+    stmt: &'s mut crate::client::async_::Stmt,
+    extractor: fn(&tokio_postgres::Row) -> Result<ListBorrowed, tokio_postgres::Error>,
+    mapper: fn(ListBorrowed) -> T,
+}
+impl<'c, 'a, 's, C, T: 'c, const N: usize> ListQuery<'c, 'a, 's, C, T, N>
+where
+    C: GenericClient,
+{
+    pub fn map<R>(self, mapper: fn(ListBorrowed) -> R) -> ListQuery<'c, 'a, 's, C, R, N> {
+        ListQuery {
+            client: self.client,
+            params: self.params,
+            stmt: self.stmt,
+            extractor: self.extractor,
+            mapper,
+        }
+    }
+    pub async fn one(self) -> Result<T, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let row = self.client.query_one(stmt, &self.params).await?;
+        Ok((self.mapper)((self.extractor)(&row)?))
+    }
+    pub async fn all(self) -> Result<Vec<T>, tokio_postgres::Error> {
+        self.iter().await?.try_collect().await
+    }
+    pub async fn opt(self) -> Result<Option<T>, tokio_postgres::Error> {
+        let stmt = self.stmt.prepare(self.client).await?;
+        Ok(self
+            .client
+            .query_opt(stmt, &self.params)
+            .await?
+            .map(|row| {
+                let extracted = (self.extractor)(&row)?;
+                Ok((self.mapper)(extracted))
+            })
+            .transpose()?)
+    }
+    pub async fn iter(
+        self,
+    ) -> Result<
+        impl futures::Stream<Item = Result<T, tokio_postgres::Error>> + 'c,
+        tokio_postgres::Error,
+    > {
+        let stmt = self.stmt.prepare(self.client).await?;
+        let it = self
+            .client
+            .query_raw(stmt, crate::slice_iter(&self.params))
+            .await?
+            .map(move |res| {
+                res.and_then(|row| {
+                    let extracted = (self.extractor)(&row)?;
+                    Ok((self.mapper)(extracted))
+                })
+            })
+            .into_stream();
+        Ok(it)
+    }
+}
 pub fn by_id_check() -> ByIdCheckStmt {
     ByIdCheckStmt(crate::client::async_::Stmt::new(
         "SELECT id FROM \"Post\" WHERE id = $1",
@@ -233,7 +326,7 @@ impl BySlugStmt {
 }
 pub fn create() -> CreateStmt {
     CreateStmt(crate::client::async_::Stmt::new(
-        "INSERT INTO \"Post\" (id, slug, meta_title, meta_description, content_id) VALUES ($1, $2, $3, $4, $5)",
+        "INSERT INTO \"Post\" (id, slug, meta_title, meta_description, content_id, category_id) VALUES ($1, $2, $3, $4, $5, $6)",
     ))
 }
 pub struct CreateStmt(crate::client::async_::Stmt);
@@ -248,6 +341,7 @@ impl CreateStmt {
         T3: crate::StringSql,
         T4: crate::StringSql,
         T5: crate::StringSql,
+        T6: crate::StringSql,
     >(
         &'s mut self,
         client: &'c C,
@@ -256,10 +350,21 @@ impl CreateStmt {
         meta_title: &'a T3,
         meta_description: &'a T4,
         content_id: &'a T5,
+        category_id: &'a T6,
     ) -> Result<u64, tokio_postgres::Error> {
         let stmt = self.0.prepare(client).await?;
         client
-            .execute(stmt, &[id, slug, meta_title, meta_description, content_id])
+            .execute(
+                stmt,
+                &[
+                    id,
+                    slug,
+                    meta_title,
+                    meta_description,
+                    content_id,
+                    category_id,
+                ],
+            )
             .await
     }
 }
@@ -271,12 +376,13 @@ impl<
     T3: crate::StringSql,
     T4: crate::StringSql,
     T5: crate::StringSql,
+    T6: crate::StringSql,
 >
     crate::client::async_::Params<
         'a,
         'a,
         'a,
-        CreateParams<T1, T2, T3, T4, T5>,
+        CreateParams<T1, T2, T3, T4, T5, T6>,
         std::pin::Pin<
             Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
         >,
@@ -286,7 +392,7 @@ impl<
     fn params(
         &'a mut self,
         client: &'a C,
-        params: &'a CreateParams<T1, T2, T3, T4, T5>,
+        params: &'a CreateParams<T1, T2, T3, T4, T5, T6>,
     ) -> std::pin::Pin<
         Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
     > {
@@ -297,6 +403,7 @@ impl<
             &params.meta_title,
             &params.meta_description,
             &params.content_id,
+            &params.category_id,
         ))
     }
 }
@@ -411,5 +518,32 @@ impl DeleteStmt {
     ) -> Result<u64, tokio_postgres::Error> {
         let stmt = self.0.prepare(client).await?;
         client.execute(stmt, &[id]).await
+    }
+}
+pub fn list() -> ListStmt {
+    ListStmt(crate::client::async_::Stmt::new(
+        "SELECT id, created_at, publish_at, meta_title FROM \"Post\"",
+    ))
+}
+pub struct ListStmt(crate::client::async_::Stmt);
+impl ListStmt {
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
+        &'s mut self,
+        client: &'c C,
+    ) -> ListQuery<'c, 'a, 's, C, List, 0> {
+        ListQuery {
+            client,
+            params: [],
+            stmt: &mut self.0,
+            extractor: |row: &tokio_postgres::Row| -> Result<ListBorrowed, tokio_postgres::Error> {
+                Ok(ListBorrowed {
+                    id: row.try_get(0)?,
+                    created_at: row.try_get(1)?,
+                    publish_at: row.try_get(2)?,
+                    meta_title: row.try_get(3)?,
+                })
+            },
+            mapper: |it| List::from(it),
+        }
     }
 }
