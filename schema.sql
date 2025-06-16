@@ -62,9 +62,9 @@ CREATE TABLE IF NOT EXISTS "PostCategory" (
     "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "meta_title" TEXT NOT NULL DEFAULT '',
-    "meta_description" TEXT NOT NULL DEFAULT '',
-    "content_id" TEXT NOT NULL,
-    CONSTRAINT "PostCategory_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    "meta_description" TEXT NOT NULL DEFAULT ''
+    -- "content_id" TEXT NOT NULL,
+    -- CONSTRAINT "PostCategory_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "Post" (
     "id" TEXT NOT NULL PRIMARY KEY,
@@ -81,6 +81,6 @@ CREATE TABLE IF NOT EXISTS "Post" (
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 CREATE UNIQUE INDEX "Product_slug_key" ON "Post"("slug");
 CREATE UNIQUE INDEX "Category_slug_key" ON "PostCategory"("slug");
-CREATE UNIQUE INDEX "Category_content_id_key" ON "PostCategory"("content_id");
+-- CREATE UNIQUE INDEX "Category_content_id_key" ON "PostCategory"("content_id");
 CREATE UNIQUE INDEX "Post_content_id_key" ON "Post"("content_id");
 CREATE UNIQUE INDEX "Post_category_id_slug_key" ON "Post"("category_id", "slug");

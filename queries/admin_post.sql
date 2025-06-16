@@ -11,8 +11,8 @@ FROM "Post"
 WHERE slug = :slug;
 
 --! create 
-INSERT INTO "Post" (id, slug, meta_title, meta_description)
-  VALUES (:id, :slug, :meta_title, :meta_description);
+INSERT INTO "Post" (id, slug, meta_title, meta_description, content_id, category_id)
+  VALUES (:id, :slug, :meta_title, :meta_description, :content_id, :category_id);
 
 --! page : (publish_at?)
 SELECT

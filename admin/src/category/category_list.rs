@@ -15,7 +15,7 @@ pub fn CategoryList() -> impl IntoView {
         <h1>
             <span>"Categories"</span>
             <span>" "</span>
-            <A href="/category/new">"+1"</A>
+            <A href="/post-category/new">"+1"</A>
         </h1>
 
         <Suspense fallback=move || {

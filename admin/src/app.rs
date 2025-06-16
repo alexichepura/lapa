@@ -8,13 +8,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::{
-    auth::{use_user_signal, Login, User},
-    home::HomePage,
-    layout::Layout,
-    category::{CategoryList, CategoryNew, CategoryPage},
-    product::{ProductList, ProductNew, ProductPage},
-    post::{PostList, PostNew, PostPage},
-    settings::{Settings, SettingsCx},
+    auth::{use_user_signal, Login, User}, category::{CategoryList, CategoryNew, CategoryPage}, home::HomePage, layout::Layout, post::{PostCreate, PostList, PostPage}, product::{ProductList, ProductNew, ProductPage}, settings::{Settings, SettingsCx}
 };
 
 #[component]
@@ -88,7 +82,7 @@ pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
                 </ParentRoute>
                 <ParentRoute path=StaticSegment("post") view=|| view! { <Outlet /> }>
                     <Route path=StaticSegment("") view=PostList />
-                    <Route path=StaticSegment("new") view=PostNew />
+                    <Route path=StaticSegment("create") view=PostCreate />
                     <Route path=ParamSegment("id") view=PostPage />
                 </ParentRoute>
             // <ParentRoute path=StaticSegment("content") view=|| view! { <Outlet /> }>

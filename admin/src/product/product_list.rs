@@ -38,7 +38,7 @@ pub fn ProductList() -> impl IntoView {
 #[component]
 pub fn PostListItems(products: Vec<ProductListItem>) -> impl IntoView {
     if products.is_empty() {
-        Either::Left(view! { <p>No posts were found.</p> })
+        Either::Left(view! { <p>No products were found.</p> })
     } else {
         Either::Right(
             products

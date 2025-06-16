@@ -17,7 +17,7 @@ pub fn CategoryNew() -> impl IntoView {
             if let Ok(id) = create_result {
                 tracing::info!("navigate post category create_result ok");
                 let navigate = use_navigate();
-                let to = format!("/category/{}", id);
+                let to = format!("/post-category/{}", id);
                 navigate(&to, Default::default());
             }
         }

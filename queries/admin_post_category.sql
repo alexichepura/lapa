@@ -6,6 +6,13 @@ SELECT
     name
 FROM "PostCategory";
 
+--! list_for_select
+SELECT
+    id,
+    slug,
+    name
+FROM "PostCategory";
+
 --! page
 SELECT
     id,

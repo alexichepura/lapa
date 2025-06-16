@@ -18,7 +18,7 @@ pub fn PostList() -> impl IntoView {
         <h1>
             <span>Posts</span>
             <small>
-                <A href="/posts/new">Create</A>
+                <A href="/post/create">Create</A>
             </small>
         </h1>
         <ul class="Card Listing">

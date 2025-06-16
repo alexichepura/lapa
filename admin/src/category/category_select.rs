@@ -1,7 +1,7 @@
-use super::CategoryError;
-use form::AlertDanger;
 use leptos::{either::Either, prelude::*};
 use serde::{Deserialize, Serialize};
+
+use crate::util::AlertDanger;
 
 #[component]
 pub fn CategorySelect() -> impl IntoView {
@@ -10,18 +10,15 @@ pub fn CategorySelect() -> impl IntoView {
         <Suspense>
             <label>
                 <div>Category</div>
-                <select name="category_id" autocomplete="off">
+                <select name="category_id" autocomplete="off" required>
                     {move || Suspend::new(async move {
                         match category_resource.await {
                             Ok(categories) => {
                                 Either::Left(
                                     categories
-                                        .unwrap()
                                         .into_iter()
                                         .map(|category| {
-                                            view! {
-                                                <option value=category.id>{category.name_en}</option>
-                                            }
+                                            view! { <option value=category.id>{category.name}</option> }
                                         })
                                         .collect_view(),
                                 )
@@ -38,31 +35,19 @@ pub fn CategorySelect() -> impl IntoView {
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CategorySelectData {
     pub id: String,
-    pub name_en: String,
+    pub name: String,
 }
-#[server(GetCategoriesSelect, "/api")]
-async fn get_categories() -> Result<Result<Vec<CategorySelectData>, CategoryError>, ServerFnError> {
-    use prisma_client::db;
-    let prisma_client = crate::server::use_prisma()?;
-
-    let categories = prisma_client
-        .category()
-        .find_many(vec![])
-        .select(db::category::select!({
-            id
-            name_en
-        }))
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Categories find"))?;
-
-    let categories: Vec<CategorySelectData> = categories
-        .iter()
-        .map(|p| CategorySelectData {
-            id: p.id.clone(),
-            name_en: p.name_en.clone(),
+#[server(GetCategorySelect, "/api")]
+async fn get_categories() -> Result<Vec<CategorySelectData>, ServerFnError> {
+    let db = crate::server::db::use_db().await?;
+    let categories = clorinde::queries::admin_post_category::list()
+        .bind(&db)
+        .map(|data| CategorySelectData {
+            id: data.id.into(),
+            name: data.name.into(),
         })
-        .collect();
-
-    Ok(Ok(categories))
+        .all()
+        .await
+        .map_err(|e| lib::emsg(e, "Post category select"))?;
+    Ok(categories)
 }
