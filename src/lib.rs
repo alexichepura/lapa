@@ -10,6 +10,7 @@ pub mod home;
 pub mod img;
 pub mod product_list;
 pub mod product_page;
+pub mod post;
 pub mod routes;
 pub mod settings;
 pub mod util;

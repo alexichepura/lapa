@@ -322,7 +322,7 @@ impl ProductPageStmt {
 }
 pub fn product_list() -> ProductListStmt {
     ProductListStmt(crate::client::async_::Stmt::new(
-        "SELECT \"Product\".\"id\", \"Product\".\"publish_at\", \"Product\".\"slug\", \"Product\".\"meta_title\", \"Product\".\"meta_description\", \"ProductImage\".\"id\" AS \"image_id\", \"ProductImage\".\"alt\" FROM \"Product\" INNER JOIN \"ProductImage\" ON \"ProductImage\".\"product_id\" = \"Product\".\"id\" WHERE \"Product\".\"publish_at\" < NOW() AND \"ProductImage\".\"is_hero\" = true LIMIT 10",
+        "SELECT \"Product\".id, \"Product\".publish_at, \"Product\".slug, \"Product\".meta_title, \"Product\".meta_description, \"ProductImage\".id AS image_id, \"ProductImage\".alt FROM \"Product\" INNER JOIN \"ProductImage\" ON \"ProductImage\".product_id = \"Product\".id WHERE \"Product\".publish_at < NOW() AND \"ProductImage\".is_hero = true LIMIT 10",
     ))
 }
 pub struct ProductListStmt(crate::client::async_::Stmt);
