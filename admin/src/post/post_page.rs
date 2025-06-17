@@ -1,14 +1,20 @@
 use leptos::{either::EitherOf3, prelude::*};
 use leptos_router::{hooks::use_params, params::Params};
+use serde::{Deserialize, Serialize};
 
 use crate::{
-    post::{PostError, PostForm, PostFormData},
-    util::{AlertDanger, Loading},
+    content::ContentHtml, post::{PostError, PostForm, PostFormData}, util::{AlertDanger, Loading}
 };
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
 pub struct PostParams {
     id: String,
+}
+#[derive(Default, Clone, Debug, Serialize, Deserialize)]
+pub struct PostPageData {
+    form: PostFormData,
+    content_id: String,
+    content_json: String,
 }
 
 #[component]
@@ -50,40 +56,53 @@ pub fn PostPage() -> impl IntoView {
         },
     );
 
+    let suspended = move || Suspend::new(async move {
+        match post.await {
+            Ok(Ok(page)) => EitherOf3::A(view! { <PostPageView page=page /> }),
+            Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
+            Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
+        }
+    });
+
     view! {
         <Suspense fallback=move || {
             view! { <Loading /> }
-        }>
-            {move || Suspend::new(async move {
-                match post.await {
-                    Ok(Ok(post)) => EitherOf3::A(view! { <PostForm post=post /> }),
-                    Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
-                    Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
-                }
-            })}
-        </Suspense>
+        }>{suspended}</Suspense>
+    }
+}
+#[component]
+pub fn PostPageView(page: PostPageData) -> impl IntoView {
+    view! {
+        <PostForm post=page.form />
+        <ContentHtml content_id=page.content_id content_json=page.content_json />
     }
 }
 
+
 #[server(GetPost, "/api")]
-pub async fn get_post(id: String) -> Result<Result<PostFormData, PostError>, ServerFnError> {
+pub async fn get_post(id: String) -> Result<Result<PostPageData, PostError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let post = clorinde::queries::admin_post::page()
+    let page = clorinde::queries::admin_post::page()
         .bind(&db, &id)
         .opt()
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;
-    let Some(post) = post else {
+    let Some(page) = page else {
         crate::server::serverr_404();
         return Ok(Err(PostError::NotFound));
     };
-    let post_data = PostFormData {
-        id: post.id,
-        created_at: post.created_at.and_utc().fixed_offset(),
-        publish_at: post.publish_at.map(|dt| dt.and_utc().fixed_offset()),
-        slug: post.slug,
-        title: post.meta_title,
-        description: post.meta_description,
+    let form = PostFormData {
+        id: page.id,
+        created_at: page.created_at.and_utc().fixed_offset(),
+        publish_at: page.publish_at.map(|dt| dt.and_utc().fixed_offset()),
+        slug: page.slug,
+        title: page.meta_title,
+        description: page.meta_description,
     };
-    Ok(Ok(post_data))
+    let page = PostPageData {
+        form,
+        content_id: page.content_id,
+        content_json: page.content_json,
+    };
+    Ok(Ok(page))
 }
