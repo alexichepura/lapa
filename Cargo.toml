@@ -35,11 +35,12 @@ opt-level = 'z'
 
 [workspace]
 resolver = "2"
-members = ["lib", "admin", "cli"]
+members = ["lib", "content", "admin", "cli"]
 
 [workspace.dependencies]
 clorinde = { path = "./clorinde" }
 lib = { path = "./lib" }
+content = { path = "./content" }
 axum = { version = "0.8", features = ["macros", "tracing"] }
 axum_session = { version = "0.16", default-features = false }
 axum_session_auth = { version = "0.16", default-features = false }
@@ -52,6 +53,7 @@ cuid2 = "0.1.4"
 deadpool-postgres = { version = "0.14.1", features = ["serde"] }
 dotenvy = "0.15.7"
 gloo-utils = { version = "0.2" }
+html-escape = "0.2.13"
 http = "1.0"
 js-sys = { version = "0.3" }
 leptos = { version = "0.8", features = ["nightly", "tracing"] }

@@ -32,6 +32,7 @@ dependencies = [
  "clorinde",
  "config",
  "console_error_panic_hook",
+ "content",
  "cuid2",
  "deadpool-postgres",
  "dotenvy",
@@ -862,6 +863,15 @@ name = "const_str_slice_concat"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f67855af358fcb20fac58f9d714c94e2b228fe5694c1c9b4ead4a366343eda1b"
+
+[[package]]
+name = "content"
+version = "0.1.0"
+dependencies = [
+ "html-escape",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "convert_case"

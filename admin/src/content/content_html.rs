@@ -74,36 +74,36 @@ async fn content_json_update(
         }
     }
 
-    let media_config = crate::server::use_media_config()?;
-    for img in &images_to_delete {
-        let path = media_config.content_upload_name_ext(&img.id, &img.ext);
-        let upload_del_result = std::fs::remove_file(&path);
-        if let Err(e) = upload_del_result {
-            tracing::debug!("image upload del {path} e={e}");
-        }
-        for image_format in CdnImageFormat::VALUES {
-            for image_size in CdnImageSize::VALUES {
-                let cdn_path = format!(
-                    "{}/{}_{}.{}",
-                    media_config.content_cdn_path, img.id, image_size, image_format
-                );
-                let cdn_del_result = std::fs::remove_file(&cdn_path);
-                if let Err(e) = cdn_del_result {
-                    tracing::debug!("image cdn del {cdn_path} e={e}");
-                }
-            }
-        }
-    }
+    // let media_config = crate::server::use_media_config()?;
+    // for img in &images_to_delete {
+    //     let path = media_config.content_upload_name_ext(&img.id, &img.ext);
+    //     let upload_del_result = std::fs::remove_file(&path);
+    //     if let Err(e) = upload_del_result {
+    //         tracing::debug!("image upload del {path} e={e}");
+    //     }
+    //     for image_format in CdnImageFormat::VALUES {
+    //         for image_size in CdnImageSize::VALUES {
+    //             let cdn_path = format!(
+    //                 "{}/{}_{}.{}",
+    //                 media_config.content_cdn_path, img.id, image_size, image_format
+    //             );
+    //             let cdn_del_result = std::fs::remove_file(&cdn_path);
+    //             if let Err(e) = cdn_del_result {
+    //                 tracing::debug!("image cdn del {cdn_path} e={e}");
+    //             }
+    //         }
+    //     }
+    // }
 
-    if images_to_delete.len() > 0 {
-        let ids = images_to_delete.into_iter().map(|img| img.id).collect();
-        prisma_web_client
-            .content_image()
-            .delete_many(vec![db::content_image::id::in_vec(ids)])
-            .exec()
-            .await
-            .map_err(|e| lib::emsg(e, "content_image delete_many"))?;
-    }
+    // if images_to_delete.len() > 0 {
+    //     let ids = images_to_delete.into_iter().map(|img| img.id).collect();
+    //     prisma_web_client
+    //         .content_image()
+    //         .delete_many(vec![db::content_image::id::in_vec(ids)])
+    //         .exec()
+    //         .await
+    //         .map_err(|e| lib::emsg(e, "content_image delete_many"))?;
+    // }
 
     let _ = prisma_web_client
         .content()
