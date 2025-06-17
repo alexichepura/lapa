@@ -77,6 +77,7 @@ pub fn PostView(post: PostData) -> impl IntoView {
         <Meta property="og:title" content=post.title.clone() />
         <Meta property="og:description" content=post.description.clone() />
         <h1>{post.title}</h1>
+        <article inner_html=post.content></article>
     }
 }
 
