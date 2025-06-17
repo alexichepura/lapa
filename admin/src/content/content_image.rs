@@ -188,9 +188,9 @@ async fn upload_img(
     }
     let img_bytes = img_bytes.unwrap();
 
-    use prisma_web_client::db;
-    let prisma_web_client = crate::server::use_prisma_web()?;
-    let media_config = crate::server::use_media_config()?;
+    // use prisma_web_client::db;
+    // let prisma_web_client = crate::server::use_prisma_web()?;
+    // let media_config = crate::server::use_media_config()?;
 
     let cursor = std::io::Cursor::new(img_bytes.clone());
     let img_reader = image::ImageReader::new(cursor.clone()).with_guessed_format();
@@ -210,23 +210,24 @@ async fn upload_img(
     let img_format = img_format.unwrap();
     let ext = img_format.extensions_str().first().unwrap();
 
-    let image_upload_data = prisma_web_client
-        .content_image()
-        .create(
-            alt,
-            ext.to_string(),
-            db::content::id::equals(content_id),
-            vec![],
-        )
-        .exec()
-        .await
-        .map_err(|e| lib::emsg(e, "Image create"))?;
+    // let image_upload_data = prisma_web_client
+    //     .content_image()
+    //     .create(
+    //         alt,
+    //         ext.to_string(),
+    //         db::content::id::equals(content_id),
+    //         vec![],
+    //     )
+    //     .exec()
+    //     .await
+    //     .map_err(|e| lib::emsg(e, "Image create"))?;
 
-    let id = image_upload_data.id;
-    let file_path = media_config.content_upload_name_ext(&id, &ext.to_string());
-    tracing::debug!("upload file_path={file_path}");
-    std::fs::write(file_path, img_bytes).map_err(|e| lib::emsg(e, "Content image write"))?;
-    Ok(Ok(ImageResult { id }))
+    // let id = image_upload_data.id;
+    // let file_path = media_config.content_upload_name_ext(&id, &ext.to_string());
+    // tracing::debug!("upload file_path={file_path}");
+    // std::fs::write(file_path, img_bytes).map_err(|e| lib::emsg(e, "Content image write"))?;
+    // Ok(Ok(ImageResult { id }))
+    Err(ServerFnError::ServerError("TODO".to_string()))
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

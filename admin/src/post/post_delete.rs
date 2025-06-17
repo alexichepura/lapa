@@ -4,7 +4,11 @@ use leptos::prelude::*;
 use leptos_router::hooks::use_navigate;
 
 #[component]
-pub fn PostDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
+pub fn PostDeleteForm(
+    id: String,
+    #[prop(optional, into)] slug: Signal<String>,
+    // slug: Signal<String>
+) -> impl IntoView {
     let post_delete = ServerAction::<PostDelete>::new();
     let pending = post_delete.pending();
     let value = post_delete.value();

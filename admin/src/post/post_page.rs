@@ -3,7 +3,7 @@ use leptos_router::{hooks::use_params, params::Params};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    content::ContentHtml, post::{PostError, PostForm, PostFormData}, util::{AlertDanger, Loading}
+    post::{PostDeleteForm, PostError, PostForm, PostFormData}, util::{AlertDanger, Loading}
 };
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
@@ -72,9 +72,34 @@ pub fn PostPage() -> impl IntoView {
 }
 #[component]
 pub fn PostPageView(page: PostPageData) -> impl IntoView {
+    let (hydrated, set_hydrated) = signal(false);
+    Effect::new(move |_| {
+        set_hydrated(true);
+    });
+    let edit_view = {
+        move || match hydrated() {
+            true => leptos::either::Either::Left(
+                #[cfg(feature = "hydrate")]
+                view! {
+                    <crate::content::ContentHtml
+                        content_id=page.content_id.clone()
+                        content_json=page.content_json.clone()
+                    />
+                },
+                #[cfg(not(feature = "hydrate"))]
+                view! {  },
+            ),
+            false => leptos::either::Either::Right(()),
+        }
+    };
+    let id = page.form.id.clone();
+    let slug = page.form.slug.clone();
     view! {
         <PostForm post=page.form />
-        <ContentHtml content_id=page.content_id content_json=page.content_json />
+        {edit_view}
+        <div class="Grid-fluid-2">
+            <PostDeleteForm id=id.clone() slug />
+        </div>
     }
 }
 

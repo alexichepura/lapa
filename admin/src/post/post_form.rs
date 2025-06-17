@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use super::PostError;
 use crate::{
-    form::{Checkbox, FormFooter}, post::PostDeleteForm, settings::use_site_url, util::{
+    form::{Checkbox, FormFooter}, settings::use_site_url, util::{
         datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
     }
 };
@@ -113,9 +113,6 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                     <FormFooter action=action submit_text="Submit post data" />
                 </fieldset>
             </ActionForm>
-            <div class="Grid-fluid-2">
-                <PostDeleteForm id=id.clone() slug />
-            </div>
         </section>
     }
 }
