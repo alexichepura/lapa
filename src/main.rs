@@ -52,7 +52,17 @@ async fn main() {
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .route("/api/{*fn_name}", post(server_fn_handler))
         .route("/robots.txt", get(robots_txt))
-        .route("/img/{img_name}", get(img_handler))
+        .route("/img/{img_name}", get(img_handler));
+
+    // #[cfg(feature = "ratelimit")]
+    // let app = site::server::ratelimit(app);
+    #[cfg(feature = "compression")]
+    let app = site::server::compression(app, &leptopts.site_pkg_dir, &leptopts.site_root);
+    #[cfg(not(feature = "compression"))]
+    let app = app.route("/pkg/{*file}", get(file_and_error_handler));
+
+    let app = app
+        // .merge(favicons)
         .fallback(file_and_error_handler)
         .with_state(AppState {
             leptos_options: leptopts.clone(),
@@ -60,10 +70,6 @@ async fn main() {
         })
         .layer(tower_http::trace::TraceLayer::new_for_http());
 
-    #[cfg(feature = "ratelimit")]
-    let app = site::server::ratelimit(app);
-    #[cfg(feature = "compression")]
-    let app = site::server::compression(app, &leptopts.site_pkg_dir, &leptopts.site_root);
 
     info!("starting to listen TCP on http://{}", &leptopts.site_addr);
     let listener = tokio::net::TcpListener::bind(&leptopts.site_addr)
