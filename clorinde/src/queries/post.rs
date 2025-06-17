@@ -1,5 +1,10 @@
 // This file was generated with `clorinde`. Do not modify.
 
+#[derive(Debug)]
+pub struct PageParams<T1: crate::StringSql, T2: crate::StringSql> {
+    pub category_slug: T1,
+    pub slug: T2,
+}
 #[derive(Debug, Clone, PartialEq)]
 pub struct Page {
     pub id: String,
@@ -111,19 +116,20 @@ where
 }
 pub fn page() -> PageStmt {
     PageStmt(crate::client::async_::Stmt::new(
-        "SELECT \"Post\".id, \"Post\".created_at, \"Post\".publish_at, \"Post\".slug, \"Post\".meta_title, \"Post\".meta_description, \"Content\".id AS content_id, \"Content\".json AS content_json FROM \"Post\" INNER JOIN \"Content\" ON \"Content\".id = \"Post\".content_id WHERE \"Post\".slug = $1 AND \"Post\".publish_at < NOW()",
+        "SELECT \"Post\".id, \"Post\".created_at, \"Post\".publish_at, \"Post\".slug, \"Post\".meta_title, \"Post\".meta_description, \"Content\".id AS content_id, \"Content\".json AS content_json FROM \"Post\" INNER JOIN \"Content\" ON \"Content\".id = \"Post\".content_id INNER JOIN \"PostCategory\" ON \"PostCategory\".id = \"Post\".category_id WHERE \"PostCategory\".slug = $1 AND \"Post\".slug = $2 AND \"Post\".publish_at < NOW()",
     ))
 }
 pub struct PageStmt(crate::client::async_::Stmt);
 impl PageStmt {
-    pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+    pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql, T2: crate::StringSql>(
         &'s mut self,
         client: &'c C,
-        slug: &'a T1,
-    ) -> PageQuery<'c, 'a, 's, C, Page, 1> {
+        category_slug: &'a T1,
+        slug: &'a T2,
+    ) -> PageQuery<'c, 'a, 's, C, Page, 2> {
         PageQuery {
             client,
-            params: [slug],
+            params: [category_slug, slug],
             stmt: &mut self.0,
             extractor: |row: &tokio_postgres::Row| -> Result<PageBorrowed, tokio_postgres::Error> {
                 Ok(PageBorrowed {
@@ -139,5 +145,23 @@ impl PageStmt {
             },
             mapper: |it| Page::from(it),
         }
+    }
+}
+impl<'c, 'a, 's, C: GenericClient, T1: crate::StringSql, T2: crate::StringSql>
+    crate::client::async_::Params<
+        'c,
+        'a,
+        's,
+        PageParams<T1, T2>,
+        PageQuery<'c, 'a, 's, C, Page, 2>,
+        C,
+    > for PageStmt
+{
+    fn params(
+        &'s mut self,
+        client: &'c C,
+        params: &'a PageParams<T1, T2>,
+    ) -> PageQuery<'c, 'a, 's, C, Page, 2> {
+        self.bind(client, &params.category_slug, &params.slug)
     }
 }

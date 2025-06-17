@@ -10,4 +10,5 @@ SELECT
     "Content".json AS content_json
 FROM "Post"
     INNER JOIN "Content" ON "Content".id = "Post".content_id
-WHERE "Post".slug = :slug AND "Post".publish_at < NOW();
+    INNER JOIN "PostCategory" ON "PostCategory".id = "Post".category_id
+WHERE "PostCategory".slug = :category_slug AND "Post".slug = :slug AND "Post".publish_at < NOW();

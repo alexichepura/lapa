@@ -88,7 +88,7 @@ pub async fn get_post(
 ) -> Result<Result<PostData, PostError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
     let post = clorinde::queries::post::page()
-        .bind(&db, &slug).opt()
+        .bind(&db, &category_slug, &slug).opt()
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;
     let Some(post) = post else {
