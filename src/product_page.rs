@@ -15,34 +15,34 @@ use crate::{
 };
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
-pub struct PostParams {
+pub struct ProductParams {
     slug: String,
 }
 
 #[derive(Error, Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ProductError {
-    #[error("Invalid post ID.")]
+    #[error("Invalid product ID.")]
     InvalidId,
-    #[error("Post not found.")]
+    #[error("Product not found.")]
     NotFound,
     #[error("Server error.")]
     ServerError,
 }
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct PostData {
+pub struct ProductPageData {
     pub id: String,
     pub slug: String,
     pub title: String,
     pub description: String,
-    pub content: String,
+    pub content_html: String,
     pub images: Vec<ImgData>,
     pub hero: Option<String>,
 }
 
 #[component]
 pub fn ProductPage() -> impl IntoView {
-    let params = use_params::<PostParams>();
+    let params = use_params::<ProductParams>();
     let slug = move || {
         params.with(|q| {
             q.as_ref()
@@ -50,31 +50,28 @@ pub fn ProductPage() -> impl IntoView {
                 .map_err(|_| ProductError::InvalidId)
         })
     };
-
-    let post = Resource::new_blocking(slug, move |slug| async move {
+    let product = Resource::new_blocking(slug, move |slug| async move {
         match slug {
             Err(e) => Ok(Err(e)),
-            Ok(slug) => get_post(slug).await,
+            Ok(slug) => get_product(slug).await,
         }
     });
-
+    let suspended = move || Suspend::new(async move {
+        match product.await {
+            Ok(Ok(product)) => EitherOf3::A(view! { <ProductPageView product=product /> }),
+            Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
+            Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
+        }
+    });
     view! {
         <Suspense fallback=move || {
             view! { <Loading /> }
-        }>
-            {move || Suspend::new(async move {
-                match post.await {
-                    Ok(Ok(post)) => EitherOf3::A(view! { <PostView post=post /> }),
-                    Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
-                    Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
-                }
-            })}
-        </Suspense>
+        }>{suspended}</Suspense>
     }
 }
 
 #[component]
-pub fn PostView(post: PostData) -> impl IntoView {
+pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
     let dialog_element: NodeRef<Dialog> = NodeRef::new();
     let (dialog_open, set_dialog_open) = signal::<DialogSignal>(None);
 
@@ -96,13 +93,13 @@ pub fn PostView(post: PostData) -> impl IntoView {
     });
 
     let dialog_view = move || match dialog_open() {
-        Some(image) => Either::Left(view! { <PostImageModal image set_dialog_open /> }),
+        Some(image) => Either::Left(view! { <ProductImageModal image set_dialog_open /> }),
         None => Either::Right(()),
     };
 
     let site_url = use_site_url();
 
-    let hero_og = match post.hero {
+    let hero_og = match product.hero {
         Some(hero) => {
             let og = format!("{site_url}{}", img_url_large_retina(&hero)); // TODO domain from DB
             Either::Left(view! { <Meta property="og:image" content=og /> })
@@ -111,19 +108,19 @@ pub fn PostView(post: PostData) -> impl IntoView {
     };
 
     view! {
-        <Title text=post.title.clone() />
-        <Meta name="description" content=post.description.clone() />
-        <Meta property="og:title" content=post.title.clone() />
-        <Meta property="og:description" content=post.description.clone() />
+        <Title text=product.title.clone() />
+        <Meta name="description" content=product.description.clone() />
+        <Meta property="og:title" content=product.title.clone() />
+        <Meta property="og:description" content=product.description.clone() />
         {hero_og}
-        <h1>{post.title}</h1>
+        <h1>{product.title}</h1>
         <section>
-            <ParagraphsByMultiline text=post.content />
+            <ParagraphsByMultiline text=product.content_html />
         </section>
         <hr />
-        <div class="post-images">
+        <div class="product-images">
             <For
-                each=move || post.images.clone()
+                each=move || product.images.clone()
                 key=|image| image.id.clone()
                 children=move |image: ImgData| {
                     view! { <Thumb image=image set_dialog_open /> }
@@ -165,7 +162,7 @@ pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl
 }
 
 #[component]
-pub fn PostImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl IntoView {
+pub fn ProductImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl IntoView {
     view! {
         <figure>
             <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) />
@@ -178,31 +175,34 @@ pub fn PostImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>
     }
 }
 
-#[server(GetPost, "/api")]
-pub async fn get_post(slug: String) -> Result<Result<PostData, ProductError>, ServerFnError> {
+#[server(GetProduct, "/api")]
+pub async fn get_product(slug: String) -> Result<Result<ProductPageData, ProductError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let post = clorinde::queries::product::product_page()
+    let page = clorinde::queries::product::page()
         .bind(&db, &slug).opt()
         .await
-        .map_err(|e| lib::emsg(e, "Post find"))?;
-    let Some(post) = post else {
+        .map_err(|e| lib::emsg(e, "Product find"))?;
+    let Some(page) = page else {
         crate::server::serverr_404();
         return Ok(Err(ProductError::NotFound));
     };
     let images = clorinde::queries::product::product_images()
-        .bind(&db, &post.id).all()
+        .bind(&db, &page.id).all()
         .await
-        .map_err(|e| lib::emsg(e, "Post images find"))?;
+        .map_err(|e| lib::emsg(e, "Product images find"))?;
     let hero = images
         .iter()
         .find(|img| img.is_hero)
         .map(|img| img.id.clone());
-    let post_data = PostData {
-        id: post.id,
-        slug: post.slug,
-        title: post.meta_title,
-        description: post.meta_description,
-        content: "".into(),
+    // let (html, headings) = content::content_json_to_html_with_headings(&page.content.json);
+    let content_html = content::content_json_to_html(&page.content_json);
+
+    let page = ProductPageData {
+        id: page.id,
+        slug: page.slug,
+        title: page.meta_title,
+        description: page.meta_description,
+        content_html,
         hero,
         images: images
             .into_iter()
@@ -212,6 +212,5 @@ pub async fn get_post(slug: String) -> Result<Result<PostData, ProductError>, Se
             })
             .collect(),
     };
-
-    Ok(Ok(post_data))
+    Ok(Ok(page))
 }

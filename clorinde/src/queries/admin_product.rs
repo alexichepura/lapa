@@ -33,6 +33,8 @@ pub struct Page {
     pub slug: String,
     pub meta_title: String,
     pub meta_description: String,
+    pub content_id: String,
+    pub content_json: String,
 }
 pub struct PageBorrowed<'a> {
     pub id: &'a str,
@@ -41,6 +43,8 @@ pub struct PageBorrowed<'a> {
     pub slug: &'a str,
     pub meta_title: &'a str,
     pub meta_description: &'a str,
+    pub content_id: &'a str,
+    pub content_json: &'a str,
 }
 impl<'a> From<PageBorrowed<'a>> for Page {
     fn from(
@@ -51,6 +55,8 @@ impl<'a> From<PageBorrowed<'a>> for Page {
             slug,
             meta_title,
             meta_description,
+            content_id,
+            content_json,
         }: PageBorrowed<'a>,
     ) -> Self {
         Self {
@@ -60,6 +66,8 @@ impl<'a> From<PageBorrowed<'a>> for Page {
             slug: slug.into(),
             meta_title: meta_title.into(),
             meta_description: meta_description.into(),
+            content_id: content_id.into(),
+            content_json: content_json.into(),
         }
     }
 }
@@ -375,7 +383,7 @@ where
 }
 pub fn page() -> PageStmt {
     PageStmt(crate::client::async_::Stmt::new(
-        "SELECT id, created_at, publish_at, slug, meta_title, meta_description FROM \"Product\" WHERE id = $1",
+        "SELECT \"Product\".id, \"Product\".created_at, \"Product\".publish_at, \"Product\".slug, \"Product\".meta_title, \"Product\".meta_description, \"Content\".id AS content_id, \"Content\".json AS content_json FROM \"Product\" INNER JOIN \"Content\" ON \"Content\".id = \"Product\".content_id WHERE \"Product\".id = $1",
     ))
 }
 pub struct PageStmt(crate::client::async_::Stmt);
@@ -397,6 +405,8 @@ impl PageStmt {
                     slug: row.try_get(3)?,
                     meta_title: row.try_get(4)?,
                     meta_description: row.try_get(5)?,
+                    content_id: row.try_get(6)?,
+                    content_json: row.try_get(7)?,
                 })
             },
             mapper: |it| Page::from(it),

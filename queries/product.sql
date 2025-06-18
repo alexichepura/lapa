@@ -1,11 +1,14 @@
---! product_page : (publish_at?)
+--! page
 SELECT
-    id,
-    publish_at,
-    slug,
-    meta_title,
-    meta_description
+    "Product".id,
+    "Product".publish_at,
+    "Product".slug,
+    "Product".meta_title,
+    "Product".meta_description,
+    "Content".id AS content_id,
+    "Content".json AS content_json
 FROM "Product"
+    INNER JOIN "Content" ON "Content".id = "Product".content_id
 WHERE slug = :slug AND publish_at < NOW();
 
 --! product_list : (image_id?, alt?)

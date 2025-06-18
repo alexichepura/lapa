@@ -34,7 +34,7 @@ pub struct PostData {
     pub slug: String,
     pub title: String,
     pub description: String,
-    pub content: String,
+    pub content_html: String,
 }
 
 #[component]
@@ -77,7 +77,7 @@ pub fn PostView(post: PostData) -> impl IntoView {
         <Meta property="og:title" content=post.title.clone() />
         <Meta property="og:description" content=post.description.clone() />
         <h1>{post.title}</h1>
-        <article inner_html=post.content></article>
+        <article inner_html=post.content_html></article>
     }
 }
 
@@ -96,14 +96,14 @@ pub async fn get_post(
         return Ok(Err(PostError::NotFound));
     };
     // let (html, headings) = content::content_json_to_html_with_headings(&post.content.json);
-    let html = content::content_json_to_html(&post.content_json);
+    let content_html = content::content_json_to_html(&post.content_json);
 
     let post_data = PostData {
         id: post.id,
         slug: post.slug,
         title: post.meta_title,
         description: post.meta_description,
-        content: html,
+        content_html,
     };
 
     Ok(Ok(post_data))

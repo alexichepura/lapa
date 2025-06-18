@@ -1,29 +1,35 @@
 // This file was generated with `clorinde`. Do not modify.
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct ProductPage {
+pub struct Page {
     pub id: String,
-    pub publish_at: Option<crate::types::time::Timestamp>,
+    pub publish_at: crate::types::time::Timestamp,
     pub slug: String,
     pub meta_title: String,
     pub meta_description: String,
+    pub content_id: String,
+    pub content_json: String,
 }
-pub struct ProductPageBorrowed<'a> {
+pub struct PageBorrowed<'a> {
     pub id: &'a str,
-    pub publish_at: Option<crate::types::time::Timestamp>,
+    pub publish_at: crate::types::time::Timestamp,
     pub slug: &'a str,
     pub meta_title: &'a str,
     pub meta_description: &'a str,
+    pub content_id: &'a str,
+    pub content_json: &'a str,
 }
-impl<'a> From<ProductPageBorrowed<'a>> for ProductPage {
+impl<'a> From<PageBorrowed<'a>> for Page {
     fn from(
-        ProductPageBorrowed {
+        PageBorrowed {
             id,
             publish_at,
             slug,
             meta_title,
             meta_description,
-        }: ProductPageBorrowed<'a>,
+            content_id,
+            content_json,
+        }: PageBorrowed<'a>,
     ) -> Self {
         Self {
             id: id.into(),
@@ -31,6 +37,8 @@ impl<'a> From<ProductPageBorrowed<'a>> for ProductPage {
             slug: slug.into(),
             meta_title: meta_title.into(),
             meta_description: meta_description.into(),
+            content_id: content_id.into(),
+            content_json: content_json.into(),
         }
     }
 }
@@ -98,22 +106,19 @@ impl<'a> From<ProductImagesBorrowed<'a>> for ProductImages {
 }
 use crate::client::async_::GenericClient;
 use futures::{self, StreamExt, TryStreamExt};
-pub struct ProductPageQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+pub struct PageQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
     client: &'c C,
     params: [&'a (dyn postgres_types::ToSql + Sync); N],
     stmt: &'s mut crate::client::async_::Stmt,
-    extractor: fn(&tokio_postgres::Row) -> Result<ProductPageBorrowed, tokio_postgres::Error>,
-    mapper: fn(ProductPageBorrowed) -> T,
+    extractor: fn(&tokio_postgres::Row) -> Result<PageBorrowed, tokio_postgres::Error>,
+    mapper: fn(PageBorrowed) -> T,
 }
-impl<'c, 'a, 's, C, T: 'c, const N: usize> ProductPageQuery<'c, 'a, 's, C, T, N>
+impl<'c, 'a, 's, C, T: 'c, const N: usize> PageQuery<'c, 'a, 's, C, T, N>
 where
     C: GenericClient,
 {
-    pub fn map<R>(
-        self,
-        mapper: fn(ProductPageBorrowed) -> R,
-    ) -> ProductPageQuery<'c, 'a, 's, C, R, N> {
-        ProductPageQuery {
+    pub fn map<R>(self, mapper: fn(PageBorrowed) -> R) -> PageQuery<'c, 'a, 's, C, R, N> {
+        PageQuery {
             client: self.client,
             params: self.params,
             stmt: self.stmt,
@@ -290,33 +295,34 @@ where
         Ok(it)
     }
 }
-pub fn product_page() -> ProductPageStmt {
-    ProductPageStmt(crate::client::async_::Stmt::new(
-        "SELECT id, publish_at, slug, meta_title, meta_description FROM \"Product\" WHERE slug = $1 AND publish_at < NOW()",
+pub fn page() -> PageStmt {
+    PageStmt(crate::client::async_::Stmt::new(
+        "SELECT \"Product\".id, \"Product\".publish_at, \"Product\".slug, \"Product\".meta_title, \"Product\".meta_description, \"Content\".id AS content_id, \"Content\".json AS content_json FROM \"Product\" INNER JOIN \"Content\" ON \"Content\".id = \"Product\".content_id WHERE slug = $1 AND publish_at < NOW()",
     ))
 }
-pub struct ProductPageStmt(crate::client::async_::Stmt);
-impl ProductPageStmt {
+pub struct PageStmt(crate::client::async_::Stmt);
+impl PageStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,
         slug: &'a T1,
-    ) -> ProductPageQuery<'c, 'a, 's, C, ProductPage, 1> {
-        ProductPageQuery {
+    ) -> PageQuery<'c, 'a, 's, C, Page, 1> {
+        PageQuery {
             client,
             params: [slug],
             stmt: &mut self.0,
-            extractor:
-                |row: &tokio_postgres::Row| -> Result<ProductPageBorrowed, tokio_postgres::Error> {
-                    Ok(ProductPageBorrowed {
-                        id: row.try_get(0)?,
-                        publish_at: row.try_get(1)?,
-                        slug: row.try_get(2)?,
-                        meta_title: row.try_get(3)?,
-                        meta_description: row.try_get(4)?,
-                    })
-                },
-            mapper: |it| ProductPage::from(it),
+            extractor: |row: &tokio_postgres::Row| -> Result<PageBorrowed, tokio_postgres::Error> {
+                Ok(PageBorrowed {
+                    id: row.try_get(0)?,
+                    publish_at: row.try_get(1)?,
+                    slug: row.try_get(2)?,
+                    meta_title: row.try_get(3)?,
+                    meta_description: row.try_get(4)?,
+                    content_id: row.try_get(5)?,
+                    content_json: row.try_get(6)?,
+                })
+            },
+            mapper: |it| Page::from(it),
         }
     }
 }

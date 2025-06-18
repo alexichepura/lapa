@@ -1,13 +1,16 @@
 --! page : (publish_at?)
 SELECT
-    id,
-    created_at,
-    publish_at,
-    slug,
-    meta_title,
-    meta_description
+    "Product".id,
+    "Product".created_at,
+    "Product".publish_at,
+    "Product".slug,
+    "Product".meta_title,
+    "Product".meta_description,
+    "Content".id AS content_id,
+    "Content".json AS content_json
 FROM "Product"
-WHERE id = :id;
+    INNER JOIN "Content" ON "Content".id = "Product".content_id
+WHERE "Product".id = :id;
 
 --! by_slug
 SELECT
