@@ -25,8 +25,8 @@ FROM "Product"
 WHERE id = :id;
 
 --! create 
-INSERT INTO "Product" (id, slug, meta_title, meta_description)
-  VALUES (:id, :slug, :meta_title, :meta_description);
+INSERT INTO "Product" (id, slug, meta_title, meta_description, content_id)
+  VALUES (:id, :slug, :meta_title, :meta_description, :content_id);
 
 --! update (publish_at?) :
 UPDATE "Product"

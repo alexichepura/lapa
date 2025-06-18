@@ -6,11 +6,13 @@ pub struct CreateParams<
     T2: crate::StringSql,
     T3: crate::StringSql,
     T4: crate::StringSql,
+    T5: crate::StringSql,
 > {
     pub id: T1,
     pub slug: T2,
     pub meta_title: T3,
     pub meta_description: T4,
+    pub content_id: T5,
 }
 #[derive(Debug)]
 pub struct UpdateParams<
@@ -457,7 +459,7 @@ impl ByIdCheckStmt {
 }
 pub fn create() -> CreateStmt {
     CreateStmt(crate::client::async_::Stmt::new(
-        "INSERT INTO \"Product\" (id, slug, meta_title, meta_description) VALUES ($1, $2, $3, $4)",
+        "INSERT INTO \"Product\" (id, slug, meta_title, meta_description, content_id) VALUES ($1, $2, $3, $4, $5)",
     ))
 }
 pub struct CreateStmt(crate::client::async_::Stmt);
@@ -471,6 +473,7 @@ impl CreateStmt {
         T2: crate::StringSql,
         T3: crate::StringSql,
         T4: crate::StringSql,
+        T5: crate::StringSql,
     >(
         &'s mut self,
         client: &'c C,
@@ -478,10 +481,11 @@ impl CreateStmt {
         slug: &'a T2,
         meta_title: &'a T3,
         meta_description: &'a T4,
+        content_id: &'a T5,
     ) -> Result<u64, tokio_postgres::Error> {
         let stmt = self.0.prepare(client).await?;
         client
-            .execute(stmt, &[id, slug, meta_title, meta_description])
+            .execute(stmt, &[id, slug, meta_title, meta_description, content_id])
             .await
     }
 }
@@ -492,12 +496,13 @@ impl<
     T2: crate::StringSql,
     T3: crate::StringSql,
     T4: crate::StringSql,
+    T5: crate::StringSql,
 >
     crate::client::async_::Params<
         'a,
         'a,
         'a,
-        CreateParams<T1, T2, T3, T4>,
+        CreateParams<T1, T2, T3, T4, T5>,
         std::pin::Pin<
             Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
         >,
@@ -507,7 +512,7 @@ impl<
     fn params(
         &'a mut self,
         client: &'a C,
-        params: &'a CreateParams<T1, T2, T3, T4>,
+        params: &'a CreateParams<T1, T2, T3, T4, T5>,
     ) -> std::pin::Pin<
         Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
     > {
@@ -517,6 +522,7 @@ impl<
             &params.slug,
             &params.meta_title,
             &params.meta_description,
+            &params.content_id,
         ))
     }
 }

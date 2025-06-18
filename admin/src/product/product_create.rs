@@ -47,17 +47,30 @@ pub async fn product_create(
     description: String,
 ) -> Result<Result<String, ProductError>, ServerFnError> {
     use clorinde::queries;
-    let db = crate::server::db::use_db().await?;
+    let mut db = crate::server::db::use_db().await?;
     let id = cuid2::create_id();
-    queries::admin_product::create()
-        .bind(
-            &db,
-            &id,
-            &slug,
-            &title,
-            &description,
-        )
-        .await
-        .map_err(|e| lib::emsg(e, "Product create"))?;
+    {
+        let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Product create transaction init"))?;
+        let content_id = cuid2::create_id();
+        queries::admin_content::create()
+            .bind(
+                &trx,
+                &content_id,
+            )
+            .await
+            .map_err(|e| lib::emsg(e, "Content create"))?;
+        queries::admin_product::create()
+            .bind(
+                &trx,
+                &id,
+                &slug,
+                &title,
+                &description,
+                &content_id,
+            )
+            .await
+            .map_err(|e| lib::emsg(e, "Product create"))?;
+        trx.commit().await.map_err(|e| lib::emsg(e, "Product create transaction"))?;
+    };
     Ok(Ok(id))
 }
