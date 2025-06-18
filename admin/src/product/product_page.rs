@@ -3,7 +3,7 @@ use leptos_router::{hooks::use_params, params::Params};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    product::{ProductError, ProductForm, ProductFormData},
+    product::{ProductDeleteForm, ProductError, ProductForm, ProductFormData},
     util::{AlertDanger, Loading},
 };
 
@@ -91,15 +91,15 @@ pub fn ProductPageView(page: ProductPageData) -> impl IntoView {
             false => leptos::either::Either::Right(()),
         }
     };
+    let id = page.form.id.clone();
+    let slug = page.form.slug.clone();
     view! {
         <ProductForm product=page.form />
         {edit_view}
+        <div class="Grid-fluid-2">
+            <ProductDeleteForm id=id.clone() slug />
+        </div>
     }
-    // let id = page.form.id.clone();
-    // let slug = page.form.slug.clone();
-    // <div class="Grid-fluid-2">
-    // <PostDeleteForm id=id.clone() slug />
-    // </div>
 }
 
 #[server(GetProduct, "/api")]

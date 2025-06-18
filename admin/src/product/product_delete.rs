@@ -4,30 +4,30 @@ use leptos::prelude::*;
 use leptos_router::hooks::use_navigate;
 
 #[component]
-pub fn ProductDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
-    let post_delete = ServerAction::<PostDelete>::new();
-    let pending = post_delete.pending();
-    let value = post_delete.value();
+pub fn ProductDeleteForm(id: String, slug: String) -> impl IntoView {
+    let action = ServerAction::<ProductDelete>::new();
+    let pending = action.pending();
+    let value = action.value();
 
     Effect::new(move |_| {
         let v = value.get();
         if let Some(v) = v {
-            let post_result = v.map_err(|_| ProductError::ServerError).flatten();
-            if let Ok(_post_result) = post_result {
-                tracing::info!("navigate post_result ok");
+            let product_result = v.map_err(|_| ProductError::ServerError).flatten();
+            if let Ok(_product_result) = product_result {
+                tracing::info!("navigate product_result ok");
                 let navigate = use_navigate();
-                let to = format!("/posts");
+                let to = format!("/product");
                 navigate(&to, Default::default());
             }
         }
     });
 
     let (input_slug, set_input_slug) = signal::<String>("".to_string());
-    let disabled = Memo::new(move |_| input_slug() != slug());
+    let disabled = Memo::new(move |_| input_slug() != slug);
     view! {
         <fieldset prop:disabled=move || pending()>
-            <legend>Danger zone. Delete post.</legend>
-            <ActionForm action=post_delete>
+            <legend>Danger zone. Delete product.</legend>
+            <ActionForm action=action>
                 <input type="hidden" name="id" value=id.clone() />
                 <label>
                     <div>Slug</div>
@@ -40,16 +40,14 @@ pub fn ProductDeleteForm(id: String, slug: Signal<String>) -> impl IntoView {
                     />
 
                 </label>
-                <FormFooter action=post_delete submit_text="Delete post" disabled />
+                <FormFooter action=action submit_text="Delete product" disabled />
             </ActionForm>
         </fieldset>
     }
 }
 
-type PostDeleteResult = Result<(), ProductError>;
-
-#[server(PostDelete, "/api")]
-pub async fn product_delete(id: String) -> Result<PostDeleteResult, ServerFnError> {
+#[server(ProductDelete, "/api")]
+pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, ServerFnError> {
     let mut db = crate::server::db::use_db().await?;
     let exists = clorinde::queries::admin_product::by_id_check()
         .bind(&db, &id)

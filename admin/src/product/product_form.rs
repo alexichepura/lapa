@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use super::ProductError;
 use crate::{
     form::{Checkbox, FormFooter, Input},
-    product::{ProductDeleteForm, ProductImages},
+    product::ProductImages,
     settings::use_site_url,
     util::{
         datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
@@ -122,9 +122,6 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
                 </fieldset>
             </ActionForm>
             <ProductImages product_id=id.clone() />
-            <div class="Grid-fluid-2">
-                <ProductDeleteForm id=id.clone() slug />
-            </div>
         </section>
     }
 }
