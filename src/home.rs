@@ -3,9 +3,7 @@ use leptos_meta::{Meta, Title};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    err::AppError,
-    product_list::ProductList,
-    util::{AlertDanger, ParagraphsByMultiline},
+    err::AppError, post::post_list::PostList, product_list::ProductList, util::{AlertDanger, ParagraphsByMultiline}
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -41,6 +39,8 @@ pub fn HomePage() -> impl IntoView {
         <Suspense>{suspended}</Suspense>
         <hr />
         <ProductList />
+        <hr />
+        <PostList />
     }
 }
 

@@ -13,3 +13,14 @@ FROM "Post"
     INNER JOIN "Content" ON "Content".id = "Post".content_id
     INNER JOIN "PostCategory" ON "PostCategory".id = "Post".category_id
 WHERE "PostCategory".slug = :category_slug AND "Post".slug = :slug AND "Post".publish_at < NOW();
+
+--! list
+SELECT
+    "Post".id,
+    "Post".publish_at,
+    "Post".slug,
+    "Post".h1,
+    "PostCategory".slug AS category_slug
+FROM "Post"
+    INNER JOIN "PostCategory" ON "PostCategory".id = "Post".category_id
+WHERE "Post".publish_at < NOW();
