@@ -36,10 +36,10 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
         |state| state.slug.clone(),
         |state, slug| state.slug = slug,
     );
-    let (title, set_title) = create_slice(
+    let (meta_title, set_meta_title) = create_slice(
         product_rw,
         |state| state.meta_title.clone(),
-        |state, title| state.meta_title = title,
+        |state, meta_title| state.meta_title = meta_title,
     );
     let (publish_at, set_publish_at) = create_slice(
         product_rw,
@@ -58,7 +58,7 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
         None => Either::Right(()),
     };
     view! {
-        <Title text=move || format!("Product: {}", title()) />
+        <Title text=move || format!("Product: {}", meta_title()) />
         <section class="PostPage">
             <header>
                 <div>
@@ -101,10 +101,10 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
                             <label>
                                 <div>Meta title</div>
                                 <input
-                                    name="title"
-                                    value=title
+                                    name="meta_title"
+                                    value=meta_title
                                     on:input=move |ev| {
-                                        set_title(event_target_value(&ev));
+                                        set_meta_title(event_target_value(&ev));
                                     }
                                 />
 
@@ -112,7 +112,7 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
                             <label>
                                 <div>Meta description</div>
                                 <textarea
-                                    name="description"
+                                    name="meta_description"
                                     prop:value=product.meta_description
                                 ></textarea>
                             </label>
