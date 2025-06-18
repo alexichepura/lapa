@@ -11,7 +11,7 @@ use thiserror::Error;
 use crate::{
     img::{img_url_large, img_url_large_retina, srcset_large},
     settings::{use_site_url},
-    util::{AlertDanger, Loading, ParagraphsByMultiline},
+    util::{AlertDanger, Loading},
 };
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
@@ -114,7 +114,7 @@ pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
         <Meta property="og:title" content=product.meta_title.clone() />
         <Meta property="og:description" content=product.meta_description.clone() />
         {hero_og}
-        <h1>{product.meta_title}</h1>
+        <h1>{product.h1}</h1>
         <div class="product-images">
             <For
                 each=move || product.images.clone()

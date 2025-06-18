@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
-    settings::{use_site_url},
     util::{AlertDanger, Loading},
 };
 
@@ -77,7 +76,7 @@ pub fn PostView(post: PostData) -> impl IntoView {
         <Meta name="description" content=post.meta_description.clone() />
         <Meta property="og:title" content=post.meta_title.clone() />
         <Meta property="og:description" content=post.meta_description.clone() />
-        <h1>{post.meta_title}</h1>
+        <h1>{post.h1}</h1>
         <article inner_html=post.content_html></article>
     }
 }
