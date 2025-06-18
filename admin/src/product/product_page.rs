@@ -57,7 +57,7 @@ pub fn ProductPage() -> impl IntoView {
     );
     let suspended = move || Suspend::new(async move {
         match page.await {
-            Ok(Ok(page)) => EitherOf3::A(view! { <ProductForm product=page.form /> }),
+            Ok(Ok(page)) => EitherOf3::A(view! { <ProductPageView page=page /> }),
             Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
             Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
         }
@@ -67,6 +67,39 @@ pub fn ProductPage() -> impl IntoView {
             view! { <Loading /> }
         }>{suspended}</Suspense>
     }
+}
+
+#[component]
+pub fn ProductPageView(page: ProductPageData) -> impl IntoView {
+    let (hydrated, set_hydrated) = signal(false);
+    Effect::new(move |_| {
+        set_hydrated(true);
+    });
+    let edit_view = {
+        move || match hydrated() {
+            true => leptos::either::Either::Left(
+                #[cfg(feature = "hydrate")]
+                view! {
+                    <crate::content::ContentHtml
+                        content_id=page.content_id.clone()
+                        content_json=page.content_json.clone()
+                    />
+                },
+                #[cfg(not(feature = "hydrate"))]
+                view! {  },
+            ),
+            false => leptos::either::Either::Right(()),
+        }
+    };
+    view! {
+        <ProductForm product=page.form />
+        {edit_view}
+    }
+    // let id = page.form.id.clone();
+    // let slug = page.form.slug.clone();
+    // <div class="Grid-fluid-2">
+    // <PostDeleteForm id=id.clone() slug />
+    // </div>
 }
 
 #[server(GetProduct, "/api")]

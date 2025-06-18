@@ -114,10 +114,6 @@ pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
         <Meta property="og:description" content=product.description.clone() />
         {hero_og}
         <h1>{product.title}</h1>
-        <section>
-            <ParagraphsByMultiline text=product.content_html />
-        </section>
-        <hr />
         <div class="product-images">
             <For
                 each=move || product.images.clone()
@@ -128,6 +124,7 @@ pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
             />
 
         </div>
+        <article inner_html=product.content_html></article>
         <dialog node_ref=dialog_element>{dialog_view}</dialog>
     }
 }

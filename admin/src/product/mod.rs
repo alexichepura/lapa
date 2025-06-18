@@ -1,3 +1,4 @@
+mod product_create;
 mod product_delete;
 mod product_error;
 mod product_form;
@@ -6,6 +7,7 @@ mod product_image_upload;
 mod product_images;
 mod product_list;
 mod product_page;
+pub use product_create::*;
 pub use product_delete::*;
 pub use product_error::*;
 pub use product_form::*;
