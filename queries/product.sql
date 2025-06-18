@@ -21,10 +21,13 @@ SELECT
     "ProductImage".id AS image_id,
     "ProductImage".alt
 FROM "Product"
-    INNER JOIN "ProductImage" ON "ProductImage".product_id = "Product".id
-WHERE "Product".publish_at < NOW()
-AND "ProductImage".is_hero = true
-LIMIT 10;
+    LEFT JOIN 
+        "ProductImage"
+    ON 
+        "Product".id = "ProductImage".product_id
+        AND "ProductImage".is_hero = true
+WHERE "Product".publish_at < NOW();
+-- LIMIT 10;
 
 --! images
 SELECT
