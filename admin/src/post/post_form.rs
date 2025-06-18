@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use super::PostError;
 use crate::{
-    form::{Checkbox, FormFooter}, settings::use_site_url, util::{
+    form::{Checkbox, FormFooter, Input}, settings::use_site_url, util::{
         datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
     }
 };
@@ -70,7 +70,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                     <dt>Created at <small>(UTC):</small></dt>
                     <dd>{created.utc}</dd>
                     <br />
-                    <dt>Published at <small>(UTC):</small></dt>
+                    <dt>Publish at <small>(UTC):</small></dt>
                     <dd>{publish_at_utc_string}</dd>
                 </dl>
             </header>
@@ -81,17 +81,6 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                     <div class="Grid-fluid-2">
                         <div>
                             <label>
-                                <div>Title</div>
-                                <input
-                                    name="title"
-                                    value=title
-                                    on:input=move |ev| {
-                                        set_title(event_target_value(&ev));
-                                    }
-                                />
-
-                            </label>
-                            <label>
                                 <div>Slug</div>
                                 <input
                                     name="slug"
@@ -100,18 +89,28 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                                         set_slug(event_target_value(&ev));
                                     }
                                 />
-
                             </label>
-                            <label>
-                                <div>Description</div>
-                                <textarea
-                                    name="description"
-                                    prop:value=post.meta_description
-                                ></textarea>
-                            </label>
+                            <Input name="h1" label="H1" value=post.h1 />
                         </div>
                         <div>
                             <PublishAt publish_at set_publish_at />
+                            <label>
+                                <div>Meta title</div>
+                                <input
+                                    name="meta_title"
+                                    value=title
+                                    on:input=move |ev| {
+                                        set_title(event_target_value(&ev));
+                                    }
+                                />
+                            </label>
+                            <label>
+                                <div>Meta description</div>
+                                <textarea
+                                    name="meta_description"
+                                    prop:value=post.meta_description
+                                ></textarea>
+                            </label>
                         </div>
                     </div>
                     <FormFooter action=action submit_text="Submit post data" />
@@ -132,7 +131,7 @@ pub fn PublishAt(
 
     Effect::new(move |old: Option<bool>| {
         let is = publish_at_rw_signal.get();
-        tracing::info!("published_at_rw_signal={}", is);
+        tracing::info!("publish_at_rw_signal={}", is);
         if old.is_some() {
             if is {
                 set_publish_at(Some(Utc::now().fixed_offset()));
@@ -160,7 +159,7 @@ pub fn PublishAt(
                 checked=publish_at_rw_signal.get_untracked()
             />
             <label>
-                <div>Published at <small>(Local)</small></div>
+                <div>Publish at <small>(Local)</small></div>
                 <input
                     disabled=disabled
                     prop:disabled=disabled
@@ -188,10 +187,10 @@ pub fn PublishAt(
 #[server(PostUpdate, "/api")]
 pub async fn post_update(
     id: String,
-    publish_at: Option<DateTime<FixedOffset>>,
-    title: String,
     slug: String,
-    description: String,
+    publish_at: Option<DateTime<FixedOffset>>,
+    meta_title: String,
+    meta_description: String,
     h1: String,
 ) -> Result<Result<(), PostError>, ServerFnError> {
     use clorinde::queries;
@@ -208,7 +207,7 @@ pub async fn post_update(
         }
     }
     queries::admin_post::update()
-        .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &title, &description, &h1, &id)
+        .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &meta_title, &meta_description, &h1, &id)
         .await
         .map_err(|e| lib::emsg(e, "Post update"))?;
     return Ok(Ok(()));

@@ -53,8 +53,7 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 - project
   - SEO site
   - admin dashboard
-  - CLI with clap: settings-init, user-add, migrate
-  - db schema: user, session, post, image, settings
+  - CLI with clap: settings-init, user-add
   - ops scripts: build, upload, run (site, admin, cli)
 - site
   - SSR + SPA hydrated
@@ -66,18 +65,21 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 - admin auth and session with
   - axum_session [AscendingCreations/AxumSessions](https://github.com/AscendingCreations/AxumSessions)
   - axum_session_auth [AscendingCreations/AxumSessionsAuth](https://github.com/AscendingCreations/AxumSessionsAuth)
+- rich text content editor integration with [ianstormtaylor/slatejs](https://github.com/ianstormtaylor/slate) 
 - post
-  - admin CRUDL
-  - published_at
-- images
-  - preview and upload
-  - resize and convert on backend
-  - order in gallery
-  - is_hero flag
-  - delete and alt update in "dialog"
+  - CRUDL
+  - publish_at
+- product
+  - CRUDL
+  - publish_at
+  - product images
+    - preview and upload
+    - resize and convert on backend
+    - order
+    - is_hero flag
+    - delete and alt update in "dialog"
 - settings
   - robots.txt, site_url
-  - images sizes
   - home_text
 - css
   - based on <https://open-props.style>

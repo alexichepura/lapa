@@ -54,9 +54,8 @@ pub fn PostListItems(products: Vec<ProductListItem>) -> impl IntoView {
 #[component]
 pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
     let created = datetime_to_strings(product.created_at);
-
-    let published = match product.published_at {
-        Some(published_at) => datetime_to_strings(published_at),
+    let publish_at_view = match product.publish_at {
+        Some(publish_at) => datetime_to_strings(publish_at),
         None => DateTimeStrings::draft(),
     };
     let class = match product.is_published {
@@ -72,13 +71,13 @@ pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
     view! {
         <li class="PostListItem">
             <A href=format!("/product/{}", product.id)>
-                <div title="Published at" class=format!("PostListItem-status {}", class)>
-                    {published.local}
+                <div title="Publish at" class=format!("PostListItem-status {}", class)>
+                    {publish_at_view.utc}
                 </div>
                 {hero_view}
                 <span title="Post title">{product.h1}</span>
                 <div title="Created at" class="PostListItem-created">
-                    {created.local}
+                    {created.utc}
                 </div>
             </A>
         </li>
@@ -104,7 +103,7 @@ pub async fn get_products() -> Result<Vec<ProductListItem>, ServerFnError> {
                 id: data.id,
                 h1: data.h1,
                 created_at: data.created_at.and_utc().fixed_offset(),
-                published_at: data.publish_at.map(|dt| dt.and_utc().fixed_offset()),
+                publish_at: data.publish_at.map(|dt| dt.and_utc().fixed_offset()),
                 is_published,
                 hero: data.image_id,
             }
@@ -118,7 +117,7 @@ pub struct ProductListItem {
     pub id: String,
     pub h1: String,
     pub created_at: DateTime<FixedOffset>,
-    pub published_at: Option<DateTime<FixedOffset>>,
+    pub publish_at: Option<DateTime<FixedOffset>>,
     pub is_published: bool,
     pub hero: Option<String>,
 }

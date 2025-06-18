@@ -74,7 +74,7 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
                     <dt>Created at <small>(UTC):</small></dt>
                     <dd>{created.utc}</dd>
                     <br />
-                    <dt>Published at <small>(UTC):</small></dt>
+                    <dt>Publish at <small>(UTC):</small></dt>
                     <dd>{publish_at_utc_string}</dd>
                 </dl>
             </header>
@@ -85,7 +85,21 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
                     <div class="Grid-fluid-2">
                         <div>
                             <label>
-                                <div>Title</div>
+                                <div>Slug</div>
+                                <input
+                                    name="slug"
+                                    value=slug
+                                    on:input=move |ev| {
+                                        set_slug(event_target_value(&ev));
+                                    }
+                                />
+                            </label>
+                            <Input name="h1" label="H1" value=product.h1 />
+                        </div>
+                        <div>
+                            <PublishAt publish_at set_publish_at />
+                            <label>
+                                <div>Meta title</div>
                                 <input
                                     name="title"
                                     value=title
@@ -96,26 +110,12 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
 
                             </label>
                             <label>
-                                <div>Slug</div>
-                                <input
-                                    name="slug"
-                                    value=slug
-                                    on:input=move |ev| {
-                                        set_slug(event_target_value(&ev));
-                                    }
-                                />
-
-                            </label>
-                            <label>
-                                <div>Description</div>
+                                <div>Meta description</div>
                                 <textarea
                                     name="description"
                                     prop:value=product.meta_description
                                 ></textarea>
                             </label>
-                        </div>
-                        <div>
-                            <PublishAt publish_at set_publish_at />
                         </div>
                     </div>
                     <FormFooter action=action submit_text="Submit product data" />
@@ -196,16 +196,16 @@ pub fn PublishAt(
 #[server(ProductUpdate, "/api")]
 pub async fn product_update(
     id: String,
-    publish_at: Option<DateTime<FixedOffset>>,
-    title: String,
     slug: String,
-    description: String,
+    publish_at: Option<DateTime<FixedOffset>>,
+    meta_title: String,
+    meta_description: String,
     h1: String,
 ) -> Result<Result<(), ProductError>, ServerFnError> {
     use clorinde::queries;
     let db = crate::server::db::use_db().await?;
     queries::admin_product::update()
-        .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &title, &description, &h1, &id)
+        .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &meta_title, &meta_description, &h1, &id)
         .await
         .map_err(|e| lib::emsg(e, "Product update"))?;
     return Ok(Ok(()));

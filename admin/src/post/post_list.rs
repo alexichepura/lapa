@@ -95,7 +95,7 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
         .into_iter()
         .map(|data| {
             let is_published: bool = match data.publish_at {
-                Some(published_at) => chrono::Utc::now().fixed_offset() > published_at.and_utc().fixed_offset(),
+                Some(publish_at) => chrono::Utc::now().fixed_offset() > publish_at.and_utc().fixed_offset(),
                 None => false,
             };
             PostListItem {
