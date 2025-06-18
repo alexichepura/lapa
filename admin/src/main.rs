@@ -9,7 +9,7 @@ async fn main() {
     use admin::{
         app::AdminRouter,
         server::{
-            auth_session_layer, file_and_error_handler, img_handler, leptos_routes_handler, server_fn_private, server_fn_public, session_layer, AppState
+            auth_session_layer, file_and_error_handler, img_handler, leptos_routes_handler, server_fn_private, server_fn_public, session_layer, AppState, MediaConfig
         },
     };
     use axum::{
@@ -49,6 +49,14 @@ async fn main() {
         .create_pool(Some(Runtime::Tokio1), tokio_postgres::NoTls)
         .unwrap();
 
+    let content_upload_path =
+        std::env::var("CONTENT_UPLOAD_PATH").unwrap_or("content_upload".to_string());
+    let content_cdn_path = std::env::var("CONTENT_CDN_PATH").unwrap_or("content_cdn".to_string());
+    let media_config = MediaConfig {
+        content_upload_path,
+        content_cdn_path,
+    };
+
     let private_app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .route("/api/{*fn_name}", post(server_fn_private))
@@ -56,6 +64,7 @@ async fn main() {
         .with_state(AppState {
             leptos_options: leptopts.clone(),
             pool: pool.clone(),
+            media_config: media_config.clone(),
         })
         .layer(auth_session_layer(&pool))
         .layer(session_layer(&pool).await)
@@ -68,6 +77,7 @@ async fn main() {
         .with_state(AppState {
             leptos_options: leptopts.clone(),
             pool: pool.clone(),
+            media_config: media_config.clone(),
         })
         .layer(tower_http::trace::TraceLayer::new_for_http());
 

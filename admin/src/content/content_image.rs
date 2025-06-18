@@ -180,54 +180,51 @@ async fn upload_img(
     alt: String,
     content_id: String,
 ) -> Result<ImageUploadResult, ServerFnError> {
+    use crate::server::{db, serverr_400, use_media_config};
+    let db = db::use_db().await?;
+    let media_config = use_media_config()?;
+
     let img_bytes = serde_json::from_str::<Vec<u8>>(&img);
     if let Err(e) = img_bytes {
         tracing::error!("{e:?}");
-        crate::server::serverr_400();
+        serverr_400();
         return Ok(Err(ImageUploadError::Deserialization));
     }
     let img_bytes = img_bytes.unwrap();
-
-    // use prisma_web_client::db;
-    // let prisma_web_client = crate::server::use_prisma_web()?;
-    // let media_config = crate::server::use_media_config()?;
-
     let cursor = std::io::Cursor::new(img_bytes.clone());
     let img_reader = image::ImageReader::new(cursor.clone()).with_guessed_format();
 
     if let Err(e) = img_reader {
         tracing::error!("{e:?}");
-        crate::server::serverr_400();
+        serverr_400();
         return Ok(Err(ImageUploadError::Read));
     }
     let img_reader = img_reader.unwrap();
 
     let img_format = img_reader.format();
     if let None = img_format {
-        crate::server::serverr_400();
+        serverr_400();
         return Ok(Err(ImageUploadError::Format));
     }
     let img_format = img_format.unwrap();
     let ext = img_format.extensions_str().first().unwrap();
 
-    // let image_upload_data = prisma_web_client
-    //     .content_image()
-    //     .create(
-    //         alt,
-    //         ext.to_string(),
-    //         db::content::id::equals(content_id),
-    //         vec![],
-    //     )
-    //     .exec()
-    //     .await
-    //     .map_err(|e| lib::emsg(e, "Image create"))?;
+    let id = cuid2::create_id();
+    clorinde::queries::admin_content_image::create()
+        .bind(
+            &db,
+            &id,
+            &alt,
+            &ext,
+            &content_id
+        )
+        .await
+        .map_err(|e| lib::emsg(e, "Content image create"))?;
 
-    // let id = image_upload_data.id;
-    // let file_path = media_config.content_upload_name_ext(&id, &ext.to_string());
-    // tracing::debug!("upload file_path={file_path}");
-    // std::fs::write(file_path, img_bytes).map_err(|e| lib::emsg(e, "Content image write"))?;
-    // Ok(Ok(ImageResult { id }))
-    Err(ServerFnError::ServerError("TODO".to_string()))
+    let file_path = media_config.content_upload_name_ext(&id, &ext.to_string());
+    tracing::debug!("upload file_path={file_path}");
+    std::fs::write(file_path, img_bytes).map_err(|e| lib::emsg(e, "Content image write"))?;
+    Ok(Ok(ImageResult { id }))
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

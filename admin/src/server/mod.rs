@@ -78,6 +78,32 @@ pub fn Favicons() -> impl IntoView {
 pub struct AppState {
     pub leptos_options: LeptosOptions,
     pub pool: clorinde::deadpool_postgres::Pool,
+    pub media_config: MediaConfig,
+}
+#[derive(Debug, Clone)]
+pub struct MediaConfig {
+    pub content_upload_path: String,
+    pub content_cdn_path: String,
+}
+impl MediaConfig {
+    pub fn hero_upload_path(&self) -> String {
+        format!("{}/hero", self.content_upload_path)
+    }
+    pub fn hero_cdn_path(&self) -> String {
+        format!("{}/hero", self.content_cdn_path)
+    }
+    pub fn content_upload_name_ext(&self, name: &str, ext: &str) -> String {
+        format!("{}/{}.{}", self.content_upload_path, name, ext)
+    }
+    pub fn hero_upload_name_ext(&self, name: &str, ext: &str) -> String {
+        format!("{}/{}.{}", self.hero_upload_path(), name, ext)
+    }
+}
+
+pub fn use_media_config() -> Result<MediaConfig, ServerFnError> {
+    use_context::<MediaConfig>()
+        .ok_or("MediaConfig missing.")
+        .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
 pub async fn server_fn_public(
@@ -103,10 +129,13 @@ pub async fn server_fn_private(
     if auth_session.current_user.is_none() {
         return (http::StatusCode::NOT_FOUND, "NOT FOUND").into_response();
     }
+    let media_config = app_state.media_config.clone();
     handle_server_fns_with_context(
         move || {
             provide_context(app_state.pool.clone());
             provide_context(auth_session.clone());
+            provide_context(media_config.clone());
+
         },
         request,
     )
