@@ -1,18 +1,6 @@
---! by_id_check
-SELECT
-    id
-FROM "Post"
-WHERE id = :id;
-
---! by_slug
-SELECT
-    id
-FROM "Post"
-WHERE slug = :slug;
-
 --! create 
-INSERT INTO "Post" (id, slug, meta_title, meta_description, content_id, category_id)
-  VALUES (:id, :slug, :meta_title, :meta_description, :content_id, :category_id);
+INSERT INTO "Post" (id, slug, meta_title, meta_description, h1, content_id, category_id)
+  VALUES (:id, :slug, :meta_title, :meta_description, :h1, :content_id, :category_id);
 
 --! page : (publish_at?)
 SELECT
@@ -31,7 +19,7 @@ WHERE "Post".id = :id;
 
 --! update (publish_at?) :
 UPDATE "Post"
-SET publish_at = :publish_at, slug = :slug, meta_title = :meta_title, meta_description = :meta_description
+SET publish_at = :publish_at, slug = :slug, meta_title = :meta_title, meta_description = :meta_description, h1 = :h1
 WHERE id = :id;
 
 --! delete
@@ -42,5 +30,18 @@ SELECT
     id,
     created_at,
     publish_at,
-    meta_title
+    h1
 FROM "Post";
+
+--! by_id_check
+SELECT
+    id
+FROM "Post"
+WHERE id = :id;
+
+--! by_slug
+SELECT
+    id
+FROM "Post"
+WHERE slug = :slug;
+

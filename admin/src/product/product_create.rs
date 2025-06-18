@@ -31,8 +31,9 @@ pub fn ProductNew() -> impl IntoView {
                 <fieldset prop:disabled=move || pending()>
                     <legend>Data</legend>
                     <Input name="slug" label="Slug" />
-                    <Input name="title" label="Title" />
-                    <Input name="description" label="Description" />
+                    <Input name="meta_title" label="Meta title" />
+                    <Input name="meta_description" label="Meta description" />
+                    <Input name="h1" label="H1" />
                     <FormFooter action=action submit_text="Create product draft" />
                 </fieldset>
             </ActionForm>
@@ -43,8 +44,9 @@ pub fn ProductNew() -> impl IntoView {
 #[server(ProductCreate, "/api")]
 pub async fn product_create(
     slug: String,
-    title: String,
-    description: String,
+    meta_title: String,
+    meta_description: String,
+    h1: String,
 ) -> Result<Result<String, ProductError>, ServerFnError> {
     use clorinde::queries;
     let mut db = crate::server::db::use_db().await?;
@@ -64,8 +66,9 @@ pub async fn product_create(
                 &trx,
                 &id,
                 &slug,
-                &title,
-                &description,
+                &meta_title,
+                &meta_description,
+                &h1,
                 &content_id,
             )
             .await

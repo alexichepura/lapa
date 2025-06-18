@@ -74,7 +74,7 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
                     {published.local}
                 </div>
                 // {hero_view}
-                <span title="Post title">{post.title}</span>
+                <span title="Post title">{post.h1}</span>
                 <div title="Created at" class="PostListItem-created">
                     {created.local}
                 </div>
@@ -100,7 +100,7 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
             };
             PostListItem {
                 id: data.id,
-                title: data.meta_title,
+                h1: data.h1,
                 created_at: data.created_at.and_utc().fixed_offset(),
                 publish_at: data.publish_at.map(|dt| dt.and_utc().fixed_offset()),
                 is_published,
@@ -114,7 +114,7 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PostListItem {
     pub id: String,
-    pub title: String,
+    pub h1: String,
     pub created_at: DateTime<FixedOffset>,
     pub publish_at: Option<DateTime<FixedOffset>>,
     pub is_published: bool,

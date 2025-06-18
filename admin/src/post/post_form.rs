@@ -16,8 +16,9 @@ pub struct PostFormData {
     pub created_at: DateTime<FixedOffset>,
     pub publish_at: Option<DateTime<FixedOffset>>,
     pub slug: String,
-    pub title: String,
-    pub description: String,
+    pub meta_title: String,
+    pub meta_description: String,
+    pub h1: String,
 }
 
 #[component]
@@ -33,8 +34,8 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
     );
     let (title, set_title) = create_slice(
         post_rw,
-        |state| state.title.clone(),
-        |state, title| state.title = title,
+        |state| state.meta_title.clone(),
+        |state, title| state.meta_title = title,
     );
     let (publish_at, set_publish_at) = create_slice(
         post_rw,
@@ -103,7 +104,10 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                             </label>
                             <label>
                                 <div>Description</div>
-                                <textarea name="description" prop:value=post.description></textarea>
+                                <textarea
+                                    name="description"
+                                    prop:value=post.meta_description
+                                ></textarea>
                             </label>
                         </div>
                         <div>
@@ -188,6 +192,7 @@ pub async fn post_update(
     title: String,
     slug: String,
     description: String,
+    h1: String,
 ) -> Result<Result<(), PostError>, ServerFnError> {
     use clorinde::queries;
     let db = crate::server::db::use_db().await?;
@@ -203,7 +208,7 @@ pub async fn post_update(
         }
     }
     queries::admin_post::update()
-        .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &title, &description, &id)
+        .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &title, &description, &h1, &id)
         .await
         .map_err(|e| lib::emsg(e, "Post update"))?;
     return Ok(Ok(()));

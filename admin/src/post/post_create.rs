@@ -32,8 +32,9 @@ pub fn PostCreate() -> impl IntoView {
                     <legend>Data</legend>
                     <CategorySelect />
                     <Input name="slug" label="Slug" />
-                    <Input name="title" label="Title" />
-                    <Input name="description" label="Description" />
+                    <Input name="meta_title" label="Meta title" />
+                    <Input name="meta_description" label="Meta description" />
+                    <Input name="h1" label="H1" />
                     <FormFooter action=action submit_text="Create post draft" />
                 </fieldset>
             </ActionForm>
@@ -43,8 +44,9 @@ pub fn PostCreate() -> impl IntoView {
 #[server(PostCreateAction, "/api")]
 pub async fn post_create(
     slug: String,
-    title: String,
-    description: String,
+    meta_title: String,
+    meta_description: String,
+    h1: String,
     category_id: String,
 ) -> Result<Result<String, PostError>, ServerFnError> {
     use clorinde::queries;
@@ -65,8 +67,9 @@ pub async fn post_create(
                 &trx,
                 &id,
                 &slug,
-                &title,
-                &description,
+                &meta_title,
+                &meta_description,
+                &h1,
                 &content_id,
                 &category_id,
             )

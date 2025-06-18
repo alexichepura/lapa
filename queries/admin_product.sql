@@ -1,3 +1,7 @@
+--! create 
+INSERT INTO "Product" (id, slug, meta_title, meta_description, h1, content_id)
+  VALUES (:id, :slug, :meta_title, :meta_description, :h1, :content_id);
+
 --! page : (publish_at?)
 SELECT
     "Product".id,
@@ -13,6 +17,25 @@ FROM "Product"
     INNER JOIN "Content" ON "Content".id = "Product".content_id
 WHERE "Product".id = :id;
 
+--! update (publish_at?) :
+UPDATE "Product"
+SET publish_at = :publish_at, slug = :slug, meta_title = :meta_title, meta_description = :meta_description, h1 = :h1
+WHERE id = :id;
+
+--! delete
+DELETE FROM "Product" WHERE id = :id;
+
+--! list : (publish_at?, image_id?)
+SELECT
+    "Product".id,
+    "Product".created_at,
+    "Product".publish_at,
+    "Product".h1,
+    "ProductImage".id AS image_id
+FROM "Product"
+    INNER JOIN "ProductImage" ON "ProductImage".product_id = "Product".id
+AND "ProductImage".is_hero = true;
+
 --! by_slug
 SELECT
     id
@@ -24,18 +47,6 @@ SELECT
     id
 FROM "Product"
 WHERE id = :id;
-
---! create 
-INSERT INTO "Product" (id, slug, meta_title, meta_description, content_id)
-  VALUES (:id, :slug, :meta_title, :meta_description, :content_id);
-
---! update (publish_at?) :
-UPDATE "Product"
-SET publish_at = :publish_at, slug = :slug, meta_title = :meta_title, meta_description = :meta_description
-WHERE id = :id;
-
---! delete
-DELETE FROM "Product" WHERE id = :id;
 
 --! images
 SELECT
@@ -53,13 +64,3 @@ SELECT
 FROM "ProductImage"
 WHERE product_id = :product_id;
 
---! list : (publish_at?, image_id?)
-SELECT
-    "Product"."id",
-    "Product"."created_at",
-    "Product"."publish_at",
-    "Product"."meta_title",
-    "ProductImage"."id" AS "image_id"
-FROM "Product"
-    INNER JOIN "ProductImage" ON "ProductImage"."product_id" = "Product"."id"
-AND "ProductImage"."is_hero" = true;

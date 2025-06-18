@@ -76,7 +76,7 @@ pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
                     {published.local}
                 </div>
                 {hero_view}
-                <span title="Post title">{product.title}</span>
+                <span title="Post title">{product.h1}</span>
                 <div title="Created at" class="PostListItem-created">
                     {created.local}
                 </div>
@@ -102,7 +102,7 @@ pub async fn get_products() -> Result<Vec<ProductListItem>, ServerFnError> {
             };
             ProductListItem {
                 id: data.id,
-                title: data.meta_title,
+                h1: data.h1,
                 created_at: data.created_at.and_utc().fixed_offset(),
                 published_at: data.publish_at.map(|dt| dt.and_utc().fixed_offset()),
                 is_published,
@@ -116,7 +116,7 @@ pub async fn get_products() -> Result<Vec<ProductListItem>, ServerFnError> {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProductListItem {
     pub id: String,
-    pub title: String,
+    pub h1: String,
     pub created_at: DateTime<FixedOffset>,
     pub published_at: Option<DateTime<FixedOffset>>,
     pub is_published: bool,

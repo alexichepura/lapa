@@ -121,8 +121,9 @@ pub async fn get_post(id: String) -> Result<Result<PostPageData, PostError>, Ser
         created_at: page.created_at.and_utc().fixed_offset(),
         publish_at: page.publish_at.map(|dt| dt.and_utc().fixed_offset()),
         slug: page.slug,
-        title: page.meta_title,
-        description: page.meta_description,
+        meta_title: page.meta_title,
+        meta_description: page.meta_description,
+        h1: page.h1,
     };
     let page = PostPageData {
         form,

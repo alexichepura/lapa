@@ -1,7 +1,6 @@
 use chrono::{DateTime, FixedOffset, Utc};
 use leptos::{either::Either, prelude::*, reactive::wrappers::write::SignalSetter};
 use leptos_meta::Title;
-use leptos_router::hooks::use_navigate;
 use serde::{Deserialize, Serialize};
 
 use super::ProductError;
@@ -20,8 +19,9 @@ pub struct ProductFormData {
     pub created_at: DateTime<FixedOffset>,
     pub publish_at: Option<DateTime<FixedOffset>>,
     pub slug: String,
-    pub title: String,
-    pub description: String,
+    pub meta_title: String,
+    pub meta_description: String,
+    pub h1: String,
 }
 
 
@@ -38,8 +38,8 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
     );
     let (title, set_title) = create_slice(
         product_rw,
-        |state| state.title.clone(),
-        |state, title| state.title = title,
+        |state| state.meta_title.clone(),
+        |state, title| state.meta_title = title,
     );
     let (publish_at, set_publish_at) = create_slice(
         product_rw,
@@ -110,7 +110,7 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
                                 <div>Description</div>
                                 <textarea
                                     name="description"
-                                    prop:value=product.description
+                                    prop:value=product.meta_description
                                 ></textarea>
                             </label>
                         </div>
@@ -200,11 +200,12 @@ pub async fn product_update(
     title: String,
     slug: String,
     description: String,
+    h1: String,
 ) -> Result<Result<(), ProductError>, ServerFnError> {
     use clorinde::queries;
     let db = crate::server::db::use_db().await?;
     queries::admin_product::update()
-        .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &title, &description, &id)
+        .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &title, &description, &h1, &id)
         .await
         .map_err(|e| lib::emsg(e, "Product update"))?;
     return Ok(Ok(()));
