@@ -12,7 +12,12 @@ use crate::{
 #[component]
 pub fn PostList() -> impl IntoView {
     let posts = Resource::new_blocking(|| (), move |_| get_posts());
-
+    let suspended = move || Suspend::new(async move {
+        match posts.await {
+            Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+            Ok(posts) => Either::Right(view! { <PostListItems posts /> }),
+        }
+    });
     view! {
         <Title text="Posts" />
         <h1>
@@ -24,14 +29,7 @@ pub fn PostList() -> impl IntoView {
         <ul class="Card Listing">
             <Suspense fallback=move || {
                 view! { <Loading /> }
-            }>
-                {move || Suspend::new(async move {
-                    match posts.await {
-                        Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
-                        Ok(posts) => Either::Right(view! { <PostListItems posts /> }),
-                    }
-                })}
-            </Suspense>
+            }>{suspended}</Suspense>
         </ul>
     }
 }

@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS "Product" (
     "slug" TEXT NOT NULL,
     "meta_title" TEXT NOT NULL DEFAULT '',
     "meta_description" TEXT NOT NULL DEFAULT '',
+    "h1" TEXT NOT NULL DEFAULT '',
     "content_id" TEXT NOT NULL,
     CONSTRAINT "Product_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
@@ -73,6 +74,7 @@ CREATE TABLE IF NOT EXISTS "Post" (
     "slug" TEXT NOT NULL,
     "meta_title" TEXT NOT NULL DEFAULT '',
     "meta_description" TEXT NOT NULL DEFAULT '',
+    "h1" TEXT NOT NULL DEFAULT '',
     "category_id" TEXT NOT NULL,
     "content_id" TEXT NOT NULL,
     CONSTRAINT "Post_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "PostCategory" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,

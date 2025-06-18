@@ -32,8 +32,9 @@ pub enum PostError {
 pub struct PostData {
     pub id: String,
     pub slug: String,
-    pub title: String,
-    pub description: String,
+    pub meta_title: String,
+    pub meta_description: String,
+    pub h1: String,
     pub content_html: String,
 }
 
@@ -72,11 +73,11 @@ pub fn PostPage() -> impl IntoView {
 #[component]
 pub fn PostView(post: PostData) -> impl IntoView {
     view! {
-        <Title text=post.title.clone() />
-        <Meta name="description" content=post.description.clone() />
-        <Meta property="og:title" content=post.title.clone() />
-        <Meta property="og:description" content=post.description.clone() />
-        <h1>{post.title}</h1>
+        <Title text=post.meta_title.clone() />
+        <Meta name="description" content=post.meta_description.clone() />
+        <Meta property="og:title" content=post.meta_title.clone() />
+        <Meta property="og:description" content=post.meta_description.clone() />
+        <h1>{post.meta_title}</h1>
         <article inner_html=post.content_html></article>
     }
 }
@@ -87,22 +88,23 @@ pub async fn get_post(
     slug: String
 ) -> Result<Result<PostData, PostError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let post = clorinde::queries::post::page()
+    let page = clorinde::queries::post::page()
         .bind(&db, &category_slug, &slug).opt()
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;
-    let Some(post) = post else {
+    let Some(page) = page else {
         crate::server::serverr_404();
         return Ok(Err(PostError::NotFound));
     };
     // let (html, headings) = content::content_json_to_html_with_headings(&post.content.json);
-    let content_html = content::content_json_to_html(&post.content_json);
+    let content_html = content::content_json_to_html(&page.content_json);
 
     let post_data = PostData {
-        id: post.id,
-        slug: post.slug,
-        title: post.meta_title,
-        description: post.meta_description,
+        id: page.id,
+        slug: page.slug,
+        meta_title: page.meta_title,
+        meta_description: page.meta_description,
+        h1: page.h1,
         content_html,
     };
 

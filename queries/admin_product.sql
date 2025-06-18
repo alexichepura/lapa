@@ -6,6 +6,7 @@ SELECT
     "Product".slug,
     "Product".meta_title,
     "Product".meta_description,
+    "Product".h1,
     "Content".id AS content_id,
     "Content".json AS content_json
 FROM "Product"

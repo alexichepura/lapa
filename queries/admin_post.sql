@@ -22,6 +22,7 @@ SELECT
     "Post".slug,
     "Post".meta_title,
     "Post".meta_description,
+    "Post".h1,
     "Content".id AS content_id,
     "Content".json AS content_json
 FROM "Post"

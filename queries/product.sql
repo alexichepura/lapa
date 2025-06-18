@@ -5,19 +5,19 @@ SELECT
     "Product".slug,
     "Product".meta_title,
     "Product".meta_description,
+    "Product".h1,
     "Content".id AS content_id,
     "Content".json AS content_json
 FROM "Product"
     INNER JOIN "Content" ON "Content".id = "Product".content_id
 WHERE slug = :slug AND publish_at < NOW();
 
---! product_list : (image_id?, alt?)
+--! list : (image_id?, alt?)
 SELECT
     "Product".id,
     "Product".publish_at,
     "Product".slug,
-    "Product".meta_title,
-    "Product".meta_description,
+    "Product".h1,
     "ProductImage".id AS image_id,
     "ProductImage".alt
 FROM "Product"
@@ -26,7 +26,7 @@ WHERE "Product".publish_at < NOW()
 AND "ProductImage".is_hero = true
 LIMIT 10;
 
---! product_images
+--! images
 SELECT
     id,
     alt,

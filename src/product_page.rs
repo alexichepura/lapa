@@ -33,8 +33,9 @@ pub enum ProductError {
 pub struct ProductPageData {
     pub id: String,
     pub slug: String,
-    pub title: String,
-    pub description: String,
+    pub meta_title: String,
+    pub meta_description: String,
+    pub h1: String,
     pub content_html: String,
     pub images: Vec<ImgData>,
     pub hero: Option<String>,
@@ -108,12 +109,12 @@ pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
     };
 
     view! {
-        <Title text=product.title.clone() />
-        <Meta name="description" content=product.description.clone() />
-        <Meta property="og:title" content=product.title.clone() />
-        <Meta property="og:description" content=product.description.clone() />
+        <Title text=product.meta_title.clone() />
+        <Meta name="description" content=product.meta_description.clone() />
+        <Meta property="og:title" content=product.meta_title.clone() />
+        <Meta property="og:description" content=product.meta_description.clone() />
         {hero_og}
-        <h1>{product.title}</h1>
+        <h1>{product.meta_title}</h1>
         <div class="product-images">
             <For
                 each=move || product.images.clone()
@@ -183,7 +184,7 @@ pub async fn get_product(slug: String) -> Result<Result<ProductPageData, Product
         crate::server::serverr_404();
         return Ok(Err(ProductError::NotFound));
     };
-    let images = clorinde::queries::product::product_images()
+    let images = clorinde::queries::product::images()
         .bind(&db, &page.id).all()
         .await
         .map_err(|e| lib::emsg(e, "Product images find"))?;
@@ -197,8 +198,9 @@ pub async fn get_product(slug: String) -> Result<Result<ProductPageData, Product
     let page = ProductPageData {
         id: page.id,
         slug: page.slug,
-        title: page.meta_title,
-        description: page.meta_description,
+        meta_title: page.meta_title,
+        meta_description: page.meta_description,
+        h1: page.h1,
         content_html,
         hero,
         images: images

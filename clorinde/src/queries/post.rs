@@ -13,6 +13,7 @@ pub struct Page {
     pub slug: String,
     pub meta_title: String,
     pub meta_description: String,
+    pub h1: String,
     pub content_id: String,
     pub content_json: String,
 }
@@ -23,6 +24,7 @@ pub struct PageBorrowed<'a> {
     pub slug: &'a str,
     pub meta_title: &'a str,
     pub meta_description: &'a str,
+    pub h1: &'a str,
     pub content_id: &'a str,
     pub content_json: &'a str,
 }
@@ -35,6 +37,7 @@ impl<'a> From<PageBorrowed<'a>> for Page {
             slug,
             meta_title,
             meta_description,
+            h1,
             content_id,
             content_json,
         }: PageBorrowed<'a>,
@@ -46,6 +49,7 @@ impl<'a> From<PageBorrowed<'a>> for Page {
             slug: slug.into(),
             meta_title: meta_title.into(),
             meta_description: meta_description.into(),
+            h1: h1.into(),
             content_id: content_id.into(),
             content_json: content_json.into(),
         }
@@ -116,7 +120,7 @@ where
 }
 pub fn page() -> PageStmt {
     PageStmt(crate::client::async_::Stmt::new(
-        "SELECT \"Post\".id, \"Post\".created_at, \"Post\".publish_at, \"Post\".slug, \"Post\".meta_title, \"Post\".meta_description, \"Content\".id AS content_id, \"Content\".json AS content_json FROM \"Post\" INNER JOIN \"Content\" ON \"Content\".id = \"Post\".content_id INNER JOIN \"PostCategory\" ON \"PostCategory\".id = \"Post\".category_id WHERE \"PostCategory\".slug = $1 AND \"Post\".slug = $2 AND \"Post\".publish_at < NOW()",
+        "SELECT \"Post\".id, \"Post\".created_at, \"Post\".publish_at, \"Post\".slug, \"Post\".meta_title, \"Post\".meta_description, \"Post\".h1, \"Content\".id AS content_id, \"Content\".json AS content_json FROM \"Post\" INNER JOIN \"Content\" ON \"Content\".id = \"Post\".content_id INNER JOIN \"PostCategory\" ON \"PostCategory\".id = \"Post\".category_id WHERE \"PostCategory\".slug = $1 AND \"Post\".slug = $2 AND \"Post\".publish_at < NOW()",
     ))
 }
 pub struct PageStmt(crate::client::async_::Stmt);
@@ -139,8 +143,9 @@ impl PageStmt {
                     slug: row.try_get(3)?,
                     meta_title: row.try_get(4)?,
                     meta_description: row.try_get(5)?,
-                    content_id: row.try_get(6)?,
-                    content_json: row.try_get(7)?,
+                    h1: row.try_get(6)?,
+                    content_id: row.try_get(7)?,
+                    content_json: row.try_get(8)?,
                 })
             },
             mapper: |it| Page::from(it),
