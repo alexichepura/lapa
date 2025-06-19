@@ -18,8 +18,7 @@ async fn main() {
     use site::{
         routes::GenerateRouteList,
         server::{
-            file_and_error_handler, img_handler, leptos_routes_handler,
-            robots_txt, server_fn_handler, AppState,
+            cdn_handler, file_and_error_handler, img_handler, leptos_routes_handler, robots_txt, server_fn_handler, AppState, MediaConfig
         },
     };
     use tracing::info;
@@ -52,7 +51,8 @@ async fn main() {
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .route("/api/{*fn_name}", post(server_fn_handler))
         .route("/robots.txt", get(robots_txt))
-        .route("/img/{img_name}", get(img_handler));
+        .route("/img/{img_name}", get(img_handler))
+        .route("/cdn/{img_name}", get(cdn_handler));
 
     // #[cfg(feature = "ratelimit")]
     // let app = site::server::ratelimit(app);
@@ -61,12 +61,22 @@ async fn main() {
     #[cfg(not(feature = "compression"))]
     let app = app.route("/pkg/{*file}", get(file_and_error_handler));
 
+    let image_upload_path =
+        std::env::var("IMAGE_UPLOAD_PATH").unwrap_or("image_upload".to_string());
+    let image_convert_path =
+        std::env::var("IMAGE_CONVERT_PATH").unwrap_or("image_convert".to_string());
+    let media_config = MediaConfig {
+        image_upload_path,
+        image_convert_path,
+    };
+
     let app = app
         // .merge(favicons)
         .fallback(file_and_error_handler)
         .with_state(AppState {
             leptos_options: leptopts.clone(),
             pool: pool.clone(),
+            media_config: media_config.clone(),
         })
         .layer(tower_http::trace::TraceLayer::new_for_http());
 

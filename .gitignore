@@ -24,3 +24,9 @@ image_upload/product/*
 !image_upload/content/.gitkeep
 !image_upload/post_hero/.gitkeep
 !image_upload/product/.gitkeep
+image_convert/content/*
+image_convert/post_hero/*
+image_convert/product/*
+!image_convert/content/.gitkeep
+!image_convert/post_hero/.gitkeep
+!image_convert/product/.gitkeep

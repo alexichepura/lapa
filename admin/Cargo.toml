@@ -26,7 +26,7 @@ deadpool-postgres = { workspace = true, optional = true }
 dotenvy = { workspace = true, optional = true }
 gloo-utils = { workspace = true }
 http = { workspace = true }
-image = { version = "0.25.5", optional = true }
+image = { workspace = true, optional = true }
 js-sys = { workspace = true, optional = true }
 kamadak-exif = { version = "0.6.1", optional = true }
 leptos = { workspace = true }

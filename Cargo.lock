@@ -3591,6 +3591,7 @@ dependencies = [
  "deadpool-postgres",
  "dotenvy",
  "http",
+ "image",
  "js-sys",
  "leptos",
  "leptos_axum",

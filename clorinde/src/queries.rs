@@ -6,6 +6,7 @@ pub mod admin_post;
 pub mod admin_post_category;
 pub mod admin_product;
 pub mod admin_product_image;
+pub mod content_image;
 pub mod post;
 pub mod product;
 pub mod product_image;

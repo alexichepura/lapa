@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use axum::{
     body::Body,
     extract::{Path, State},
@@ -7,12 +9,12 @@ use axum::{
 use http::{header::CACHE_CONTROL, HeaderValue};
 use leptos::prelude::*;
 use tower::ServiceExt;
-use tower_http::services::ServeDir;
+use tower_http::services::{fs::ServeFileSystemResponseBody, ServeDir};
 
 use crate::err::AppError;
 use crate::err::ErrorTemplate;
 
-const MAX_AGE_MONTH: HeaderValue = HeaderValue::from_static("public, max-age=2592000");
+pub const MAX_AGE_MONTH: HeaderValue = HeaderValue::from_static("public, max-age=2592000");
 // const MAX_AGE_YEAR: HeaderValue = HeaderValue::from_static("public, max-age=31536000");
 
 pub async fn img_handler(Path(img_name): Path<String>, req: Request<Body>) -> AxumResponse {
@@ -38,6 +40,14 @@ pub async fn file_and_error_handler(
     } else {
         not_found_response(req).await
     }
+}
+
+pub async fn serve_file(
+    uri: &Uri,
+    root: &str,
+) -> Result<Response<ServeFileSystemResponseBody>, Infallible> {
+    let req = Request::builder().uri(uri).body(Body::empty()).unwrap();
+    ServeDir::new(root).oneshot(req).await
 }
 
 async fn get_static_file(uri: Uri, root: &str) -> Result<Response<Body>, (StatusCode, String)> {
