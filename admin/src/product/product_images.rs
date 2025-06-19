@@ -2,12 +2,9 @@ use leptos::{either::Either, html::Dialog, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    form::FormFooter,
-    image::{img_url_small, srcset_small, ImageLoadError},
-    product::{
+    err::AppError, form::FormFooter, product::{
         ImageDelete, ImageEditData, ImageEditSignal, ImageUpdate, ImageUpload, PostImageModalForm,
-    },
-    util::{AlertDanger, Loading},
+    }, util::{AlertDanger, Loading}
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -129,6 +126,17 @@ fn ProductImagesView(
         _ => Either::Right(()),
     };
 
+    let children = move |image: ProductImageData| {
+        let is_last = image.order + 1 == images_sorted().len() as i32;
+        let id_to_make_hero = image.id.clone();
+        let make_hero = move || {
+            hero_action
+                .dispatch(ImageMakeHero {
+                    id: id_to_make_hero.clone(),
+                });
+        };
+        view! { <ProductImage image set_editing on_order is_last make_hero /> }
+    };
     view! {
         <fieldset prop:disabled=disabled>
             <legend>Images</legend>
@@ -148,17 +156,7 @@ fn ProductImagesView(
                 <For
                     each=move || images_sorted()
                     key=|image| format!("{}:{}", image.id, image.order)
-                    children=move |image: ProductImageData| {
-                        let is_last = image.order + 1 == images_sorted().len() as i32;
-                        let id_to_make_hero = image.id.clone();
-                        let make_hero = move || {
-                            hero_action
-                                .dispatch(ImageMakeHero {
-                                    id: id_to_make_hero.clone(),
-                                });
-                        };
-                        view! { <ProductImage image set_editing on_order is_last make_hero /> }
-                    }
+                    children=children
                 />
 
             </div>
@@ -183,8 +181,7 @@ where
 {
     let id = image.id.clone();
     let alt_clone = image.alt.clone();
-    let src = img_url_small(&id);
-    let srcset = srcset_small(&id);
+    let src = format!("/product-image/{}", &id);
 
     let on_edit = move |_| {
         set_editing(Some(ImageEditData {
@@ -202,7 +199,7 @@ where
 
     view! {
         <figure>
-            <img on:click=on_edit src=src srcset=srcset width=250 />
+            <img on:click=on_edit src=src width=250 />
             <figcaption>{image.alt}</figcaption>
             <footer>
                 <button
@@ -213,7 +210,6 @@ where
                         move |_| on_order(id.clone(), -1)
                     }
                 >
-
                     "<"
                 </button>
                 {hero_view}
@@ -225,7 +221,6 @@ where
                         move |_| on_order(id.clone(), 1)
                     }
                 >
-
                     ">"
                 </button>
             </footer>
@@ -253,11 +248,10 @@ pub async fn get_images(post_id: String) -> Result<Vec<ProductImageData>, Server
     Ok(images)
 }
 
-pub type ImagesOrderUpdateResult = Result<(), ImageLoadError>;
 #[server(ImagesOrderUpdate, "/api")]
 pub async fn images_order_update(
     ids: Vec<String>,
-) -> Result<ImagesOrderUpdateResult, ServerFnError> {
+) -> Result<Result<(), AppError>, ServerFnError> {
     // TODO how this can be improved? batch, sql?
     let mut db_trx = crate::server::db::use_db().await?;
     let db = crate::server::db::use_db().await?;
@@ -276,7 +270,7 @@ pub async fn images_order_update(
 //     pub not_hero: Option<String>,
 // }
 // pub type ImageMakeHeroResult = Result<ImageMakeHeroData, ImageLoadError>;
-pub type ImageMakeHeroResult = Result<(), ImageLoadError>;
+pub type ImageMakeHeroResult = Result<(), AppError>;
 #[server(ImageMakeHero, "/api")]
 pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
@@ -286,7 +280,7 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
         .await
         .map_err(|e| lib::emsg(e, "Image find"))?;
     if let None = current_img {
-        return Ok(Err(ImageLoadError::NotFound));
+        return Ok(Err(AppError::NotFound));
     }
     let current_img = current_img.unwrap();
     let current_hero = clorinde::queries::product_image::find_hero()

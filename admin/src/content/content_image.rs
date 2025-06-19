@@ -1,7 +1,7 @@
 use leptos::{either::Either, html::Dialog, prelude::*};
 use serde::{Deserialize, Serialize};
 
-use crate::content::{ImageUploadError, ContentImageUploadAction};
+use crate::content::{ContentImageUploadAction};
 use crate::form::{FormFooter, Input};
 
 #[component]
@@ -92,7 +92,7 @@ pub fn ImageEditModalForm(
     }
 }
 
-use crate::upload::InputImage;
+use crate::upload::{ImageUploadError, InputImage};
 
 #[component]
 pub fn ContentImageUpload(content_id: String, set_image_id: WriteSignal<String>) -> impl IntoView {

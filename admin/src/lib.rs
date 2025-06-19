@@ -9,7 +9,6 @@ pub mod auth;
 pub mod err;
 pub mod form;
 pub mod home;
-pub mod image;
 pub mod layout;
 pub mod product;
 pub mod post;

@@ -46,6 +46,3 @@ SELECT
 FROM "ProductImage"
 WHERE product_id = :product_id AND is_hero = true;
 
---! create
-INSERT INTO "ProductImage" (id, alt, ext, product_id)
-  VALUES (:id, :alt, :ext, :product_id);

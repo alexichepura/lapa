@@ -2,8 +2,7 @@ use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    form::{FormFooter, Input},
-    image::{img_url_large, srcset_large, ImageLoadError},
+    err::AppError, form::{FormFooter, Input}
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -42,8 +41,10 @@ pub fn PostImageModalForm(
         });
     };
 
+    let src = format!("/product-image/{}", &image.id);
+
     view! {
-        <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) width=500 />
+        <img src=src width=500 />
         <div>
             <button on:click=on_delete>Delete</button>
             <hr />
@@ -62,7 +63,7 @@ pub fn PostImageModalForm(
     }
 }
 
-type ImageDeleteResult = Result<(), ImageLoadError>;
+type ImageDeleteResult = Result<(), AppError>;
 
 #[server(ImageDelete, "/api")]
 pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError> {
@@ -73,34 +74,14 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
         .map_err(|e| lib::emsg(e, "Image delete"))?;
     if deleted_count == 0 {
         crate::server::serverr_404();
-        return Ok(Err(ImageLoadError::NotFound));
+        return Ok(Err(AppError::NotFound));
     }
-    delete_image_on_server(&id);
+    // TODO
+    // delete_image_on_server(&id);
     Ok(Ok(()))
 }
 
-#[cfg(feature = "ssr")]
-pub fn delete_image_on_server(id: &String) {
-    // TODO iterate
-    if let Err(e) = std::fs::remove_file(crate::image::img_path_small(&id)) {
-        tracing::error!("remove_file e={e}");
-    };
-    if let Err(e) = std::fs::remove_file(crate::image::img_path_small_retina(&id)) {
-        tracing::error!("remove_file e={e}");
-    };
-    if let Err(e) = std::fs::remove_file(crate::image::img_path_large(&id)) {
-        tracing::error!("remove_file e={e}");
-    };
-    if let Err(e) = std::fs::remove_file(crate::image::img_path_large_retina(&id)) {
-        tracing::error!("remove_file e={e}");
-    };
-    if let Err(e) = std::fs::remove_file(crate::image::img_path_upload_ext(&id, &"jpg".to_string()))
-    {
-        tracing::error!("remove_file e={e}");
-    };
-}
-
-type ImageUpdateResult = Result<(), ImageLoadError>;
+type ImageUpdateResult = Result<(), AppError>;
 #[server(ImageUpdate, "/api")]
 pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
@@ -110,7 +91,7 @@ pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResu
         .map_err(|e| lib::emsg(e, "Image alt update"))?;
     if updated_count == 0 {
         crate::server::serverr_404();
-        return Ok(Err(ImageLoadError::NotFound));
+        return Ok(Err(AppError::NotFound));
     }
     Ok(Ok(()))
 }

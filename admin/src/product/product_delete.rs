@@ -78,7 +78,8 @@ pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, Serv
         trx.commit().await.map_err(|e| lib::emsg(e, "Product delete transaction"))?;
     };
     for id in images_ids {
-        crate::product::delete_image_on_server(&id);
+        // TODO
+        // crate::product::delete_image_on_server(&id);
     }
     Ok(Ok(()))
 }

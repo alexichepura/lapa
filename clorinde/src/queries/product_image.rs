@@ -10,18 +10,6 @@ pub struct UpdateOrderParams<T1: crate::StringSql> {
     pub order: i32,
     pub id: T1,
 }
-#[derive(Debug)]
-pub struct CreateParams<
-    T1: crate::StringSql,
-    T2: crate::StringSql,
-    T3: crate::StringSql,
-    T4: crate::StringSql,
-> {
-    pub id: T1,
-    pub alt: T2,
-    pub ext: T3,
-    pub product_id: T4,
-}
 #[derive(Debug, Clone, PartialEq)]
 pub struct SelectAllForConvert {
     pub id: String,
@@ -383,68 +371,5 @@ impl FindHeroStmt {
             extractor: |row| Ok(row.try_get(0)?),
             mapper: |it| it.into(),
         }
-    }
-}
-pub fn create() -> CreateStmt {
-    CreateStmt(crate::client::async_::Stmt::new(
-        "INSERT INTO \"ProductImage\" (id, alt, ext, product_id) VALUES ($1, $2, $3, $4)",
-    ))
-}
-pub struct CreateStmt(crate::client::async_::Stmt);
-impl CreateStmt {
-    pub async fn bind<
-        'c,
-        'a,
-        's,
-        C: GenericClient,
-        T1: crate::StringSql,
-        T2: crate::StringSql,
-        T3: crate::StringSql,
-        T4: crate::StringSql,
-    >(
-        &'s mut self,
-        client: &'c C,
-        id: &'a T1,
-        alt: &'a T2,
-        ext: &'a T3,
-        product_id: &'a T4,
-    ) -> Result<u64, tokio_postgres::Error> {
-        let stmt = self.0.prepare(client).await?;
-        client.execute(stmt, &[id, alt, ext, product_id]).await
-    }
-}
-impl<
-    'a,
-    C: GenericClient + Send + Sync,
-    T1: crate::StringSql,
-    T2: crate::StringSql,
-    T3: crate::StringSql,
-    T4: crate::StringSql,
->
-    crate::client::async_::Params<
-        'a,
-        'a,
-        'a,
-        CreateParams<T1, T2, T3, T4>,
-        std::pin::Pin<
-            Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
-        >,
-        C,
-    > for CreateStmt
-{
-    fn params(
-        &'a mut self,
-        client: &'a C,
-        params: &'a CreateParams<T1, T2, T3, T4>,
-    ) -> std::pin::Pin<
-        Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
-    > {
-        Box::pin(self.bind(
-            client,
-            &params.id,
-            &params.alt,
-            &params.ext,
-            &params.product_id,
-        ))
     }
 }

@@ -5,14 +5,18 @@ use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    image::img_url_small,
     util::{datetime_to_strings, AlertDanger, DateTimeStrings, Loading},
 };
 
 #[component]
 pub fn ProductList() -> impl IntoView {
     let products = Resource::new_blocking(|| (), move |_| get_products());
-
+    let suspended = move || Suspend::new(async move {
+        match products.await {
+            Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+            Ok(products) => Either::Right(view! { <PostListItems products /> }),
+        }
+    });
     view! {
         <Title text="Products" />
         <h1>
@@ -24,14 +28,7 @@ pub fn ProductList() -> impl IntoView {
         <ul class="Card Listing">
             <Suspense fallback=move || {
                 view! { <Loading /> }
-            }>
-                {move || Suspend::new(async move {
-                    match products.await {
-                        Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
-                        Ok(products) => Either::Right(view! { <PostListItems products /> }),
-                    }
-                })}
-            </Suspense>
+            }>{suspended}</Suspense>
         </ul>
     }
 }
@@ -62,19 +59,18 @@ pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
         true => "published",
         false => "not-published",
     };
-    let hero_view = match product.hero {
-        Some(id) => {
-            Either::Left(view! { <img title="Post hero" src=img_url_small(&id) width="36" /> })
-        }
-        None => Either::Right(view! { <div title="No post hero">?</div> }),
-    };
+    // let hero_view = match product.hero {
+    //     Some(id) => {
+    //         Either::Left(view! { <img title="Post hero" src=img_url_small(&id) width="36" /> })
+    //     }
+    //     None => Either::Right(view! { <div title="No post hero">?</div> }),
+    // };
     view! {
         <li class="PostListItem">
             <A href=format!("/product/{}", product.id)>
                 <div title="Publish at" class=format!("PostListItem-status {}", class)>
                     {publish_at_view.utc}
                 </div>
-                {hero_view}
                 <span title="Post title">{product.h1}</span>
                 <div title="Created at" class="PostListItem-created">
                     {created.utc}

@@ -5,7 +5,6 @@ use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    image::img_url_small,
     util::{datetime_to_strings, AlertDanger, DateTimeStrings, Loading},
 };
 
@@ -61,19 +60,12 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
         true => "published",
         false => "not-published",
     };
-    // let hero_view = match post.hero {
-    //     Some(id) => {
-    //         Either::Left(view! { <img title="Post hero" src=img_url_small(&id) width="36" /> })
-    //     }
-    //     None => Either::Right(view! { <div title="No post hero">?</div> }),
-    // };
     view! {
         <li class="PostListItem">
             <A href=format!("/post/{}", post.id)>
                 <div title="Published at" class=format!("PostListItem-status {}", class)>
                     {published.local}
                 </div>
-                // {hero_view}
                 <span title="Post title">{post.h1}</span>
                 <div title="Created at" class="PostListItem-created">
                     {created.local}

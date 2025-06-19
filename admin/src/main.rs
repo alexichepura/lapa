@@ -9,7 +9,7 @@ async fn main() {
     use admin::{
         app::AdminRouter,
         server::{
-            auth_session_layer, content_image_handler, file_and_error_handler, img_handler, leptos_routes_handler, server_fn_private, server_fn_public, session_layer, AppState, MediaConfig
+            auth_session_layer, content_image_handler, file_and_error_handler, leptos_routes_handler, product_image_handler, server_fn_private, server_fn_public, session_layer, AppState, MediaConfig
         },
     };
     use axum::{
@@ -70,8 +70,8 @@ async fn main() {
 
     let app = Router::new()
         .merge(private_app)
-        .route("/img/{img_name}", get(img_handler))
         .route("/content-image/{image_name}", get(content_image_handler))
+        .route("/product-image/{image_name}", get(product_image_handler))
         .fallback(file_and_error_handler)
         .with_state(AppState {
             leptos_options: leptopts.clone(),
