@@ -87,7 +87,7 @@ pub async fn get_products() -> Result<Vec<ProductListItem>, ServerFnError> {
         .bind(&db)
         .all()
         .await
-        .map_err(|e| lib::emsg(e, "Post list find"))?;
+        .map_err(|e| lib::emsg(e, "Product list"))?;
     let products: Vec<ProductListItem> = products
         .into_iter()
         .map(|data| {

@@ -592,7 +592,7 @@ impl DeleteStmt {
 }
 pub fn list() -> ListStmt {
     ListStmt(crate::client::async_::Stmt::new(
-        "SELECT \"Product\".id, \"Product\".created_at, \"Product\".publish_at, \"Product\".h1, \"ProductImage\".id AS image_id FROM \"Product\" INNER JOIN \"ProductImage\" ON \"ProductImage\".product_id = \"Product\".id AND \"ProductImage\".is_hero = true",
+        "SELECT \"Product\".id, \"Product\".created_at, \"Product\".publish_at, \"Product\".h1, \"ProductImage\".id AS image_id FROM \"Product\" LEFT JOIN \"ProductImage\" ON \"Product\".id = \"ProductImage\".product_id AND \"ProductImage\".is_hero = true",
     ))
 }
 pub struct ListStmt(crate::client::async_::Stmt);

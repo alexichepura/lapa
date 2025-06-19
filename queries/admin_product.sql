@@ -33,8 +33,11 @@ SELECT
     "Product".h1,
     "ProductImage".id AS image_id
 FROM "Product"
-    INNER JOIN "ProductImage" ON "ProductImage".product_id = "Product".id
-AND "ProductImage".is_hero = true;
+    LEFT JOIN 
+        "ProductImage"
+    ON 
+        "Product".id = "ProductImage".product_id
+        AND "ProductImage".is_hero = true;
 
 --! by_slug
 SELECT
