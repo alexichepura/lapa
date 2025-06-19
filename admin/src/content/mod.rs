@@ -13,3 +13,6 @@ mod content_error;
 pub use content_error::*;
 mod content_update;
 pub use content_update::*;
+
+mod content_image_upload;
+pub use content_image_upload::*;

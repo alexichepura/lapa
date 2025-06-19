@@ -17,7 +17,10 @@ site.db-journal
 ops/cert
 ops/sozu.toml
 .env
-upload/*
-!upload/.gitkeep
-img/*
-!img/.gitkeep
+
+image_upload/content/*
+image_upload/post_hero/*
+image_upload/product/*
+!image_upload/content/.gitkeep
+!image_upload/post_hero/.gitkeep
+!image_upload/product/.gitkeep

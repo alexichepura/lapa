@@ -85,8 +85,11 @@ pub struct MediaConfig {
     pub image_upload_path: String,
 }
 impl MediaConfig {
+    pub fn content_image_upload_path(&self) -> String {
+        format!("{}/content", self.image_upload_path)
+    }
     pub fn content_image_upload_name_ext(&self, name: &str, ext: &str) -> String {
-        format!("{}/{}.{}", self.image_upload_path, name, ext)
+        format!("{}/{}.{}", self.content_image_upload_path(), name, ext)
     }
     pub fn post_hero_upload_path(&self) -> String {
         format!("{}/post_hero", self.image_upload_path)
@@ -95,7 +98,7 @@ impl MediaConfig {
         format!("{}/{}.{}", self.post_hero_upload_path(), name, ext)
     }
     pub fn product_image_upload_path(&self) -> String {
-        format!("{}/product_image", self.image_upload_path)
+        format!("{}/product", self.image_upload_path)
     }
     pub fn product_image_upload_name_ext(&self, name: &str, ext: &str) -> String {
         format!("{}/{}.{}", self.product_image_upload_path(), name, ext)

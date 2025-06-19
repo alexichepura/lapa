@@ -1,20 +1,8 @@
 use leptos::{either::Either, html::Dialog, prelude::*};
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
 
+use crate::content::{ImageUploadError, ContentImageUploadAction};
 use crate::form::{FormFooter, Input};
-
-#[derive(Error, Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ImageUploadError {
-    #[error("Image upload server error")]
-    ServerError,
-    #[error("Image upload deserialization error")]
-    Deserialization,
-    #[error("Image upload read error.")]
-    Read,
-    #[error("Image upload format error.")]
-    Format,
-}
 
 #[component]
 pub fn ContentImageEditor(
@@ -108,7 +96,7 @@ use crate::upload::InputImage;
 
 #[component]
 pub fn ContentImageUpload(content_id: String, set_image_id: WriteSignal<String>) -> impl IntoView {
-    let image_upload = ServerAction::<ContentImageUpload>::new();
+    let image_upload = ServerAction::<ContentImageUploadAction>::new();
     let value = image_upload.value();
     Effect::new(move |_| {
         let v = value.get();
@@ -126,6 +114,15 @@ pub fn ContentImageUpload(content_id: String, set_image_id: WriteSignal<String>)
     let (save_byte_vec, set_save_byte_vec) = signal(None::<Vec<u8>>);
     let (_save_file, set_save_file) = signal(None::<String>);
     let (obj_url, set_obj_url) = signal(None::<String>);
+
+    let img_value = move || {
+        Some(
+            serde_json::to_string(
+                    &save_byte_vec().unwrap_or_default().to_vec(),
+                )
+                .unwrap(),
+        )
+    };
     view! {
         <fieldset prop:disabled=move || pending()>
             <legend>Image upload</legend>
@@ -137,23 +134,11 @@ pub fn ContentImageUpload(content_id: String, set_image_id: WriteSignal<String>)
                     </label>
                     <ActionForm action=image_upload>
                         <input type="hidden" name="content_id" value=content_id />
+                        <input type="hidden" name="img" value=img_value />
                         <label>
                             <span>Alt</span>
                             <input name="alt" />
                         </label>
-                        <input
-                            type="hidden"
-                            name="img"
-                            value=move || {
-                                Some(
-                                    serde_json::to_string(
-                                            &save_byte_vec().unwrap_or_default().to_vec(),
-                                        )
-                                        .unwrap(),
-                                )
-                            }
-                        />
-
                         <FormFooter action=image_upload submit_text="Upload image" />
                     </ActionForm>
                 </div>
@@ -172,63 +157,3 @@ pub fn ImageUploadPreview(obj_url: ReadSignal<Option<String>>) -> impl IntoView 
     view! { <div class="ImageUploadPreview">{view}</div> }
 }
 
-type ImageUploadResult = Result<ImageResult, ImageUploadError>;
-
-#[server(ContentImageUpload, "/api")]
-async fn content_image_upload(
-    img: String,
-    alt: String,
-    content_id: String,
-) -> Result<ImageUploadResult, ServerFnError> {
-    tracing::info!("content_image_upload {}", content_id);
-    use crate::server::{db, serverr_400, use_media_config};
-    let db = db::use_db().await?;
-    let media_config = use_media_config()?;
-
-    let img_bytes = serde_json::from_str::<Vec<u8>>(&img);
-    if let Err(e) = img_bytes {
-        tracing::error!("{e:?}");
-        serverr_400();
-        return Ok(Err(ImageUploadError::Deserialization));
-    }
-    let img_bytes = img_bytes.unwrap();
-    let cursor = std::io::Cursor::new(img_bytes.clone());
-    let img_reader = image::ImageReader::new(cursor.clone()).with_guessed_format();
-
-    if let Err(e) = img_reader {
-        tracing::error!("{e:?}");
-        serverr_400();
-        return Ok(Err(ImageUploadError::Read));
-    }
-    let img_reader = img_reader.unwrap();
-
-    let img_format = img_reader.format();
-    if let None = img_format {
-        serverr_400();
-        return Ok(Err(ImageUploadError::Format));
-    }
-    let img_format = img_format.unwrap();
-    let ext = img_format.extensions_str().first().unwrap();
-
-    let id = cuid2::create_id();
-    clorinde::queries::admin_content_image::create()
-        .bind(
-            &db,
-            &id,
-            &alt,
-            &ext,
-            &content_id
-        )
-        .await
-        .map_err(|e| lib::emsg(e, "Content image create"))?;
-
-    let file_path = media_config.content_image_upload_name_ext(&id, &ext.to_string());
-    tracing::debug!("upload file_path={file_path}");
-    std::fs::write(file_path, img_bytes).map_err(|e| lib::emsg(e, "Content image write"))?;
-    Ok(Ok(ImageResult { id }))
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct ImageResult {
-    id: String,
-}
