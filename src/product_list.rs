@@ -3,7 +3,6 @@ use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    img::{ImgData, Thumb},
     util::{AlertDanger, Loading},
 };
 
@@ -44,7 +43,10 @@ pub fn ProductListView(products: Vec<ProductListItem>) -> impl IntoView {
 #[component]
 pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
     let image_view = match product.hero {
-        Some(image) => Either::Left(view! { <Thumb image /> }),
+        Some(image) => {
+            let src = format!("/product-image/{}_s", image.id);
+            Either::Left(view! { <img src=src alt=image.alt /> })
+        },
         None => Either::Right(()),
     };
     let href = format!("/product/{}", product.slug);
@@ -76,10 +78,15 @@ pub async fn get_products() -> Result<Vec<ProductListItem>, ServerFnError> {
     Ok(products)
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ProductListItem {
     pub id: String,
     pub h1: String,
     pub slug: String,
     pub hero: Option<ImgData>,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ImgData {
+    pub id: String,
+    pub alt: String,
 }

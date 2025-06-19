@@ -1,3 +1,4 @@
+use content::CdnImageSize;
 use leptos::{
     either::{Either, EitherOf3},
     html::Dialog,
@@ -9,7 +10,6 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
-    img::{img_url_large, img_url_large_retina, srcset_large},
     settings::{use_site_url},
     util::{AlertDanger, Loading},
 };
@@ -102,8 +102,9 @@ pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
 
     let hero_og = match product.hero {
         Some(hero) => {
-            let og = format!("{site_url}{}", img_url_large_retina(&hero)); // TODO domain from DB
-            Either::Left(view! { <Meta property="og:image" content=og /> })
+            let src = format!("/product-image/{}_l", &hero);
+            let content = format!("{site_url}{src}");
+            Either::Left(view! { <Meta property="og:image" content=content /> })
         }
         None => Either::Right(()),
     };
@@ -136,24 +137,33 @@ pub struct ImgData {
     pub alt: String,
 }
 
+pub fn product_image_size(id: &str, size: CdnImageSize) -> String {
+    format!("/product-image/{id}_{size} {}w", size.to_width())
+}
+
 type DialogSignal = Option<ImgData>;
 #[component]
 pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl IntoView {
     let id = image.id.clone();
     let alt = image.alt.clone();
-
     let on_edit = move |_| {
         set_dialog_open(Some(ImgData {
             id: id.clone(),
             alt: alt.clone(),
         }));
     };
-
-    let src = format!("/img/{}-s.webp", image.id);
-    let srcset = format!("/img/{}-s2.webp 2x", image.id);
+    let srcset = CdnImageSize::VALUES
+        .map(|size| product_image_size(&image.id, size))
+        .join(", ");
+    let sizes = format!(
+        "(max-width: {}px) {}px, 100vw",
+        CdnImageSize::S.to_width(),
+        CdnImageSize::S.to_width(),
+    );
+    let src = format!("/product-image/{}_l", &image.id);
     view! {
         <figure>
-            <img on:click=on_edit src=src srcset=srcset />
+            <img on:click=on_edit src=src srcset=srcset sizes=sizes />
             <figcaption>{image.alt}</figcaption>
         </figure>
     }
@@ -161,9 +171,10 @@ pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl
 
 #[component]
 pub fn ProductImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl IntoView {
+    let src = format!("/product-image/{}_xl", image.id);
     view! {
         <figure>
-            <img src=img_url_large(&image.id) srcset=srcset_large(&image.id) />
+            <img src=src />
             <figcaption>{image.alt}</figcaption>
             <button on:click=move |ev| {
                 ev.prevent_default();

@@ -3,7 +3,6 @@ use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    img::{ImgData, Thumb},
     util::{AlertDanger, Loading},
 };
 
@@ -43,12 +42,16 @@ pub fn PostListView(posts: Vec<PostListItem>) -> impl IntoView {
 
 #[component]
 pub fn PostListItem(post: PostListItem) -> impl IntoView {
-    let image_view = match post.hero {
-        Some(image) => Either::Left(view! { <Thumb image /> }),
-        None => Either::Right(()),
-    };
+    // let image_view = match post.hero {
+    //     Some(image) => Either::Left(view! { <Thumb image /> }),
+    //     None => Either::Right(()),
+    // };
     let href = format!("/{}/{}", post.category_slug ,post.slug);
-    view! { <A href>{image_view} <p>{post.h1}</p></A> }
+    view! {
+        <A href>
+            <p>{post.h1}</p>
+        </A>
+    }
 }
 
 #[server(GetProducts, "/api")]
@@ -70,7 +73,7 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
                 h1: data.h1,
                 category_slug: data.category_slug,
                 slug: data.slug,
-                hero: None,
+                // hero: None,
             }
         })
         .collect();
@@ -83,5 +86,5 @@ pub struct PostListItem {
     pub h1: String,
     pub category_slug: String,
     pub slug: String,
-    pub hero: Option<ImgData>,
+    // pub hero: Option<ImgData>,
 }

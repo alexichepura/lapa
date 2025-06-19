@@ -1,3 +1,9 @@
+--! read_ext
+SELECT
+  ext  
+FROM "ProductImage"
+WHERE id = :id;
+
 --! select_all_for_convert
 SELECT
     id,

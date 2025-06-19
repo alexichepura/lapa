@@ -18,7 +18,7 @@ async fn main() {
     use site::{
         routes::GenerateRouteList,
         server::{
-            cdn_handler, file_and_error_handler, img_handler, leptos_routes_handler, robots_txt, server_fn_handler, AppState, MediaConfig
+            content_image_handler, file_and_error_handler, leptos_routes_handler, product_image_handler, robots_txt, server_fn_handler, AppState, MediaConfig
         },
     };
     use tracing::info;
@@ -51,8 +51,8 @@ async fn main() {
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .route("/api/{*fn_name}", post(server_fn_handler))
         .route("/robots.txt", get(robots_txt))
-        .route("/img/{img_name}", get(img_handler))
-        .route("/cdn/{img_name}", get(cdn_handler));
+        .route("/cdn/{img_name}", get(content_image_handler))
+        .route("/product-image/{img_name}", get(product_image_handler));
 
     // #[cfg(feature = "ratelimit")]
     // let app = site::server::ratelimit(app);
