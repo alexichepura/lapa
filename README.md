@@ -4,7 +4,7 @@
 
 ## Status
 This project is under active development.\
-Recently migrated from Prisma ORM to SQL first approach with Clorinde.\
+Recently migrated from Prisma ORM to SQL first approach with [Clorinde](https://github.com/halcyonnouveau/clorinde).\
 Next is to add more CMS like features. Most important one is rich text editor.\
 I have been working on integration with Slate.js and going add it here.
 
@@ -98,6 +98,12 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 
 ```sh
 clorinde schema ./schema.sql
+```
+
+### Build rich text editor
+
+```sh
+cd slate && npm run build && cd -
 ```
 
 ### Local DB

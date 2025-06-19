@@ -266,7 +266,7 @@ const Element: FC<
         boxShadow: `${focused && selected ? "0 0 0 3px #B4D5FF" : "none"}`,
         position: "relative",
       }
-      const src = `/cdn/` + element.id;
+      const src = `/content-image/` + element.id;
       return (
         <div {...attributes}>
           <div contentEditable={false} style={style}>

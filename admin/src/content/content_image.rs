@@ -175,11 +175,12 @@ pub fn ImageUploadPreview(obj_url: ReadSignal<Option<String>>) -> impl IntoView 
 type ImageUploadResult = Result<ImageResult, ImageUploadError>;
 
 #[server(ContentImageUpload, "/api")]
-async fn upload_img(
+async fn content_image_upload(
     img: String,
     alt: String,
     content_id: String,
 ) -> Result<ImageUploadResult, ServerFnError> {
+    tracing::info!("content_image_upload {}", content_id);
     use crate::server::{db, serverr_400, use_media_config};
     let db = db::use_db().await?;
     let media_config = use_media_config()?;
@@ -221,7 +222,7 @@ async fn upload_img(
         .await
         .map_err(|e| lib::emsg(e, "Content image create"))?;
 
-    let file_path = media_config.content_upload_name_ext(&id, &ext.to_string());
+    let file_path = media_config.content_image_upload_name_ext(&id, &ext.to_string());
     tracing::debug!("upload file_path={file_path}");
     std::fs::write(file_path, img_bytes).map_err(|e| lib::emsg(e, "Content image write"))?;
     Ok(Ok(ImageResult { id }))

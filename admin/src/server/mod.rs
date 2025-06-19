@@ -82,21 +82,23 @@ pub struct AppState {
 }
 #[derive(Debug, Clone)]
 pub struct MediaConfig {
-    pub content_upload_path: String,
-    pub content_cdn_path: String,
+    pub image_upload_path: String,
 }
 impl MediaConfig {
-    pub fn hero_upload_path(&self) -> String {
-        format!("{}/hero", self.content_upload_path)
+    pub fn content_image_upload_name_ext(&self, name: &str, ext: &str) -> String {
+        format!("{}/{}.{}", self.image_upload_path, name, ext)
     }
-    pub fn hero_cdn_path(&self) -> String {
-        format!("{}/hero", self.content_cdn_path)
+    pub fn post_hero_upload_path(&self) -> String {
+        format!("{}/post_hero", self.image_upload_path)
     }
-    pub fn content_upload_name_ext(&self, name: &str, ext: &str) -> String {
-        format!("{}/{}.{}", self.content_upload_path, name, ext)
+    pub fn post_hero_upload_name_ext(&self, name: &str, ext: &str) -> String {
+        format!("{}/{}.{}", self.post_hero_upload_path(), name, ext)
     }
-    pub fn hero_upload_name_ext(&self, name: &str, ext: &str) -> String {
-        format!("{}/{}.{}", self.hero_upload_path(), name, ext)
+    pub fn product_image_upload_path(&self) -> String {
+        format!("{}/product_image", self.image_upload_path)
+    }
+    pub fn product_image_upload_name_ext(&self, name: &str, ext: &str) -> String {
+        format!("{}/{}.{}", self.product_image_upload_path(), name, ext)
     }
 }
 

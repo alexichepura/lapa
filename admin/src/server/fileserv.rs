@@ -12,6 +12,8 @@ use tower_http::services::ServeDir;
 use crate::err::AppError;
 use crate::err::ErrorTemplate;
 
+use super::MediaConfig;
+
 const MAX_AGE_MONTH: HeaderValue = HeaderValue::from_static("public, max-age=2592000");
 // const MAX_AGE_YEAR: HeaderValue = HeaderValue::from_static("public, max-age=31536000");
 
@@ -24,6 +26,36 @@ pub async fn img_handler(Path(img_name): Path<String>, req: Request<Body>) -> Ax
         res.into_response()
     } else {
         not_found_response(req).await
+    }
+}
+pub async fn content_image_handler(
+    Path(image_name): Path<String>,
+    State(media_config): State<MediaConfig>,
+    State(pool): State<clorinde::deadpool_postgres::Pool>,
+) -> Result<AxumResponse, StatusCode> {
+    let db = pool.clone().get().await.unwrap();
+    let db_image = clorinde::queries::admin_content_image::read_ext()
+        .bind(&db, &image_name)
+        .opt()
+        .await
+        .inspect_err(|e| tracing::error!("Content image read_ext error={e}"));
+    let Ok(db_image) = db_image else {
+        return Err(StatusCode::INTERNAL_SERVER_ERROR);
+    };
+    let Some(db_image) = db_image else {
+        return Err(StatusCode::NOT_FOUND);
+    };
+
+    let image_name = format!("/{image_name}.{}", db_image);
+    let uri = image_name.parse::<Uri>().unwrap();
+    let mut res = get_static_file(uri, &media_config.image_upload_path)
+        .await
+        .unwrap();
+    if res.status() == StatusCode::OK {
+        res.headers_mut().insert(CACHE_CONTROL, MAX_AGE_MONTH);
+        Ok(res.into_response())
+    } else {
+        return Err(StatusCode::NOT_FOUND);
     }
 }
 
