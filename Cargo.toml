@@ -35,12 +35,13 @@ opt-level = 'z'
 
 [workspace]
 resolver = "2"
-members = ["lib", "content", "admin", "cli"]
+members = ["lib", "content", "image_config", "admin", "cli"]
 
 [workspace.dependencies]
 clorinde = { path = "./clorinde" }
 lib = { path = "./lib" }
 content = { path = "./content" }
+image_config = { path = "./image_config" }
 axum = { version = "0.8", features = ["macros", "tracing"] }
 axum_session = { version = "0.16", default-features = false }
 axum_session_auth = { version = "0.16", default-features = false }
@@ -88,6 +89,7 @@ web-sys = { version = "0.3", features = [
 [dependencies]
 clorinde = { workspace = true, optional = true }
 content.workspace = true
+image_config.workspace = true
 lib = { workspace = true, features = ["leptos"] }
 axum = { workspace = true, optional = true }
 cfg-if = { workspace = true }

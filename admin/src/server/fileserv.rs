@@ -5,6 +5,7 @@ use axum::{
     response::{IntoResponse, Response as AxumResponse},
 };
 use http::{header::CACHE_CONTROL, HeaderValue};
+use image_config::ImageConfig;
 use leptos::prelude::*;
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
@@ -12,14 +13,12 @@ use tower_http::services::ServeDir;
 use crate::err::AppError;
 use crate::err::ErrorTemplate;
 
-use super::MediaConfig;
-
 const MAX_AGE_MONTH: HeaderValue = HeaderValue::from_static("public, max-age=2592000");
 // const MAX_AGE_YEAR: HeaderValue = HeaderValue::from_static("public, max-age=31536000");
 
 pub async fn content_image_handler(
     Path(image_name): Path<String>,
-    State(media_config): State<MediaConfig>,
+    State(image_config): State<ImageConfig>,
     State(pool): State<clorinde::deadpool_postgres::Pool>,
 ) -> Result<AxumResponse, StatusCode> {
     let db = pool.clone().get().await.unwrap();
@@ -37,7 +36,7 @@ pub async fn content_image_handler(
         tracing::error!("Content image uri parse error={e}");
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
-    let mut res = get_static_file(uri, &media_config.content_image_upload_path())
+    let mut res = get_static_file(uri, &image_config.content_image_upload_path())
         .await.map_err(|e|{
             tracing::error!("Content image file error={}", e.1);
             StatusCode::INTERNAL_SERVER_ERROR
@@ -51,7 +50,7 @@ pub async fn content_image_handler(
 }
 pub async fn product_image_handler(
     Path(image_name): Path<String>,
-    State(media_config): State<MediaConfig>,
+    State(image_config): State<ImageConfig>,
     State(pool): State<clorinde::deadpool_postgres::Pool>,
 ) -> Result<AxumResponse, StatusCode> {
     let db = pool.clone().get().await.unwrap();
@@ -69,7 +68,7 @@ pub async fn product_image_handler(
         tracing::error!("Product image uri parse error={e}");
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
-    let mut res = get_static_file(uri, &media_config.product_image_upload_path())
+    let mut res = get_static_file(uri, &image_config.product_image_upload_path())
         .await.map_err(|e|{
             tracing::error!("Product image file error={}", e.1);
             StatusCode::INTERNAL_SERVER_ERROR

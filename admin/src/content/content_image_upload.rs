@@ -14,9 +14,9 @@ pub async fn content_image_upload(
     alt: String,
     content_id: String,
 ) -> Result<Result<ImageResult, ImageUploadError>, ServerFnError> {
-    use crate::server::{db, serverr_400, use_media_config};
+    use crate::server::{db, serverr_400, use_image_config};
     let db = db::use_db().await?;
-    let media_config = use_media_config()?;
+    let media_config = use_image_config()?;
     let img_bytes = serde_json::from_str::<Vec<u8>>(&img).map_err(|e| {
         tracing::error!("{e:?}");
         serverr_400();

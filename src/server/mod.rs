@@ -6,6 +6,7 @@ use axum::{
 };
 use clorinde::queries;
 use http::StatusCode;
+use image_config::ImageConfig;
 use leptos::prelude::*;
 use leptos_axum::handle_server_fns_with_context;
 use leptos_meta::{HashedStylesheet, Link, MetaTags, Script};
@@ -71,45 +72,11 @@ pub fn Favicons() -> impl IntoView {
 pub struct AppState {
     pub leptos_options: LeptosOptions,
     pub pool: clorinde::deadpool_postgres::Pool,
-    pub media_config: MediaConfig,
+    pub image_config: ImageConfig,
 }
-#[derive(Debug, Clone)]
-pub struct MediaConfig {
-    pub image_upload_path: String,
-    pub image_convert_path: String,
-}
-impl MediaConfig {
-    pub fn content_image_upload_path(&self) -> String {
-        format!("{}/content", self.image_upload_path)
-    }
-    pub fn content_image_convert_path(&self) -> String {
-        format!("{}/content", self.image_convert_path)
-    }
-    pub fn content_image_upload_name_ext(&self, name: &str, ext: &str) -> String {
-        format!("{}/{}.{}", self.content_image_upload_path(), name, ext)
-    }
-    pub fn product_image_upload_path(&self) -> String {
-        format!("{}/product", self.image_upload_path)
-    }
-    pub fn product_image_convert_path(&self) -> String {
-        format!("{}/product", self.image_convert_path)
-    }
-    pub fn product_image_upload_name_ext(&self, name: &str, ext: &str) -> String {
-        format!("{}/{}.{}", self.product_image_upload_path(), name, ext)
-    }
-    pub fn post_hero_upload_path(&self) -> String {
-        format!("{}/post_hero", self.image_upload_path)
-    }
-    pub fn post_hero_convert_path(&self) -> String {
-        format!("{}/post_hero", self.image_convert_path)
-    }
-    pub fn post_hero_upload_name_ext(&self, name: &str, ext: &str) -> String {
-        format!("{}/{}.{}", self.post_hero_upload_path(), name, ext)
-    }
-}
-pub fn use_media_config() -> Result<MediaConfig, ServerFnError> {
-    use_context::<MediaConfig>()
-        .ok_or("MediaConfig missing.")
+pub fn use_image_config() -> Result<ImageConfig, ServerFnError> {
+    use_context::<ImageConfig>()
+        .ok_or("ImageConfig missing.")
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 

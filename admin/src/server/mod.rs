@@ -4,6 +4,7 @@ use axum::{
     http::Request,
     response::{IntoResponse, Response},
 };
+use image_config::ImageConfig;
 use leptos::prelude::*;
 use leptos_axum::handle_server_fns_with_context;
 use leptos_meta::{HashedStylesheet, Link, MetaTags, Script};
@@ -78,36 +79,12 @@ pub fn Favicons() -> impl IntoView {
 pub struct AppState {
     pub leptos_options: LeptosOptions,
     pub pool: clorinde::deadpool_postgres::Pool,
-    pub media_config: MediaConfig,
-}
-#[derive(Debug, Clone)]
-pub struct MediaConfig {
-    pub image_upload_path: String,
-}
-impl MediaConfig {
-    pub fn content_image_upload_path(&self) -> String {
-        format!("{}/content", self.image_upload_path)
-    }
-    pub fn content_image_upload_name_ext(&self, name: &str, ext: &str) -> String {
-        format!("{}/{}.{}", self.content_image_upload_path(), name, ext)
-    }
-    pub fn post_hero_upload_path(&self) -> String {
-        format!("{}/post_hero", self.image_upload_path)
-    }
-    pub fn post_hero_upload_name_ext(&self, name: &str, ext: &str) -> String {
-        format!("{}/{}.{}", self.post_hero_upload_path(), name, ext)
-    }
-    pub fn product_image_upload_path(&self) -> String {
-        format!("{}/product", self.image_upload_path)
-    }
-    pub fn product_image_upload_name_ext(&self, name: &str, ext: &str) -> String {
-        format!("{}/{}.{}", self.product_image_upload_path(), name, ext)
-    }
+    pub image_config: ImageConfig,
 }
 
-pub fn use_media_config() -> Result<MediaConfig, ServerFnError> {
-    use_context::<MediaConfig>()
-        .ok_or("MediaConfig missing.")
+pub fn use_image_config() -> Result<ImageConfig, ServerFnError> {
+    use_context::<ImageConfig>()
+        .ok_or("ImageConfig missing.")
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
@@ -134,7 +111,7 @@ pub async fn server_fn_private(
     if auth_session.current_user.is_none() {
         return (http::StatusCode::NOT_FOUND, "NOT FOUND").into_response();
     }
-    let media_config = app_state.media_config.clone();
+    let media_config = app_state.image_config.clone();
     handle_server_fns_with_context(
         move || {
             provide_context(app_state.pool.clone());

@@ -9,7 +9,7 @@ async fn main() {
     use admin::{
         app::AdminRouter,
         server::{
-            auth_session_layer, content_image_handler, file_and_error_handler, leptos_routes_handler, product_image_handler, server_fn_private, server_fn_public, session_layer, AppState, MediaConfig
+            auth_session_layer, content_image_handler, file_and_error_handler, leptos_routes_handler, product_image_handler, server_fn_private, server_fn_public, session_layer, AppState
         },
     };
     use axum::{
@@ -19,6 +19,7 @@ async fn main() {
     use clorinde::{deadpool_postgres, tokio_postgres};
     use deadpool_postgres::Runtime;
     use dotenvy::dotenv;
+    use image_config::ImageConfig;
     use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use serde::Deserialize;
@@ -51,8 +52,11 @@ async fn main() {
 
     let image_upload_path =
         std::env::var("IMAGE_UPLOAD_PATH").unwrap_or("image_upload".to_string());
-    let media_config = MediaConfig {
+    let image_convert_path =
+        std::env::var("IMAGE_CONVERT_PATH").unwrap_or("image_convert".to_string());
+    let image_config = ImageConfig {
         image_upload_path,
+        image_convert_path,
     };
 
     let private_app = Router::new()
@@ -62,7 +66,7 @@ async fn main() {
         .with_state(AppState {
             leptos_options: leptopts.clone(),
             pool: pool.clone(),
-            media_config: media_config.clone(),
+            image_config: image_config.clone(),
         })
         .layer(auth_session_layer(&pool))
         .layer(session_layer(&pool).await)
@@ -76,7 +80,7 @@ async fn main() {
         .with_state(AppState {
             leptos_options: leptopts.clone(),
             pool: pool.clone(),
-            media_config: media_config.clone(),
+            image_config: image_config.clone(),
         })
         .layer(tower_http::trace::TraceLayer::new_for_http());
 

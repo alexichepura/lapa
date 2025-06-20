@@ -39,6 +39,7 @@ dependencies = [
  "gloo-utils",
  "http",
  "image",
+ "image_config",
  "js-sys",
  "kamadak-exif",
  "leptos",
@@ -1801,6 +1802,10 @@ dependencies = [
  "byteorder-lite",
  "quick-error",
 ]
+
+[[package]]
+name = "image_config"
+version = "0.1.0"
 
 [[package]]
 name = "imgref"
@@ -3592,6 +3597,7 @@ dependencies = [
  "dotenvy",
  "http",
  "image",
+ "image_config",
  "js-sys",
  "leptos",
  "leptos_axum",

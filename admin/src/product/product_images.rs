@@ -252,13 +252,12 @@ pub async fn get_images(post_id: String) -> Result<Vec<ProductImageData>, Server
 pub async fn images_order_update(
     ids: Vec<String>,
 ) -> Result<Result<(), AppError>, ServerFnError> {
-    // TODO how this can be improved? batch, sql?
     let mut db_trx = crate::server::db::use_db().await?;
-    let db = crate::server::db::use_db().await?;
     let order_update = ids.into_iter().enumerate();
     let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images order transaction init"))?;
     for (i, id) in order_update {
-        clorinde::queries::product_image::update_order().bind(&db, &(i as i32), &id).await;
+        // TODO how this can be improved? batch, sql?
+        clorinde::queries::product_image::update_order().bind(&trx, &(i as i32), &id).await?;
     }
     trx.commit().await.map_err(|e| lib::emsg(e, "Images order transaction"))?;
     Ok(Ok(()))
@@ -293,11 +292,11 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
     let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images hero transaction init"))?;
     clorinde::queries::product_image::set_hero()
         .bind(&db, &id)
-        .await;
+        .await?;
     if let Some(current_hero) = current_hero {
         clorinde::queries::product_image::unset_hero()
             .bind(&db, &current_hero)
-            .await;
+            .await?;
     }
     trx.commit().await.map_err(|e| lib::emsg(e, "Images hero transaction"))?;
     Ok(Ok(()))

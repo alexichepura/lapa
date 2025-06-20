@@ -10,6 +10,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 lib = { workspace = true, features = ["leptos"] }
 content.workspace = true
+image_config.workspace = true
 anyhow = "1"
 async-trait = { version = "0.1", optional = true }
 axum = { workspace = true, optional = true }

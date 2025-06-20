@@ -8,7 +8,7 @@ pub async fn content_json_update(
     json: String,
 ) -> Result<Result<(), ContentError>, ServerFnError> {
     use content::{CdnImageFormat, CdnImageSize, SlateBlock, SlateBlocks};
-    let db = crate::server::db::use_db().await?;
+    let mut db = crate::server::db::use_db().await?;
     let slate_model = serde_json::from_str::<SlateBlocks>(&json)
         .map_err(|e| lib::emsg(e, "Content json is not sarialisable"))?;
     let images_ids: Vec<String> = slate_model
@@ -48,7 +48,7 @@ pub async fn content_json_update(
         }
     }
 
-    let media_config = crate::server::use_media_config()?;
+    let media_config = crate::server::use_image_config()?;
     for img in &images_to_delete {
         let path = media_config.content_image_upload_name_ext(&img.id, &img.ext);
         let upload_del_result = std::fs::remove_file(&path);
@@ -71,14 +71,14 @@ pub async fn content_json_update(
     {
         let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Content update transaction init"))?;
         if images_to_delete.len() > 0 {
-            let ids = images_to_delete.into_iter().map(|img| img.id).collect();
+            let ids_to_del: Vec<String> = images_to_delete.into_iter().map(|img| img.id).collect();
             let _deleted = clorinde::queries::admin_content_image::delete_many_by_id()
-                .bind(&trx, &images_ids)
+                .bind(&trx, &ids_to_del)
                 .await
                 .map_err(|e| lib::emsg(e, "Content images delete"))?;
         }
         clorinde::queries::admin_content::update()
-            .bind(&db, &json, &content_id)
+            .bind(&trx, &json, &content_id)
             .await
             .map_err(|e| lib::emsg(e, "Content json string update"))?;
         trx.commit().await.map_err(|e| lib::emsg(e, "Content update transaction"))?;

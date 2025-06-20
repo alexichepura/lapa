@@ -12,13 +12,14 @@ async fn main() {
     use config::ConfigError;
     use deadpool_postgres::Runtime;
     use dotenvy::dotenv;
+    use image_config::ImageConfig;
     use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use serde::Deserialize;
     use site::{
         routes::GenerateRouteList,
         server::{
-            content_image_handler, file_and_error_handler, leptos_routes_handler, product_image_handler, robots_txt, server_fn_handler, AppState, MediaConfig
+            content_image_handler, file_and_error_handler, leptos_routes_handler, product_image_handler, robots_txt, server_fn_handler, AppState
         },
     };
     use tracing::info;
@@ -65,7 +66,7 @@ async fn main() {
         std::env::var("IMAGE_UPLOAD_PATH").unwrap_or("image_upload".to_string());
     let image_convert_path =
         std::env::var("IMAGE_CONVERT_PATH").unwrap_or("image_convert".to_string());
-    let media_config = MediaConfig {
+    let image_config = ImageConfig {
         image_upload_path,
         image_convert_path,
     };
@@ -76,7 +77,7 @@ async fn main() {
         .with_state(AppState {
             leptos_options: leptopts.clone(),
             pool: pool.clone(),
-            media_config: media_config.clone(),
+            image_config: image_config.clone(),
         })
         .layer(tower_http::trace::TraceLayer::new_for_http());
 

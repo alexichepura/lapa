@@ -12,8 +12,9 @@ use http::HeaderValue;
 use http::{header::CACHE_CONTROL, HeaderMap};
 use image::imageops::FilterType;
 use image::ImageFormat;
+use image_config::ImageConfig;
 
-use super::{serve_file, MediaConfig, MAX_AGE_MONTH};
+use super::{serve_file, MAX_AGE_MONTH};
 
 const VARY_ACCEPT: HeaderValue = HeaderValue::from_static("Accept");
 
@@ -32,7 +33,7 @@ impl ToImageFormat for CdnImageFormat {
 
 pub async fn content_image_handler(
     Path(img_name): Path<String>,
-    State(media_config): State<MediaConfig>,
+    State(image_config): State<ImageConfig>,
     State(pool): State<clorinde::deadpool_postgres::Pool>,
     headers: HeaderMap,
 ) -> Result<AxumResponse, StatusCode> {
@@ -53,7 +54,7 @@ pub async fn content_image_handler(
         tracing::error!("cdn uri parse error={e:?}");
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
-    let mut cdn_res = serve_file(&uri, &media_config.content_image_convert_path())
+    let mut cdn_res = serve_file(&uri, &image_config.content_image_convert_path())
         .await
         .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
     if cdn_res.status() == StatusCode::OK {
@@ -73,14 +74,14 @@ pub async fn content_image_handler(
             .ok_or(StatusCode::NOT_FOUND)?;
 
         let img_name = format!("/{image_name}.{}", db_image_ext);
-        let path = format!("{}{}", &media_config.content_image_upload_path(), img_name);
+        let path = format!("{}{}", &image_config.content_image_upload_path(), img_name);
         tracing::trace!("upload_path={}", path);
         let dynamic_image = image::open(&path).map_err(|e| {
             tracing::error!("cdn image error={e:?}");
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
         let variant = dynamic_image.resize(img_size.to_width(), u32::MAX, FilterType::Lanczos3);
-        let cdn_image_path = format!("{}{}", &media_config.content_image_convert_path(), uri);
+        let cdn_image_path = format!("{}{}", &image_config.content_image_convert_path(), uri);
         variant
             .save_with_format(cdn_image_path, cdn_format.to_image_format())
             .map_err(|e| {
@@ -88,7 +89,7 @@ pub async fn content_image_handler(
                 StatusCode::INTERNAL_SERVER_ERROR
             })?;
 
-        let mut cdn_res = serve_file(&uri, &media_config.content_image_convert_path())
+        let mut cdn_res = serve_file(&uri, &image_config.content_image_convert_path())
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         if cdn_res.status() == StatusCode::OK {
@@ -102,7 +103,7 @@ pub async fn content_image_handler(
 }
 pub async fn product_image_handler(
     Path(img_name): Path<String>,
-    State(media_config): State<MediaConfig>,
+    State(image_config): State<ImageConfig>,
     State(pool): State<clorinde::deadpool_postgres::Pool>,
     headers: HeaderMap,
 ) -> Result<AxumResponse, StatusCode> {
@@ -123,7 +124,7 @@ pub async fn product_image_handler(
         tracing::error!("cdn uri parse error={e:?}");
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
-    let mut cdn_res = serve_file(&uri, &media_config.product_image_convert_path())
+    let mut cdn_res = serve_file(&uri, &image_config.product_image_convert_path())
         .await
         .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
     if cdn_res.status() == StatusCode::OK {
@@ -143,14 +144,14 @@ pub async fn product_image_handler(
             .ok_or(StatusCode::NOT_FOUND)?;
 
         let img_name = format!("/{image_name}.{}", db_image_ext);
-        let path = format!("{}{}", &media_config.product_image_upload_path(), img_name);
+        let path = format!("{}{}", &image_config.product_image_upload_path(), img_name);
         tracing::trace!("upload_path={}", path);
         let dynamic_image = image::open(&path).map_err(|e| {
             tracing::error!("cdn image error={e:?}");
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
         let variant = dynamic_image.resize(img_size.to_width(), u32::MAX, FilterType::Lanczos3);
-        let cdn_image_path = format!("{}{}", &media_config.product_image_convert_path(), uri);
+        let cdn_image_path = format!("{}{}", &image_config.product_image_convert_path(), uri);
         variant
             .save_with_format(cdn_image_path, cdn_format.to_image_format())
             .map_err(|e| {
@@ -158,7 +159,7 @@ pub async fn product_image_handler(
                 StatusCode::INTERNAL_SERVER_ERROR
             })?;
 
-        let mut cdn_res = serve_file(&uri, &media_config.product_image_convert_path())
+        let mut cdn_res = serve_file(&uri, &image_config.product_image_convert_path())
             .await
             .map_err(|_e| StatusCode::INTERNAL_SERVER_ERROR)?;
         if cdn_res.status() == StatusCode::OK {
