@@ -5,13 +5,15 @@
 ## Status
 This project is under active development.\
 Recently migrated from Prisma ORM to SQL first approach with [Clorinde](https://github.com/halcyonnouveau/clorinde).\
-Next is to add more CMS like features. Most important one is rich text editor.\
-I have been working on integration with Slate.js and going add it here.
+Also added integration with Slate.js for rich text editor because we don't have a good one in Rust yet.\
 
 ---
 
 Intro: <https://youtu.be/6eMWAI1D-XA> \
 Demo site: <https://lapa.chepura.space>
+
+---
+Screenshots below are outdated and to be updated.
 
 <img width="360" alt="Site Home" src="https://github.com/alexichepura/lapa/assets/5582266/66326ce4-c61c-4fcc-a9f3-1f0548bb8c60">
 <img width="360" alt="Site Home" src="https://github.com/alexichepura/lapa/assets/5582266/4a0f0d99-fd95-4abe-84bb-30e43c9aeeaa">
