@@ -203,29 +203,6 @@ impl SelectAllForConvertStmt {
         }
     }
 }
-pub fn delete_many_by_id() -> DeleteManyByIdStmt {
-    DeleteManyByIdStmt(crate::client::async_::Stmt::new(
-        "DELETE FROM \"ProductImage\" WHERE id = ANY($1)",
-    ))
-}
-pub struct DeleteManyByIdStmt(crate::client::async_::Stmt);
-impl DeleteManyByIdStmt {
-    pub async fn bind<
-        'c,
-        'a,
-        's,
-        C: GenericClient,
-        T1: crate::StringSql,
-        T2: crate::ArraySql<Item = T1>,
-    >(
-        &'s mut self,
-        client: &'c C,
-        ids: &'a T2,
-    ) -> Result<u64, tokio_postgres::Error> {
-        let stmt = self.0.prepare(client).await?;
-        client.execute(stmt, &[ids]).await
-    }
-}
 pub fn delete_by_id() -> DeleteByIdStmt {
     DeleteByIdStmt(crate::client::async_::Stmt::new(
         "DELETE FROM \"ProductImage\" WHERE id = $1",

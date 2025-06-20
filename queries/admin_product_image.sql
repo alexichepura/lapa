@@ -7,3 +7,8 @@ SELECT
   ext  
 FROM "ProductImage"
 WHERE id = :id;
+
+--! delete_many_by_id
+DELETE
+FROM "ProductImage"
+WHERE id = ANY(:ids);

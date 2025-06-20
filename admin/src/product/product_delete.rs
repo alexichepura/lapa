@@ -67,7 +67,7 @@ pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, Serv
 
     {
         let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Product delete transaction init"))?;
-        let _deleted = clorinde::queries::product_image::delete_many_by_id()
+        let _deleted = clorinde::queries::admin_product_image::delete_many_by_id()
             .bind(&trx, &images_ids)
             .await
             .map_err(|e| lib::emsg(e, "Product images delete"))?;

@@ -10,10 +10,6 @@ SELECT
     ext
 FROM "ProductImage";
 
---! delete_many_by_id
-DELETE
-FROM "ProductImage"
-WHERE id = ANY(:ids);
 
 --! delete_by_id
 DELETE

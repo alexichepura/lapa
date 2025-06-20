@@ -71,13 +71,16 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
     let deleted_count = clorinde::queries::product_image::delete_by_id()
         .bind(&db, &id)
         .await
-        .map_err(|e| lib::emsg(e, "Image delete"))?;
+        .map_err(|e| lib::emsg(e, "Product image delete"))?;
     if deleted_count == 0 {
         crate::server::serverr_404();
         return Ok(Err(AppError::NotFound));
     }
     // TODO
     // delete_image_on_server(&id);
+    // if let Err(e) = std::fs::remove_file(crate::image::img_path_small(&id)) {
+    //     tracing::error!("remove_file e={e}");
+    // };
     Ok(Ok(()))
 }
 

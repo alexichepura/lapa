@@ -21,75 +21,67 @@ pub async fn content_json_update(
             };
         })
         .collect();
-    let content = clorinde::queries::admin_content::read()
+    let _current_content = clorinde::queries::admin_content::read() // TODO "exists" method?
         .bind(&db, &content_id)
         .opt()
         .await
-        .map_err(|e| lib::emsg(e, "Content find"))?;
-    // let current_content = prisma_web_client
-    //     .content()
-    //     .find_unique(db::content::id::equals(content_id.clone()))
-    //     .select(db::content::select!({
-    //         content_image: select {
-    //             id
-    //             ext
-    //         }
-    //     }))
-    //     .exec()
-    //     .await
-    //     .map_err(|e| lib::emsg(e, "Content find_unique"))?;
-    let Some(current_content) = content else {
-        crate::server::serverr_404();
-        return Ok(Err(ContentError::NotFound));
-    };
+        .map_err(|e| lib::emsg(e, "Content find"))?.ok_or_else(|| {
+            crate::server::serverr_404();
+            ContentError::NotFound
+        })?;
     struct ImageToDelete {
         id: String,
         ext: String,
     }
-    let mut images_to_delete: Vec<ImageToDelete> = vec![];
-    // for img in current_content.content_image {
-    //     if !images_ids.contains(&img.id) {
-    //         images_to_delete.push(ImageToDelete {
-    //             id: img.id,
-    //             ext: img.ext,
-    //         });
-    //     }
-    // }
-
-    // let media_config = crate::server::use_media_config()?;
-    // for img in &images_to_delete {
-    //     let path = media_config.content_upload_name_ext(&img.id, &img.ext);
-    //     let upload_del_result = std::fs::remove_file(&path);
-    //     if let Err(e) = upload_del_result {
-    //         tracing::debug!("image upload del {path} e={e}");
-    //     }
-    //     for image_format in CdnImageFormat::VALUES {
-    //         for image_size in CdnImageSize::VALUES {
-    //             let cdn_path = format!(
-    //                 "{}/{}_{}.{}",
-    //                 media_config.content_cdn_path, img.id, image_size, image_format
-    //             );
-    //             let cdn_del_result = std::fs::remove_file(&cdn_path);
-    //             if let Err(e) = cdn_del_result {
-    //                 tracing::debug!("image cdn del {cdn_path} e={e}");
-    //             }
-    //         }
-    //     }
-    // }
-
-    // if images_to_delete.len() > 0 {
-    //     let ids = images_to_delete.into_iter().map(|img| img.id).collect();
-    //     prisma_web_client
-    //         .content_image()
-    //         .delete_many(vec![db::content_image::id::in_vec(ids)])
-    //         .exec()
-    //         .await
-    //         .map_err(|e| lib::emsg(e, "content_image delete_many"))?;
-    // }
-
-    clorinde::queries::admin_content::update()
-        .bind(&db, &json, &content_id)
+    let content_images = clorinde::queries::admin_content_image::read_by_content()
+        .bind(&db, &content_id)
+        .all()
         .await
-        .map_err(|e| lib::emsg(e, "Content json string update"))?;
+        .map_err(|e| lib::emsg(e, "Content images find"))?;
+    let mut images_to_delete: Vec<ImageToDelete> = vec![];
+    for img in content_images {
+        if !images_ids.contains(&img.id) {
+            images_to_delete.push(ImageToDelete {
+                id: img.id,
+                ext: img.ext,
+            });
+        }
+    }
+
+    let media_config = crate::server::use_media_config()?;
+    for img in &images_to_delete {
+        let path = media_config.content_image_upload_name_ext(&img.id, &img.ext);
+        let upload_del_result = std::fs::remove_file(&path);
+        if let Err(e) = upload_del_result {
+            tracing::debug!("image upload del {path} e={e}");
+        }
+        for image_format in CdnImageFormat::VALUES {
+            for image_size in CdnImageSize::VALUES {
+                let cdn_path = format!(
+                    "{}/{}_{}.{}",
+                    media_config.content_image_convert_path(), img.id, image_size, image_format
+                );
+                let cdn_del_result = std::fs::remove_file(&cdn_path);
+                if let Err(e) = cdn_del_result {
+                    tracing::debug!("image cdn del {cdn_path} e={e}");
+                }
+            }
+        }
+    }
+    {
+        let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Content update transaction init"))?;
+        if images_to_delete.len() > 0 {
+            let ids = images_to_delete.into_iter().map(|img| img.id).collect();
+            let _deleted = clorinde::queries::admin_content_image::delete_many_by_id()
+                .bind(&trx, &images_ids)
+                .await
+                .map_err(|e| lib::emsg(e, "Content images delete"))?;
+        }
+        clorinde::queries::admin_content::update()
+            .bind(&db, &json, &content_id)
+            .await
+            .map_err(|e| lib::emsg(e, "Content json string update"))?;
+        trx.commit().await.map_err(|e| lib::emsg(e, "Content update transaction"))?;
+    };
     return Ok(Ok(()));
 }
