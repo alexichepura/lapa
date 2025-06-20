@@ -12,14 +12,14 @@ async fn main() {
     use config::ConfigError;
     use deadpool_postgres::Runtime;
     use dotenvy::dotenv;
+    use image_config::ImageConfig;
     use leptos::prelude::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
     use serde::Deserialize;
     use site::{
         routes::GenerateRouteList,
         server::{
-            file_and_error_handler, img_handler, leptos_routes_handler,
-            robots_txt, server_fn_handler, AppState,
+            content_image_handler, file_and_error_handler, leptos_routes_handler, product_image_handler, robots_txt, server_fn_handler, AppState
         },
     };
     use tracing::info;
@@ -52,18 +52,35 @@ async fn main() {
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .route("/api/{*fn_name}", post(server_fn_handler))
         .route("/robots.txt", get(robots_txt))
-        .route("/img/{img_name}", get(img_handler))
+        .route("/cdn/{img_name}", get(content_image_handler))
+        .route("/product-image/{img_name}", get(product_image_handler));
+
+    // #[cfg(feature = "ratelimit")]
+    // let app = site::server::ratelimit(app);
+    #[cfg(feature = "compression")]
+    let app = site::server::compression(app, &leptopts.site_pkg_dir, &leptopts.site_root);
+    #[cfg(not(feature = "compression"))]
+    let app = app.route("/pkg/{*file}", get(file_and_error_handler));
+
+    let image_upload_path =
+        std::env::var("IMAGE_UPLOAD_PATH").unwrap_or("image_upload".to_string());
+    let image_convert_path =
+        std::env::var("IMAGE_CONVERT_PATH").unwrap_or("image_convert".to_string());
+    let image_config = ImageConfig {
+        image_upload_path,
+        image_convert_path,
+    };
+
+    let app = app
+        // .merge(favicons)
         .fallback(file_and_error_handler)
         .with_state(AppState {
             leptos_options: leptopts.clone(),
             pool: pool.clone(),
+            image_config: image_config.clone(),
         })
         .layer(tower_http::trace::TraceLayer::new_for_http());
 
-    #[cfg(feature = "ratelimit")]
-    let app = site::server::ratelimit(app);
-    #[cfg(feature = "compression")]
-    let app = site::server::compression(app, &leptopts.site_pkg_dir, &leptopts.site_root);
 
     info!("starting to listen TCP on http://{}", &leptopts.site_addr);
     let listener = tokio::net::TcpListener::bind(&leptopts.site_addr)

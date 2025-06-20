@@ -32,11 +32,14 @@ dependencies = [
  "clorinde",
  "config",
  "console_error_panic_hook",
+ "content",
  "cuid2",
  "deadpool-postgres",
  "dotenvy",
+ "gloo-utils",
  "http",
  "image",
+ "image_config",
  "js-sys",
  "kamadak-exif",
  "leptos",
@@ -861,6 +864,15 @@ name = "const_str_slice_concat"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f67855af358fcb20fac58f9d714c94e2b228fe5694c1c9b4ead4a366343eda1b"
+
+[[package]]
+name = "content"
+version = "0.1.0"
+dependencies = [
+ "html-escape",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "convert_case"
@@ -1790,6 +1802,10 @@ dependencies = [
  "byteorder-lite",
  "quick-error",
 ]
+
+[[package]]
+name = "image_config"
+version = "0.1.0"
 
 [[package]]
 name = "imgref"
@@ -3576,9 +3592,12 @@ dependencies = [
  "clorinde",
  "config",
  "console_error_panic_hook",
+ "content",
  "deadpool-postgres",
  "dotenvy",
  "http",
+ "image",
+ "image_config",
  "js-sys",
  "leptos",
  "leptos_axum",

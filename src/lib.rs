@@ -7,9 +7,9 @@ cfg_if::cfg_if! {if #[cfg(feature = "ssr")] {
 pub mod app;
 pub mod err;
 pub mod home;
-pub mod img;
-pub mod post_list;
-pub mod post_page;
+pub mod product_list;
+pub mod product_page;
+pub mod post;
 pub mod routes;
 pub mod settings;
 pub mod util;

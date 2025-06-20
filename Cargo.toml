@@ -35,11 +35,13 @@ opt-level = 'z'
 
 [workspace]
 resolver = "2"
-members = ["lib", "admin", "cli"]
+members = ["lib", "content", "image_config", "admin", "cli"]
 
 [workspace.dependencies]
 clorinde = { path = "./clorinde" }
 lib = { path = "./lib" }
+content = { path = "./content" }
+image_config = { path = "./image_config" }
 axum = { version = "0.8", features = ["macros", "tracing"] }
 axum_session = { version = "0.16", default-features = false }
 axum_session_auth = { version = "0.16", default-features = false }
@@ -51,7 +53,11 @@ console_error_panic_hook = "0.1"
 cuid2 = "0.1.4"
 deadpool-postgres = { version = "0.14.1", features = ["serde"] }
 dotenvy = "0.15.7"
+gloo-utils = { version = "0.2" }
+html-escape = "0.2.13"
 http = "1.0"
+# image = { version = "0.25.6", features=["avif-native"] }
+image = { version = "0.25.6", features=[] }
 js-sys = { version = "0.3" }
 leptos = { version = "0.8", features = ["nightly", "tracing"] }
 leptos_axum = { version = "0.8" }
@@ -82,6 +88,8 @@ web-sys = { version = "0.3", features = [
 
 [dependencies]
 clorinde = { workspace = true, optional = true }
+content.workspace = true
+image_config.workspace = true
 lib = { workspace = true, features = ["leptos"] }
 axum = { workspace = true, optional = true }
 cfg-if = { workspace = true }
@@ -90,6 +98,7 @@ config = { workspace = true, optional = true }
 console_error_panic_hook = { workspace = true }
 deadpool-postgres = { workspace = true, optional = true }
 dotenvy = { workspace = true, optional = true }
+image = { workspace = true, optional = true }
 http = { workspace = true }
 js-sys = { workspace = true, optional = true }
 leptos = { workspace = true }
@@ -131,14 +140,15 @@ ssr = [
     "dep:config",
     "dep:dotenvy",
     "dep:deadpool-postgres",
-    "tokio/rt-multi-thread",
     "dep:tower_governor",
     "dep:tower-http",
     "dep:tower",
     "dep:tracing-subscriber",
+    "dep:image",
     "leptos_meta/ssr",
     "leptos_router/ssr",
     "leptos/ssr",
+    "tokio/rt-multi-thread",
 ]
 
 [package.metadata.cargo-all-features]

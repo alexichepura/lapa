@@ -9,12 +9,15 @@ pub mod auth;
 pub mod err;
 pub mod form;
 pub mod home;
-pub mod image;
 pub mod layout;
+pub mod product;
 pub mod post;
 pub mod settings;
 pub mod upload;
 pub mod util;
+pub mod slate;
+pub mod category;
+pub mod content;
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]

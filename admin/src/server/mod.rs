@@ -4,6 +4,7 @@ use axum::{
     http::Request,
     response::{IntoResponse, Response},
 };
+use image_config::ImageConfig;
 use leptos::prelude::*;
 use leptos_axum::handle_server_fns_with_context;
 use leptos_meta::{HashedStylesheet, Link, MetaTags, Script};
@@ -78,6 +79,13 @@ pub fn Favicons() -> impl IntoView {
 pub struct AppState {
     pub leptos_options: LeptosOptions,
     pub pool: clorinde::deadpool_postgres::Pool,
+    pub image_config: ImageConfig,
+}
+
+pub fn use_image_config() -> Result<ImageConfig, ServerFnError> {
+    use_context::<ImageConfig>()
+        .ok_or("ImageConfig missing.")
+        .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
 pub async fn server_fn_public(
@@ -103,10 +111,13 @@ pub async fn server_fn_private(
     if auth_session.current_user.is_none() {
         return (http::StatusCode::NOT_FOUND, "NOT FOUND").into_response();
     }
+    let media_config = app_state.image_config.clone();
     handle_server_fns_with_context(
         move || {
             provide_context(app_state.pool.clone());
             provide_context(auth_session.clone());
+            provide_context(media_config.clone());
+
         },
         request,
     )

@@ -4,14 +4,16 @@
 
 ## Status
 This project is under active development.\
-Recently migrated from Prisma ORM to SQL first approach with Clorinde.\
-Next is to add more CMS like features. Most important one is rich text editor.\
-I have been working on integration with Slate.js and going add it here.
+Recently migrated from Prisma ORM to SQL first approach with [Clorinde](https://github.com/halcyonnouveau/clorinde).\
+Also added integration with Slate.js for rich text editor because we don't have a good one in Rust yet.\
 
 ---
 
 Intro: <https://youtu.be/6eMWAI1D-XA> \
 Demo site: <https://lapa.chepura.space>
+
+---
+Screenshots below are outdated and to be updated.
 
 <img width="360" alt="Site Home" src="https://github.com/alexichepura/lapa/assets/5582266/66326ce4-c61c-4fcc-a9f3-1f0548bb8c60">
 <img width="360" alt="Site Home" src="https://github.com/alexichepura/lapa/assets/5582266/4a0f0d99-fd95-4abe-84bb-30e43c9aeeaa">
@@ -53,8 +55,7 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 - project
   - SEO site
   - admin dashboard
-  - CLI with clap: settings-init, user-add, migrate
-  - db schema: user, session, post, image, settings
+  - CLI with clap: settings-init, user-add
   - ops scripts: build, upload, run (site, admin, cli)
 - site
   - SSR + SPA hydrated
@@ -66,18 +67,21 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 - admin auth and session with
   - axum_session [AscendingCreations/AxumSessions](https://github.com/AscendingCreations/AxumSessions)
   - axum_session_auth [AscendingCreations/AxumSessionsAuth](https://github.com/AscendingCreations/AxumSessionsAuth)
+- rich text content editor integration with [ianstormtaylor/slatejs](https://github.com/ianstormtaylor/slate) 
 - post
-  - admin CRUDL
-  - published_at
-- images
-  - preview and upload
-  - resize and convert on backend
-  - order in gallery
-  - is_hero flag
-  - delete and alt update in "dialog"
+  - CRUDL
+  - publish_at
+- product
+  - CRUDL
+  - publish_at
+  - product images
+    - preview and upload
+    - resize and convert on backend
+    - order
+    - is_hero flag
+    - delete and alt update in "dialog"
 - settings
   - robots.txt, site_url
-  - images sizes
   - home_text
 - css
   - based on <https://open-props.style>
@@ -96,6 +100,12 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 
 ```sh
 clorinde schema ./schema.sql
+```
+
+### Build rich text editor
+
+```sh
+cd slate && npm run build && cd -
 ```
 
 ### Local DB

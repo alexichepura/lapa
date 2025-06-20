@@ -4,13 +4,9 @@ cfg_if::cfg_if! { if #[cfg(feature = "ssr")] {
 }}
 mod settings_error;
 mod settings_home;
-mod settings_images;
-mod settings_images_convert;
 mod settings_site;
 pub use settings_error::*;
 pub use settings_home::*;
-pub use settings_images::*;
-pub use settings_images_convert::*;
 pub use settings_site::*;
 
 use leptos::{either::Either, prelude::*};
@@ -22,10 +18,6 @@ use crate::util::Loading;
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SettingsCx {
     pub site_url: String,
-    pub hero_width: i32,
-    pub hero_height: i32,
-    pub thumb_width: i32,
-    pub thumb_height: i32,
 }
 pub type SettingsSignal = RwSignal<SettingsCx>;
 pub fn use_settings() -> SettingsSignal {
@@ -45,10 +37,6 @@ pub struct SettingsData {
     pub robots_txt: String,
     pub site_url: String,
     pub home_text: String,
-    pub hero_width: i32,
-    pub hero_height: i32,
-    pub thumb_width: i32,
-    pub thumb_height: i32,
 }
 
 impl From<&SettingsData> for SettingsHome {
@@ -59,16 +47,6 @@ impl From<&SettingsData> for SettingsHome {
     }
 }
 
-impl From<&SettingsData> for SettingsImages {
-    fn from(data: &SettingsData) -> Self {
-        SettingsImages {
-            hero_width: data.hero_width,
-            hero_height: data.hero_height,
-            thumb_width: data.thumb_width,
-            thumb_height: data.thumb_height,
-        }
-    }
-}
 impl From<&SettingsData> for SettingsSite {
     fn from(data: &SettingsData) -> Self {
         SettingsSite {
@@ -113,12 +91,6 @@ pub fn Settings() -> impl IntoView {
                                         <SettingsHomeForm settings=SettingsHome::from(&settings) />
                                         <SettingsSiteForm settings=SettingsSite::from(&settings) />
                                     </div>
-                                    <div class="Grid-fluid-2">
-                                        <SettingsImagesForm settings=SettingsImages::from(
-                                            &settings,
-                                        ) />
-                                        <ImagesConvertView />
-                                    </div>
                                 },
                             )
                         }
@@ -146,10 +118,6 @@ pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
     let settings = SettingsData {
         robots_txt: settings.robots_txt,
         site_url: settings.site_url,
-        hero_width: settings.hero_width,
-        hero_height: settings.hero_height,
-        thumb_width: settings.thumb_width,
-        thumb_height: settings.thumb_height,
         home_text: settings.home_text,
     };
     Ok(Ok(settings))

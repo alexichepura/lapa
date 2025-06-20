@@ -1,31 +1,20 @@
+use std::convert::Infallible;
 use axum::{
     body::Body,
-    extract::{Path, State},
+    extract::State,
     http::{Request, Response, StatusCode, Uri},
     response::{IntoResponse, Response as AxumResponse},
 };
-use http::{header::CACHE_CONTROL, HeaderValue};
+use http::HeaderValue;
 use leptos::prelude::*;
 use tower::ServiceExt;
-use tower_http::services::ServeDir;
+use tower_http::services::{fs::ServeFileSystemResponseBody, ServeDir};
 
 use crate::err::AppError;
 use crate::err::ErrorTemplate;
 
-const MAX_AGE_MONTH: HeaderValue = HeaderValue::from_static("public, max-age=2592000");
+pub const MAX_AGE_MONTH: HeaderValue = HeaderValue::from_static("public, max-age=2592000");
 // const MAX_AGE_YEAR: HeaderValue = HeaderValue::from_static("public, max-age=31536000");
-
-pub async fn img_handler(Path(img_name): Path<String>, req: Request<Body>) -> AxumResponse {
-    let img_name = format!("/{img_name}");
-    let uri = img_name.parse::<Uri>().unwrap();
-    let mut res = get_static_file(uri, &"img").await.unwrap();
-    if res.status() == StatusCode::OK {
-        res.headers_mut().insert(CACHE_CONTROL, MAX_AGE_MONTH);
-        res.into_response()
-    } else {
-        not_found_response(req).await
-    }
-}
 
 pub async fn file_and_error_handler(
     uri: Uri,
@@ -38,6 +27,14 @@ pub async fn file_and_error_handler(
     } else {
         not_found_response(req).await
     }
+}
+
+pub async fn serve_file(
+    uri: &Uri,
+    root: &str,
+) -> Result<Response<ServeFileSystemResponseBody>, Infallible> {
+    let req = Request::builder().uri(uri).body(Body::empty()).unwrap();
+    ServeDir::new(root).oneshot(req).await
 }
 
 async fn get_static_file(uri: Uri, root: &str) -> Result<Response<Body>, (StatusCode, String)> {

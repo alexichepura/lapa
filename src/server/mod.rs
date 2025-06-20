@@ -6,6 +6,7 @@ use axum::{
 };
 use clorinde::queries;
 use http::StatusCode;
+use image_config::ImageConfig;
 use leptos::prelude::*;
 use leptos_axum::handle_server_fns_with_context;
 use leptos_meta::{HashedStylesheet, Link, MetaTags, Script};
@@ -21,8 +22,10 @@ cfg_if! {if #[cfg(feature = "compression")] {
 }}
 
 pub mod db;
+pub mod cdn;
 pub mod err;
 pub mod fileserv;
+pub use cdn::*;
 pub use err::*;
 pub use fileserv::*;
 
@@ -69,6 +72,12 @@ pub fn Favicons() -> impl IntoView {
 pub struct AppState {
     pub leptos_options: LeptosOptions,
     pub pool: clorinde::deadpool_postgres::Pool,
+    pub image_config: ImageConfig,
+}
+pub fn use_image_config() -> Result<ImageConfig, ServerFnError> {
+    use_context::<ImageConfig>()
+        .ok_or("ImageConfig missing.")
+        .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
 pub async fn server_fn_handler(

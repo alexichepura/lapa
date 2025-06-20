@@ -9,6 +9,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 lib = { workspace = true, features = ["leptos"] }
+content.workspace = true
+image_config.workspace = true
 anyhow = "1"
 async-trait = { version = "0.1", optional = true }
 axum = { workspace = true, optional = true }
@@ -23,8 +25,9 @@ console_error_panic_hook = { workspace = true }
 cuid2 = { workspace = true, optional = true }
 deadpool-postgres = { workspace = true, optional = true }
 dotenvy = { workspace = true, optional = true }
+gloo-utils = { workspace = true }
 http = { workspace = true }
-image = { version = "0.25.5", optional = true }
+image = { workspace = true, optional = true }
 js-sys = { workspace = true, optional = true }
 kamadak-exif = { version = "0.6.1", optional = true }
 leptos = { workspace = true }

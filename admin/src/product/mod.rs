@@ -1,0 +1,18 @@
+mod product_create;
+mod product_delete;
+mod product_error;
+mod product_form;
+mod product_image_edit;
+mod product_image_upload;
+mod product_images;
+mod product_list;
+mod product_page;
+pub use product_create::*;
+pub use product_delete::*;
+pub use product_error::*;
+pub use product_form::*;
+pub use product_image_edit::*;
+pub use product_image_upload::*;
+pub use product_images::*;
+pub use product_list::*;
+pub use product_page::*;
