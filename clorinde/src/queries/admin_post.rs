@@ -493,22 +493,6 @@ impl<
         ))
     }
 }
-pub fn delete() -> DeleteStmt {
-    DeleteStmt(crate::client::async_::Stmt::new(
-        "DELETE FROM \"Post\" WHERE id = $1",
-    ))
-}
-pub struct DeleteStmt(crate::client::async_::Stmt);
-impl DeleteStmt {
-    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
-        &'s mut self,
-        client: &'c C,
-        id: &'a T1,
-    ) -> Result<u64, tokio_postgres::Error> {
-        let stmt = self.0.prepare(client).await?;
-        client.execute(stmt, &[id]).await
-    }
-}
 pub fn list() -> ListStmt {
     ListStmt(crate::client::async_::Stmt::new(
         "SELECT id, created_at, publish_at, h1 FROM \"Post\"",
@@ -536,13 +520,13 @@ impl ListStmt {
         }
     }
 }
-pub fn by_id_check() -> ByIdCheckStmt {
-    ByIdCheckStmt(crate::client::async_::Stmt::new(
-        "SELECT id FROM \"Post\" WHERE id = $1",
+pub fn read_content_id() -> ReadContentIdStmt {
+    ReadContentIdStmt(crate::client::async_::Stmt::new(
+        "SELECT content_id FROM \"Post\" WHERE id = $1",
     ))
 }
-pub struct ByIdCheckStmt(crate::client::async_::Stmt);
-impl ByIdCheckStmt {
+pub struct ReadContentIdStmt(crate::client::async_::Stmt);
+impl ReadContentIdStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s mut self,
         client: &'c C,

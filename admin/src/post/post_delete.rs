@@ -54,24 +54,53 @@ type PostDeleteResult = Result<(), PostError>;
 
 #[server(PostDelete, "/api")]
 pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> {
-    let mut db = crate::server::db::use_db().await?;
-    let exists = clorinde::queries::admin_post::by_id_check()
+    let db = crate::server::db::use_db().await?;
+    let content_id = clorinde::queries::admin_post::read_content_id()
         .bind(&db, &id)
         .opt()
         .await
-        .map_err(|e| lib::emsg(e, "Post by id check"))?
-        .is_some();
-    if !exists {
-        crate::server::serverr_404();
-        return Ok(Err(PostError::NotFound));
+        .map_err(|e| lib::emsg(e, "Post read content id"))?
+        .ok_or_else(|| {
+            crate::server::serverr_404();
+            PostError::NotFound
+        })?;
+    let content_images = clorinde::queries::admin_content_image::read_by_content()
+        .bind(&db, &content_id)
+        .all()
+        .await
+        .map_err(|e| lib::emsg(e, "Content images find"))?;
+    let image_config = crate::server::use_image_config()?;
+    for img in &content_images {
+        let path = image_config.content_image_upload_name_ext(&img.id, &img.ext);
+        let upload_del_result = std::fs::remove_file(&path);
+        if let Err(e) = upload_del_result {
+            tracing::debug!("image upload del {path} e={e}");
+        }
+        for image_format in content::CdnImageFormat::VALUES {
+            for image_size in content::CdnImageSize::VALUES {
+                let cdn_path = format!(
+                    "{}/{}_{}.{}",
+                    image_config.content_image_convert_path(), img.id, image_size, image_format
+                );
+                let cdn_del_result = std::fs::remove_file(&cdn_path);
+                if let Err(e) = cdn_del_result {
+                    tracing::debug!("image cdn del {cdn_path} e={e}");
+                }
+            }
+        }
     }
-    {
-        let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Post delete transaction init"))?;
-        let _deleted = clorinde::queries::admin_post::delete()
-            .bind(&trx, &id)
-            .await
-            .map_err(|e| lib::emsg(e, "Post delete"))?;
-        trx.commit().await.map_err(|e| lib::emsg(e, "Post delete transaction"))?;
-    };
+    // post and content images should be cascade deleted
+    let _deleted = clorinde::queries::admin_content::delete()
+        .bind(&db, &content_id)
+        .await
+        .map_err(|e| lib::emsg(e, "Content delete"))?;
+    // {
+    //     let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Post delete transaction init"))?;
+    //     let _deleted = clorinde::queries::admin_post::delete()
+    //         .bind(&trx, &id)
+    //         .await
+    //         .map_err(|e| lib::emsg(e, "Post delete"))?;
+    //     trx.commit().await.map_err(|e| lib::emsg(e, "Post delete transaction"))?;
+    // };
     Ok(Ok(()))
 }

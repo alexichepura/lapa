@@ -166,3 +166,19 @@ impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql, T2: crate::String
         Box::pin(self.bind(client, &params.json, &params.id))
     }
 }
+pub fn delete() -> DeleteStmt {
+    DeleteStmt(crate::client::async_::Stmt::new(
+        "DELETE FROM \"Content\" WHERE id = $1",
+    ))
+}
+pub struct DeleteStmt(crate::client::async_::Stmt);
+impl DeleteStmt {
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+        &'s mut self,
+        client: &'c C,
+        id: &'a T1,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let stmt = self.0.prepare(client).await?;
+        client.execute(stmt, &[id]).await
+    }
+}

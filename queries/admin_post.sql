@@ -22,8 +22,8 @@ UPDATE "Post"
 SET publish_at = :publish_at, slug = :slug, meta_title = :meta_title, meta_description = :meta_description, h1 = :h1
 WHERE id = :id;
 
---! delete
-DELETE FROM "Post" WHERE id = :id;
+-- --! delete
+-- DELETE FROM "Post" WHERE id = :id;
 
 --! list : (publish_at?)
 SELECT
@@ -33,9 +33,9 @@ SELECT
     h1
 FROM "Post";
 
---! by_id_check
+--! read_content_id
 SELECT
-    id
+    content_id
 FROM "Post"
 WHERE id = :id;
 

@@ -13,3 +13,6 @@ WHERE id = :id;
 UPDATE "Content"
 SET json = :json
 WHERE id = :id;
+
+--! delete
+DELETE FROM "Content" WHERE id = :id;

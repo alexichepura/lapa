@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS "Product" (
     "meta_description" TEXT NOT NULL DEFAULT '',
     "h1" TEXT NOT NULL DEFAULT '',
     "content_id" TEXT NOT NULL,
-    CONSTRAINT "Product_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "Product_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "ProductImage" (
     "id" TEXT NOT NULL PRIMARY KEY,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS "ProductImage" (
     "is_hero" BOOLEAN NOT NULL DEFAULT false,
     "order" INTEGER NOT NULL DEFAULT 0,
     "product_id" TEXT NOT NULL,
-    CONSTRAINT "Image_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Product" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "Image_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "Product" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "PostCategory" (
     "id" TEXT NOT NULL PRIMARY KEY,
@@ -64,8 +64,6 @@ CREATE TABLE IF NOT EXISTS "PostCategory" (
     "name" TEXT NOT NULL,
     "meta_title" TEXT NOT NULL DEFAULT '',
     "meta_description" TEXT NOT NULL DEFAULT ''
-    -- "content_id" TEXT NOT NULL,
-    -- CONSTRAINT "PostCategory_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "Post" (
     "id" TEXT NOT NULL PRIMARY KEY,
@@ -78,11 +76,10 @@ CREATE TABLE IF NOT EXISTS "Post" (
     "category_id" TEXT NOT NULL,
     "content_id" TEXT NOT NULL,
     CONSTRAINT "Post_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "PostCategory" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
-    CONSTRAINT "Post_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT "Post_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 CREATE UNIQUE INDEX "Product_slug_key" ON "Post"("slug");
 CREATE UNIQUE INDEX "Category_slug_key" ON "PostCategory"("slug");
--- CREATE UNIQUE INDEX "Category_content_id_key" ON "PostCategory"("content_id");
 CREATE UNIQUE INDEX "Post_content_id_key" ON "Post"("content_id");
 CREATE UNIQUE INDEX "Post_category_id_slug_key" ON "Post"("category_id", "slug");

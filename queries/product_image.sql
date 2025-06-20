@@ -10,12 +10,6 @@ SELECT
     ext
 FROM "ProductImage";
 
-
---! delete_by_id
-DELETE
-FROM "ProductImage"
-WHERE id = :id;
-
 --! update_alt
 UPDATE "ProductImage"
 SET alt = :alt

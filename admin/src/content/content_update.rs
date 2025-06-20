@@ -25,7 +25,8 @@ pub async fn content_json_update(
         .bind(&db, &content_id)
         .opt()
         .await
-        .map_err(|e| lib::emsg(e, "Content find"))?.ok_or_else(|| {
+        .map_err(|e| lib::emsg(e, "Content find"))?
+        .ok_or_else(|| {
             crate::server::serverr_404();
             ContentError::NotFound
         })?;

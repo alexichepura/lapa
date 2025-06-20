@@ -68,19 +68,37 @@ type ImageDeleteResult = Result<(), AppError>;
 #[server(ImageDelete, "/api")]
 pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let deleted_count = clorinde::queries::product_image::delete_by_id()
+    let ext = clorinde::queries::admin_product_image::read_ext()
+        .bind(&db, &id)
+        .opt()
+        .await
+        .map_err(|e| lib::emsg(e, "Product image read ext"))?
+        .ok_or_else(|| {
+            crate::server::serverr_404();
+            AppError::NotFound
+        })?;
+    let image_config = crate::server::use_image_config()?;
+    let path = image_config.product_image_upload_name_ext(&id, &ext);
+    let upload_del_result = std::fs::remove_file(&path);
+    if let Err(e) = upload_del_result {
+        tracing::debug!("image upload del {path} e={e}");
+    }
+    for image_format in content::CdnImageFormat::VALUES {
+        for image_size in content::CdnImageSize::VALUES {
+            let cdn_path = format!(
+                "{}/{}_{}.{}",
+                image_config.product_image_convert_path(), id, image_size, image_format
+            );
+            let cdn_del_result = std::fs::remove_file(&cdn_path);
+            if let Err(e) = cdn_del_result {
+                tracing::debug!("image cdn del {cdn_path} e={e}");
+            }
+        }
+    }
+    let _deleted_count = clorinde::queries::admin_product_image::delete_by_id()
         .bind(&db, &id)
         .await
         .map_err(|e| lib::emsg(e, "Product image delete"))?;
-    if deleted_count == 0 {
-        crate::server::serverr_404();
-        return Ok(Err(AppError::NotFound));
-    }
-    // TODO
-    // delete_image_on_server(&id);
-    // if let Err(e) = std::fs::remove_file(crate::image::img_path_small(&id)) {
-    //     tracing::error!("remove_file e={e}");
-    // };
     Ok(Ok(()))
 }
 
