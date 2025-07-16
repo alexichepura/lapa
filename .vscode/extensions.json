@@ -1,8 +1,0 @@
-{
-    "recommendations": [
-        "bram209.leptos-language-server",
-        "serayuzgur.crates",
-        "rust-lang.rust-analyzer",
-        "tamasfe.even-better-toml"
-    ]
-}
