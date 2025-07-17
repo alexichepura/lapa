@@ -97,8 +97,10 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 ## Run
 
 ### Generate db client
-
+https://halcyonnouveau.github.io/clorinde/introduction/installation.html \
+Note the need of docker or podman.
 ```sh
+cargo install clorinde
 clorinde schema ./schema.sql
 ```
 

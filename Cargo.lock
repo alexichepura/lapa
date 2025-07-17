@@ -737,15 +737,15 @@ dependencies = [
 
 [[package]]
 name = "clorinde"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "chrono",
  "deadpool-postgres",
+ "fallible-iterator",
  "futures",
  "postgres",
  "postgres-protocol",
  "postgres-types",
- "time",
  "tokio-postgres",
 ]
 
@@ -2855,7 +2855,6 @@ dependencies = [
  "fallible-iterator",
  "postgres-derive",
  "postgres-protocol",
- "time",
 ]
 
 [[package]]
@@ -3903,7 +3902,6 @@ checksum = "8a7619e19bc266e0f9c5e6686659d394bc57973859340060a69221e57dbc0c40"
 dependencies = [
  "deranged",
  "itoa",
- "js-sys",
  "num-conv",
  "powerfmt",
  "serde",
