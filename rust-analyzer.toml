@@ -1,5 +1,5 @@
 [rustfmt]
 overrideCommand = ["leptosfmt", "--stdin", "--rustfmt"]
 [cargo]
-features = ["all"]
+features = ["all"] # each package has "all" feature for convenience
 targetDir = true
