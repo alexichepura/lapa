@@ -7,16 +7,18 @@ pub struct UserCreateParams<T1: crate::StringSql, T2: crate::StringSql, T3: crat
     pub password: T3,
 }
 #[derive(Debug, Clone, PartialEq)]
-pub struct UserFindByUsername {
+pub struct UserGetAuthByUsername {
     pub id: String,
     pub password: String,
 }
-pub struct UserFindByUsernameBorrowed<'a> {
+pub struct UserGetAuthByUsernameBorrowed<'a> {
     pub id: &'a str,
     pub password: &'a str,
 }
-impl<'a> From<UserFindByUsernameBorrowed<'a>> for UserFindByUsername {
-    fn from(UserFindByUsernameBorrowed { id, password }: UserFindByUsernameBorrowed<'a>) -> Self {
+impl<'a> From<UserGetAuthByUsernameBorrowed<'a>> for UserGetAuthByUsername {
+    fn from(
+        UserGetAuthByUsernameBorrowed { id, password }: UserGetAuthByUsernameBorrowed<'a>,
+    ) -> Self {
         Self {
             id: id.into(),
             password: password.into(),
@@ -25,24 +27,24 @@ impl<'a> From<UserFindByUsernameBorrowed<'a>> for UserFindByUsername {
 }
 use crate::client::async_::GenericClient;
 use futures::{self, StreamExt, TryStreamExt};
-pub struct UserFindByUsernameQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+pub struct UserGetAuthByUsernameQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
     client: &'c C,
     params: [&'a (dyn postgres_types::ToSql + Sync); N],
     query: &'static str,
     cached: Option<&'s tokio_postgres::Statement>,
     extractor:
-        fn(&tokio_postgres::Row) -> Result<UserFindByUsernameBorrowed, tokio_postgres::Error>,
-    mapper: fn(UserFindByUsernameBorrowed) -> T,
+        fn(&tokio_postgres::Row) -> Result<UserGetAuthByUsernameBorrowed, tokio_postgres::Error>,
+    mapper: fn(UserGetAuthByUsernameBorrowed) -> T,
 }
-impl<'c, 'a, 's, C, T: 'c, const N: usize> UserFindByUsernameQuery<'c, 'a, 's, C, T, N>
+impl<'c, 'a, 's, C, T: 'c, const N: usize> UserGetAuthByUsernameQuery<'c, 'a, 's, C, T, N>
 where
     C: GenericClient,
 {
     pub fn map<R>(
         self,
-        mapper: fn(UserFindByUsernameBorrowed) -> R,
-    ) -> UserFindByUsernameQuery<'c, 'a, 's, C, R, N> {
-        UserFindByUsernameQuery {
+        mapper: fn(UserGetAuthByUsernameBorrowed) -> R,
+    ) -> UserGetAuthByUsernameQuery<'c, 'a, 's, C, R, N> {
+        UserGetAuthByUsernameQuery {
             client: self.client,
             params: self.params,
             query: self.query,
@@ -218,14 +220,14 @@ impl<
         Box::pin(self.bind(client, &params.id, &params.username, &params.password))
     }
 }
-pub struct UserFindByUsernameStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn user_find_by_username() -> UserFindByUsernameStmt {
-    UserFindByUsernameStmt(
+pub struct UserGetAuthByUsernameStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn user_get_auth_by_username() -> UserGetAuthByUsernameStmt {
+    UserGetAuthByUsernameStmt(
         "SELECT id, password FROM \"User\" WHERE username = $1",
         None,
     )
 }
-impl UserFindByUsernameStmt {
+impl UserGetAuthByUsernameStmt {
     pub async fn prepare<'a, C: GenericClient>(
         mut self,
         client: &'a C,
@@ -237,21 +239,21 @@ impl UserFindByUsernameStmt {
         &'s self,
         client: &'c C,
         username: &'a T1,
-    ) -> UserFindByUsernameQuery<'c, 'a, 's, C, UserFindByUsername, 1> {
-        UserFindByUsernameQuery {
+    ) -> UserGetAuthByUsernameQuery<'c, 'a, 's, C, UserGetAuthByUsername, 1> {
+        UserGetAuthByUsernameQuery {
             client,
             params: [username],
             query: self.0,
             cached: self.1.as_ref(),
             extractor: |
                 row: &tokio_postgres::Row,
-            | -> Result<UserFindByUsernameBorrowed, tokio_postgres::Error> {
-                Ok(UserFindByUsernameBorrowed {
+            | -> Result<UserGetAuthByUsernameBorrowed, tokio_postgres::Error> {
+                Ok(UserGetAuthByUsernameBorrowed {
                     id: row.try_get(0)?,
                     password: row.try_get(1)?,
                 })
             },
-            mapper: |it| UserFindByUsername::from(it),
+            mapper: |it| UserGetAuthByUsername::from(it),
         }
     }
 }

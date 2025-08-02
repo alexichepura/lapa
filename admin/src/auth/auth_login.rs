@@ -59,10 +59,10 @@ pub async fn login(
     skip_redirect: Option<String>,
 ) -> Result<Result<super::User, AuthError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let user = clorinde::queries::user::user_find_by_username()
+    let user = clorinde::queries::user::user_get_auth_by_username()
         .bind(&db, &username).opt()
         .await
-        .map_err(|e| lib::emsg(e, "User find"))?;
+        .map_err(|e| lib::emsg(e, "user_get_auth_by_username"))?;
     let Some(user) = user else {
         crate::server::serverr_401();
         return Ok(Err(AuthError::NoMatch));

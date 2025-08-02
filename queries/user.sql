@@ -2,7 +2,7 @@
 INSERT INTO "User" (id, username, password)
   VALUES (:id, :username, :password);
 
---! user_find_by_username
+--! user_get_auth_by_username
 SELECT
     id,
     password
