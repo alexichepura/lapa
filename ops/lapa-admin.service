@@ -1,0 +1,26 @@
+[Unit]
+Description=Lapa Admin
+Documentation=
+After=network-online.target local-fs.target remote-fs.target time-sync.target
+Wants=network-online.target local-fs.target remote-fs.target time-sync.target
+
+[Service]
+RuntimeDirectory=lapa-admin
+Type=simple
+ExecStart=/usr/bin/lapa_admin
+ExecReload=/usr/bin/lapa_admin
+Restart=on-failure
+User=lapa-admin
+Environment=LEPTOS_HASH_FILES=true
+Environment=LEPTOS_HASH_FILE_NAME=/home/lapa-server/admin/hash.txt
+Environment=LEPTOS_SITE_ADDR=127.0.0.1:8110
+Environment=LEPTOS_SITE_ROOT=/home/lapa-server/admin/public
+Environment=LEPTOS_OUTPUT_NAME=lapa_admin
+# Environment=DATABASE_URL=file:/home/lapa-server/site.db
+# Environment=CONTENT_UPLOAD_PATH=/home/lapa-server/content_upload
+# Environment=CONTENT_CDN_PATH=/home/lapa-server/content_cdn
+# Environment=IMG_PATH=/home/lapa-server/img
+Environment=RUST_LOG=info,site
+
+[Install]
+WantedBy=multi-user.target

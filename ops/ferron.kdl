@@ -1,0 +1,25 @@
+// https://v2.ferronweb.org/docs/configuration-kdl
+* {
+  default_http_port 80
+  default_https_port 443
+  no_redirect_to_https #true
+  log "/var/log/ferron/access.log"
+  error_log "/var/log/ferron/error.log"  
+  auto_tls #false
+// for auto TLS default ACME cache directory
+// /home/ferron/.local/share/ferron-acme
+// mkdir /home/ferron
+// chown -hR ferron:ferron /home/ferron
+}
+
+
+lapa.chepura.space {
+    proxy "http://127.0.0.1:8000"
+    no_redirect_to_https #true
+	auto_tls #true
+	auto_tls_contact "example@email"
+	auto_tls_letsencrypt_production #true
+	auto_tls_cache "/home/ferron/.local/share/ferron-acme"
+	log "/var/log/ferron/lapa-access.log"
+	error_log "/var/log/ferron/lapa-error.log"
+}
