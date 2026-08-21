@@ -193,9 +193,9 @@ pub async fn post_update(
     meta_description: String,
     h1: String,
 ) -> Result<Result<(), PostError>, ServerFnError> {
-    use clorinde::queries;
+    use cornucopia::queries;
     let db = crate::server::db::use_db().await?;
-    let post_by_slug_id = clorinde::queries::admin_post::by_slug()
+    let post_by_slug_id = cornucopia::queries::admin_post::by_slug()
         .bind(&db, &slug).opt()
         .await
         .map_err(|e| lib::emsg(e, "Post by slug"))?;

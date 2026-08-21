@@ -83,7 +83,7 @@ pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
 #[server(GetProducts, "/api")]
 pub async fn get_products() -> Result<Vec<ProductListItem>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let products = clorinde::queries::admin_product::list()
+    let products = cornucopia::queries::admin_product::list()
         .bind(&db)
         .all()
         .await

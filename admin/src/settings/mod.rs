@@ -105,7 +105,7 @@ type SettingsResult = Result<SettingsData, SettingsError>;
 #[server(GetSettings, "/api")]
 pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let settings = clorinde::queries::settings::settings_page()
+    let settings = cornucopia::queries::settings::settings_page()
         .bind(&db).opt()
         .await
         .map_err(|e| lib::emsg(e, "Settings find"))?;

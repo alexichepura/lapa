@@ -1,4 +1,4 @@
-// This file was generated with `clorinde`. Do not modify.
+// This file was generated with `cornucopia`. Do not modify.
 
 mod array_iterator;
 pub mod client;
@@ -21,7 +21,11 @@ pub use deadpool_postgres;
 pub use domain::{Domain, DomainArray};
 #[cfg(not(any(feature = "deadpool", feature = "wasm-async")))]
 pub use postgres;
+#[cfg(not(any(feature = "deadpool", feature = "wasm-async")))]
+pub use postgres::fallible_iterator;
 #[cfg(any(feature = "deadpool", feature = "wasm-async"))]
 pub use tokio_postgres;
+#[cfg(any(feature = "deadpool", feature = "wasm-async"))]
+pub use tokio_postgres::fallible_iterator;
 pub use type_traits::{ArraySql, BytesSql, IterSql, StringSql};
 pub(crate) use utils::slice_iter;

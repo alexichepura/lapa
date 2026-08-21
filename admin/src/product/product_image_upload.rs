@@ -81,7 +81,7 @@ pub async fn upload_img(
     let ext = img_format.extensions_str().first().unwrap();
 
     let id = cuid2::create_id();
-    let _created = clorinde::queries::admin_product_image::create()
+    let _created = cornucopia::queries::admin_product_image::create()
         .bind(&db, &id, &alt, ext, &post_id)
         .await
         .map_err(|e| lib::emsg(e, "Product image create"))?;

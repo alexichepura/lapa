@@ -8,7 +8,7 @@ async fn main() {
         routing::{get, post},
         Router,
     };
-    use clorinde::tokio_postgres;
+    use cornucopia::tokio_postgres;
     use config::ConfigError;
     use deadpool_postgres::Runtime;
     use dotenvy::dotenv;

@@ -78,7 +78,7 @@ pub fn Favicons() -> impl IntoView {
 #[derive(FromRef, Debug, Clone)]
 pub struct AppState {
     pub leptos_options: LeptosOptions,
-    pub pool: clorinde::deadpool_postgres::Pool,
+    pub pool: cornucopia::deadpool_postgres::Pool,
     pub image_config: ImageConfig,
 }
 

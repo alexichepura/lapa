@@ -199,7 +199,7 @@ pub async fn product_update(
     meta_description: String,
     h1: String,
 ) -> Result<Result<(), ProductError>, ServerFnError> {
-    use clorinde::queries;
+    use cornucopia::queries;
     let db = crate::server::db::use_db().await?;
     queries::admin_product::update()
         .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &meta_title, &meta_description, &h1, &id)

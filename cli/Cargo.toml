@@ -10,7 +10,7 @@ all = []
 [dependencies]
 bcrypt.workspace = true
 clap = { version = "4.5", features = ["derive"] }
-clorinde.workspace = true
+cornucopia.workspace = true
 config.workspace = true
 cuid2.workspace = true
 dotenvy.workspace = true

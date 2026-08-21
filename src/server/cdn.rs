@@ -34,7 +34,7 @@ impl ToImageFormat for CdnImageFormat {
 pub async fn content_image_handler(
     Path(img_name): Path<String>,
     State(image_config): State<ImageConfig>,
-    State(pool): State<clorinde::deadpool_postgres::Pool>,
+    State(pool): State<cornucopia::deadpool_postgres::Pool>,
     headers: HeaderMap,
 ) -> Result<AxumResponse, StatusCode> {
     let (image_name, img_size) = img_name.split_once("_").ok_or(StatusCode::NOT_FOUND)?;
@@ -63,7 +63,7 @@ pub async fn content_image_handler(
         Ok(cdn_res.into_response())
     } else {
         let db = pool.clone().get().await.unwrap();
-        let db_image_ext = clorinde::queries::content_image::read_ext()
+        let db_image_ext = cornucopia::queries::content_image::read_ext()
             .bind(&db, &image_name)
             .opt()
             .await
@@ -104,7 +104,7 @@ pub async fn content_image_handler(
 pub async fn product_image_handler(
     Path(img_name): Path<String>,
     State(image_config): State<ImageConfig>,
-    State(pool): State<clorinde::deadpool_postgres::Pool>,
+    State(pool): State<cornucopia::deadpool_postgres::Pool>,
     headers: HeaderMap,
 ) -> Result<AxumResponse, StatusCode> {
     let (image_name, img_size) = img_name.split_once("_").ok_or(StatusCode::NOT_FOUND)?;
@@ -133,7 +133,7 @@ pub async fn product_image_handler(
         Ok(cdn_res.into_response())
     } else {
         let db = pool.clone().get().await.unwrap();
-        let db_image_ext = clorinde::queries::product_image::read_ext()
+        let db_image_ext = cornucopia::queries::product_image::read_ext()
             .bind(&db, &image_name)
             .opt()
             .await

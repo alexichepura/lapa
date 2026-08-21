@@ -1,4 +1,4 @@
-// This file was generated with `clorinde`. Do not modify.
+// This file was generated with `cornucopia`. Do not modify.
 
 #[derive(Debug)]
 pub struct SettingsUpdateParams<T1: crate::StringSql, T2: crate::StringSql, T3: crate::StringSql> {

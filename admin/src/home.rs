@@ -102,7 +102,7 @@ pub async fn get_stats(period: StatsPeriod) -> Result<StatsResult, ServerFnError
         StatsPeriod::Month => now - chrono::Duration::days(30),
         _ => chrono::DateTime::UNIX_EPOCH.naive_utc(),
     };
-    let renders = clorinde::queries::ssr::select_by_period()
+    let renders = cornucopia::queries::ssr::select_by_period()
         .bind(&db, &period)
         .all().await
         .map_err(|e| lib::emsg(e, "SSR counter find_many"))?;

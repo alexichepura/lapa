@@ -1,5 +1,5 @@
 use leptos::prelude::{use_context, ServerFnError};
-use clorinde::deadpool_postgres::{Object, Pool};
+use cornucopia::deadpool_postgres::{Object, Pool};
 
 pub fn use_pool() -> Result<Pool, ServerFnError> {
     use_context::<Pool>()

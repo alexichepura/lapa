@@ -105,7 +105,7 @@ pub fn ProductPageView(page: ProductPageData) -> impl IntoView {
 #[server(GetProduct, "/api")]
 pub async fn get_product(id: String) -> Result<Result<ProductPageData, ProductError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let page = clorinde::queries::admin_product::page()
+    let page = cornucopia::queries::admin_product::page()
         .bind(&db, &id)
         .opt()
         .await

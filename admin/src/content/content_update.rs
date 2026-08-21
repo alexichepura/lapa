@@ -21,7 +21,7 @@ pub async fn content_json_update(
             };
         })
         .collect();
-    let _current_content = clorinde::queries::admin_content::read() // TODO "exists" method?
+    let _current_content = cornucopia::queries::admin_content::read() // TODO "exists" method?
         .bind(&db, &content_id)
         .opt()
         .await
@@ -34,7 +34,7 @@ pub async fn content_json_update(
         id: String,
         ext: String,
     }
-    let content_images = clorinde::queries::admin_content_image::read_by_content()
+    let content_images = cornucopia::queries::admin_content_image::read_by_content()
         .bind(&db, &content_id)
         .all()
         .await
@@ -73,12 +73,12 @@ pub async fn content_json_update(
         let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Content update transaction init"))?;
         if images_to_delete.len() > 0 {
             let ids_to_del: Vec<String> = images_to_delete.into_iter().map(|img| img.id).collect();
-            let _deleted = clorinde::queries::admin_content_image::delete_many_by_id()
+            let _deleted = cornucopia::queries::admin_content_image::delete_many_by_id()
                 .bind(&trx, &ids_to_del)
                 .await
                 .map_err(|e| lib::emsg(e, "Content images delete"))?;
         }
-        clorinde::queries::admin_content::update()
+        cornucopia::queries::admin_content::update()
             .bind(&trx, &json, &content_id)
             .await
             .map_err(|e| lib::emsg(e, "Content json string update"))?;

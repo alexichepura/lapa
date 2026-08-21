@@ -79,7 +79,7 @@ pub async fn get_category(
     id: String,
 ) -> Result<Result<CategoryPageData, CategoryError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let category = clorinde::queries::admin_post_category::page()
+    let category = cornucopia::queries::admin_post_category::page()
         .bind(&db, &id)
         .opt()
         .await

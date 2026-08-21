@@ -1,10 +1,33 @@
-// This file was generated with `clorinde`. Do not modify.
+// This file was generated with `cornucopia`. Do not modify.
 
 #[derive(Debug)]
-pub struct StoreParams<T1: crate::StringSql, T2: crate::StringSql> {
+pub struct CreateParams<
+    T1: crate::StringSql,
+    T2: crate::StringSql,
+    T3: crate::StringSql,
+    T4: crate::StringSql,
+> {
     pub id: T1,
-    pub session: T2,
-    pub expires: chrono::NaiveDateTime,
+    pub alt: T2,
+    pub ext: T3,
+    pub content_id: T4,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct ReadByContent {
+    pub id: String,
+    pub ext: String,
+}
+pub struct ReadByContentBorrowed<'a> {
+    pub id: &'a str,
+    pub ext: &'a str,
+}
+impl<'a> From<ReadByContentBorrowed<'a>> for ReadByContent {
+    fn from(ReadByContentBorrowed { id, ext }: ReadByContentBorrowed<'a>) -> Self {
+        Self {
+            id: id.into(),
+            ext: ext.into(),
+        }
+    }
 }
 use crate::client::async_::GenericClient;
 use futures::{self, StreamExt, TryStreamExt};
@@ -72,20 +95,23 @@ where
         Ok(mapped)
     }
 }
-pub struct I64Query<'c, 'a, 's, C: GenericClient, T, const N: usize> {
+pub struct ReadByContentQuery<'c, 'a, 's, C: GenericClient, T, const N: usize> {
     client: &'c C,
     params: [&'a (dyn postgres_types::ToSql + Sync); N],
     query: &'static str,
     cached: Option<&'s tokio_postgres::Statement>,
-    extractor: fn(&tokio_postgres::Row) -> Result<i64, tokio_postgres::Error>,
-    mapper: fn(i64) -> T,
+    extractor: fn(&tokio_postgres::Row) -> Result<ReadByContentBorrowed, tokio_postgres::Error>,
+    mapper: fn(ReadByContentBorrowed) -> T,
 }
-impl<'c, 'a, 's, C, T: 'c, const N: usize> I64Query<'c, 'a, 's, C, T, N>
+impl<'c, 'a, 's, C, T: 'c, const N: usize> ReadByContentQuery<'c, 'a, 's, C, T, N>
 where
     C: GenericClient,
 {
-    pub fn map<R>(self, mapper: fn(i64) -> R) -> I64Query<'c, 'a, 's, C, R, N> {
-        I64Query {
+    pub fn map<R>(
+        self,
+        mapper: fn(ReadByContentBorrowed) -> R,
+    ) -> ReadByContentQuery<'c, 'a, 's, C, R, N> {
+        ReadByContentQuery {
             client: self.client,
             params: self.params,
             query: self.query,
@@ -136,14 +162,14 @@ where
         Ok(mapped)
     }
 }
-pub struct DeleteByExpiryStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn delete_by_expiry() -> DeleteByExpiryStmt {
-    DeleteByExpiryStmt(
-        "DELETE FROM \"Session\" WHERE (expires IS NULL OR expires < NOW()) RETURNING id",
+pub struct CreateStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn create() -> CreateStmt {
+    CreateStmt(
+        "INSERT INTO \"ContentImage\" (id, alt, ext, content_id) VALUES ($1, $2, $3, $4)",
         None,
     )
 }
-impl DeleteByExpiryStmt {
+impl CreateStmt {
     pub async fn prepare<'a, C: GenericClient>(
         mut self,
         client: &'a C,
@@ -151,101 +177,66 @@ impl DeleteByExpiryStmt {
         self.1 = Some(client.prepare(self.0).await?);
         Ok(self)
     }
-    pub fn bind<'c, 'a, 's, C: GenericClient>(
-        &'s self,
-        client: &'c C,
-    ) -> StringQuery<'c, 'a, 's, C, String, 0> {
-        StringQuery {
-            client,
-            params: [],
-            query: self.0,
-            cached: self.1.as_ref(),
-            extractor: |row| Ok(row.try_get(0)?),
-            mapper: |it| it.into(),
-        }
-    }
-}
-pub struct CountStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn count() -> CountStmt {
-    CountStmt("SELECT COUNT(*) FROM \"Session\"", None)
-}
-impl CountStmt {
-    pub async fn prepare<'a, C: GenericClient>(
-        mut self,
-        client: &'a C,
-    ) -> Result<Self, tokio_postgres::Error> {
-        self.1 = Some(client.prepare(self.0).await?);
-        Ok(self)
-    }
-    pub fn bind<'c, 'a, 's, C: GenericClient>(
-        &'s self,
-        client: &'c C,
-    ) -> I64Query<'c, 'a, 's, C, i64, 0> {
-        I64Query {
-            client,
-            params: [],
-            query: self.0,
-            cached: self.1.as_ref(),
-            extractor: |row| Ok(row.try_get(0)?),
-            mapper: |it| it,
-        }
-    }
-}
-pub struct StoreStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn store() -> StoreStmt {
-    StoreStmt(
-        "INSERT INTO \"Session\" (id, session, expires) VALUES ($1, $2, $3) ON CONFLICT(id) DO UPDATE SET expires = EXCLUDED.expires, session = EXCLUDED.session",
-        None,
-    )
-}
-impl StoreStmt {
-    pub async fn prepare<'a, C: GenericClient>(
-        mut self,
-        client: &'a C,
-    ) -> Result<Self, tokio_postgres::Error> {
-        self.1 = Some(client.prepare(self.0).await?);
-        Ok(self)
-    }
-    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql, T2: crate::StringSql>(
+    pub async fn bind<
+        'c,
+        'a,
+        's,
+        C: GenericClient,
+        T1: crate::StringSql,
+        T2: crate::StringSql,
+        T3: crate::StringSql,
+        T4: crate::StringSql,
+    >(
         &'s self,
         client: &'c C,
         id: &'a T1,
-        session: &'a T2,
-        expires: &'a chrono::NaiveDateTime,
+        alt: &'a T2,
+        ext: &'a T3,
+        content_id: &'a T4,
     ) -> Result<u64, tokio_postgres::Error> {
-        client.execute(self.0, &[id, session, expires]).await
+        client.execute(self.0, &[id, alt, ext, content_id]).await
     }
 }
-impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql, T2: crate::StringSql>
+impl<
+    'a,
+    C: GenericClient + Send + Sync,
+    T1: crate::StringSql,
+    T2: crate::StringSql,
+    T3: crate::StringSql,
+    T4: crate::StringSql,
+>
     crate::client::async_::Params<
         'a,
         'a,
         'a,
-        StoreParams<T1, T2>,
+        CreateParams<T1, T2, T3, T4>,
         std::pin::Pin<
             Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
         >,
         C,
-    > for StoreStmt
+    > for CreateStmt
 {
     fn params(
         &'a self,
         client: &'a C,
-        params: &'a StoreParams<T1, T2>,
+        params: &'a CreateParams<T1, T2, T3, T4>,
     ) -> std::pin::Pin<
         Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
     > {
-        Box::pin(self.bind(client, &params.id, &params.session, &params.expires))
+        Box::pin(self.bind(
+            client,
+            &params.id,
+            &params.alt,
+            &params.ext,
+            &params.content_id,
+        ))
     }
 }
-pub struct LoadStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn load() -> LoadStmt {
-    LoadStmt(
-        "SELECT session FROM \"Session\" WHERE id = $1 AND (expires IS NULL OR expires > NOW())",
-        None,
-    )
+pub struct ReadExtStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn read_ext() -> ReadExtStmt {
+    ReadExtStmt("SELECT ext FROM \"ContentImage\" WHERE id = $1", None)
 }
-impl LoadStmt {
+impl ReadExtStmt {
     pub async fn prepare<'a, C: GenericClient>(
         mut self,
         client: &'a C,
@@ -268,34 +259,14 @@ impl LoadStmt {
         }
     }
 }
-pub struct DeleteOneByIdStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn delete_one_by_id() -> DeleteOneByIdStmt {
-    DeleteOneByIdStmt("DELETE FROM \"Session\" WHERE id = $1", None)
-}
-impl DeleteOneByIdStmt {
-    pub async fn prepare<'a, C: GenericClient>(
-        mut self,
-        client: &'a C,
-    ) -> Result<Self, tokio_postgres::Error> {
-        self.1 = Some(client.prepare(self.0).await?);
-        Ok(self)
-    }
-    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
-        &'s self,
-        client: &'c C,
-        id: &'a T1,
-    ) -> Result<u64, tokio_postgres::Error> {
-        client.execute(self.0, &[id]).await
-    }
-}
-pub struct ExistsStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn exists() -> ExistsStmt {
-    ExistsStmt(
-        "SELECT COUNT(*) FROM \"Session\" WHERE id = $1 AND (expires IS NULL OR expires > NOW())",
+pub struct ReadByContentStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn read_by_content() -> ReadByContentStmt {
+    ReadByContentStmt(
+        "SELECT id, ext FROM \"ContentImage\" WHERE content_id = $1",
         None,
     )
 }
-impl ExistsStmt {
+impl ReadByContentStmt {
     pub async fn prepare<'a, C: GenericClient>(
         mut self,
         client: &'a C,
@@ -306,23 +277,29 @@ impl ExistsStmt {
     pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
         &'s self,
         client: &'c C,
-        id: &'a T1,
-    ) -> I64Query<'c, 'a, 's, C, i64, 1> {
-        I64Query {
+        content_id: &'a T1,
+    ) -> ReadByContentQuery<'c, 'a, 's, C, ReadByContent, 1> {
+        ReadByContentQuery {
             client,
-            params: [id],
+            params: [content_id],
             query: self.0,
             cached: self.1.as_ref(),
-            extractor: |row| Ok(row.try_get(0)?),
-            mapper: |it| it,
+            extractor:
+                |row: &tokio_postgres::Row| -> Result<ReadByContentBorrowed, tokio_postgres::Error> {
+                    Ok(ReadByContentBorrowed {
+                        id: row.try_get(0)?,
+                        ext: row.try_get(1)?,
+                    })
+                },
+            mapper: |it| ReadByContent::from(it),
         }
     }
 }
-pub struct DeleteAllStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn delete_all() -> DeleteAllStmt {
-    DeleteAllStmt("TRUNCATE \"Session\"", None)
+pub struct DeleteManyByIdStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn delete_many_by_id() -> DeleteManyByIdStmt {
+    DeleteManyByIdStmt("DELETE FROM \"ContentImage\" WHERE id = ANY($1)", None)
 }
-impl DeleteAllStmt {
+impl DeleteManyByIdStmt {
     pub async fn prepare<'a, C: GenericClient>(
         mut self,
         client: &'a C,
@@ -330,39 +307,18 @@ impl DeleteAllStmt {
         self.1 = Some(client.prepare(self.0).await?);
         Ok(self)
     }
-    pub async fn bind<'c, 'a, 's, C: GenericClient>(
+    pub async fn bind<
+        'c,
+        'a,
+        's,
+        C: GenericClient,
+        T1: crate::StringSql,
+        T2: crate::ArraySql<Item = T1>,
+    >(
         &'s self,
         client: &'c C,
+        ids: &'a T2,
     ) -> Result<u64, tokio_postgres::Error> {
-        client.execute(self.0, &[]).await
-    }
-}
-pub struct GetIdsStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn get_ids() -> GetIdsStmt {
-    GetIdsStmt(
-        "SELECT id FROM \"Session\" WHERE (expires IS NULL OR expires > NOW())",
-        None,
-    )
-}
-impl GetIdsStmt {
-    pub async fn prepare<'a, C: GenericClient>(
-        mut self,
-        client: &'a C,
-    ) -> Result<Self, tokio_postgres::Error> {
-        self.1 = Some(client.prepare(self.0).await?);
-        Ok(self)
-    }
-    pub fn bind<'c, 'a, 's, C: GenericClient>(
-        &'s self,
-        client: &'c C,
-    ) -> StringQuery<'c, 'a, 's, C, String, 0> {
-        StringQuery {
-            client,
-            params: [],
-            query: self.0,
-            cached: self.1.as_ref(),
-            extractor: |row| Ok(row.try_get(0)?),
-            mapper: |it| it.into(),
-        }
+        client.execute(self.0, &[ids]).await
     }
 }

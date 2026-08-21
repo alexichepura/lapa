@@ -107,7 +107,7 @@ pub fn PostPageView(page: PostPageData) -> impl IntoView {
 #[server(GetPost, "/api")]
 pub async fn get_post(id: String) -> Result<Result<PostPageData, PostError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let page = clorinde::queries::admin_post::page()
+    let page = cornucopia::queries::admin_post::page()
         .bind(&db, &id)
         .opt()
         .await

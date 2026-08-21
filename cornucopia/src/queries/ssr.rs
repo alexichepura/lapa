@@ -1,4 +1,4 @@
-// This file was generated with `clorinde`. Do not modify.
+// This file was generated with `cornucopia`. Do not modify.
 
 use crate::client::async_::GenericClient;
 use futures::{self, StreamExt, TryStreamExt};
@@ -66,11 +66,11 @@ where
         Ok(mapped)
     }
 }
-pub struct ReadExtStmt(&'static str, Option<tokio_postgres::Statement>);
-pub fn read_ext() -> ReadExtStmt {
-    ReadExtStmt("SELECT ext FROM \"ContentImage\" WHERE id = $1", None)
+pub struct SelectByPeriodStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn select_by_period() -> SelectByPeriodStmt {
+    SelectByPeriodStmt("SELECT path FROM \"Ssr\" WHERE created_at > $1", None)
 }
-impl ReadExtStmt {
+impl SelectByPeriodStmt {
     pub async fn prepare<'a, C: GenericClient>(
         mut self,
         client: &'a C,
@@ -78,14 +78,14 @@ impl ReadExtStmt {
         self.1 = Some(client.prepare(self.0).await?);
         Ok(self)
     }
-    pub fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql>(
+    pub fn bind<'c, 'a, 's, C: GenericClient>(
         &'s self,
         client: &'c C,
-        id: &'a T1,
+        created_at: &'a chrono::NaiveDateTime,
     ) -> StringQuery<'c, 'a, 's, C, String, 1> {
         StringQuery {
             client,
-            params: [id],
+            params: [created_at],
             query: self.0,
             cached: self.1.as_ref(),
             extractor: |row| Ok(row.try_get(0)?),

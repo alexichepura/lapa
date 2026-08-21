@@ -19,10 +19,10 @@ const MAX_AGE_MONTH: HeaderValue = HeaderValue::from_static("public, max-age=259
 pub async fn content_image_handler(
     Path(image_name): Path<String>,
     State(image_config): State<ImageConfig>,
-    State(pool): State<clorinde::deadpool_postgres::Pool>,
+    State(pool): State<cornucopia::deadpool_postgres::Pool>,
 ) -> Result<AxumResponse, StatusCode> {
     let db = pool.clone().get().await.unwrap();
-    let db_image = clorinde::queries::admin_content_image::read_ext()
+    let db_image = cornucopia::queries::admin_content_image::read_ext()
         .bind(&db, &image_name)
         .opt()
         .await
@@ -51,10 +51,10 @@ pub async fn content_image_handler(
 pub async fn product_image_handler(
     Path(image_name): Path<String>,
     State(image_config): State<ImageConfig>,
-    State(pool): State<clorinde::deadpool_postgres::Pool>,
+    State(pool): State<cornucopia::deadpool_postgres::Pool>,
 ) -> Result<AxumResponse, StatusCode> {
     let db = pool.clone().get().await.unwrap();
-    let db_image = clorinde::queries::admin_product_image::read_ext()
+    let db_image = cornucopia::queries::admin_product_image::read_ext()
         .bind(&db, &image_name)
         .opt()
         .await

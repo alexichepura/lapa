@@ -68,7 +68,7 @@ type ImageDeleteResult = Result<(), AppError>;
 #[server(ImageDelete, "/api")]
 pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let ext = clorinde::queries::admin_product_image::read_ext()
+    let ext = cornucopia::queries::admin_product_image::read_ext()
         .bind(&db, &id)
         .opt()
         .await
@@ -95,7 +95,7 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
             }
         }
     }
-    let _deleted_count = clorinde::queries::admin_product_image::delete_by_id()
+    let _deleted_count = cornucopia::queries::admin_product_image::delete_by_id()
         .bind(&db, &id)
         .await
         .map_err(|e| lib::emsg(e, "Product image delete"))?;
@@ -106,7 +106,7 @@ type ImageUpdateResult = Result<(), AppError>;
 #[server(ImageUpdate, "/api")]
 pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let updated_count = clorinde::queries::product_image::update_alt()
+    let updated_count = cornucopia::queries::product_image::update_alt()
         .bind(&db, &alt, &id)
         .await
         .map_err(|e| lib::emsg(e, "Image alt update"))?;

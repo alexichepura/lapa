@@ -38,7 +38,7 @@ resolver = "2"
 members = ["lib", "content", "image_config", "admin", "cli"]
 
 [workspace.dependencies]
-clorinde = { path = "./clorinde" }
+cornucopia = { path = "./cornucopia" }
 lib = { path = "./lib" }
 content = { path = "./content" }
 image_config = { path = "./image_config" }
@@ -87,7 +87,7 @@ web-sys = { version = "0.3", features = [
 ] }
 
 [dependencies]
-clorinde = { workspace = true, optional = true }
+cornucopia = { workspace = true, optional = true }
 content.workspace = true
 image_config.workspace = true
 lib = { workspace = true, features = ["leptos"] }
@@ -136,7 +136,7 @@ hydrate = [
 ssr = [
     "dep:axum",
     "dep:leptos_axum",
-    "dep:clorinde",
+    "dep:cornucopia",
     "dep:config",
     "dep:dotenvy",
     "dep:deadpool-postgres",

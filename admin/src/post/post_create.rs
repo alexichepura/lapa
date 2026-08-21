@@ -49,7 +49,7 @@ pub async fn post_create(
     h1: String,
     category_id: String,
 ) -> Result<Result<String, PostError>, ServerFnError> {
-    use clorinde::queries;
+    use cornucopia::queries;
     let mut db = crate::server::db::use_db().await?;
     let id = cuid2::create_id();
     {
@@ -75,7 +75,7 @@ pub async fn post_create(
             )
             .await
             .map_err(|e| lib::emsg(e, "Post create"))?;
-        // use clorinde::{client::Params, queries::admin_post::CreateParams};
+        // use cornucopia::{client::Params, queries::admin_post::CreateParams};
         // queries::admin_post::create()
         //     .params(&db, &CreateParams { id: &id, slug, meta_title: title, meta_description: description })
         //     .await

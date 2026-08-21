@@ -57,7 +57,7 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
 #[server(GetProducts, "/api")]
 pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let posts = clorinde::queries::post::list()
+    let posts = cornucopia::queries::post::list()
         .bind(&db).all()
         .await
         .map_err(|e| lib::emsg(e, "Post list find"))?;

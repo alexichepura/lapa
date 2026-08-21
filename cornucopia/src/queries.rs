@@ -1,4 +1,4 @@
-// This file was generated with `clorinde`. Do not modify.
+// This file was generated with `cornucopia`. Do not modify.
 
 pub mod admin_content;
 pub mod admin_content_image;
