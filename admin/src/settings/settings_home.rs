@@ -36,12 +36,18 @@ pub async fn settings_home_update(
     home_text: String,
 ) -> Result<Result<(), SettingsError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let settings = cornucopia::queries::settings::settings().bind(&db).opt().await.map_err(|e| lib::emsg(e, "Settings find"))?;
+    let settings = cornucopia::queries::settings::settings()
+        .bind(&db)
+        .opt()
+        .await
+        .map_err(|e| lib::emsg(e, "Settings find"))?;
     let Some(settings) = settings else {
         return Ok(Err(SettingsError::NotFound));
     };
     let id = settings.id;
-    let res = cornucopia::queries::settings::settings_update_home().bind(&db, &home_text, &id).await;
+    let res = cornucopia::queries::settings::settings_update_home()
+        .bind(&db, &home_text, &id)
+        .await;
     tracing::debug!("Settings home updated res={res:?}");
     Ok(Ok(()))
 }

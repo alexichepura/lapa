@@ -21,8 +21,8 @@ cfg_if! {if #[cfg(feature = "compression")] {
     pub use compression::*;
 }}
 
-pub mod db;
 pub mod cdn;
+pub mod db;
 pub mod err;
 pub mod fileserv;
 pub use cdn::*;
@@ -31,7 +31,7 @@ pub use fileserv::*;
 
 use crate::{
     app::App,
-    settings::{settings_db, SettingsCx},
+    settings::{SettingsCx, settings_db},
 };
 
 pub fn html_shell(options: LeptosOptions, settings: SettingsCx) -> impl IntoView {
@@ -117,7 +117,11 @@ pub async fn leptos_routes_handler(
 
 pub async fn robots_txt(State(app_state): State<AppState>) -> Result<String, (StatusCode, String)> {
     let client = app_state.pool.clone().get().await.unwrap();
-    let robots = queries::settings::settings_robots().bind(&client).opt().await.unwrap();
+    let robots = queries::settings::settings_robots()
+        .bind(&client)
+        .opt()
+        .await
+        .unwrap();
     dbg!(&robots);
     let robots = robots.unwrap();
     Ok(robots)

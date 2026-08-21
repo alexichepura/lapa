@@ -9,22 +9,24 @@ async fn main() {
     use admin::{
         app::AdminRouter,
         server::{
-            auth_session_layer, content_image_handler, file_and_error_handler, leptos_routes_handler, product_image_handler, server_fn_private, server_fn_public, session_layer, AppState
+            AppState, auth_session_layer, content_image_handler, file_and_error_handler,
+            leptos_routes_handler, product_image_handler, server_fn_private, server_fn_public,
+            session_layer,
         },
     };
     use axum::{
-        routing::{get, post},
         Router,
+        routing::{get, post},
     };
+    use config::ConfigError;
     use cornucopia::{deadpool_postgres, tokio_postgres};
     use deadpool_postgres::Runtime;
     use dotenvy::dotenv;
     use image_config::ImageConfig;
     use leptos::prelude::*;
-    use leptos_axum::{generate_route_list, LeptosRoutes};
+    use leptos_axum::{LeptosRoutes, generate_route_list};
     use serde::Deserialize;
     use tracing::info;
-    use config::ConfigError;
 
     dotenv().expect(".env file not found");
 

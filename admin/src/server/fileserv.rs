@@ -4,7 +4,7 @@ use axum::{
     http::{Request, Response, StatusCode, Uri},
     response::{IntoResponse, Response as AxumResponse},
 };
-use http::{header::CACHE_CONTROL, HeaderValue};
+use http::{HeaderValue, header::CACHE_CONTROL};
 use image_config::ImageConfig;
 use leptos::prelude::*;
 use tower::ServiceExt;
@@ -26,18 +26,19 @@ pub async fn content_image_handler(
         .bind(&db, &image_name)
         .opt()
         .await
-        .map_err(|e|{
+        .map_err(|e| {
             tracing::error!("Content image read_ext error={e}");
             StatusCode::INTERNAL_SERVER_ERROR
         })?
         .ok_or(StatusCode::NOT_FOUND)?;
     let image_name = format!("/{image_name}.{}", db_image);
-    let uri = image_name.parse::<Uri>().map_err(|e|{
+    let uri = image_name.parse::<Uri>().map_err(|e| {
         tracing::error!("Content image uri parse error={e}");
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
     let mut res = get_static_file(uri, &image_config.content_image_upload_path())
-        .await.map_err(|e|{
+        .await
+        .map_err(|e| {
             tracing::error!("Content image file error={}", e.1);
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
@@ -58,18 +59,19 @@ pub async fn product_image_handler(
         .bind(&db, &image_name)
         .opt()
         .await
-        .map_err(|e|{
+        .map_err(|e| {
             tracing::error!("Product image read_ext error={e}");
             StatusCode::INTERNAL_SERVER_ERROR
         })?
         .ok_or(StatusCode::NOT_FOUND)?;
     let image_name = format!("/{image_name}.{}", db_image);
-    let uri = image_name.parse::<Uri>().map_err(|e|{
+    let uri = image_name.parse::<Uri>().map_err(|e| {
         tracing::error!("Product image uri parse error={e}");
         StatusCode::INTERNAL_SERVER_ERROR
     })?;
     let mut res = get_static_file(uri, &image_config.product_image_upload_path())
-        .await.map_err(|e|{
+        .await
+        .map_err(|e| {
             tracing::error!("Product image file error={}", e.1);
             StatusCode::INTERNAL_SERVER_ERROR
         })?;

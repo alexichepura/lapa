@@ -1,6 +1,6 @@
 use leptos::prelude::*;
 use leptos_meta::*;
-use leptos_router::components::{Router, RoutingProgress, A};
+use leptos_router::components::{A, Router, RoutingProgress};
 
 use crate::{routes::FrontRoutes, settings::SettingsCx};
 

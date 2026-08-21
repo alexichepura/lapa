@@ -1,7 +1,7 @@
 use axum::Router;
 use std::sync::Arc;
 use tower_governor::{
-    governor::GovernorConfigBuilder, key_extractor::SmartIpKeyExtractor, GovernorLayer,
+    GovernorLayer, governor::GovernorConfigBuilder, key_extractor::SmartIpKeyExtractor,
 };
 
 pub fn ratelimit(app: Router) -> Router {

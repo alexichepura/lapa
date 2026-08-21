@@ -4,19 +4,19 @@ use leptos_meta::Title;
 use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    util::{datetime_to_strings, AlertDanger, DateTimeStrings, Loading},
-};
+use crate::util::{AlertDanger, DateTimeStrings, Loading, datetime_to_strings};
 
 #[component]
 pub fn PostList() -> impl IntoView {
     let posts = Resource::new_blocking(|| (), move |_| get_posts());
-    let suspended = move || Suspend::new(async move {
-        match posts.await {
-            Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
-            Ok(posts) => Either::Right(view! { <PostListItems posts /> }),
-        }
-    });
+    let suspended = move || {
+        Suspend::new(async move {
+            match posts.await {
+                Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+                Ok(posts) => Either::Right(view! { <PostListItems posts /> }),
+            }
+        })
+    };
     view! {
         <Title text="Posts" />
         <h1>
@@ -87,7 +87,9 @@ pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
         .into_iter()
         .map(|data| {
             let is_published: bool = match data.publish_at {
-                Some(publish_at) => chrono::Utc::now().fixed_offset() > publish_at.and_utc().fixed_offset(),
+                Some(publish_at) => {
+                    chrono::Utc::now().fixed_offset() > publish_at.and_utc().fixed_offset()
+                }
                 None => false,
             };
             PostListItem {

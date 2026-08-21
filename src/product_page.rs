@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
-    settings::{use_site_url},
+    settings::use_site_url,
     util::{AlertDanger, Loading},
 };
 
@@ -57,13 +57,15 @@ pub fn ProductPage() -> impl IntoView {
             Ok(slug) => get_product(slug).await,
         }
     });
-    let suspended = move || Suspend::new(async move {
-        match product.await {
-            Ok(Ok(product)) => EitherOf3::A(view! { <ProductPageView product=product /> }),
-            Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
-            Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
-        }
-    });
+    let suspended = move || {
+        Suspend::new(async move {
+            match product.await {
+                Ok(Ok(product)) => EitherOf3::A(view! { <ProductPageView product=product /> }),
+                Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
+                Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
+            }
+        })
+    };
     view! {
         <Suspense fallback=move || {
             view! { <Loading /> }
@@ -170,7 +172,10 @@ pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl
 }
 
 #[component]
-pub fn ProductImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl IntoView {
+pub fn ProductImageModal(
+    image: ImgData,
+    set_dialog_open: WriteSignal<DialogSignal>,
+) -> impl IntoView {
     let src = format!("/product-image/{}_xl", image.id);
     view! {
         <figure>
@@ -185,10 +190,13 @@ pub fn ProductImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSign
 }
 
 #[server(GetProduct, "/api")]
-pub async fn get_product(slug: String) -> Result<Result<ProductPageData, ProductError>, ServerFnError> {
+pub async fn get_product(
+    slug: String,
+) -> Result<Result<ProductPageData, ProductError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
     let page = cornucopia::queries::product::page()
-        .bind(&db, &slug).opt()
+        .bind(&db, &slug)
+        .opt()
         .await
         .map_err(|e| lib::emsg(e, "Product find"))?;
     let Some(page) = page else {
@@ -196,7 +204,8 @@ pub async fn get_product(slug: String) -> Result<Result<ProductPageData, Product
         return Ok(Err(ProductError::NotFound));
     };
     let images = cornucopia::queries::product::images()
-        .bind(&db, &page.id).all()
+        .bind(&db, &page.id)
+        .all()
         .await
         .map_err(|e| lib::emsg(e, "Product images find"))?;
     let hero = images

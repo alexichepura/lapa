@@ -2,19 +2,19 @@ use leptos::{either::Either, prelude::*};
 use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    util::{AlertDanger, Loading},
-};
+use crate::util::{AlertDanger, Loading};
 
 #[component]
 pub fn PostList() -> impl IntoView {
     let posts = Resource::new_blocking(|| (), move |_| get_posts());
-    let suspended = move || Suspend::new(async move {
-        match posts.await {
-            Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
-            Ok(posts) => Either::Right(view! { <PostListView posts /> }),
-        }
-    });
+    let suspended = move || {
+        Suspend::new(async move {
+            match posts.await {
+                Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+                Ok(posts) => Either::Right(view! { <PostListView posts /> }),
+            }
+        })
+    };
     view! {
         <h2>Posts</h2>
         <Suspense fallback=move || {
@@ -46,7 +46,7 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
     //     Some(image) => Either::Left(view! { <Thumb image /> }),
     //     None => Either::Right(()),
     // };
-    let href = format!("/{}/{}", post.category_slug ,post.slug);
+    let href = format!("/{}/{}", post.category_slug, post.slug);
     view! {
         <A href>
             <p>{post.h1}</p>
@@ -58,7 +58,8 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
 pub async fn get_posts() -> Result<Vec<PostListItem>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
     let posts = cornucopia::queries::post::list()
-        .bind(&db).all()
+        .bind(&db)
+        .all()
         .await
         .map_err(|e| lib::emsg(e, "Post list find"))?;
     let posts: Vec<PostListItem> = posts

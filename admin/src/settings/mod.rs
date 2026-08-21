@@ -106,7 +106,8 @@ type SettingsResult = Result<SettingsData, SettingsError>;
 pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
     let settings = cornucopia::queries::settings::settings_page()
-        .bind(&db).opt()
+        .bind(&db)
+        .opt()
         .await
         .map_err(|e| lib::emsg(e, "Settings find"))?;
 

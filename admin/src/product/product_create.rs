@@ -3,9 +3,7 @@ use leptos_meta::Title;
 use leptos_router::hooks::use_navigate;
 
 use super::ProductError;
-use crate::{ 
-    form::{FormFooter, Input}}
-;
+use crate::form::{FormFooter, Input};
 
 #[component]
 pub fn ProductNew() -> impl IntoView {
@@ -52,13 +50,13 @@ pub async fn product_create(
     let mut db = crate::server::db::use_db().await?;
     let id = cuid2::create_id();
     {
-        let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Product create transaction init"))?;
+        let trx = db
+            .transaction()
+            .await
+            .map_err(|e| lib::emsg(e, "Product create transaction init"))?;
         let content_id = cuid2::create_id();
         queries::admin_content::create()
-            .bind(
-                &trx,
-                &content_id,
-            )
+            .bind(&trx, &content_id)
             .await
             .map_err(|e| lib::emsg(e, "Content create"))?;
         queries::admin_product::create()
@@ -73,7 +71,9 @@ pub async fn product_create(
             )
             .await
             .map_err(|e| lib::emsg(e, "Product create"))?;
-        trx.commit().await.map_err(|e| lib::emsg(e, "Product create transaction"))?;
+        trx.commit()
+            .await
+            .map_err(|e| lib::emsg(e, "Product create transaction"))?;
     };
     Ok(Ok(id))
 }

@@ -80,7 +80,10 @@ pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> 
             for image_size in content::CdnImageSize::VALUES {
                 let cdn_path = format!(
                     "{}/{}_{}.{}",
-                    image_config.content_image_convert_path(), img.id, image_size, image_format
+                    image_config.content_image_convert_path(),
+                    img.id,
+                    image_size,
+                    image_format
                 );
                 let cdn_del_result = std::fs::remove_file(&cdn_path);
                 if let Err(e) = cdn_del_result {

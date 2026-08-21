@@ -8,7 +8,13 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::{
-    auth::{use_user_signal, Login, User}, category::{CategoryList, CategoryNew, CategoryPage}, home::HomePage, layout::Layout, post::{PostCreate, PostList, PostPage}, product::{ProductList, ProductNew, ProductPage}, settings::{Settings, SettingsCx}
+    auth::{Login, User, use_user_signal},
+    category::{CategoryList, CategoryNew, CategoryPage},
+    home::HomePage,
+    layout::Layout,
+    post::{PostCreate, PostList, PostPage},
+    product::{ProductList, ProductNew, ProductPage},
+    settings::{Settings, SettingsCx},
 };
 
 #[component]

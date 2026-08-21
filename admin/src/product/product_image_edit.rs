@@ -2,7 +2,8 @@ use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    err::AppError, form::{FormFooter, Input}
+    err::AppError,
+    form::{FormFooter, Input},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -87,7 +88,10 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
         for image_size in content::CdnImageSize::VALUES {
             let cdn_path = format!(
                 "{}/{}_{}.{}",
-                image_config.product_image_convert_path(), id, image_size, image_format
+                image_config.product_image_convert_path(),
+                id,
+                image_size,
+                image_format
             );
             let cdn_del_result = std::fs::remove_file(&cdn_path);
             if let Err(e) = cdn_del_result {

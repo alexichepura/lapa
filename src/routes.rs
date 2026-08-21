@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos_router::{
-    components::{Route, Router, Routes},
     ParamSegment, StaticSegment,
+    components::{Route, Router, Routes},
 };
 
 use crate::{home::HomePage, post::post_page::PostPage, product_page::ProductPage};

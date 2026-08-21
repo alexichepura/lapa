@@ -4,7 +4,10 @@ use leptos_router::{hooks::use_params, params::Params};
 use serde::{Deserialize, Serialize};
 
 use super::{CategoryFormData, CategoryHeaderData};
-use crate::{category::{CategoryError, CategoryForm, CategoryHeader}, util::{AlertDanger, Loading}};
+use crate::{
+    category::{CategoryError, CategoryForm, CategoryHeader},
+    util::{AlertDanger, Loading},
+};
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
 pub struct CategoryParams {

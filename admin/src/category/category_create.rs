@@ -47,16 +47,9 @@ pub async fn category_create(
     let db = crate::server::db::use_db().await?;
     let id = cuid2::create_id();
     let _post_category_created_at = cornucopia::queries::admin_post_category::create()
-    .bind(
-        &db,
-        &id,
-        &slug,
-        &name,
-        &"",
-        &""
-    )
-    .one()
-    .await
-    .map_err(|e| lib::emsg(e, "Post category create"))?;
+        .bind(&db, &id, &slug, &name, &"", &"")
+        .one()
+        .await
+        .map_err(|e| lib::emsg(e, "Post category create"))?;
     return Ok(Ok(id));
 }

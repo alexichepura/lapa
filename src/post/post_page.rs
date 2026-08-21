@@ -1,15 +1,10 @@
-use leptos::{
-    either::EitherOf3,
-    prelude::*,
-};
+use leptos::{either::EitherOf3, prelude::*};
 use leptos_meta::{Meta, Title};
 use leptos_router::{hooks::use_params, params::Params};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{
-    util::{AlertDanger, Loading},
-};
+use crate::util::{AlertDanger, Loading};
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
 pub struct PostParams {
@@ -55,13 +50,15 @@ pub fn PostPage() -> impl IntoView {
         }
     });
 
-    let suspended = move || Suspend::new(async move {
-        match post.await {
-            Ok(Ok(post)) => EitherOf3::A(view! { <PostView post=post /> }),
-            Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
-            Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
-        }
-    });
+    let suspended = move || {
+        Suspend::new(async move {
+            match post.await {
+                Ok(Ok(post)) => EitherOf3::A(view! { <PostView post=post /> }),
+                Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
+                Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
+            }
+        })
+    };
     view! {
         <Suspense fallback=move || {
             view! { <Loading /> }
@@ -84,11 +81,12 @@ pub fn PostView(post: PostData) -> impl IntoView {
 #[server(GetPost, "/api")]
 pub async fn get_post(
     category_slug: String,
-    slug: String
+    slug: String,
 ) -> Result<Result<PostData, PostError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
     let page = cornucopia::queries::post::page()
-        .bind(&db, &category_slug, &slug).opt()
+        .bind(&db, &category_slug, &slug)
+        .opt()
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;
     let Some(page) = page else {

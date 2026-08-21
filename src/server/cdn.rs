@@ -7,14 +7,14 @@ use axum::{
     response::Response as AxumResponse,
 };
 use content::{CdnImageFormat, CdnImageSize};
-use http::header::VARY;
 use http::HeaderValue;
-use http::{header::CACHE_CONTROL, HeaderMap};
-use image::imageops::FilterType;
+use http::header::VARY;
+use http::{HeaderMap, header::CACHE_CONTROL};
 use image::ImageFormat;
+use image::imageops::FilterType;
 use image_config::ImageConfig;
 
-use super::{serve_file, MAX_AGE_MONTH};
+use super::{MAX_AGE_MONTH, serve_file};
 
 const VARY_ACCEPT: HeaderValue = HeaderValue::from_static("Accept");
 
@@ -67,7 +67,7 @@ pub async fn content_image_handler(
             .bind(&db, &image_name)
             .opt()
             .await
-            .map_err(|e|{
+            .map_err(|e| {
                 tracing::error!("Content image read_ext error={e}");
                 StatusCode::INTERNAL_SERVER_ERROR
             })?
@@ -137,7 +137,7 @@ pub async fn product_image_handler(
             .bind(&db, &image_name)
             .opt()
             .await
-            .map_err(|e|{
+            .map_err(|e| {
                 tracing::error!("Product image read_ext error={e}");
                 StatusCode::INTERNAL_SERVER_ERROR
             })?

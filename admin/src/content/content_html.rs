@@ -1,6 +1,9 @@
 use leptos::prelude::*;
 
-use crate::{content::{ContentEditor, ContentJsonUpdate}, form::FormFooter};
+use crate::{
+    content::{ContentEditor, ContentJsonUpdate},
+    form::FormFooter,
+};
 
 #[component]
 pub fn ContentHtml(content_id: String, content_json: String) -> impl IntoView {
@@ -20,4 +23,3 @@ pub fn ContentHtml(content_id: String, content_json: String) -> impl IntoView {
         </fieldset>
     }
 }
-

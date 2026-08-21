@@ -1,5 +1,5 @@
 use leptos::{html::Nav, prelude::*};
-use leptos_router::components::{Outlet, A};
+use leptos_router::components::{A, Outlet};
 
 use crate::auth::{Logout, User};
 

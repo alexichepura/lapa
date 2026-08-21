@@ -104,7 +104,8 @@ pub async fn get_stats(period: StatsPeriod) -> Result<StatsResult, ServerFnError
     };
     let renders = cornucopia::queries::ssr::select_by_period()
         .bind(&db, &period)
-        .all().await
+        .all()
+        .await
         .map_err(|e| lib::emsg(e, "SSR counter find_many"))?;
     let hmap: HashMap<String, i32> = renders.iter().fold(HashMap::new(), |mut acc, data| {
         match acc.get(data) {

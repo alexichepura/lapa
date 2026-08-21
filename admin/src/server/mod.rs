@@ -12,7 +12,7 @@ use leptos_meta::{HashedStylesheet, Link, MetaTags, Script};
 use crate::{
     app::App,
     auth::User,
-    settings::{settings_db, SettingsCx},
+    settings::{SettingsCx, settings_db},
 };
 
 use cfg_if::cfg_if;
@@ -25,8 +25,8 @@ cfg_if! {if #[cfg(feature = "compression")] {
     pub use compression::*;
 }}
 
-pub mod db;
 pub mod auth;
+pub mod db;
 pub mod err;
 pub mod fileserv;
 pub mod session;
@@ -117,7 +117,6 @@ pub async fn server_fn_private(
             provide_context(app_state.pool.clone());
             provide_context(auth_session.clone());
             provide_context(media_config.clone());
-
         },
         request,
     )

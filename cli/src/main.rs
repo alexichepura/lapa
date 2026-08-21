@@ -1,9 +1,12 @@
 use clap::{Args, Parser, Subcommand};
-use cornucopia::{deadpool_postgres::{self}, queries, tokio_postgres};
+use config::ConfigError;
+use cornucopia::{
+    deadpool_postgres::{self},
+    queries, tokio_postgres,
+};
 use deadpool_postgres::Runtime;
 use dotenvy::dotenv;
 use serde::Deserialize;
-use config::ConfigError;
 
 #[derive(Debug, Deserialize)]
 struct Config {
