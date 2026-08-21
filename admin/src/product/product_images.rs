@@ -231,7 +231,7 @@ where
 #[server(GetImages, "/api")]
 pub async fn get_images(post_id: String) -> Result<Vec<ProductImageData>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let images = clorinde::queries::admin_product::images()
+    let images = cornucopia::queries::admin_product::images()
         .bind(&db, &post_id)
         .all()
         .await
@@ -257,7 +257,7 @@ pub async fn images_order_update(
     let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images order transaction init"))?;
     for (i, id) in order_update {
         // TODO how this can be improved? batch, sql?
-        clorinde::queries::product_image::update_order().bind(&trx, &(i as i32), &id).await?;
+        cornucopia::queries::product_image::update_order().bind(&trx, &(i as i32), &id).await?;
     }
     trx.commit().await.map_err(|e| lib::emsg(e, "Images order transaction"))?;
     Ok(Ok(()))
@@ -273,7 +273,7 @@ pub type ImageMakeHeroResult = Result<(), AppError>;
 #[server(ImageMakeHero, "/api")]
 pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let current_img = clorinde::queries::product_image::select_product_id()
+    let current_img = cornucopia::queries::product_image::select_product_id()
         .bind(&db, &id)
         .opt()
         .await
@@ -282,7 +282,7 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
         return Ok(Err(AppError::NotFound));
     }
     let current_img = current_img.unwrap();
-    let current_hero = clorinde::queries::product_image::find_hero()
+    let current_hero = cornucopia::queries::product_image::find_hero()
         .bind(&db, &current_img)
         .opt()
         .await
@@ -290,11 +290,11 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
 
     let mut db_trx = crate::server::db::use_db().await?;
     let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images hero transaction init"))?;
-    clorinde::queries::product_image::set_hero()
+    cornucopia::queries::product_image::set_hero()
         .bind(&db, &id)
         .await?;
     if let Some(current_hero) = current_hero {
-        clorinde::queries::product_image::unset_hero()
+        cornucopia::queries::product_image::unset_hero()
             .bind(&db, &current_hero)
             .await?;
     }

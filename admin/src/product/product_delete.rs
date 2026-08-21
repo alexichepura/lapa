@@ -49,7 +49,7 @@ pub fn ProductDeleteForm(id: String, slug: String) -> impl IntoView {
 #[server(ProductDelete, "/api")]
 pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let content_id = clorinde::queries::admin_product::read_content_id()
+    let content_id = cornucopia::queries::admin_product::read_content_id()
         .bind(&db, &id)
         .opt()
         .await
@@ -58,7 +58,7 @@ pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, Serv
             crate::server::serverr_404();
             ProductError::NotFound
         })?;
-    let content_images = clorinde::queries::admin_content_image::read_by_content()
+    let content_images = cornucopia::queries::admin_content_image::read_by_content()
         .bind(&db, &content_id)
         .all()
         .await
@@ -83,7 +83,7 @@ pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, Serv
             }
         }
     }
-    let product_images = clorinde::queries::admin_product_image::read_by_product()
+    let product_images = cornucopia::queries::admin_product_image::read_by_product()
         .bind(&db, &id)
         .all()
         .await
@@ -108,22 +108,22 @@ pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, Serv
         }
     }
     // product, product images and content images should be cascade deleted
-    let _deleted = clorinde::queries::admin_content::delete()
+    let _deleted = cornucopia::queries::admin_content::delete()
         .bind(&db, &content_id)
         .await
         .map_err(|e| lib::emsg(e, "Content delete"))?;
     // let product_images_ids: Vec<String> = product_images.into_iter().map(|img| img.id).collect();
     // {
     //     let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Product delete transaction init"))?;
-        // let _deleted = clorinde::queries::admin_product_image::delete_many_by_id()
+        // let _deleted = cornucopia::queries::admin_product_image::delete_many_by_id()
         //     .bind(&trx, &product_images_ids)
         //     .await
         //     .map_err(|e| lib::emsg(e, "Product images delete"))?;
-        // let _deleted = clorinde::queries::admin_product::delete()
+        // let _deleted = cornucopia::queries::admin_product::delete()
         //     .bind(&trx, &id)
         //     .await
         //     .map_err(|e| lib::emsg(e, "Product delete"))?;
-        // let _deleted = clorinde::queries::admin_content::delete()
+        // let _deleted = cornucopia::queries::admin_content::delete()
         //     .bind(&trx, &content_id)
         //     .await
         //     .map_err(|e| lib::emsg(e, "Content delete"))?;

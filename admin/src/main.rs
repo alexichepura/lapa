@@ -16,7 +16,7 @@ async fn main() {
         routing::{get, post},
         Router,
     };
-    use clorinde::{deadpool_postgres, tokio_postgres};
+    use cornucopia::{deadpool_postgres, tokio_postgres};
     use deadpool_postgres::Runtime;
     use dotenvy::dotenv;
     use image_config::ImageConfig;

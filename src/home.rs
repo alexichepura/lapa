@@ -47,7 +47,7 @@ pub fn HomePage() -> impl IntoView {
 #[server(GetHome, "/api")]
 pub async fn get_home() -> Result<Result<HomeData, AppError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let home = clorinde::queries::settings::settings_home().bind(&db).opt().await.unwrap();
+    let home = cornucopia::queries::settings::settings_home().bind(&db).opt().await.unwrap();
     let home = home.unwrap();
 
     let home_data = HomeData {

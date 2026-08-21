@@ -19,7 +19,7 @@ axum_session_auth = { workspace = true, optional = true }
 bcrypt = { workspace = true, optional = true }
 cfg-if = { workspace = true }
 chrono = { workspace = true }
-clorinde = { workspace = true, optional = true }
+cornucopia = { workspace = true, optional = true }
 config = { workspace = true, optional = true }
 console_error_panic_hook = { workspace = true }
 cuid2 = { workspace = true, optional = true }
@@ -64,7 +64,7 @@ hydrate = [
     "leptos/hydrate",
 ]
 ssr = [
-    "dep:clorinde",
+    "dep:cornucopia",
     "dep:async-trait",
     "dep:axum_session_auth",
     "dep:axum_session",

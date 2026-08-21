@@ -4,7 +4,7 @@
 
 ## Status
 This project is under active development.\
-Recently migrated from Prisma ORM to SQL first approach with [Clorinde](https://github.com/halcyonnouveau/clorinde).\
+Recently migrated from Prisma ORM to SQL first approach with [Cornucopia](https://github.com/cornucopia-rs/cornucopia).\
 Also added integration with Slate.js for rich text editor because we don't have a good one in Rust yet.\
 
 ---
@@ -97,11 +97,11 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 ## Run
 
 ### Generate db client
-https://halcyonnouveau.github.io/clorinde/introduction/installation.html \
+https://cornucopia-rs.github.io/cornucopia/introduction/installation.html \
 Note the need of docker or podman.
 ```sh
-cargo install clorinde
-clorinde schema ./schema.sql
+cargo install cornucopia
+cornucopia schema ./schema.sql
 ```
 
 ### Build rich text editor

@@ -35,7 +35,7 @@ pub async fn content_image_upload(
     let ext = img_format.extensions_str().first().unwrap();
 
     let id = cuid2::create_id();
-    clorinde::queries::admin_content_image::create()
+    cornucopia::queries::admin_content_image::create()
         .bind(
             &db,
             &id,

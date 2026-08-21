@@ -39,7 +39,7 @@ pub async fn category_update(
     let db = crate::server::db::use_db().await?;
     let title = "";
     let description = "";
-    clorinde::queries::admin_post_category::update()
+    cornucopia::queries::admin_post_category::update()
         .bind(&db, &slug, &name, &title, &description, &id)
         .await
         .map_err(|e| lib::emsg(e, "Post category update"))?;

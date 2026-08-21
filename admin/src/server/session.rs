@@ -3,7 +3,7 @@ use axum_session::{
     DatabaseError, DatabasePool, SessionConfig, SessionLayer, SessionStore,
 };
 use chrono::{DateTime};
-use clorinde::{deadpool_postgres::Pool, queries};
+use cornucopia::{deadpool_postgres::Pool, queries};
 
 pub async fn session_layer(pool: &Pool) -> SessionLayer<SessionPool> {
     let config = SessionConfig::default()

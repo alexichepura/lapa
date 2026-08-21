@@ -1,5 +1,5 @@
 use clap::{Args, Parser, Subcommand};
-use clorinde::{deadpool_postgres::{self}, queries, tokio_postgres};
+use cornucopia::{deadpool_postgres::{self}, queries, tokio_postgres};
 use deadpool_postgres::Runtime;
 use dotenvy::dotenv;
 use serde::Deserialize;

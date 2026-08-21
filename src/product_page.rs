@@ -187,7 +187,7 @@ pub fn ProductImageModal(image: ImgData, set_dialog_open: WriteSignal<DialogSign
 #[server(GetProduct, "/api")]
 pub async fn get_product(slug: String) -> Result<Result<ProductPageData, ProductError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let page = clorinde::queries::product::page()
+    let page = cornucopia::queries::product::page()
         .bind(&db, &slug).opt()
         .await
         .map_err(|e| lib::emsg(e, "Product find"))?;
@@ -195,7 +195,7 @@ pub async fn get_product(slug: String) -> Result<Result<ProductPageData, Product
         crate::server::serverr_404();
         return Ok(Err(ProductError::NotFound));
     };
-    let images = clorinde::queries::product::images()
+    let images = cornucopia::queries::product::images()
         .bind(&db, &page.id).all()
         .await
         .map_err(|e| lib::emsg(e, "Product images find"))?;

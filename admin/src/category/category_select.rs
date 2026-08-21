@@ -40,7 +40,7 @@ pub struct CategorySelectData {
 #[server(GetCategorySelect, "/api")]
 async fn get_categories() -> Result<Vec<CategorySelectData>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let categories = clorinde::queries::admin_post_category::list()
+    let categories = cornucopia::queries::admin_post_category::list()
         .bind(&db)
         .map(|data| CategorySelectData {
             id: data.id.into(),

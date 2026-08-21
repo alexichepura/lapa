@@ -87,7 +87,7 @@ pub async fn get_post(
     slug: String
 ) -> Result<Result<PostData, PostError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let page = clorinde::queries::post::page()
+    let page = cornucopia::queries::post::page()
         .bind(&db, &category_slug, &slug).opt()
         .await
         .map_err(|e| lib::emsg(e, "Post find"))?;

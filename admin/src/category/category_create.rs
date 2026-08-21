@@ -46,7 +46,7 @@ pub async fn category_create(
 ) -> Result<Result<String, CategoryError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
     let id = cuid2::create_id();
-    let _post_category_created_at = clorinde::queries::admin_post_category::create()
+    let _post_category_created_at = cornucopia::queries::admin_post_category::create()
     .bind(
         &db,
         &id,

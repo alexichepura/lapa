@@ -20,10 +20,10 @@ dependencies = [
  "bcrypt",
  "cfg-if",
  "chrono",
- "clorinde",
  "config",
  "console_error_panic_hook",
  "content",
+ "cornucopia",
  "cuid2",
  "deadpool-postgres",
  "dotenvy",
@@ -758,8 +758,8 @@ version = "0.1.0"
 dependencies = [
  "bcrypt",
  "clap",
- "clorinde",
  "config",
+ "cornucopia",
  "cuid2",
  "deadpool-postgres",
  "dotenvy",
@@ -767,20 +767,6 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
-]
-
-[[package]]
-name = "clorinde"
-version = "0.0.0"
-dependencies = [
- "chrono",
- "deadpool-postgres",
- "fallible-iterator",
- "futures",
- "postgres",
- "postgres-protocol",
- "postgres-types",
- "tokio-postgres",
 ]
 
 [[package]]
@@ -983,6 +969,19 @@ name = "core-foundation-sys"
 version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
+
+[[package]]
+name = "cornucopia"
+version = "0.0.0"
+dependencies = [
+ "chrono",
+ "deadpool-postgres",
+ "futures",
+ "postgres",
+ "postgres-protocol",
+ "postgres-types",
+ "tokio-postgres",
+]
 
 [[package]]
 name = "cpufeatures"
@@ -3867,10 +3866,10 @@ dependencies = [
  "axum",
  "cfg-if",
  "chrono",
- "clorinde",
  "config",
  "console_error_panic_hook",
  "content",
+ "cornucopia",
  "deadpool-postgres",
  "dotenvy",
  "http",

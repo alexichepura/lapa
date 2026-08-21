@@ -1,7 +1,7 @@
 use super::SettingsCx;
 
-pub async fn settings_db(pool: clorinde::deadpool_postgres::Pool) -> SettingsCx {
-    use clorinde::queries;
+pub async fn settings_db(pool: cornucopia::deadpool_postgres::Pool) -> SettingsCx {
+    use cornucopia::queries;
     let client = pool.get().await.unwrap();
     let settings = queries::settings::settings().bind(&client).opt().await.unwrap();
     dbg!(&settings);

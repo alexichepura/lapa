@@ -4,7 +4,7 @@ use axum::{
     http::Request,
     response::{IntoResponse, Response},
 };
-use clorinde::queries;
+use cornucopia::queries;
 use http::StatusCode;
 use image_config::ImageConfig;
 use leptos::prelude::*;
@@ -71,7 +71,7 @@ pub fn Favicons() -> impl IntoView {
 #[derive(FromRef, Debug, Clone)]
 pub struct AppState {
     pub leptos_options: LeptosOptions,
-    pub pool: clorinde::deadpool_postgres::Pool,
+    pub pool: cornucopia::deadpool_postgres::Pool,
     pub image_config: ImageConfig,
 }
 pub fn use_image_config() -> Result<ImageConfig, ServerFnError> {

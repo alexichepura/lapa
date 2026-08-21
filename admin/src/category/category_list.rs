@@ -65,7 +65,7 @@ pub fn CategoryListItem(category: CategoryListItem) -> impl IntoView {
 #[server(GetCategoriesList, "/api")]
 async fn get_categories() -> Result<Vec<CategoryListItem>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let categories = clorinde::queries::admin_post_category::list()
+    let categories = cornucopia::queries::admin_post_category::list()
         .bind(&db)
         .map(|data| CategoryListItem {
             id: data.id.into(),

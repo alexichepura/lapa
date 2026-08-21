@@ -4,7 +4,7 @@ use leptos::prelude::{use_context, ServerFnError};
 
 use super::SessionPool;
 use crate::auth::User;
-use clorinde::deadpool_postgres::Pool;
+use cornucopia::deadpool_postgres::Pool;
 
 type PoolAuthSessionLayer = AuthSessionLayer<User, String, SessionPool, Pool>;
 
@@ -29,7 +29,7 @@ impl Authentication<User, String, Pool> for User {
             return Err(anyhow::anyhow!("no pool"))
         };
         let db = pool.clone().get().await.unwrap();
-        let username = clorinde::queries::user::user_find_by_id()
+        let username = cornucopia::queries::user::user_find_by_id()
             .bind(&db, &userid).opt()
             .await
             .map_err(|e| anyhow::anyhow!(e.to_string()))?

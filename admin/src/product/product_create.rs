@@ -48,7 +48,7 @@ pub async fn product_create(
     meta_description: String,
     h1: String,
 ) -> Result<Result<String, ProductError>, ServerFnError> {
-    use clorinde::queries;
+    use cornucopia::queries;
     let mut db = crate::server::db::use_db().await?;
     let id = cuid2::create_id();
     {

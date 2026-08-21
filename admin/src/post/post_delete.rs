@@ -55,7 +55,7 @@ type PostDeleteResult = Result<(), PostError>;
 #[server(PostDelete, "/api")]
 pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> {
     let db = crate::server::db::use_db().await?;
-    let content_id = clorinde::queries::admin_post::read_content_id()
+    let content_id = cornucopia::queries::admin_post::read_content_id()
         .bind(&db, &id)
         .opt()
         .await
@@ -64,7 +64,7 @@ pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> 
             crate::server::serverr_404();
             PostError::NotFound
         })?;
-    let content_images = clorinde::queries::admin_content_image::read_by_content()
+    let content_images = cornucopia::queries::admin_content_image::read_by_content()
         .bind(&db, &content_id)
         .all()
         .await
@@ -90,13 +90,13 @@ pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> 
         }
     }
     // post and content images should be cascade deleted
-    let _deleted = clorinde::queries::admin_content::delete()
+    let _deleted = cornucopia::queries::admin_content::delete()
         .bind(&db, &content_id)
         .await
         .map_err(|e| lib::emsg(e, "Content delete"))?;
     // {
     //     let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Post delete transaction init"))?;
-    //     let _deleted = clorinde::queries::admin_post::delete()
+    //     let _deleted = cornucopia::queries::admin_post::delete()
     //         .bind(&trx, &id)
     //         .await
     //         .map_err(|e| lib::emsg(e, "Post delete"))?;
