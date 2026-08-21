@@ -8,8 +8,8 @@ async fn main() {
         routing::{get, post},
         Router,
     };
-    use cornucopia::tokio_postgres;
     use config::ConfigError;
+    use cornucopia::tokio_postgres;
     use deadpool_postgres::Runtime;
     use dotenvy::dotenv;
     use image_config::ImageConfig;
