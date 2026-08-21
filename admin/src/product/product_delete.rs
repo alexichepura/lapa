@@ -74,7 +74,10 @@ pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, Serv
             for image_size in content::CdnImageSize::VALUES {
                 let cdn_path = format!(
                     "{}/{}_{}.{}",
-                    image_config.content_image_convert_path(), img.id, image_size, image_format
+                    image_config.content_image_convert_path(),
+                    img.id,
+                    image_size,
+                    image_format
                 );
                 let cdn_del_result = std::fs::remove_file(&cdn_path);
                 if let Err(e) = cdn_del_result {
@@ -98,7 +101,10 @@ pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, Serv
             for image_size in content::CdnImageSize::VALUES {
                 let cdn_path = format!(
                     "{}/{}_{}.{}",
-                    image_config.product_image_convert_path(), img.id, image_size, image_format
+                    image_config.product_image_convert_path(),
+                    img.id,
+                    image_size,
+                    image_format
                 );
                 let cdn_del_result = std::fs::remove_file(&cdn_path);
                 if let Err(e) = cdn_del_result {
@@ -115,18 +121,18 @@ pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, Serv
     // let product_images_ids: Vec<String> = product_images.into_iter().map(|img| img.id).collect();
     // {
     //     let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Product delete transaction init"))?;
-        // let _deleted = cornucopia::queries::admin_product_image::delete_many_by_id()
-        //     .bind(&trx, &product_images_ids)
-        //     .await
-        //     .map_err(|e| lib::emsg(e, "Product images delete"))?;
-        // let _deleted = cornucopia::queries::admin_product::delete()
-        //     .bind(&trx, &id)
-        //     .await
-        //     .map_err(|e| lib::emsg(e, "Product delete"))?;
-        // let _deleted = cornucopia::queries::admin_content::delete()
-        //     .bind(&trx, &content_id)
-        //     .await
-        //     .map_err(|e| lib::emsg(e, "Content delete"))?;
+    // let _deleted = cornucopia::queries::admin_product_image::delete_many_by_id()
+    //     .bind(&trx, &product_images_ids)
+    //     .await
+    //     .map_err(|e| lib::emsg(e, "Product images delete"))?;
+    // let _deleted = cornucopia::queries::admin_product::delete()
+    //     .bind(&trx, &id)
+    //     .await
+    //     .map_err(|e| lib::emsg(e, "Product delete"))?;
+    // let _deleted = cornucopia::queries::admin_content::delete()
+    //     .bind(&trx, &content_id)
+    //     .await
+    //     .map_err(|e| lib::emsg(e, "Content delete"))?;
     //     trx.commit().await.map_err(|e| lib::emsg(e, "Product delete transaction"))?;
     // };
     Ok(Ok(()))

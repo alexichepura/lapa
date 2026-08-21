@@ -1,6 +1,6 @@
 use axum_session_auth::Authentication;
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
-use leptos::prelude::{use_context, ServerFnError};
+use leptos::prelude::{ServerFnError, use_context};
 
 use super::SessionPool;
 use crate::auth::User;
@@ -26,15 +26,16 @@ pub fn use_auth() -> Result<AuthSession, ServerFnError> {
 impl Authentication<User, String, Pool> for User {
     async fn load_user(userid: String, pool: Option<&Pool>) -> Result<User, anyhow::Error> {
         let Some(pool) = pool else {
-            return Err(anyhow::anyhow!("no pool"))
+            return Err(anyhow::anyhow!("no pool"));
         };
         let db = pool.clone().get().await.unwrap();
         let username = cornucopia::queries::user::user_find_by_id()
-            .bind(&db, &userid).opt()
+            .bind(&db, &userid)
+            .opt()
             .await
             .map_err(|e| anyhow::anyhow!(e.to_string()))?
             .ok_or("User does not exist.")
-            .map_err(|e| anyhow::anyhow!(e.to_string()))?;          
+            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
 
         let user = User {
             id: userid,

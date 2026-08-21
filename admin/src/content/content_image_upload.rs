@@ -1,4 +1,4 @@
-use leptos::{prelude::*};
+use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::upload::ImageUploadError;
@@ -23,11 +23,13 @@ pub async fn content_image_upload(
         ImageUploadError::Deserialization
     })?;
     let cursor = std::io::Cursor::new(img_bytes.clone());
-    let img_reader = image::ImageReader::new(cursor.clone()).with_guessed_format().map_err(|e| {
-        tracing::error!("{e:?}");
-        serverr_400();
-        ImageUploadError::Read
-    })?;
+    let img_reader = image::ImageReader::new(cursor.clone())
+        .with_guessed_format()
+        .map_err(|e| {
+            tracing::error!("{e:?}");
+            serverr_400();
+            ImageUploadError::Read
+        })?;
     let img_format = img_reader.format().ok_or_else(|| {
         serverr_400();
         ImageUploadError::Format
@@ -36,13 +38,7 @@ pub async fn content_image_upload(
 
     let id = cuid2::create_id();
     cornucopia::queries::admin_content_image::create()
-        .bind(
-            &db,
-            &id,
-            &alt,
-            &ext,
-            &content_id
-        )
+        .bind(&db, &id, &alt, &ext, &content_id)
         .await
         .map_err(|e| lib::emsg(e, "Content image create"))?;
 
@@ -51,4 +47,3 @@ pub async fn content_image_upload(
 
     Ok(Ok(ImageResult { id }))
 }
-

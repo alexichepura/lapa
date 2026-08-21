@@ -60,7 +60,10 @@ pub async fn content_json_update(
             for image_size in CdnImageSize::VALUES {
                 let cdn_path = format!(
                     "{}/{}_{}.{}",
-                    media_config.content_image_convert_path(), img.id, image_size, image_format
+                    media_config.content_image_convert_path(),
+                    img.id,
+                    image_size,
+                    image_format
                 );
                 let cdn_del_result = std::fs::remove_file(&cdn_path);
                 if let Err(e) = cdn_del_result {
@@ -70,7 +73,10 @@ pub async fn content_json_update(
         }
     }
     {
-        let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Content update transaction init"))?;
+        let trx = db
+            .transaction()
+            .await
+            .map_err(|e| lib::emsg(e, "Content update transaction init"))?;
         if images_to_delete.len() > 0 {
             let ids_to_del: Vec<String> = images_to_delete.into_iter().map(|img| img.id).collect();
             let _deleted = cornucopia::queries::admin_content_image::delete_many_by_id()
@@ -82,7 +88,9 @@ pub async fn content_json_update(
             .bind(&trx, &json, &content_id)
             .await
             .map_err(|e| lib::emsg(e, "Content json string update"))?;
-        trx.commit().await.map_err(|e| lib::emsg(e, "Content update transaction"))?;
+        trx.commit()
+            .await
+            .map_err(|e| lib::emsg(e, "Content update transaction"))?;
     };
     return Ok(Ok(()));
 }

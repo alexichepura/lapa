@@ -2,9 +2,12 @@ use leptos::{either::Either, html::Dialog, prelude::*};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    err::AppError, form::FormFooter, product::{
+    err::AppError,
+    form::FormFooter,
+    product::{
         ImageDelete, ImageEditData, ImageEditSignal, ImageUpdate, ImageUpload, PostImageModalForm,
-    }, util::{AlertDanger, Loading}
+    },
+    util::{AlertDanger, Loading},
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -130,10 +133,9 @@ fn ProductImagesView(
         let is_last = image.order + 1 == images_sorted().len() as i32;
         let id_to_make_hero = image.id.clone();
         let make_hero = move || {
-            hero_action
-                .dispatch(ImageMakeHero {
-                    id: id_to_make_hero.clone(),
-                });
+            hero_action.dispatch(ImageMakeHero {
+                id: id_to_make_hero.clone(),
+            });
         };
         view! { <ProductImage image set_editing on_order is_last make_hero /> }
     };
@@ -249,17 +251,22 @@ pub async fn get_images(post_id: String) -> Result<Vec<ProductImageData>, Server
 }
 
 #[server(ImagesOrderUpdate, "/api")]
-pub async fn images_order_update(
-    ids: Vec<String>,
-) -> Result<Result<(), AppError>, ServerFnError> {
+pub async fn images_order_update(ids: Vec<String>) -> Result<Result<(), AppError>, ServerFnError> {
     let mut db_trx = crate::server::db::use_db().await?;
     let order_update = ids.into_iter().enumerate();
-    let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images order transaction init"))?;
+    let trx = db_trx
+        .transaction()
+        .await
+        .map_err(|e| lib::emsg(e, "Images order transaction init"))?;
     for (i, id) in order_update {
         // TODO how this can be improved? batch, sql?
-        cornucopia::queries::product_image::update_order().bind(&trx, &(i as i32), &id).await?;
+        cornucopia::queries::product_image::update_order()
+            .bind(&trx, &(i as i32), &id)
+            .await?;
     }
-    trx.commit().await.map_err(|e| lib::emsg(e, "Images order transaction"))?;
+    trx.commit()
+        .await
+        .map_err(|e| lib::emsg(e, "Images order transaction"))?;
     Ok(Ok(()))
 }
 
@@ -289,7 +296,10 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
         .map_err(|e| lib::emsg(e, "Image current hero find"))?;
 
     let mut db_trx = crate::server::db::use_db().await?;
-    let trx = db_trx.transaction().await.map_err(|e| lib::emsg(e, "Images hero transaction init"))?;
+    let trx = db_trx
+        .transaction()
+        .await
+        .map_err(|e| lib::emsg(e, "Images hero transaction init"))?;
     cornucopia::queries::product_image::set_hero()
         .bind(&db, &id)
         .await?;
@@ -298,6 +308,8 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
             .bind(&db, &current_hero)
             .await?;
     }
-    trx.commit().await.map_err(|e| lib::emsg(e, "Images hero transaction"))?;
+    trx.commit()
+        .await
+        .map_err(|e| lib::emsg(e, "Images hero transaction"))?;
     Ok(Ok(()))
 }

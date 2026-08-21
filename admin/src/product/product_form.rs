@@ -24,7 +24,6 @@ pub struct ProductFormData {
     pub h1: String,
 }
 
-
 #[component]
 pub fn ProductForm(product: ProductFormData) -> impl IntoView {
     let action = ServerAction::<ProductUpdate>::new();
@@ -202,7 +201,15 @@ pub async fn product_update(
     use cornucopia::queries;
     let db = crate::server::db::use_db().await?;
     queries::admin_product::update()
-        .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &meta_title, &meta_description, &h1, &id)
+        .bind(
+            &db,
+            &publish_at.map(|publish_at| publish_at.naive_utc()),
+            &slug,
+            &meta_title,
+            &meta_description,
+            &h1,
+            &id,
+        )
         .await
         .map_err(|e| lib::emsg(e, "Product update"))?;
     return Ok(Ok(()));

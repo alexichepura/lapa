@@ -3,7 +3,8 @@ use leptos_router::{hooks::use_params, params::Params};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    post::{PostDeleteForm, PostError, PostForm, PostFormData}, util::{AlertDanger, Loading}
+    post::{PostDeleteForm, PostError, PostForm, PostFormData},
+    util::{AlertDanger, Loading},
 };
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
@@ -56,13 +57,15 @@ pub fn PostPage() -> impl IntoView {
         },
     );
 
-    let suspended = move || Suspend::new(async move {
-        match post.await {
-            Ok(Ok(page)) => EitherOf3::A(view! { <PostPageView page=page /> }),
-            Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
-            Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
-        }
-    });
+    let suspended = move || {
+        Suspend::new(async move {
+            match post.await {
+                Ok(Ok(page)) => EitherOf3::A(view! { <PostPageView page=page /> }),
+                Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
+                Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
+            }
+        })
+    };
 
     view! {
         <Suspense fallback=move || {
@@ -87,7 +90,7 @@ pub fn PostPageView(page: PostPageData) -> impl IntoView {
                     />
                 },
                 #[cfg(not(feature = "hydrate"))]
-                view! {  },
+                view! {},
             ),
             false => leptos::either::Either::Right(()),
         }
@@ -102,7 +105,6 @@ pub fn PostPageView(page: PostPageData) -> impl IntoView {
         </div>
     }
 }
-
 
 #[server(GetPost, "/api")]
 pub async fn get_post(id: String) -> Result<Result<PostPageData, PostError>, ServerFnError> {

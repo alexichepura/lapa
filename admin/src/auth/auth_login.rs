@@ -60,7 +60,8 @@ pub async fn login(
 ) -> Result<Result<super::User, AuthError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
     let user = cornucopia::queries::user::user_get_auth_by_username()
-        .bind(&db, &username).opt()
+        .bind(&db, &username)
+        .opt()
         .await
         .map_err(|e| lib::emsg(e, "user_get_auth_by_username"))?;
     let Some(user) = user else {

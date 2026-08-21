@@ -5,9 +5,11 @@ use serde::{Deserialize, Serialize};
 
 use super::PostError;
 use crate::{
-    form::{Checkbox, FormFooter, Input}, settings::use_site_url, util::{
+    form::{Checkbox, FormFooter, Input},
+    settings::use_site_url,
+    util::{
         datetime_to_local_html, datetime_to_string, datetime_to_strings, html_local_to_datetime,
-    }
+    },
 };
 
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -196,7 +198,8 @@ pub async fn post_update(
     use cornucopia::queries;
     let db = crate::server::db::use_db().await?;
     let post_by_slug_id = cornucopia::queries::admin_post::by_slug()
-        .bind(&db, &slug).opt()
+        .bind(&db, &slug)
+        .opt()
         .await
         .map_err(|e| lib::emsg(e, "Post by slug"))?;
 
@@ -207,7 +210,15 @@ pub async fn post_update(
         }
     }
     queries::admin_post::update()
-        .bind(&db, &publish_at.map(|publish_at| publish_at.naive_utc()), &slug, &meta_title, &meta_description, &h1, &id)
+        .bind(
+            &db,
+            &publish_at.map(|publish_at| publish_at.naive_utc()),
+            &slug,
+            &meta_title,
+            &meta_description,
+            &h1,
+            &id,
+        )
         .await
         .map_err(|e| lib::emsg(e, "Post update"))?;
     return Ok(Ok(()));

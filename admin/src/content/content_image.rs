@@ -1,7 +1,7 @@
 use leptos::{either::Either, html::Dialog, prelude::*};
 use serde::{Deserialize, Serialize};
 
-use crate::content::{ContentImageUploadAction};
+use crate::content::ContentImageUploadAction;
 use crate::form::{FormFooter, Input};
 
 #[component]
@@ -115,14 +115,8 @@ pub fn ContentImageUpload(content_id: String, set_image_id: WriteSignal<String>)
     let (_save_file, set_save_file) = signal(None::<String>);
     let (obj_url, set_obj_url) = signal(None::<String>);
 
-    let img_value = move || {
-        Some(
-            serde_json::to_string(
-                    &save_byte_vec().unwrap_or_default().to_vec(),
-                )
-                .unwrap(),
-        )
-    };
+    let img_value =
+        move || Some(serde_json::to_string(&save_byte_vec().unwrap_or_default().to_vec()).unwrap());
     view! {
         <fieldset prop:disabled=move || pending()>
             <legend>Image upload</legend>
@@ -156,4 +150,3 @@ pub fn ImageUploadPreview(obj_url: ReadSignal<Option<String>>) -> impl IntoView 
     };
     view! { <div class="ImageUploadPreview">{view}</div> }
 }
-

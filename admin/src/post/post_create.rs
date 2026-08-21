@@ -3,9 +3,10 @@ use leptos_meta::Title;
 use leptos_router::hooks::use_navigate;
 
 use super::PostError;
-use crate::{category::CategorySelect, 
-    form::{FormFooter, Input}}
-;
+use crate::{
+    category::CategorySelect,
+    form::{FormFooter, Input},
+};
 
 #[component]
 pub fn PostCreate() -> impl IntoView {
@@ -53,13 +54,13 @@ pub async fn post_create(
     let mut db = crate::server::db::use_db().await?;
     let id = cuid2::create_id();
     {
-        let trx = db.transaction().await.map_err(|e| lib::emsg(e, "Post create transaction init"))?;
+        let trx = db
+            .transaction()
+            .await
+            .map_err(|e| lib::emsg(e, "Post create transaction init"))?;
         let content_id = cuid2::create_id();
         queries::admin_content::create()
-            .bind(
-                &trx,
-                &content_id,
-            )
+            .bind(&trx, &content_id)
             .await
             .map_err(|e| lib::emsg(e, "Content create"))?;
         queries::admin_post::create()
@@ -80,7 +81,9 @@ pub async fn post_create(
         //     .params(&db, &CreateParams { id: &id, slug, meta_title: title, meta_description: description })
         //     .await
         //     .map_err(|e| lib::emsg(e, "Post create"))?;
-        trx.commit().await.map_err(|e| lib::emsg(e, "Post create transaction"))?;
+        trx.commit()
+            .await
+            .map_err(|e| lib::emsg(e, "Post create transaction"))?;
     };
     return Ok(Ok(id));
 }

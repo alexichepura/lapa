@@ -1,4 +1,3 @@
-use std::convert::Infallible;
 use axum::{
     body::Body,
     extract::State,
@@ -7,8 +6,9 @@ use axum::{
 };
 use http::HeaderValue;
 use leptos::prelude::*;
+use std::convert::Infallible;
 use tower::ServiceExt;
-use tower_http::services::{fs::ServeFileSystemResponseBody, ServeDir};
+use tower_http::services::{ServeDir, fs::ServeFileSystemResponseBody};
 
 use crate::err::AppError;
 use crate::err::ErrorTemplate;

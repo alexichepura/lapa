@@ -55,13 +55,15 @@ pub fn ProductPage() -> impl IntoView {
             }
         },
     );
-    let suspended = move || Suspend::new(async move {
-        match page.await {
-            Ok(Ok(page)) => EitherOf3::A(view! { <ProductPageView page=page /> }),
-            Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
-            Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
-        }
-    });
+    let suspended = move || {
+        Suspend::new(async move {
+            match page.await {
+                Ok(Ok(page)) => EitherOf3::A(view! { <ProductPageView page=page /> }),
+                Ok(Err(e)) => EitherOf3::B(view! { <AlertDanger text=e.to_string() /> }),
+                Err(e) => EitherOf3::C(view! { <AlertDanger text=e.to_string() /> }),
+            }
+        })
+    };
     view! {
         <Suspense fallback=move || {
             view! { <Loading /> }
@@ -86,7 +88,7 @@ pub fn ProductPageView(page: ProductPageData) -> impl IntoView {
                     />
                 },
                 #[cfg(not(feature = "hydrate"))]
-                view! {  },
+                view! {},
             ),
             false => leptos::either::Either::Right(()),
         }
@@ -103,7 +105,9 @@ pub fn ProductPageView(page: ProductPageData) -> impl IntoView {
 }
 
 #[server(GetProduct, "/api")]
-pub async fn get_product(id: String) -> Result<Result<ProductPageData, ProductError>, ServerFnError> {
+pub async fn get_product(
+    id: String,
+) -> Result<Result<ProductPageData, ProductError>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
     let page = cornucopia::queries::admin_product::page()
         .bind(&db, &id)

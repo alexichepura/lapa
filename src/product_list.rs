@@ -2,19 +2,19 @@ use leptos::{either::Either, prelude::*};
 use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    util::{AlertDanger, Loading},
-};
+use crate::util::{AlertDanger, Loading};
 
 #[component]
 pub fn ProductList() -> impl IntoView {
     let products = Resource::new_blocking(|| (), move |_| get_products());
-    let suspended = move || Suspend::new(async move {
-        match products.await {
-            Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
-            Ok(products) => Either::Right(view! { <ProductListView products /> }),
-        }
-    });
+    let suspended = move || {
+        Suspend::new(async move {
+            match products.await {
+                Err(e) => Either::Left(view! { <AlertDanger text=e.to_string() /> }),
+                Ok(products) => Either::Right(view! { <ProductListView products /> }),
+            }
+        })
+    };
     view! {
         <h2>Products</h2>
         <Suspense fallback=move || {
@@ -46,7 +46,7 @@ pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
         Some(image) => {
             let src = format!("/product-image/{}_s", image.id);
             Either::Left(view! { <img src=src alt=image.alt /> })
-        },
+        }
         None => Either::Right(()),
     };
     let href = format!("/product/{}", product.slug);
@@ -57,7 +57,8 @@ pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
 pub async fn get_products() -> Result<Vec<ProductListItem>, ServerFnError> {
     let db = crate::server::db::use_db().await?;
     let products = cornucopia::queries::product::list()
-        .bind(&db).all()
+        .bind(&db)
+        .all()
         .await
         .map_err(|e| lib::emsg(e, "Products list find"))?;
     let products: Vec<ProductListItem> = products

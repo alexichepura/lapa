@@ -1,7 +1,10 @@
 use leptos::{either::Either, prelude::*};
 use serde::{Deserialize, Serialize};
 
-use crate::{form::FormFooter, upload::{ImageUploadError, InputImage}};
+use crate::{
+    form::FormFooter,
+    upload::{ImageUploadError, InputImage},
+};
 
 #[component]
 pub fn ImageUpload(product_id: String, image_upload: ServerAction<ImageUpload>) -> impl IntoView {
@@ -10,14 +13,8 @@ pub fn ImageUpload(product_id: String, image_upload: ServerAction<ImageUpload>) 
     let (save_byte_vec, set_save_byte_vec) = signal(None::<Vec<u8>>);
     let (_save_file, set_save_file) = signal(None::<String>);
     let (obj_url, set_obj_url) = signal(None::<String>);
-    let img_value = move || {
-        Some(
-            serde_json::to_string(
-                    &save_byte_vec().unwrap_or_default().to_vec(),
-                )
-                .unwrap(),
-        )
-    };
+    let img_value =
+        move || Some(serde_json::to_string(&save_byte_vec().unwrap_or_default().to_vec()).unwrap());
     view! {
         <fieldset prop:disabled=move || pending()>
             <legend>Image upload</legend>
@@ -69,11 +66,13 @@ pub async fn upload_img(
         ImageUploadError::Deserialization
     })?;
     let cursor = std::io::Cursor::new(img_bytes.clone());
-    let img_reader = image::ImageReader::new(cursor.clone()).with_guessed_format().map_err(|e| {
-        tracing::error!("{e:?}");
-        serverr_400();
-        ImageUploadError::Read
-    })?;
+    let img_reader = image::ImageReader::new(cursor.clone())
+        .with_guessed_format()
+        .map_err(|e| {
+            tracing::error!("{e:?}");
+            serverr_400();
+            ImageUploadError::Read
+        })?;
     let img_format = img_reader.format().ok_or_else(|| {
         serverr_400();
         ImageUploadError::Format

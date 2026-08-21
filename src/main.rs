@@ -5,8 +5,8 @@ async fn main() {
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
     use axum::{
-        routing::{get, post},
         Router,
+        routing::{get, post},
     };
     use config::ConfigError;
     use cornucopia::tokio_postgres;
@@ -14,12 +14,13 @@ async fn main() {
     use dotenvy::dotenv;
     use image_config::ImageConfig;
     use leptos::prelude::*;
-    use leptos_axum::{generate_route_list, LeptosRoutes};
+    use leptos_axum::{LeptosRoutes, generate_route_list};
     use serde::Deserialize;
     use site::{
         routes::GenerateRouteList,
         server::{
-            content_image_handler, file_and_error_handler, leptos_routes_handler, product_image_handler, robots_txt, server_fn_handler, AppState
+            AppState, content_image_handler, file_and_error_handler, leptos_routes_handler,
+            product_image_handler, robots_txt, server_fn_handler,
         },
     };
     use tracing::info;
@@ -80,7 +81,6 @@ async fn main() {
             image_config: image_config.clone(),
         })
         .layer(tower_http::trace::TraceLayer::new_for_http());
-
 
     info!("starting to listen TCP on http://{}", &leptopts.site_addr);
     let listener = tokio::net::TcpListener::bind(&leptopts.site_addr)

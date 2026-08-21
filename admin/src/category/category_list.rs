@@ -4,7 +4,7 @@ use leptos_meta::Title;
 use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
-use crate::util::{datetime_to_strings, AlertDanger, Loading};
+use crate::util::{AlertDanger, Loading, datetime_to_strings};
 
 #[component]
 pub fn CategoryList() -> impl IntoView {
