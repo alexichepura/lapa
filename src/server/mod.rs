@@ -146,7 +146,10 @@ pub async fn robots_txt(State(app_state): State<AppState>) -> Result<String, (St
         .await
         .map_err(|e| {
             tracing::error!("robots.txt: failed to load settings: {e}");
-            (StatusCode::INTERNAL_SERVER_ERROR, "database error".to_string())
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "database error".to_string(),
+            )
         })?
         .ok_or((StatusCode::NOT_FOUND, "robots.txt not found".to_string()))?;
     Ok(robots)

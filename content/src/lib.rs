@@ -191,7 +191,10 @@ fn safe_href(href: &str) -> &str {
         .collect::<String>()
         .to_ascii_lowercase();
     const DANGEROUS: [&str; 3] = ["javascript:", "vbscript:", "data:"];
-    if DANGEROUS.iter().any(|scheme| normalized.starts_with(scheme)) {
+    if DANGEROUS
+        .iter()
+        .any(|scheme| normalized.starts_with(scheme))
+    {
         "#"
     } else {
         trimmed

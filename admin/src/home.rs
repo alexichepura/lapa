@@ -109,7 +109,10 @@ pub async fn get_stats(period: StatsPeriod) -> Result<StatsResult, ServerFnError
                 .await
                 .map_err(|e| lib::emsg(e, "SSR stats all"))?;
             rows.into_iter()
-                .map(|r| StatsListItem { path: r.path, n: r.n })
+                .map(|r| StatsListItem {
+                    path: r.path,
+                    n: r.n,
+                })
                 .collect::<Vec<_>>()
         }
         StatsPeriod::Live => since_stats(&db, now - chrono::Duration::minutes(5)).await?,
@@ -135,7 +138,10 @@ async fn since_stats(
         .map_err(|e| lib::emsg(e, "SSR stats since"))?;
     Ok(rows
         .into_iter()
-        .map(|r| StatsListItem { path: r.path, n: r.n })
+        .map(|r| StatsListItem {
+            path: r.path,
+            n: r.n,
+        })
         .collect())
 }
 
