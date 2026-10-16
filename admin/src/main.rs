@@ -19,8 +19,7 @@ async fn main() {
         routing::{get, post},
     };
     use config::ConfigError;
-    use cornucopia::{deadpool_postgres, tokio_postgres};
-    use deadpool_postgres::Runtime;
+    use cornucopia::deadpool_postgres;
     use dotenvy::dotenv;
     use image_config::ImageConfig;
     use leptos::prelude::*;
@@ -51,10 +50,7 @@ async fn main() {
 
     let leptopts = get_configuration(None).unwrap().leptos_options;
     let routes = generate_route_list(|| view! { <AdminRouter /> });
-    let pool = config
-        .pg
-        .create_pool(Some(Runtime::Tokio1), tokio_postgres::NoTls)
-        .unwrap();
+    let pool = lib::create_pool(&config.pg);
 
     let image_upload_path =
         std::env::var("IMAGE_UPLOAD_PATH").unwrap_or("image_upload".to_string());

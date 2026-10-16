@@ -9,8 +9,6 @@ async fn main() {
         routing::{get, post},
     };
     use config::ConfigError;
-    use cornucopia::tokio_postgres;
-    use deadpool_postgres::Runtime;
     use dotenvy::dotenv;
     use image_config::ImageConfig;
     use leptos::prelude::*;
@@ -44,10 +42,7 @@ async fn main() {
 
     let leptopts = get_configuration(None).unwrap().leptos_options;
     let routes = generate_route_list(|| view! { <GenerateRouteList /> });
-    let pool = config
-        .pg
-        .create_pool(Some(Runtime::Tokio1), tokio_postgres::NoTls)
-        .unwrap();
+    let pool = lib::create_pool(&config.pg);
 
     let app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
