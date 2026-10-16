@@ -164,7 +164,7 @@ fn ProductImagesView(
 
                 <FormFooter action=order_action submit_text="Save order" />
             </ActionForm>
-            <div data-testid="images" class=images::images>
+            <div class=images::images>
                 {no_images}
                 <For
                     each=move || images_sorted()
