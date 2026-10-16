@@ -222,8 +222,9 @@ impl SlateToHtml for Img {
         );
         let alt = html_escape::encode_double_quoted_attribute(&self.alt);
         let caption = html_escape::encode_text(&self.caption);
+        let l = CdnImageSize::L;
         format!(
-            "<figure><img src=\"/cdn/{}_lg\" alt=\"{}\" srcset=\"{srcset}\" sizes=\"{sizes}\" loading=\"lazy\"/><figcaption>{}</figcaption></figure>",
+            "<figure><img src=\"/cdn/{}_{l}\" alt=\"{}\" srcset=\"{srcset}\" sizes=\"{sizes}\" loading=\"lazy\"/><figcaption>{}</figcaption></figure>",
             self.id, alt, caption
         )
     }
@@ -299,5 +300,9 @@ mod tests {
         );
         assert!(html.contains(r#"alt="&lt;img src=x onerror=alert(1)&gt;""#));
         assert!(html.contains("<figcaption>a &lt; b &amp; c</figcaption>"));
+        // The `src` fallback must use a valid CDN size (the handler only knows
+        // s/m/l/xl), not the old broken `_lg`.
+        assert!(html.contains(r#"src="/cdn/abc_l""#));
+        assert!(!html.contains("_lg"));
     }
 }
