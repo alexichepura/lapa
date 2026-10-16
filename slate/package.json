@@ -7,20 +7,20 @@
     "build": "rspack build"
   },
   "devDependencies": {
-    "@rspack/cli": "^1.1.8",
-    "@rspack/core": "^1.1.8",
+    "@rspack/cli": "^2.2.9",
+    "@rspack/core": "^2.2.9",
     "@types/is-url": "^1.2.32",
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5"
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0"
   },
   "dependencies": {
     "is-hotkey": "^0.2.0",
     "is-url": "^1.2.4",
-    "react": "^19.0.0",
-    "slate": "^0.112.0",
-    "slate-history": "^0.110.3",
-    "slate-hyperscript": "^0.100.0",
-    "slate-react": "^0.112.0",
-    "use-debounce": "^10.0.4"
+    "react": "^19.3.1",
+    "slate": "^0.142.1",
+    "slate-history": "^0.140.0",
+    "slate-hyperscript": "^0.138.3",
+    "slate-react": "^0.142.0",
+    "use-debounce": "^10.1.1"
   }
 }
