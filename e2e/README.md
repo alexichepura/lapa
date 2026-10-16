@@ -3,8 +3,9 @@
 Rust-native end-to-end harness for the Lapa site, built on
 [`playwright-rs`](https://crates.io/crates/playwright-rs) +
 [`testcontainers`](https://crates.io/crates/testcontainers). It boots an
-ephemeral Postgres, applies `schema.sql`, seeds deterministic fixtures, starts
-the Leptos site (`cargo leptos serve`) and drives Chromium against it.
+ephemeral Postgres, applies `schema.sql` (equivalent to the refinery
+`db/migrations/V1__init.sql` used in production), seeds deterministic fixtures,
+starts the Leptos site (`cargo leptos serve`) and drives Chromium against it.
 
 ## Prerequisites (one-time)
 

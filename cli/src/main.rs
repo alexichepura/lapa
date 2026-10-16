@@ -60,8 +60,8 @@ async fn main() {
 
     match &cli.command {
         Commands::Migrate => {
-            // prisma_client._migrate_deploy().await.unwrap();
-            // println!("Migration success");
+            db::migrate(&pool).await.unwrap();
+            println!("Migration success");
         }
         Commands::UserAdd(user) => {
             let username = user.username.clone();

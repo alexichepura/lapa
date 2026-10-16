@@ -1,0 +1,14 @@
+[package]
+name = "db"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+deadpool-postgres = { workspace = true }
+refinery = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt", "macros"] }

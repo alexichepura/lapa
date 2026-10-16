@@ -13,6 +13,7 @@ clap = { version = "4.6", features = ["derive"] }
 cornucopia.workspace = true
 config.workspace = true
 cuid2.workspace = true
+db.workspace = true
 dotenvy.workspace = true
 deadpool-postgres.workspace = true
 serde.workspace = true
