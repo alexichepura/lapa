@@ -176,7 +176,25 @@ pub struct AProps {
 impl SlateToHtml for A {
     fn to_html(&self) -> String {
         let children_html = self.children.to_html();
-        format!("<a href={}>{}</a>", self.attributes.href, children_html)
+        let href = html_escape::encode_double_quoted_attribute(safe_href(&self.attributes.href));
+        format!("<a href=\"{}\">{}</a>", href, children_html)
+    }
+}
+
+/// Drops script-bearing URL schemes, tolerating leading whitespace and embedded
+/// control characters (`java\tscript:`), so the escaped href cannot execute.
+fn safe_href(href: &str) -> &str {
+    let trimmed = href.trim_start();
+    let normalized: String = trimmed
+        .chars()
+        .filter(|c| !c.is_ascii_control())
+        .collect::<String>()
+        .to_ascii_lowercase();
+    const DANGEROUS: [&str; 3] = ["javascript:", "vbscript:", "data:"];
+    if DANGEROUS.iter().any(|scheme| normalized.starts_with(scheme)) {
+        "#"
+    } else {
+        trimmed
     }
 }
 #[derive(Debug, Serialize, Deserialize)]
@@ -199,9 +217,11 @@ impl SlateToHtml for Img {
             CdnImageSize::S.to_width(),
             CdnImageSize::S.to_width(),
         );
+        let alt = html_escape::encode_double_quoted_attribute(&self.alt);
+        let caption = html_escape::encode_text(&self.caption);
         format!(
             "<figure><img src=\"/cdn/{}_lg\" alt=\"{}\" srcset=\"{srcset}\" sizes=\"{sizes}\" loading=\"lazy\"/><figcaption>{}</figcaption></figure>",
-            self.id, self.alt, self.caption
+            self.id, alt, caption
         )
     }
 }
@@ -241,5 +261,40 @@ impl Text {
                 false => format!("<span>{}</span>", text),
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn escapes_text() {
+        let html = content_json_to_html(r#"[{"text":"a < b & c"}]"#);
+        assert!(html.contains("a &lt; b &amp; c"));
+    }
+
+    #[test]
+    fn escapes_link_href_and_blocks_script_scheme() {
+        let html = content_json_to_html(
+            r#"[
+                {"type":"a","attributes":{"href":"javascript:alert(1)"},"children":[{"text":"x"}]},
+                {"type":"a","attributes":{"href":"/ok\" onmouseover=\"alert(1)"},"children":[{"text":"y"}]}
+            ]"#,
+        );
+        assert!(html.contains(r##"<a href="#">x</a>"##));
+        assert!(!html.contains("javascript:"));
+        // The injected quote must be escaped so it cannot break out of the attribute.
+        assert!(!html.contains(r#"" onmouseover=""#));
+        assert!(html.contains("&quot; onmouseover=&quot;"));
+    }
+
+    #[test]
+    fn escapes_image_alt_and_caption() {
+        let html = content_json_to_html(
+            r#"[{"type":"img","id":"abc","alt":"<img src=x onerror=alert(1)>","caption":"a < b & c"}]"#,
+        );
+        assert!(html.contains(r#"alt="&lt;img src=x onerror=alert(1)&gt;""#));
+        assert!(html.contains("<figcaption>a &lt; b &amp; c</figcaption>"));
     }
 }
