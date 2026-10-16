@@ -4885,6 +4885,7 @@ dependencies = [
  "console_error_panic_hook",
  "content",
  "cornucopia",
+ "cuid2",
  "deadpool-postgres",
  "dotenvy",
  "http",

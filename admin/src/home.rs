@@ -87,7 +87,7 @@ pub enum StatsPeriod {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StatsListItem {
     pub path: String,
-    pub n: i32,
+    pub n: i64,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -96,33 +96,47 @@ pub struct StatsResult {
 }
 #[server(GetStats, "/api")]
 pub async fn get_stats(period: StatsPeriod) -> Result<StatsResult, ServerFnError> {
-    use std::collections::HashMap;
+    // Cap the number of paths shown per period; aggregation happens in SQL.
+    const LIMIT: i64 = 100;
     let db = crate::server::db::use_db().await?;
+    let offset = 0i64;
     let now = chrono::Utc::now().naive_utc();
-    let period = match period {
-        StatsPeriod::Hour => now - chrono::Duration::hours(1),
-        StatsPeriod::Month => now - chrono::Duration::days(30),
-        _ => chrono::DateTime::UNIX_EPOCH.naive_utc(),
+    let list = match period {
+        StatsPeriod::All => {
+            let rows = cornucopia::queries::ssr::stats_all()
+                .bind(&db, &LIMIT, &offset)
+                .all()
+                .await
+                .map_err(|e| lib::emsg(e, "SSR stats all"))?;
+            rows.into_iter()
+                .map(|r| StatsListItem { path: r.path, n: r.n })
+                .collect::<Vec<_>>()
+        }
+        StatsPeriod::Live => since_stats(&db, now - chrono::Duration::minutes(5)).await?,
+        StatsPeriod::Hour => since_stats(&db, now - chrono::Duration::hours(1)).await?,
+        StatsPeriod::Day => since_stats(&db, now - chrono::Duration::days(1)).await?,
+        StatsPeriod::Week => since_stats(&db, now - chrono::Duration::days(7)).await?,
+        StatsPeriod::Month => since_stats(&db, now - chrono::Duration::days(30)).await?,
     };
-    let renders = cornucopia::queries::ssr::select_by_period()
-        .bind(&db, &period)
+    Ok(StatsResult { list })
+}
+
+#[cfg(feature = "ssr")]
+async fn since_stats(
+    db: &cornucopia::deadpool_postgres::Object,
+    since: chrono::NaiveDateTime,
+) -> Result<Vec<StatsListItem>, ServerFnError> {
+    const LIMIT: i64 = 100;
+    let offset = 0i64;
+    let rows = cornucopia::queries::ssr::stats_since()
+        .bind(db, &since, &LIMIT, &offset)
         .all()
         .await
-        .map_err(|e| lib::emsg(e, "SSR counter find_many"))?;
-    let hmap: HashMap<String, i32> = renders.iter().fold(HashMap::new(), |mut acc, data| {
-        match acc.get(data) {
-            Some(count) => acc.insert(data.clone(), count + 1),
-            None => acc.insert(data.clone(), 1),
-        };
-        acc
-    });
-    let mut list = hmap
+        .map_err(|e| lib::emsg(e, "SSR stats since"))?;
+    Ok(rows
         .into_iter()
-        .map(|(path, n)| StatsListItem { path, n })
-        .collect::<Vec<StatsListItem>>();
-
-    list.sort_by(|a, b| b.n.cmp(&a.n));
-    Ok(StatsResult { list })
+        .map(|r| StatsListItem { path: r.path, n: r.n })
+        .collect())
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
