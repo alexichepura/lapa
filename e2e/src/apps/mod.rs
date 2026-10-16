@@ -42,6 +42,8 @@ pub struct CaseCtx {
     pub base_urls: HashMap<&'static str, String>,
     pub page: Page,
     pub artifacts_dir: PathBuf,
+    /// Postgres URL, for cases that need to arrange DB state directly.
+    pub database_url: String,
     pub update: bool,
 }
 
@@ -104,6 +106,17 @@ impl CaseCtx {
 
     pub async fn snapshot(&self, name: &str) -> Result<()> {
         snapshot::compare(&self.page, self.app, name, &self.artifacts_dir, self.update).await
+    }
+
+    /// Run SQL against the ephemeral database (state arrangement for a case).
+    pub async fn exec_sql(&self, sql: &str) -> Result<()> {
+        let (client, connection) =
+            tokio_postgres::connect(&self.database_url, tokio_postgres::NoTls).await?;
+        tokio::spawn(async move {
+            let _ = connection.await;
+        });
+        client.batch_execute(sql).await?;
+        Ok(())
     }
 
     pub fn console_errors(&self) -> Vec<String> {

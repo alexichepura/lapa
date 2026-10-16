@@ -44,6 +44,7 @@ pub struct Session {
     browser: BrowserSession,
     _infra: Infra,
     base_urls: HashMap<&'static str, String>,
+    database_url: String,
 }
 
 impl Session {
@@ -65,6 +66,7 @@ impl Session {
         }
         let image_upload_path = image_upload.to_string_lossy().to_string();
         let image_convert_path = image_convert.to_string_lossy().to_string();
+        let database_url = infra.database_url.clone();
 
         let mut servers = Vec::new();
         let mut base_urls = HashMap::new();
@@ -75,7 +77,7 @@ impl Session {
             let server = Server::start(ServerConfig {
                 server_dir: &server_dir,
                 project: name,
-                database_url: &infra.database_url,
+                database_url: &database_url,
                 image_upload_path: &image_upload_path,
                 image_convert_path: &image_convert_path,
                 timeout: Duration::from_secs(900),
@@ -99,6 +101,7 @@ impl Session {
             browser,
             _infra: infra,
             base_urls,
+            database_url: database_url.clone(),
         })
     }
 
@@ -132,6 +135,7 @@ impl Session {
                 base_urls: self.base_urls.clone(),
                 page: self.browser.page.clone(),
                 artifacts_dir: artifacts.clone(),
+                database_url: self.database_url.clone(),
                 update,
             };
             match (case.run)(&ctx).await {

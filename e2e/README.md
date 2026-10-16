@@ -36,14 +36,16 @@ The first run compiles the app's SSR + wasm bundles, so give it a few minutes.
 ## Coverage
 
 `site` (public): home/product/post render, `publish_at` gating + 404s, the
-image pipeline (product hero + in-content image resized on demand), SEO meta
-tags, client-side navigation, `robots.txt`, unmatched-route 404 and a
-console-error sweep.
+image pipeline (product hero + in-content image resized on demand, the image
+dialog, endpoint 200/404 cases), SEO meta tags (title/description/`og:image`),
+client-side navigation, `robots.txt`, unmatched-route 404, a mobile-viewport
+snapshot, empty states and a console-error sweep.
 
 `admin`: unauthenticated redirect to the login form, the seeded-user login flow,
 logout, auth negatives (bad password, protected route, default-deny `/api`),
-product create/edit/delete and category+post create, plus a console-error sweep
-across the dashboard/product/post/settings sections.
+product create/edit/delete, category+post create, image upload (through the
+file input + wasm reader), plus a console-error sweep across the
+dashboard/product/post/settings sections.
 
 `integration`: boots both servers and verifies an admin Settings write is read
 back by the public site (`/robots.txt` and the home text).

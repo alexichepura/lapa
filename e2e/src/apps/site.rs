@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use playwright_rs::expect;
+use playwright_rs::{Viewport, expect};
 
 use crate::apps::{AppUnderTest, Case, CaseCtx, CaseFuture};
 use crate::support::seed;
@@ -43,6 +43,14 @@ impl AppUnderTest for SiteApp {
                 run: case_images,
             },
             Case {
+                name: "product-image-dialog",
+                run: case_product_image_dialog,
+            },
+            Case {
+                name: "image-endpoints",
+                run: case_image_endpoints,
+            },
+            Case {
                 name: "meta-tags",
                 run: case_meta_tags,
             },
@@ -59,8 +67,17 @@ impl AppUnderTest for SiteApp {
                 run: case_unknown_route,
             },
             Case {
+                name: "mobile-render",
+                run: case_mobile_render,
+            },
+            Case {
                 name: "console-clean",
                 run: case_console_clean,
+            },
+            // Destructive: empties the product/post tables, so it runs last.
+            Case {
+                name: "empty-state",
+                run: case_empty_state,
             },
         ]
     }
@@ -188,6 +205,51 @@ fn case_images<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     })
 }
 
+/// Clicking a product image opens the native `<dialog>` modal; Close dismisses it.
+fn case_product_image_dialog<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        ctx.goto(&format!("/product/{}", seed::PRODUCT_SLUG))
+            .await?;
+        ctx.wait_for_image(".product-images img", 60).await?;
+        ctx.page.locator(".product-images img").click(None).await?;
+        expect(ctx.page.locator("dialog[open]"))
+            .to_be_visible()
+            .await?;
+        expect(ctx.page.locator("dialog[open] figcaption"))
+            .to_contain_text("E2E product image")
+            .await?;
+        ctx.page.locator("dialog[open] button").click(None).await?;
+        expect(ctx.page.locator("dialog[open]"))
+            .to_have_count(0)
+            .await?;
+        Ok(())
+    })
+}
+
+/// The image endpoints: a missing original is a 404 (not a 500), an unknown
+/// size suffix is a 404, and a known one serves 200.
+fn case_image_endpoints<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        let status = ctx
+            .goto_status("/product-image/e2e-product-image_s")
+            .await?;
+        anyhow::ensure!(
+            status == 200,
+            "known product image returned {status}, want 200"
+        );
+
+        for path in [
+            "/product-image/nope_s",
+            "/cdn/nope_lg",
+            "/product-image/e2e-product-image_xxl",
+        ] {
+            let status = ctx.goto_status(path).await?;
+            anyhow::ensure!(status == 404, "{path} returned {status}, want 404");
+        }
+        Ok(())
+    })
+}
+
 fn case_meta_tags<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     Box::pin(async move {
         ctx.goto("/").await?;
@@ -210,6 +272,19 @@ fn case_meta_tags<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
             description == "E2E product meta description",
             "product meta description is {description:?}"
         );
+        // The hero drives og:image, absolute against the configured site URL.
+        let og_image: String = ctx
+            .page
+            .evaluate(
+                "() => { const m = document.querySelector('meta[property=\"og:image\"]'); \
+                 return m ? m.content : ''; }",
+                None::<&()>,
+            )
+            .await?;
+        anyhow::ensure!(
+            og_image == "https://e2e.example/product-image/e2e-product-image_l",
+            "og:image is {og_image:?}"
+        );
 
         ctx.goto(&format!(
             "/{}/{}",
@@ -219,6 +294,51 @@ fn case_meta_tags<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
         .await?;
         let title: String = ctx.page.evaluate_value("document.title").await?;
         anyhow::ensure!(title == "E2E Post - Lapa", "post title is {title:?}");
+        Ok(())
+    })
+}
+
+/// The CSS is mobile-first; render the home page at a phone viewport too.
+fn case_mobile_render<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        ctx.page
+            .set_viewport_size(Viewport {
+                width: 390,
+                height: 844,
+            })
+            .await?;
+        let result = async {
+            ctx.goto("/").await?;
+            expect(ctx.page.locator("text=Welcome to Lapa"))
+                .to_be_visible()
+                .await?;
+            ctx.snapshot("home-mobile").await
+        }
+        .await;
+        // Restore the desktop viewport for the remaining cases, even on failure.
+        ctx.page
+            .set_viewport_size(Viewport {
+                width: 1280,
+                height: 800,
+            })
+            .await?;
+        result
+    })
+}
+
+/// With no products/posts the home page shows its empty states. Destructive;
+/// runs last in the suite.
+fn case_empty_state<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        ctx.exec_sql("DELETE FROM \"Product\"; DELETE FROM \"Post\";")
+            .await?;
+        ctx.goto("/").await?;
+        expect(ctx.page.locator("text=No products were found."))
+            .to_be_visible()
+            .await?;
+        expect(ctx.page.locator("text=No posts were found."))
+            .to_be_visible()
+            .await?;
         Ok(())
     })
 }
