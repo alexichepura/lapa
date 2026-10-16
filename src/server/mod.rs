@@ -97,12 +97,13 @@ pub async fn leptos_routes_handler(
     State(app_state): State<AppState>,
     req: Request<AxumBody>,
 ) -> Response {
-    let path = req.uri().path().to_string();
+    let path_uri = req.uri().path().to_string();
     let headers = req.headers();
-    let user_agent: Option<String> = match headers.get("user-agent") {
-        Some(ua_header) => Some(ua_header.to_str().unwrap().to_string()),
-        _ => None,
-    };
+    let user_agent = headers
+        .get("user-agent")
+        .and_then(|ua_header| ua_header.to_str().ok())
+        .map(str::to_string);
+    tracing::trace!("ssr route path={path_uri} user_agent={user_agent:?}");
     let pool = app_state.pool.clone();
     let settings = settings_db(pool.clone()).await;
     let leptos_options = app_state.leptos_options;
