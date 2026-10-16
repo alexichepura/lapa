@@ -4,7 +4,7 @@ use leptos::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::upload::ImageUploadError;
+use crate::upload::{ImageUploadError, MAX_IMAGE_BYTES};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ImageResult {
@@ -31,6 +31,10 @@ pub async fn content_image_upload(
         match field.name().unwrap_or_default() {
             "img" => {
                 while let Ok(Some(chunk)) = field.chunk().await {
+                    if img_bytes.len() + chunk.len() > MAX_IMAGE_BYTES {
+                        serverr_400();
+                        return Ok(Err(ImageUploadError::TooLarge));
+                    }
                     img_bytes.extend_from_slice(&chunk);
                 }
             }
