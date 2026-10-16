@@ -1,8 +1,11 @@
 use leptos::{either::Either, html::Dialog, prelude::*};
 use serde::{Deserialize, Serialize};
 
-use crate::content::ContentImageUploadAction;
-use crate::form::{FormFooter, Input};
+use wasm_bindgen::JsCast;
+
+use crate::content::{ImageResult, content_image_upload};
+use crate::form::{Input, UploadFooter};
+use crate::upload::{ImageUploadError, InputImage};
 
 stylance::import_crate_style!(
     #[allow(dead_code)]
@@ -103,49 +106,52 @@ pub fn ImageEditModalForm(
     }
 }
 
-use crate::upload::{ImageUploadError, InputImage};
-
 #[component]
 pub fn ContentImageUpload(content_id: String, set_image_id: WriteSignal<String>) -> impl IntoView {
-    let image_upload = ServerAction::<ContentImageUploadAction>::new();
-    let value = image_upload.value();
-    Effect::new(move |_| {
-        let v = value.get();
-        if let Some(v) = v {
-            let content_image_result = v.map_err(|_| ImageUploadError::ServerError).flatten();
-            if let Ok(content_image_result) = content_image_result {
-                let id = content_image_result.id;
-                set_image_id(id);
-            }
-        }
-    });
-
-    let pending = image_upload.pending();
-    let (_file_name, set_file_name) = signal(None::<String>);
-    let (save_byte_vec, set_save_byte_vec) = signal(None::<Vec<u8>>);
-    let (_save_file, set_save_file) = signal(None::<String>);
+    let pending = RwSignal::new(false);
+    let value =
+        RwSignal::<Option<Result<Result<ImageResult, ImageUploadError>, ServerFnError>>>::new(None);
     let (obj_url, set_obj_url) = signal(None::<String>);
 
-    let img_value =
-        move || Some(serde_json::to_string(&save_byte_vec().unwrap_or_default().to_vec()).unwrap());
+    let on_submit = move |ev: web_sys::SubmitEvent| {
+        ev.prevent_default();
+        let target = ev
+            .target()
+            .unwrap()
+            .unchecked_into::<web_sys::HtmlFormElement>();
+        let form_data = web_sys::FormData::new_with_form(&target).unwrap();
+        pending.set(true);
+        leptos::task::spawn_local(async move {
+            let result = content_image_upload(form_data.into()).await;
+            if let Ok(Ok(image)) = &result {
+                set_image_id(image.id.clone());
+            }
+            value.set(Some(result));
+            pending.set(false);
+        });
+    };
+
     view! {
-        <fieldset prop:disabled=move || pending()>
+        <fieldset prop:disabled=move || pending.get()>
             <legend>Image upload</legend>
             <div class=grid::gridFluid2>
                 <div>
-                    <label>
-                        <div>Select image</div>
-                        <InputImage set_file_name set_save_file set_obj_url set_save_byte_vec />
-                    </label>
-                    <ActionForm action=image_upload>
+                    <form on:submit=on_submit>
+                        <label>
+                            <div>Select image</div>
+                            <InputImage set_obj_url />
+                        </label>
                         <input type="hidden" name="content_id" value=content_id />
-                        <input type="hidden" name="img" value=img_value />
                         <label>
                             <span>Alt</span>
                             <input name="alt" />
                         </label>
-                        <FormFooter action=image_upload submit_text="Upload image" />
-                    </ActionForm>
+                        <UploadFooter
+                            pending=Signal::from(pending)
+                            value=Signal::from(value)
+                            submit_text="Upload image"
+                        />
+                    </form>
                 </div>
                 <ImageUploadPreview obj_url />
             </div>

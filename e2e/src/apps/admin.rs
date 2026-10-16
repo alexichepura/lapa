@@ -244,7 +244,7 @@ fn case_product_crud<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
             .fill("E2E CRUD H1 (edited)", None)
             .await?;
         submit(ctx, "Submit product data").await?;
-        wait_at_least(ctx, ".Alert.Success", 1, 20).await?;
+        wait_at_least(ctx, "text=Success", 1, 20).await?;
 
         ctx.goto_for("admin", "/product").await?;
         expect(ctx.page.locator("text=E2E CRUD H1 (edited)"))
@@ -331,18 +331,23 @@ fn case_image_hero_and_order<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
         login(ctx).await?;
         ctx.goto_for("admin", &format!("/product/{}", seed::PRODUCT_SLUG))
             .await?;
-        wait_at_least(ctx, ".images figure", 2, 20).await?;
+        // The image grid lives in the "Images" fieldset; class names are hashed
+        // by stylance, so anchor on the legend text instead.
+        let figures = "fieldset:has-text(\"Images\") figure";
+        wait_at_least(ctx, figures, 2, 20).await?;
 
         // Swap the hero to the second image.
         ctx.page
-            .locator(
-                ".images figure:has-text(\"E2E product image 2\") button:has-text(\"Make hero\")",
-            )
+            .locator(format!(
+                "{figures}:has-text(\"E2E product image 2\") button:has-text(\"Make hero\")"
+            ))
             .click(None)
             .await?;
         wait_at_least(
             ctx,
-            ".images figure:has-text(\"E2E product image 2\") button:disabled:has-text(\"Hero\")",
+            &format!(
+                "{figures}:has-text(\"E2E product image 2\") button:disabled:has-text(\"Hero\")"
+            ),
             1,
             20,
         )
@@ -350,26 +355,21 @@ fn case_image_hero_and_order<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
 
         // Move the first image below the second, then persist the order.
         ctx.page
-            .locator(".images figure")
+            .locator(figures)
             .first()
             .locator("button")
             .last()
             .click(None)
             .await?;
         submit(ctx, "Save order").await?;
-        wait_at_least(ctx, ".Alert.Success", 1, 20).await?;
+        wait_at_least(ctx, "text=Success", 1, 20).await?;
 
         // A fresh load reads the persisted order: image 2 is now first.
         ctx.goto_for("admin", &format!("/product/{}", seed::PRODUCT_SLUG))
             .await?;
-        expect(
-            ctx.page
-                .locator(".images figure")
-                .first()
-                .locator("figcaption"),
-        )
-        .to_contain_text("E2E product image 2")
-        .await?;
+        expect(ctx.page.locator(figures).first().locator("figcaption"))
+            .to_contain_text("E2E product image 2")
+            .await?;
         Ok(())
     })
 }
@@ -417,12 +417,11 @@ fn case_image_upload<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
             .locator("input[type=file]")
             .set_input_files(&file, None)
             .await?;
-        // The wasm reader fills the hidden `img` field with the file bytes.
-        wait_hidden_value(ctx, "input[name=img]", 20).await?;
         ctx.page
             .locator("input[name=alt]")
             .fill("Uploaded e2e image", None)
             .await?;
+        // The form submits the file as a real multipart field.
         submit(ctx, "Upload image").await?;
 
         // The images list refetches on upload; the new alt shows up.
@@ -503,24 +502,6 @@ async fn wait_at_least(ctx: &CaseCtx, selector: &str, n: usize, secs: u64) -> an
         tokio::time::sleep(Duration::from_millis(250)).await;
     }
     anyhow::bail!("{selector} never reached {n} element(s) within {secs}s")
-}
-
-/// Poll until a form field holds more than an empty JSON array (`[]`), which is
-/// how the upload form signals the wasm file reader finished.
-async fn wait_hidden_value(ctx: &CaseCtx, selector: &str, secs: u64) -> anyhow::Result<()> {
-    for _ in 0..secs * 4 {
-        let value = ctx
-            .page
-            .locator(selector)
-            .input_value(None)
-            .await
-            .unwrap_or_default();
-        if value.len() > 2 {
-            return Ok(());
-        }
-        tokio::time::sleep(Duration::from_millis(250)).await;
-    }
-    anyhow::bail!("{selector} never received file bytes within {secs}s")
 }
 
 async fn wait_url(ctx: &CaseCtx, secs: u64, pred: impl Fn(&str) -> bool) -> anyhow::Result<()> {

@@ -2,6 +2,7 @@ use leptos::{either::Either, prelude::*, server_fn::Http, text_prop::TextProp};
 use serde::{Serialize, de::DeserializeOwned};
 use server_fn::{ServerFn, codec::PostUrl};
 
+use crate::upload::ImageUploadError;
 use crate::util::{AlertDanger, AlertSuccess};
 
 #[component]
@@ -21,6 +22,47 @@ where
     match result {
         Ok(_) => Either::Left(view! { <AlertSuccess /> }),
         Err(e) => Either::Right(view! { <AlertDanger text=e.to_string() /> }),
+    }
+}
+
+/// Footer for forms that are submitted manually (e.g. multipart file uploads
+/// dispatched as `FormData`) rather than through an `<ActionForm>`.
+///
+/// The `value` signal mirrors what a [`ServerAction`] would hold: the outer
+/// result is the server-fn call, the inner result the upload outcome.
+#[component]
+pub fn UploadFooter<T, E>(
+    pending: Signal<bool>,
+    value: Signal<Option<Result<Result<T, ImageUploadError>, E>>>,
+    #[prop(optional, into)] submit_text: Option<TextProp>,
+    #[prop(optional, into)] disabled: Option<Signal<bool>>,
+) -> impl IntoView
+where
+    T: Clone + Send + Sync + 'static,
+    E: std::fmt::Debug + Clone + Send + Sync + 'static,
+{
+    let submit_text = match submit_text {
+        Some(submit_text) => submit_text,
+        None => "SUBMIT".into(),
+    };
+    let disabled = move || match disabled {
+        Some(disabled) => disabled.get(),
+        None => false,
+    };
+    view! {
+        <footer>
+            <input type="submit" value=submit_text.get() disabled=disabled />
+            {move || {
+                if pending.get() {
+                    return view! { <progress></progress> }.into_any();
+                }
+                match value.get() {
+                    None => ().into_any(),
+                    Some(Ok(inner)) => view! { <ResultAlert result=inner /> }.into_any(),
+                    Some(Err(e)) => view! { <AlertDanger text=format!("{e:?}") /> }.into_any(),
+                }
+            }}
+        </footer>
     }
 }
 

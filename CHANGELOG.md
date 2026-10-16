@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Admin image uploads (product and content) now send the file as a real
+  `multipart/form-data` field through Leptos server functions
+  (`input = MultipartFormData` / `MultipartData`), replacing the previous
+  approach of stuffing a JSON-serialized byte array into a hidden input.
 - Styling migrated from Sass (`style/main.scss`) to plain-CSS **CSS modules**
   with [`stylance`](https://github.com/basro/stylance-rs): component rules live
   in `*.module.css` files and are referenced through hashed class constants, the
