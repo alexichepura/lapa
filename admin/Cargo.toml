@@ -38,6 +38,7 @@ log = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
+stylance = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true, optional = true }
@@ -93,7 +94,8 @@ skip_feature_sets = [["ssr", "hydrate"]]
 [package.metadata.leptos]
 site-root = "target/admin"
 site-pkg-dir = "pkg"
-style-file = "style/main.scss"
+style-file = "style/main.css"
+style-bundle = true
 assets-dir = "public"
 site-addr = "127.0.0.1:4143"
 reload-port = 4444
@@ -106,3 +108,9 @@ bin-features = ["ssr"]
 bin-default-features = false
 lib-features = ["hydrate"]
 lib-default-features = false
+
+[package.metadata.stylance]
+# See the root `site` crate for details. Regenerate with `stylance admin`.
+output_file = "style/stylance.css"
+folders = ["./src"]
+extensions = [".module.css"]

@@ -1,0 +1,70 @@
+.card {
+	background: var(--surface-2);
+	border-radius: var(--radius-2);
+	padding: var(--size-fluid-2);
+	box-shadow: var(--shadow-3);
+	margin-block-end: var(--size-fluid-2);
+}
+
+.listing {
+	padding: 0;
+
+	>li {
+		display: block;
+		width: 100%;
+		list-style: none;
+		padding: 0;
+		max-inline-size: inherit;
+		display: flex;
+		align-items: stretch;
+
+		>a {
+			width: 100%;
+			padding: 0 var(--size-fluid-1);
+			margin: 0;
+			text-decoration: none;
+			display: grid;
+			align-items: center;
+			font-size: var(--font-size-fluid-1-07);
+
+			&:visited {
+				color: var(--text-1);
+			}
+
+			&:hover,
+			&:focus-visible {
+				background: var(--surface-3);
+			}
+		}
+	}
+}
+
+.postListItem {
+	height: 48px;
+
+	>a {
+		grid-template-columns: 125px 50px auto;
+
+		@media (min-width: 480px) {
+			grid-template-columns: 170px 50px auto 170px;
+		}
+	}
+}
+
+.postListItemCreated {
+	display: none;
+
+	@media (min-width: 480px) {
+		display: block;
+	}
+}
+
+.postListItemStatus {
+	&.published {
+		color: var(--green-6);
+	}
+
+	&.notPublished {
+		color: var(--blue-6);
+	}
+}

@@ -9,6 +9,12 @@ use crate::{
     util::{AlertDanger, Loading},
 };
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    page,
+    "src/page.module.css"
+);
+
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
 pub struct CategoryParams {
     id: String,
@@ -70,7 +76,7 @@ pub fn CategoryPage() -> impl IntoView {
 pub fn CategoryPageView(category: CategoryPageData) -> impl IntoView {
     view! {
         <Title text=format!("Category: {}", category.form.slug) />
-        <section class="PostPage">
+        <section class=page::postPage>
             <CategoryHeader category=category.header />
             <CategoryForm form=category.form />
         </section>

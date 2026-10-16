@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::util::{AlertDanger, Loading};
 
+stylance::import_crate_style!(style, "src/home.module.css");
+
 #[component]
 pub fn HomePage() -> impl IntoView {
     let stats_all = Resource::new_blocking(|| (), move |_| get_stats(StatsPeriod::All));
@@ -11,11 +13,11 @@ pub fn HomePage() -> impl IntoView {
     let stats_hour = Resource::new_blocking(|| (), move |_| get_stats(StatsPeriod::Hour));
     view! {
         <Title text="Dashboard" />
-        <div class="HomePage">
+        <div>
             <h1>Dashboard</h1>
             <hr />
             <h2>Stats</h2>
-            <section class="Stats">
+            <section class=style::stats>
                 <StatsTableTransition caption="All time" resource=stats_all />
                 <StatsTableTransition caption="Last month" resource=stats_month />
                 <StatsTableTransition caption="Last hour" resource=stats_hour />
@@ -43,12 +45,12 @@ pub fn StatsTableTransition(resource: StatsResource, caption: &'static str) -> i
 #[component]
 pub fn StatsTable(caption: &'static str, list: Vec<StatsListItem>) -> impl IntoView {
     view! {
-        <table class="StatsTable">
+        <table class=style::statsTable>
             <caption>{caption}</caption>
             <thead>
                 <tr>
-                    <th class="StatsTable-path">Path</th>
-                    <th class="StatsTable-count">Count</th>
+                    <th class=style::statsTablePath>Path</th>
+                    <th class=style::statsTableCount>Count</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,8 +60,8 @@ pub fn StatsTable(caption: &'static str, list: Vec<StatsListItem>) -> impl IntoV
                     children=move |stat| {
                         view! {
                             <tr>
-                                <td class="StatsTable-path">{stat.path}</td>
-                                <td class="StatsTable-count">{stat.n}</td>
+                                <td class=style::statsTablePath>{stat.path}</td>
+                                <td class=style::statsTableCount>{stat.n}</td>
                             </tr>
                         }
                     }

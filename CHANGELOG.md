@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Styling migrated from Sass (`style/main.scss`) to plain-CSS **CSS modules**
+  with [`stylance`](https://github.com/basro/stylance-rs): component rules live
+  in `*.module.css` files and are referenced through hashed class constants, the
+  bundle is produced by `stylance` and inlined by cargo-leptos Lightning CSS
+  bundling (`style-bundle = true`). No more `dart-sass` step.
+
 ## [0.2] - 2026-08-22
 
 ### Added

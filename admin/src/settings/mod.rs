@@ -15,6 +15,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::util::Loading;
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    grid,
+    "src/grid.module.css"
+);
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SettingsCx {
     pub site_url: String,
@@ -87,7 +93,7 @@ pub fn Settings() -> impl IntoView {
                         Ok(settings) => {
                             Either::Right(
                                 view! {
-                                    <div class="Grid-fluid-2">
+                                    <div class=grid::gridFluid2>
                                         <SettingsHomeForm settings=SettingsHome::from(&settings) />
                                         <SettingsSiteForm settings=SettingsSite::from(&settings) />
                                     </div>

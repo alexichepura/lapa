@@ -1,0 +1,7 @@
+@media (min-width: 768px) {
+	.gridFluid2 {
+		display: grid;
+		gap: var(--size-fluid-2);
+		grid-template-columns: 1fr 1fr;
+	}
+}

@@ -3,6 +3,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::form::Input;
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    grid,
+    "src/grid.module.css"
+);
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LinkEditData {
     pub href: String,
@@ -43,7 +49,7 @@ pub fn ContentLinkEditor(
         }
     });
     view! {
-        <dialog class="Grid-fluid-2" node_ref=dialog_element>
+        <dialog class=grid::gridFluid2 node_ref=dialog_element>
             {edit_view}
         </dialog>
     }

@@ -11,6 +11,8 @@ the Leptos site (`cargo leptos serve`) and drives Chromium against it.
 ```sh
 docker info                        # Docker must be running
 cargo install cargo-leptos
+cargo install stylance-cli         # regenerate CSS module bundles (optional; the
+                                   # generated bundles are committed)
 cargo run -p lapa-e2e -- install   # download Chromium for the playwright-rs driver
 ```
 

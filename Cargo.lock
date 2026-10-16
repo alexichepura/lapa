@@ -42,6 +42,7 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
+ "stylance",
  "thiserror 2.0.21",
  "tokio",
  "tower",
@@ -4842,6 +4843,7 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "serde_json",
+ "stylance",
  "thiserror 2.0.21",
  "tokio",
  "tower",
@@ -4943,6 +4945,41 @@ checksum = "152a0b65a590ff6c3da95cabe2353ee04e6167c896b28e3b14478c2636c922fc"
 dependencies = [
  "proc-macro2",
  "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "stylance"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "252bdc37547d27ee7ccd20e028dced7acfdb64b561ac4d8a58393cf1adec0f14"
+dependencies = [
+ "stylance-macros",
+]
+
+[[package]]
+name = "stylance-core"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd267d69de4c0bcb01423fdd641a3007798842c19fe4da6b6acac0efa9ed0b41"
+dependencies = [
+ "anyhow",
+ "serde",
+ "siphasher",
+ "toml",
+ "winnow",
+]
+
+[[package]]
+name = "stylance-macros"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c7a1fdbb4d152b969919646561e8a2d3beb0b03b1014570fd573e55a3b3b627"
+dependencies = [
+ "anyhow",
+ "proc-macro2",
+ "quote",
+ "stylance-core",
  "syn 2.0.119",
 ]
 

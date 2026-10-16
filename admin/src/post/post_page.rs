@@ -7,6 +7,12 @@ use crate::{
     util::{AlertDanger, Loading},
 };
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    grid,
+    "src/grid.module.css"
+);
+
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
 pub struct PostParams {
     id: String,
@@ -100,7 +106,7 @@ pub fn PostPageView(page: PostPageData) -> impl IntoView {
     view! {
         <PostForm post=page.form />
         {edit_view}
-        <div class="Grid-fluid-2">
+        <div class=grid::gridFluid2>
             <PostDeleteForm id=id.clone() slug />
         </div>
     }

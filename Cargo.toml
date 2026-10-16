@@ -71,6 +71,7 @@ log = "0.4"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde-wasm-bindgen = "0.6.5"
+stylance = "0.8"
 thiserror = "2"
 tokio = { version = "1.53", features = ["macros"] }
 tower = { version = "0.5" }
@@ -113,6 +114,7 @@ log = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
+stylance = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true, optional = true }
@@ -162,7 +164,8 @@ skip_feature_sets = [["ssr", "hydrate"]]
 [package.metadata.leptos]
 site-root = "target/site"
 site-pkg-dir = "pkg"
-style-file = "style/main.scss"
+style-file = "style/main.css"
+style-bundle = true
 assets-dir = "public"
 site-addr = "127.0.0.1:4141"
 reload-port = 4142
@@ -175,3 +178,12 @@ bin-features = ["ssr"]
 bin-default-features = false
 lib-features = ["hydrate"]
 lib-default-features = false
+
+[package.metadata.stylance]
+# Bundle every `*.module.css` under ./src into a single stylesheet that
+# `style/main.css` imports. Class names are hashed deterministically, in
+# agreement with what `stylance::import_crate_style!` resolves at compile time.
+# Regenerate with `stylance .` (or `stylance --watch .` during development).
+output_file = "style/stylance.css"
+folders = ["./src"]
+extensions = [".module.css"]

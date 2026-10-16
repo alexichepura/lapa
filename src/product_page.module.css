@@ -1,0 +1,22 @@
+.productImages {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 240px);
+	gap: var(--size-fluid-2) var(--size-fluid-1);
+	justify-content: space-around;
+
+	& img {
+		/* background: var(--surface-2); */
+		border-radius: var(--radius-2);
+		overflow: hidden;
+		cursor: pointer;
+		box-shadow: var(--shadow-3);
+		transition-property: transform, box-shadow;
+		transition-duration: 0.3s;
+		transition-timing-function: ease;
+
+		&:hover {
+			transform: scale(1.03);
+			box-shadow: var(--shadow-4);
+		}
+	}
+}

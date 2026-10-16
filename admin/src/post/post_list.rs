@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::util::{AlertDanger, DateTimeStrings, Loading, datetime_to_strings};
 
+stylance::import_crate_style!(style, "src/listing.module.css");
+
 #[component]
 pub fn PostList() -> impl IntoView {
     let posts = Resource::new_blocking(|| (), move |_| get_posts());
@@ -25,7 +27,7 @@ pub fn PostList() -> impl IntoView {
                 <A href="/post/create">Create</A>
             </small>
         </h1>
-        <ul class="Card Listing">
+        <ul class=format!("{} {}", style::card, style::listing)>
             <Suspense fallback=move || {
                 view! { <Loading /> }
             }>{suspended}</Suspense>
@@ -57,17 +59,17 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
         None => DateTimeStrings::draft(),
     };
     let class = match post.is_published {
-        true => "published",
-        false => "not-published",
+        true => style::published,
+        false => style::notPublished,
     };
     view! {
-        <li class="PostListItem">
+        <li class=style::postListItem>
             <A href=format!("/post/{}", post.id)>
-                <div title="Published at" class=format!("PostListItem-status {}", class)>
+                <div title="Published at" class=format!("{} {}", style::postListItemStatus, class)>
                     {published.local}
                 </div>
                 <span title="Post title">{post.h1}</span>
-                <div title="Created at" class="PostListItem-created">
+                <div title="Created at" class=style::postListItemCreated>
                     {created.local}
                 </div>
             </A>

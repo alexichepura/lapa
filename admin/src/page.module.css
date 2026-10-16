@@ -1,0 +1,28 @@
+.postPage {
+	>header {
+		margin-block-end: var(--size-fluid-1-05);
+
+		@media (min-width: 480px) {
+			display: grid;
+			grid-template-columns: 1fr auto;
+		}
+
+		& h1 {
+			margin-block-end: 0;
+		}
+
+		& dl {
+			font-size: var(--font-size-fluid-1-07);
+			margin-block-start: var(--size-fluid-1-05);
+
+			@media (min-width: 480px) {
+				margin-block-start: 0;
+			}
+
+			& dt,
+			& dd {
+				display: inline;
+			}
+		}
+	}
+}

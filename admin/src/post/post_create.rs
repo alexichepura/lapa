@@ -8,6 +8,12 @@ use crate::{
     form::{FormFooter, Input},
 };
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    page,
+    "src/page.module.css"
+);
+
 #[component]
 pub fn PostCreate() -> impl IntoView {
     let action = ServerAction::<PostCreateAction>::new();
@@ -27,7 +33,7 @@ pub fn PostCreate() -> impl IntoView {
     });
     view! {
         <Title text=move || format!("Post create") />
-        <section class="PostPage">
+        <section class=page::postPage>
             <ActionForm action=action>
                 <fieldset prop:disabled=move || pending()>
                     <legend>Data</legend>

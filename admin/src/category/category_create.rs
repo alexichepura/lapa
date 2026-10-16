@@ -5,6 +5,12 @@ use leptos_router::hooks::use_navigate;
 
 use super::CategoryError;
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    grid,
+    "src/grid.module.css"
+);
+
 #[component]
 pub fn CategoryNew() -> impl IntoView {
     let category_create = ServerAction::<CategoryCreate>::new();
@@ -28,7 +34,7 @@ pub fn CategoryNew() -> impl IntoView {
         <ActionForm action=category_create>
             <fieldset prop:disabled=move || pending()>
                 <legend>Data</legend>
-                <div class="Grid-fluid-2">
+                <div class=grid::gridFluid2>
                     <Input name="slug" label="Slug" />
                     <Input name="name" label="Name" />
                 </div>

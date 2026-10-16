@@ -1,0 +1,23 @@
+.stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 350px);
+	gap: var(--size-fluid-2) var(--size-fluid-1);
+	align-items: start;
+}
+
+.statsTable {
+	text-align: left;
+	background: var(--surface-2);
+	border-radius: var(--radius-2);
+	box-shadow: var(--shadow-3);
+	padding: var(--size-fluid-1);
+	margin-block-end: var(--size-fluid-2);
+}
+
+.statsTablePath {
+	width: 250px;
+}
+
+.statsTableCount {
+	width: 70px;
+}

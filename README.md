@@ -87,7 +87,8 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
   - based on <https://open-props.style>
   - dark and light themes
   - mobile first
-  - sass, @custom-media, @container, see notes on css below
+  - CSS modules with [stylance](https://github.com/basro/stylance-rs), bundled by
+    Lightning CSS (`style-bundle`) in cargo-leptos, see notes on css below
 - components
   - forms, inputs and response messages
   - input datetime-local usage with chrono library
@@ -131,6 +132,9 @@ RUST_LOG="debug" cargo cli user-add
 ### Dev
 
 ```sh
+cargo install stylance-cli   # one-time
+stylance --watch .           # site CSS modules (run in a second terminal)
+stylance --watch admin       # admin CSS modules (run in a second terminal)
 RUST_LOG="info,admin=debug" cargo leptos watch -p admin
 RUST_LOG="info,site=debug" cargo leptos watch -p site
 ```
@@ -196,11 +200,29 @@ The suites also run in CI (`.github/workflows/e2e.yml`); CI sets
 
 ## Notes on CSS
 
-Modern CSS is quite cool. Nesting, custom media, container queries. All that was used here before, but required cargo-leptos fork. As well another cli step to bundle everything into one css. For now returning to SASS.
-Considering return back to CSS if/when cargo-leptos will support lightningcss config and bundling.
+Styling is plain CSS organised as **CSS modules** with
+[`stylance`](https://github.com/basro/stylance-rs) plus Lightning CSS for
+bundling (cargo-leptos `style-bundle = true`).
 
-Sass PR <https://github.com/alexichepura/lapa/pull/24>.
-Ligntningcss bundle with cli proof of concept <https://github.com/alexichepura/lapa/pull/23>.
+- Component-scoped rules live next to the components as `*.module.css`
+  (e.g. `src/product_list.module.css`). Add the
+  `stylance::import_crate_style!(style, "src/product_list.module.css");` import
+  and reference `style::ProductList`; the macro resolves the same deterministic
+  hash the CLI writes into the bundle.
+- Shared/global element rules (e.g. `body`, `dialog`, `@container`) live in
+  `style/main.css`, which also `@import`s the vendor stylesheets
+  (`open-props`, `normalize`, `buttons`) and the generated `style/stylance.css`.
+- Regenerate the bundle with `stylance .` (site) / `stylance admin` (admin), or
+  keep `stylance --watch <crate>` running while editing. The generated
+  `style/stylance.css` is committed so a plain `cargo leptos build` works
+  without the CLI; `ops/*-deploy.sh` and the e2e harness refresh it for you.
+
+Native CSS nesting, `@media`, `@container` and `@layer` are all supported;
+Lightning CSS lowers them for the configured `browserquery`.
+
+Earlier experiments: Sass PR <https://github.com/alexichepura/lapa/pull/24>,
+Lightning CSS bundle with CLI proof of concept
+<https://github.com/alexichepura/lapa/pull/23>.
 
 ## License
 

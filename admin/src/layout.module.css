@@ -1,0 +1,81 @@
+.admin {
+	display: grid;
+	grid-template-rows: 36px 1fr;
+	grid-template-areas: "header" "main";
+
+	@media (min-width: 768px) {
+		grid-template-rows: 48px 1fr;
+		grid-template-areas: "header header" "nav main";
+		grid-template-columns: calc(var(--size-fluid-4) * 4) 1fr;
+	}
+
+	>header {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		grid-area: header;
+		background: var(--surface-1);
+		box-shadow: var(--shadow-3);
+		display: grid;
+		grid-template-columns: 1fr auto auto;
+		gap: var(--size-fluid-2);
+		padding: 0 var(--size-fluid-2);
+		align-items: center;
+
+		& button {
+			padding: 1px 4px;
+		}
+	}
+}
+
+.logo {
+	color: var(--text-2);
+	font-size: var(--font-size-fluid-1);
+	visibility: hidden;
+
+	@media (min-width: 768px) {
+		visibility: visible;
+	}
+}
+
+.menu {
+	grid-area: nav;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 15;
+
+	@media (min-width: 768px) {
+		position: relative;
+		z-index: 1;
+	}
+
+	&:focus-within {
+		& nav {
+			display: block;
+		}
+	}
+
+	& .toggle {
+		color: var(--text-2);
+		font-weight: normal;
+		font-size: var(--font-size-fluid-1);
+		text-decoration: none;
+		white-space: nowrap;
+		height: 36px;
+		padding: 0 var(--size-fluid-2);
+		margin: 0;
+		display: flex;
+		align-items: center;
+
+		/* text-decoration: none; */
+		@media (min-width: 768px) {
+			display: none;
+		}
+
+		&:hover,
+		&:focus-visible {
+			background: var(--surface-3);
+		}
+	}
+}

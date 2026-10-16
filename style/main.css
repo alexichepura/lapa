@@ -1,10 +1,7 @@
-@use "./open-props.min.css";
-@use "./normalize.min.css";
-@use "./buttons.min.css";
-
-// @custom-media --md-n-above (width >=768px);
-// @custom-media --sm-n-above (width >=480px);
-$sm-n-above: 480px;
+@import "./open-props.min.css";
+@import "./normalize.min.css";
+@import "./buttons.min.css";
+@import "./stylance.css";
 
 :root {
 	--inner-width: min(100% - 2rem, 50rem);
@@ -100,7 +97,7 @@ dialog {
 	& figure {
 		grid-template-areas: "img" "text" "btn";
 
-		@media (min-width: #{$sm-n-above}) {
+		@media (min-width: 480px) {
 			grid-template-areas: "img img" "text btn";
 		}
 	}
@@ -118,84 +115,8 @@ dialog {
 	& button {
 		grid-area: btn;
 
-		@media (min-width: #{$sm-n-above}) {
+		@media (min-width: 480px) {
 			justify-self: end;
-		}
-	}
-}
-
-.RoutingProgress {
-	position: fixed;
-	opacity: 0.5;
-	top: 0;
-	width: 100vw;
-	transform: translateY(-50%);
-}
-
-
-/* HOME PAGE */
-#ava {
-	width: 200px;
-	height: 200px;
-	border-radius: 50%;
-	margin-top: var(--size-fluid-2);
-	margin-inline: auto;
-}
-
-.ProductList {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, 240px);
-	gap: var(--size-fluid-2) var(--size-fluid-1);
-	justify-content: space-around;
-
-	& a {
-		text-decoration: none;
-		overflow: hidden;
-		box-shadow: var(--shadow-3);
-
-		/* transition: transform 0.3s ease; */
-		transition-property: transform, box-shadow;
-		transition-duration: 0.3s;
-		transition-timing-function: ease;
-
-		&:visited {
-			color: var(--text-1);
-		}
-
-		&:hover {
-			transform: scale(1.03);
-			box-shadow: var(--shadow-4);
-		}
-
-		>img {
-			border-radius: var(--radius-2);
-		}
-
-		>p {
-			padding-block: calc(var(--size-fluid-1)/2);
-		}
-	}
-}
-
-.product-images {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, 240px);
-	gap: var(--size-fluid-2) var(--size-fluid-1);
-	justify-content: space-around;
-
-	& img {
-		/* background: var(--surface-2); */
-		border-radius: var(--radius-2);
-		overflow: hidden;
-		cursor: pointer;
-		box-shadow: var(--shadow-3);
-		transition-property: transform, box-shadow;
-		transition-duration: 0.3s;
-		transition-timing-function: ease;
-
-		&:hover {
-			transform: scale(1.03);
-			box-shadow: var(--shadow-4);
 		}
 	}
 }

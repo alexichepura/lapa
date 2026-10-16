@@ -6,6 +6,8 @@ use crate::{
 use leptos::{either::Either, prelude::*};
 use serde::{Deserialize, Serialize};
 
+stylance::import_crate_style!(style, "src/auth.module.css");
+
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LoginFormData {
     pub username: String,
@@ -39,7 +41,7 @@ pub fn Login() -> impl IntoView {
     });
 
     view! {
-        <fieldset prop:disabled=move || pending() class="login-card">
+        <fieldset prop:disabled=move || pending() class=style::loginCard>
             <legend>Log in</legend>
             <ActionForm action=login>
                 {skip_redirect_view} <Input name="username" label="User" />
