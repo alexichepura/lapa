@@ -6,7 +6,8 @@ use cornucopia::{deadpool_postgres::Pool, queries};
 pub async fn session_layer(pool: &Pool) -> SessionLayer<SessionPool> {
     let config = SessionConfig::default()
         .with_table_name("Session")
-        .with_session_name("session");
+        .with_session_name("session")
+        .with_secure(session_cookie_secure());
 
     let store = SessionStore::<SessionPool>::new(Some(pool.clone().into()), config)
         .await
@@ -14,6 +15,22 @@ pub async fn session_layer(pool: &Pool) -> SessionLayer<SessionPool> {
 
     let layer = SessionLayer::new(store);
     layer
+}
+
+/// Whether the session cookie carries the `Secure` flag.
+///
+/// `SessionConfig::default()` leaves it off, which means the auth cookie would
+/// also be sent over plaintext HTTP in production. Default to on for release
+/// builds and off for debug builds (local dev and the e2e harness serve over
+/// `http://127.0.0.1`). Override with `SESSION_SECURE=1` / `SESSION_SECURE=0`.
+fn session_cookie_secure() -> bool {
+    match std::env::var("SESSION_SECURE") {
+        Ok(v) => matches!(
+            v.trim().to_ascii_lowercase().as_str(),
+            "1" | "true" | "yes" | "on"
+        ),
+        Err(_) => !cfg!(debug_assertions),
+    }
 }
 
 #[derive(Debug, Clone)]
