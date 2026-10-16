@@ -76,6 +76,7 @@ serde-wasm-bindgen = "0.6.5"
 stylance = "0.8"
 thiserror = "2"
 tokio = { version = "1.53", features = ["macros"] }
+tokio-postgres-rustls = { version = "0.14", default-features = false, features = ["ring", "webpki-roots"] }
 tower = { version = "0.5" }
 tower_governor = { version = "0.8" }
 tower-http = { version = "0.7", features = ["fs", "trace"] }
@@ -105,6 +106,7 @@ cfg-if = { workspace = true }
 chrono = { workspace = true }
 config = { workspace = true, optional = true }
 console_error_panic_hook = { workspace = true }
+cuid2 = { workspace = true, optional = true }
 deadpool-postgres = { workspace = true, optional = true }
 dotenvy = { workspace = true, optional = true }
 image = { workspace = true, optional = true }
@@ -148,6 +150,7 @@ ssr = [
     "dep:leptos_axum",
     "dep:cornucopia",
     "dep:config",
+    "dep:cuid2",
     "dep:dotenvy",
     "dep:deadpool-postgres",
     "dep:tower_governor",
@@ -155,6 +158,7 @@ ssr = [
     "dep:tower",
     "dep:tracing-subscriber",
     "dep:image",
+    "lib/pg",
     "leptos_meta/ssr",
     "leptos_router/ssr",
     "leptos/ssr",

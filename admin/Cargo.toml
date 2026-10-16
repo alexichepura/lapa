@@ -82,6 +82,7 @@ ssr = [
     "dep:tower-http",
     "dep:tower",
     "dep:tracing-subscriber",
+    "lib/pg",
     "leptos_meta/ssr",
     "leptos_router/ssr",
     "leptos/ssr",

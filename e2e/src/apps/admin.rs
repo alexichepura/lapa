@@ -101,8 +101,9 @@ fn case_login_flow<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
             .await?;
         // The router's progress bar lingers briefly after navigation and the
         // stats `<Transition>` resolves asynchronously; wait for both so the
-        // screenshot is deterministic.
-        wait_until_hidden(ctx, ".RoutingProgress", 10).await?;
+        // screenshot is deterministic. The class name is stylance-hashed
+        // (`routingProgress-<hash>`), so match the stable name as a substring.
+        wait_until_hidden(ctx, "[class*=\"routingProgress\"]", 10).await?;
         expect(ctx.page.locator("text=All time"))
             .to_be_visible()
             .await?;

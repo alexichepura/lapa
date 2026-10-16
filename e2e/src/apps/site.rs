@@ -8,6 +8,11 @@ use playwright_rs::{Viewport, expect};
 use crate::apps::{AppUnderTest, Case, CaseCtx, CaseFuture};
 use crate::support::seed;
 
+/// CSS-module class names carry a stylance hash suffix (`productList-<hash>`),
+/// so match the stable name part as a substring instead of the literal class.
+const IMAGES_PRODUCT_LIST: &str = "[class*=\"productList\"] img";
+const IMAGES_PRODUCT_GALLERY: &str = "[class*=\"productImages\"] img";
+
 pub struct SiteApp;
 
 impl AppUnderTest for SiteApp {
@@ -182,11 +187,13 @@ fn case_draft_hidden<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
 fn case_images<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     Box::pin(async move {
         ctx.goto("/").await?;
-        ctx.wait_for_image(".ProductList img", 60).await?;
+        // stylance appends a hash to CSS-module class names
+        // (`productList-<hash>`), so match the stable name as a substring.
+        ctx.wait_for_image(IMAGES_PRODUCT_LIST, 60).await?;
 
         ctx.goto(&format!("/product/{}", seed::PRODUCT_SLUG))
             .await?;
-        ctx.wait_for_image(".product-images img", 60).await?;
+        ctx.wait_for_image(IMAGES_PRODUCT_GALLERY, 60).await?;
         ctx.wait_for_image("article figure img", 60).await?;
 
         let content_src: String = ctx
@@ -210,9 +217,9 @@ fn case_product_image_dialog<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     Box::pin(async move {
         ctx.goto(&format!("/product/{}", seed::PRODUCT_SLUG))
             .await?;
-        ctx.wait_for_image(".product-images img", 60).await?;
+        ctx.wait_for_image(IMAGES_PRODUCT_GALLERY, 60).await?;
         ctx.page
-            .locator(".product-images img")
+            .locator(IMAGES_PRODUCT_GALLERY)
             .first()
             .click(None)
             .await?;

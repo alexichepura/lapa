@@ -16,6 +16,7 @@ pub async fn content_image_upload(
     data: MultipartData,
 ) -> Result<Result<ImageResult, ImageUploadError>, ServerFnError> {
     use crate::server::{db, serverr_400, use_image_config};
+    use crate::upload::MAX_IMAGE_BYTES;
     let db = db::use_db().await?;
     let media_config = use_image_config()?;
 
@@ -31,6 +32,10 @@ pub async fn content_image_upload(
         match field.name().unwrap_or_default() {
             "img" => {
                 while let Ok(Some(chunk)) = field.chunk().await {
+                    if img_bytes.len() + chunk.len() > MAX_IMAGE_BYTES {
+                        serverr_400();
+                        return Ok(Err(ImageUploadError::TooLarge));
+                    }
                     img_bytes.extend_from_slice(&chunk);
                 }
             }

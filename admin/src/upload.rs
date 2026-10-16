@@ -8,7 +8,13 @@ pub enum ImageUploadError {
     Read,
     #[error("Image upload format error.")]
     Format,
+    #[error("Image is too large (max 10 MiB).")]
+    TooLarge,
 }
+
+/// Maximum accepted upload size. Bytes beyond this are rejected while
+/// streaming so a single request cannot exhaust memory or disk.
+pub const MAX_IMAGE_BYTES: usize = 10 * 1024 * 1024;
 
 /// A file input for image uploads.
 ///

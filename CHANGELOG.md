@@ -26,6 +26,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   bundle is produced by `stylance` and inlined by cargo-leptos Lightning CSS
   bundling (`style-bundle = true`). No more `dart-sass` step.
 
+### Fixed
+
+- Site/admin SSR no longer returns 500 when the `Settings` record is missing or
+  a DB call fails; `settings_db` falls back to defaults and `robots.txt`
+  returns proper 404/500 responses.
+- Rich-text rendering escapes link `href` (as a quoted attribute) and image
+  `alt`/`caption`, and drops `javascript:`/`vbscript:`/`data:` hrefs.
+- Rendering no longer panics on a non-UTF-8 `User-Agent` header.
+- Admin dashboard stats work again: each site page render is recorded in the
+  `Ssr` table and the stats queries aggregate in SQL.
+
+### Security
+
+- Admin session cookie sets the `Secure` flag in release builds (tunable via
+  `SESSION_SECURE`).
+- Admin `/auth/*` endpoints are always rate limited (burst + per-second
+  replenish), independent of the `prod` feature.
+- Image uploads (product and content) are rejected above 10 MiB.
+- Postgres connections can use TLS via `PG_TLS` instead of always `NoTls`.
+
 ## [0.2] - 2026-08-22
 
 ### Added
