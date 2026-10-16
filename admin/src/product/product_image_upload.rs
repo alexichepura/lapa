@@ -1,8 +1,12 @@
-use leptos::{either::Either, prelude::*};
+use leptos::{
+    either::Either,
+    prelude::*,
+    server_fn::codec::{MultipartData, MultipartFormData},
+};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    form::FormFooter,
+    form::UploadFooter,
     upload::{ImageUploadError, InputImage},
 };
 
@@ -18,32 +22,58 @@ stylance::import_crate_style!(
 );
 
 #[component]
-pub fn ImageUpload(product_id: String, image_upload: ServerAction<ImageUpload>) -> impl IntoView {
-    let pending = image_upload.pending();
-    let (_file_name, set_file_name) = signal(None::<String>);
-    let (save_byte_vec, set_save_byte_vec) = signal(None::<Vec<u8>>);
-    let (_save_file, set_save_file) = signal(None::<String>);
+pub fn ImageUpload(product_id: String, version: RwSignal<usize>) -> impl IntoView {
+    let pending = RwSignal::new(false);
+    let value = RwSignal::<Option<Result<ImageUploadResult, ServerFnError>>>::new(None);
     let (obj_url, set_obj_url) = signal(None::<String>);
-    let img_value =
-        move || Some(serde_json::to_string(&save_byte_vec().unwrap_or_default().to_vec()).unwrap());
+    #[cfg(not(feature = "hydrate"))]
+    let _ = version;
+
+    let on_submit = move |ev: leptos::ev::SubmitEvent| {
+        #[cfg(feature = "hydrate")]
+        {
+            use wasm_bindgen::JsCast;
+            ev.prevent_default();
+            let target = ev
+                .target()
+                .unwrap()
+                .unchecked_into::<web_sys::HtmlFormElement>();
+            let form_data = web_sys::FormData::new_with_form(&target).unwrap();
+            pending.set(true);
+            leptos::task::spawn_local(async move {
+                let result = upload_img(form_data.into()).await;
+                if result.as_ref().is_ok_and(|r| r.is_ok()) {
+                    version.update(|v| *v += 1);
+                }
+                value.set(Some(result));
+                pending.set(false);
+            });
+        }
+        #[cfg(not(feature = "hydrate"))]
+        let _ = ev;
+    };
+
     view! {
-        <fieldset prop:disabled=move || pending()>
+        <fieldset prop:disabled=move || pending.get()>
             <legend>Image upload</legend>
             <div class=grid::gridFluid2>
                 <div>
-                    <label>
-                        <div>Select image</div>
-                        <InputImage set_file_name set_save_file set_obj_url set_save_byte_vec />
-                    </label>
-                    <ActionForm action=image_upload>
+                    <form on:submit=on_submit>
+                        <label>
+                            <div>Select image</div>
+                            <InputImage set_obj_url />
+                        </label>
                         <input type="hidden" name="post_id" value=product_id />
-                        <input type="hidden" name="img" value=img_value />
                         <label>
                             <span>Alt</span>
                             <input name="alt" />
                         </label>
-                        <FormFooter action=image_upload submit_text="Upload image" />
-                    </ActionForm>
+                        <UploadFooter
+                            pending=Signal::from(pending)
+                            value=Signal::from(value)
+                            submit_text="Upload image"
+                        />
+                    </form>
                 </div>
                 <ImageUploadPreview obj_url />
             </div>
@@ -62,22 +92,35 @@ pub fn ImageUploadPreview(obj_url: ReadSignal<Option<String>>) -> impl IntoView 
 
 type ImageUploadResult = Result<ImageResult, ImageUploadError>;
 
-#[server(ImageUpload, "/api")]
-pub async fn upload_img(
-    img: String,
-    alt: String,
-    post_id: String,
-) -> Result<ImageUploadResult, ServerFnError> {
+#[server(ImageUpload, "/api", input = MultipartFormData)]
+pub async fn upload_img(data: MultipartData) -> Result<ImageUploadResult, ServerFnError> {
     use crate::server::{db, serverr_400, use_image_config};
     let db = db::use_db().await?;
     let media_config = use_image_config()?;
-    let img_bytes = serde_json::from_str::<Vec<u8>>(&img).map_err(|e| {
-        tracing::error!("{e:?}");
+
+    let mut data = data.into_inner().ok_or_else(|| {
         serverr_400();
-        ImageUploadError::Deserialization
+        ImageUploadError::Read
     })?;
-    let cursor = std::io::Cursor::new(img_bytes.clone());
-    let img_reader = image::ImageReader::new(cursor.clone())
+
+    let mut img_bytes = Vec::new();
+    let mut alt = String::new();
+    let mut post_id = String::new();
+    while let Ok(Some(mut field)) = data.next_field().await {
+        match field.name().unwrap_or_default() {
+            "img" => {
+                while let Ok(Some(chunk)) = field.chunk().await {
+                    img_bytes.extend_from_slice(&chunk);
+                }
+            }
+            "alt" => alt = field.text().await.unwrap_or_default(),
+            "post_id" => post_id = field.text().await.unwrap_or_default(),
+            _ => {}
+        }
+    }
+
+    let cursor = std::io::Cursor::new(&img_bytes);
+    let img_reader = image::ImageReader::new(cursor)
         .with_guessed_format()
         .map_err(|e| {
             tracing::error!("{e:?}");

@@ -34,7 +34,7 @@ pub fn ProductImages(product_id: String) -> impl IntoView {
     let post_id_clone = product_id.clone();
 
     let image_delete = ServerAction::<ImageDelete>::new();
-    let image_upload = ServerAction::<ImageUpload>::new();
+    let image_upload_version = RwSignal::new(0usize);
     let image_update = ServerAction::<ImageUpdate>::new();
     let order_action = ServerAction::<ImagesOrderUpdate>::new();
     let hero_action = ServerAction::<ImageMakeHero>::new();
@@ -44,7 +44,7 @@ pub fn ProductImages(product_id: String) -> impl IntoView {
             (
                 post_id_clone.clone(),
                 image_delete.version().get(),
-                image_upload.version().get(),
+                image_upload_version.get(),
                 image_update.version().get(),
                 order_action.version().get(),
                 hero_action.version().get(),
@@ -54,7 +54,7 @@ pub fn ProductImages(product_id: String) -> impl IntoView {
     );
 
     view! {
-        <ImageUpload product_id image_upload />
+        <ImageUpload product_id version=image_upload_version />
         <Transition fallback=move || {
             view! { <Loading /> }
         }>

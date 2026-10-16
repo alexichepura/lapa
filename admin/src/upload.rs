@@ -4,22 +4,19 @@ use thiserror::Error;
 
 #[derive(Error, Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ImageUploadError {
-    #[error("Image upload server error")]
-    ServerError,
-    #[error("Image upload deserialization error")]
-    Deserialization,
     #[error("Image upload read error.")]
     Read,
     #[error("Image upload format error.")]
     Format,
 }
 
+/// A file input for image uploads.
+///
+/// The raw file bytes are sent as a real multipart field (see the
+/// `MultipartFormData` server functions); this component only mirrors the
+/// selection into a preview object URL.
 #[component]
 pub(crate) fn InputImage(
-    #[allow(unused_variables)] set_file_name: WriteSignal<Option<String>>,
-    #[allow(unused_variables)] set_save_file: WriteSignal<Option<String>>,
-    // set_save_bytes: WriteSignal<Option<js_sys::Uint8Array>>,
-    #[allow(unused_variables)] set_save_byte_vec: WriteSignal<Option<Vec<u8>>>,
     #[allow(unused_variables)] set_obj_url: WriteSignal<Option<String>>,
 ) -> impl IntoView {
     #[allow(unused_variables)]
@@ -30,25 +27,17 @@ pub(crate) fn InputImage(
             let file = files.get(0).unwrap();
             let object_url = web_sys::Url::create_object_url_with_blob(&file).unwrap();
             set_obj_url(Some(object_url));
-
-            let file_blob_promise = js_sys::Promise::resolve(&file.array_buffer());
-            set_file_name(Some(file.name()));
-            leptos::task::spawn_local(async move {
-                let bytes = wasm_bindgen_futures::JsFuture::from(file_blob_promise)
-                    .await
-                    .unwrap();
-                let byte_arr = js_sys::Uint8Array::new(&bytes);
-                // set_save_bytes(Some(byte_arr));
-                let byte_vec = (&byte_arr).to_vec();
-                set_save_byte_vec(Some(byte_vec));
-                let buffer = &byte_arr.to_vec()[..];
-                // let s = serde_json::to_string(&byte_arr.to_vec()).unwrap();
-                //let _ = SaveFile::from_bytes_rs(buffer);
-                // let sf = SaveFile::from_bytes_rs(buffer).unwrap();
-                set_save_file(Some(format!("{buffer:?}")));
-            })
         }
     };
 
-    view! { <input type="file" on:change=on_file_change node_ref=file_input autocomplete="off" /> }
+    view! {
+        <input
+            type="file"
+            name="img"
+            accept="image/*"
+            on:change=on_file_change
+            node_ref=file_input
+            autocomplete="off"
+        />
+    }
 }

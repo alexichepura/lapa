@@ -30,7 +30,7 @@ http = { workspace = true }
 image = { workspace = true, optional = true }
 js-sys = { workspace = true, optional = true }
 kamadak-exif = { version = "0.6.1", optional = true }
-leptos = { workspace = true }
+leptos = { workspace = true, features = ["multipart"] }
 leptos_axum = { workspace = true, optional = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }

@@ -1,4 +1,7 @@
-use leptos::prelude::*;
+use leptos::{
+    prelude::*,
+    server_fn::codec::{MultipartData, MultipartFormData},
+};
 use serde::{Deserialize, Serialize};
 
 use crate::upload::ImageUploadError;
@@ -8,22 +11,37 @@ pub struct ImageResult {
     pub id: String,
 }
 
-#[server(ContentImageUploadAction, "/api")]
+#[server(ContentImageUploadAction, "/api", input = MultipartFormData)]
 pub async fn content_image_upload(
-    img: String,
-    alt: String,
-    content_id: String,
+    data: MultipartData,
 ) -> Result<Result<ImageResult, ImageUploadError>, ServerFnError> {
     use crate::server::{db, serverr_400, use_image_config};
     let db = db::use_db().await?;
     let media_config = use_image_config()?;
-    let img_bytes = serde_json::from_str::<Vec<u8>>(&img).map_err(|e| {
-        tracing::error!("{e:?}");
+
+    let mut data = data.into_inner().ok_or_else(|| {
         serverr_400();
-        ImageUploadError::Deserialization
+        ImageUploadError::Read
     })?;
-    let cursor = std::io::Cursor::new(img_bytes.clone());
-    let img_reader = image::ImageReader::new(cursor.clone())
+
+    let mut img_bytes = Vec::new();
+    let mut alt = String::new();
+    let mut content_id = String::new();
+    while let Ok(Some(mut field)) = data.next_field().await {
+        match field.name().unwrap_or_default() {
+            "img" => {
+                while let Ok(Some(chunk)) = field.chunk().await {
+                    img_bytes.extend_from_slice(&chunk);
+                }
+            }
+            "alt" => alt = field.text().await.unwrap_or_default(),
+            "content_id" => content_id = field.text().await.unwrap_or_default(),
+            _ => {}
+        }
+    }
+
+    let cursor = std::io::Cursor::new(&img_bytes);
+    let img_reader = image::ImageReader::new(cursor)
         .with_guessed_format()
         .map_err(|e| {
             tracing::error!("{e:?}");

@@ -417,12 +417,11 @@ fn case_image_upload<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
             .locator("input[type=file]")
             .set_input_files(&file, None)
             .await?;
-        // The wasm reader fills the hidden `img` field with the file bytes.
-        wait_hidden_value(ctx, "input[name=img]", 20).await?;
         ctx.page
             .locator("input[name=alt]")
             .fill("Uploaded e2e image", None)
             .await?;
+        // The form submits the file as a real multipart field.
         submit(ctx, "Upload image").await?;
 
         // The images list refetches on upload; the new alt shows up.
@@ -503,24 +502,6 @@ async fn wait_at_least(ctx: &CaseCtx, selector: &str, n: usize, secs: u64) -> an
         tokio::time::sleep(Duration::from_millis(250)).await;
     }
     anyhow::bail!("{selector} never reached {n} element(s) within {secs}s")
-}
-
-/// Poll until a form field holds more than an empty JSON array (`[]`), which is
-/// how the upload form signals the wasm file reader finished.
-async fn wait_hidden_value(ctx: &CaseCtx, selector: &str, secs: u64) -> anyhow::Result<()> {
-    for _ in 0..secs * 4 {
-        let value = ctx
-            .page
-            .locator(selector)
-            .input_value(None)
-            .await
-            .unwrap_or_default();
-        if value.len() > 2 {
-            return Ok(());
-        }
-        tokio::time::sleep(Duration::from_millis(250)).await;
-    }
-    anyhow::bail!("{selector} never received file bytes within {secs}s")
 }
 
 async fn wait_url(ctx: &CaseCtx, secs: u64, pred: impl Fn(&str) -> bool) -> anyhow::Result<()> {
