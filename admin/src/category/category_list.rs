@@ -39,7 +39,7 @@ pub fn CategoryListItems(categories: Vec<CategoryListItem>) -> impl IntoView {
         Either::Left(view! { <p>"0 categories"</p> })
     } else {
         Either::Right(view! {
-            <ul class=format!("{} {}", style::Card, style::Listing)>
+            <ul class=format!("{} {}", style::card, style::listing)>
                 {categories
                     .into_iter()
                     .map(|category| {

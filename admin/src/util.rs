@@ -10,11 +10,11 @@ pub fn Loading() -> impl IntoView {
 
 #[component]
 pub fn AlertDanger(text: String) -> impl IntoView {
-    view! { <div class=format!("{} {}", style::Alert, style::Danger)>{text}</div> }
+    view! { <div class=format!("{} {}", style::alert, style::danger)>{text}</div> }
 }
 #[component]
 pub fn AlertSuccess() -> impl IntoView {
-    view! { <div class=format!("{} {}", style::Alert, style::Success)>Success</div> }
+    view! { <div class=format!("{} {}", style::alert, style::success)>Success</div> }
 }
 
 pub fn datetime_to_string(datetime: DateTime<FixedOffset>) -> String {

@@ -30,7 +30,7 @@ pub fn ProductNew() -> impl IntoView {
     });
     view! {
         <Title text=move || format!("Product create") />
-        <section class=page::PostPage>
+        <section class=page::postPage>
             <ActionForm action=action>
                 <fieldset prop:disabled=move || pending()>
                     <legend>Data</legend>

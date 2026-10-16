@@ -27,7 +27,7 @@ pub fn ProductList() -> impl IntoView {
                 <A href="/product/new">Create</A>
             </small>
         </h1>
-        <ul class=format!("{} {}", style::Card, style::Listing)>
+        <ul class=format!("{} {}", style::card, style::listing)>
             <Suspense fallback=move || {
                 view! { <Loading /> }
             }>{suspended}</Suspense>
@@ -59,7 +59,7 @@ pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
     };
     let class = match product.is_published {
         true => style::published,
-        false => style::not_published,
+        false => style::notPublished,
     };
     // let hero_view = match product.hero {
     //     Some(id) => {
@@ -68,13 +68,13 @@ pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
     //     None => Either::Right(view! { <div title="No post hero">?</div> }),
     // };
     view! {
-        <li class=style::PostListItem>
+        <li class=style::postListItem>
             <A href=format!("/product/{}", product.id)>
-                <div title="Publish at" class=format!("{} {}", style::PostListItem_status, class)>
+                <div title="Publish at" class=format!("{} {}", style::postListItemStatus, class)>
                     {publish_at_view.utc}
                 </div>
                 <span title="Post title">{product.h1}</span>
-                <div title="Created at" class=style::PostListItem_created>
+                <div title="Created at" class=style::postListItemCreated>
                     {created.utc}
                 </div>
             </A>

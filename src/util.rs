@@ -9,11 +9,11 @@ pub fn Loading() -> impl IntoView {
 
 #[component]
 pub fn AlertDanger(text: String) -> impl IntoView {
-    view! { <p class=style::AlertDanger>{text}</p> }
+    view! { <p class=style::alertDanger>{text}</p> }
 }
 #[component]
 pub fn AlertSuccess() -> impl IntoView {
-    view! { <p class=style::AlertSuccess>Success</p> }
+    view! { <p class=style::alertSuccess>Success</p> }
 }
 
 #[component]

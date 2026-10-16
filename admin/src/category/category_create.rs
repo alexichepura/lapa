@@ -34,7 +34,7 @@ pub fn CategoryNew() -> impl IntoView {
         <ActionForm action=category_create>
             <fieldset prop:disabled=move || pending()>
                 <legend>Data</legend>
-                <div class=grid::Grid_fluid_2>
+                <div class=grid::gridFluid2>
                     <Input name="slug" label="Slug" />
                     <Input name="name" label="Name" />
                 </div>

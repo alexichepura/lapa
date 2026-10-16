@@ -1,11 +1,11 @@
-.Stats {
+.stats {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, 350px);
 	gap: var(--size-fluid-2) var(--size-fluid-1);
 	align-items: start;
 }
 
-.StatsTable {
+.statsTable {
 	text-align: left;
 	background: var(--surface-2);
 	border-radius: var(--radius-2);
@@ -14,10 +14,10 @@
 	margin-block-end: var(--size-fluid-2);
 }
 
-.StatsTable-path {
+.statsTablePath {
 	width: 250px;
 }
 
-.StatsTable-count {
+.statsTableCount {
 	width: 70px;
 }

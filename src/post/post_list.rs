@@ -39,7 +39,7 @@ pub fn PostListView(posts: Vec<PostListItem>) -> impl IntoView {
                 .collect_view(),
         )
     };
-    view! { <div class=style::ProductList>{list}</div> }
+    view! { <div class=style::productList>{list}</div> }
 }
 
 #[component]

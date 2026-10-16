@@ -41,7 +41,7 @@
 	}
 }
 
-.ImageUploadPreview {
+.imageUploadPreview {
 	background: var(--surface-2);
 	display: flex;
 	align-items: center;

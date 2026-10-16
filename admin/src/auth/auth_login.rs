@@ -41,7 +41,7 @@ pub fn Login() -> impl IntoView {
     });
 
     view! {
-        <fieldset prop:disabled=move || pending() class=style::login_card>
+        <fieldset prop:disabled=move || pending() class=style::loginCard>
             <legend>Log in</legend>
             <ActionForm action=login>
                 {skip_redirect_view} <Input name="username" label="User" />

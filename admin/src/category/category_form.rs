@@ -25,7 +25,7 @@ pub fn CategoryForm(form: CategoryFormData) -> impl IntoView {
             <fieldset prop:disabled=move || pending()>
                 <legend>Data</legend>
                 <input type="hidden" name="id" value=form.id />
-                <div class=grid::Grid_fluid_2>
+                <div class=grid::gridFluid2>
                     <Input name="slug" label="Slug" value=form.slug />
                     <Input name="name" label="Name" value=form.name />
                 </div>

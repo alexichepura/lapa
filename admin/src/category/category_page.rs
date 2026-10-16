@@ -76,7 +76,7 @@ pub fn CategoryPage() -> impl IntoView {
 pub fn CategoryPageView(category: CategoryPageData) -> impl IntoView {
     view! {
         <Title text=format!("Category: {}", category.form.slug) />
-        <section class=page::PostPage>
+        <section class=page::postPage>
             <CategoryHeader category=category.header />
             <CategoryForm form=category.form />
         </section>

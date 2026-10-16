@@ -1,4 +1,4 @@
-.Card {
+.card {
 	background: var(--surface-2);
 	border-radius: var(--radius-2);
 	padding: var(--size-fluid-2);
@@ -6,7 +6,7 @@
 	margin-block-end: var(--size-fluid-2);
 }
 
-.Listing {
+.listing {
 	padding: 0;
 
 	>li {
@@ -39,7 +39,7 @@
 	}
 }
 
-.PostListItem {
+.postListItem {
 	height: 48px;
 
 	>a {
@@ -51,7 +51,7 @@
 	}
 }
 
-.PostListItem-created {
+.postListItemCreated {
 	display: none;
 
 	@media (min-width: 480px) {
@@ -59,12 +59,12 @@
 	}
 }
 
-.PostListItem-status {
+.postListItemStatus {
 	&.published {
 		color: var(--green-6);
 	}
 
-	&.not-published {
+	&.notPublished {
 		color: var(--blue-6);
 	}
 }

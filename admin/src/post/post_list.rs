@@ -27,7 +27,7 @@ pub fn PostList() -> impl IntoView {
                 <A href="/post/create">Create</A>
             </small>
         </h1>
-        <ul class=format!("{} {}", style::Card, style::Listing)>
+        <ul class=format!("{} {}", style::card, style::listing)>
             <Suspense fallback=move || {
                 view! { <Loading /> }
             }>{suspended}</Suspense>
@@ -60,16 +60,16 @@ pub fn PostListItem(post: PostListItem) -> impl IntoView {
     };
     let class = match post.is_published {
         true => style::published,
-        false => style::not_published,
+        false => style::notPublished,
     };
     view! {
-        <li class=style::PostListItem>
+        <li class=style::postListItem>
             <A href=format!("/post/{}", post.id)>
-                <div title="Published at" class=format!("{} {}", style::PostListItem_status, class)>
+                <div title="Published at" class=format!("{} {}", style::postListItemStatus, class)>
                     {published.local}
                 </div>
                 <span title="Post title">{post.h1}</span>
-                <div title="Created at" class=style::PostListItem_created>
+                <div title="Created at" class=style::postListItemCreated>
                     {created.local}
                 </div>
             </A>

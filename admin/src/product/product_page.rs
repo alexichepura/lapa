@@ -104,7 +104,7 @@ pub fn ProductPageView(page: ProductPageData) -> impl IntoView {
     view! {
         <ProductForm product=page.form />
         {edit_view}
-        <div class=grid::Grid_fluid_2>
+        <div class=grid::gridFluid2>
             <ProductDeleteForm id=id.clone() slug />
         </div>
     }

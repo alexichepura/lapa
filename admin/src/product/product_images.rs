@@ -174,7 +174,7 @@ fn ProductImagesView(
 
             </div>
         </fieldset>
-        <dialog class=grid::Grid_fluid_2 node_ref=dialog_element>
+        <dialog class=grid::gridFluid2 node_ref=dialog_element>
             {edit_view}
         </dialog>
     }

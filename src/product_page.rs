@@ -120,7 +120,7 @@ pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
         <Meta property="og:description" content=product.meta_description.clone() />
         {hero_og}
         <h1>{product.h1}</h1>
-        <div class=style::product_images>
+        <div class=style::productImages>
             <For
                 each=move || product.images.clone()
                 key=|image| image.id.clone()

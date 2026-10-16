@@ -29,7 +29,7 @@ pub fn ImageUpload(product_id: String, image_upload: ServerAction<ImageUpload>) 
     view! {
         <fieldset prop:disabled=move || pending()>
             <legend>Image upload</legend>
-            <div class=grid::Grid_fluid_2>
+            <div class=grid::gridFluid2>
                 <div>
                     <label>
                         <div>Select image</div>
@@ -57,7 +57,7 @@ pub fn ImageUploadPreview(obj_url: ReadSignal<Option<String>>) -> impl IntoView 
         Some(url) => Either::Left(view! { <img src=url /> }),
         None => Either::Right(view! { <p>Upload preview</p> }),
     };
-    view! { <div class=images::ImageUploadPreview>{view}</div> }
+    view! { <div class=images::imageUploadPreview>{view}</div> }
 }
 
 type ImageUploadResult = Result<ImageResult, ImageUploadError>;

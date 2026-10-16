@@ -17,7 +17,7 @@ pub fn HomePage() -> impl IntoView {
             <h1>Dashboard</h1>
             <hr />
             <h2>Stats</h2>
-            <section class=style::Stats>
+            <section class=style::stats>
                 <StatsTableTransition caption="All time" resource=stats_all />
                 <StatsTableTransition caption="Last month" resource=stats_month />
                 <StatsTableTransition caption="Last hour" resource=stats_hour />
@@ -45,12 +45,12 @@ pub fn StatsTableTransition(resource: StatsResource, caption: &'static str) -> i
 #[component]
 pub fn StatsTable(caption: &'static str, list: Vec<StatsListItem>) -> impl IntoView {
     view! {
-        <table class=style::StatsTable>
+        <table class=style::statsTable>
             <caption>{caption}</caption>
             <thead>
                 <tr>
-                    <th class=style::StatsTable_path>Path</th>
-                    <th class=style::StatsTable_count>Count</th>
+                    <th class=style::statsTablePath>Path</th>
+                    <th class=style::statsTableCount>Count</th>
                 </tr>
             </thead>
             <tbody>
@@ -60,8 +60,8 @@ pub fn StatsTable(caption: &'static str, list: Vec<StatsListItem>) -> impl IntoV
                     children=move |stat| {
                         view! {
                             <tr>
-                                <td class=style::StatsTable_path>{stat.path}</td>
-                                <td class=style::StatsTable_count>{stat.n}</td>
+                                <td class=style::statsTablePath>{stat.path}</td>
+                                <td class=style::statsTableCount>{stat.n}</td>
                             </tr>
                         }
                     }

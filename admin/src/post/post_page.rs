@@ -106,7 +106,7 @@ pub fn PostPageView(page: PostPageData) -> impl IntoView {
     view! {
         <PostForm post=page.form />
         {edit_view}
-        <div class=grid::Grid_fluid_2>
+        <div class=grid::gridFluid2>
             <PostDeleteForm id=id.clone() slug />
         </div>
     }

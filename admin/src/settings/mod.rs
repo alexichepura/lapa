@@ -93,7 +93,7 @@ pub fn Settings() -> impl IntoView {
                         Ok(settings) => {
                             Either::Right(
                                 view! {
-                                    <div class=grid::Grid_fluid_2>
+                                    <div class=grid::gridFluid2>
                                         <SettingsHomeForm settings=SettingsHome::from(&settings) />
                                         <SettingsSiteForm settings=SettingsSite::from(&settings) />
                                     </div>

@@ -33,7 +33,7 @@ pub fn PostCreate() -> impl IntoView {
     });
     view! {
         <Title text=move || format!("Post create") />
-        <section class=page::PostPage>
+        <section class=page::postPage>
             <ActionForm action=action>
                 <fieldset prop:disabled=move || pending()>
                     <legend>Data</legend>

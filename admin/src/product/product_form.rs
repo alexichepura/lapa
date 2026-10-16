@@ -69,7 +69,7 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
     };
     view! {
         <Title text=move || format!("Product: {}", meta_title()) />
-        <section class=page::PostPage>
+        <section class=page::postPage>
             <header>
                 <div>
                     <h1>Product</h1>
@@ -92,7 +92,7 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
                 <input type="hidden" name="id" value=id_value />
                 <fieldset prop:disabled=move || pending()>
                     <legend>Data</legend>
-                    <div class=grid::Grid_fluid_2>
+                    <div class=grid::gridFluid2>
                         <div>
                             <label>
                                 <div>Slug</div>
@@ -168,7 +168,7 @@ pub fn PublishAt(
     });
 
     view! {
-        <div class=grid::Grid_fluid_2>
+        <div class=grid::gridFluid2>
             <Checkbox
                 label="Publish"
                 bind=publish_at_rw_signal

@@ -17,7 +17,7 @@ pub fn App(settings: SettingsCx) -> impl IntoView {
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)
-            attr:class=style::RoutingProgress
+            attr:class=style::routingProgress
         />
         <Router set_is_routing>
             <header>
