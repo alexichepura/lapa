@@ -244,7 +244,7 @@ fn case_product_crud<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
             .fill("E2E CRUD H1 (edited)", None)
             .await?;
         submit(ctx, "Submit product data").await?;
-        wait_at_least(ctx, ".Alert.Success", 1, 20).await?;
+        wait_at_least(ctx, "[data-testid=alert-success]", 1, 20).await?;
 
         ctx.goto_for("admin", "/product").await?;
         expect(ctx.page.locator("text=E2E CRUD H1 (edited)"))
@@ -331,18 +331,18 @@ fn case_image_hero_and_order<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
         login(ctx).await?;
         ctx.goto_for("admin", &format!("/product/{}", seed::PRODUCT_SLUG))
             .await?;
-        wait_at_least(ctx, ".images figure", 2, 20).await?;
+        wait_at_least(ctx, "[data-testid=images] figure", 2, 20).await?;
 
         // Swap the hero to the second image.
         ctx.page
             .locator(
-                ".images figure:has-text(\"E2E product image 2\") button:has-text(\"Make hero\")",
+                "[data-testid=images] figure:has-text(\"E2E product image 2\") button:has-text(\"Make hero\")",
             )
             .click(None)
             .await?;
         wait_at_least(
             ctx,
-            ".images figure:has-text(\"E2E product image 2\") button:disabled:has-text(\"Hero\")",
+            "[data-testid=images] figure:has-text(\"E2E product image 2\") button:disabled:has-text(\"Hero\")",
             1,
             20,
         )
@@ -350,21 +350,21 @@ fn case_image_hero_and_order<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
 
         // Move the first image below the second, then persist the order.
         ctx.page
-            .locator(".images figure")
+            .locator("[data-testid=images] figure")
             .first()
             .locator("button")
             .last()
             .click(None)
             .await?;
         submit(ctx, "Save order").await?;
-        wait_at_least(ctx, ".Alert.Success", 1, 20).await?;
+        wait_at_least(ctx, "[data-testid=alert-success]", 1, 20).await?;
 
         // A fresh load reads the persisted order: image 2 is now first.
         ctx.goto_for("admin", &format!("/product/{}", seed::PRODUCT_SLUG))
             .await?;
         expect(
             ctx.page
-                .locator(".images figure")
+                .locator("[data-testid=images] figure")
                 .first()
                 .locator("figcaption"),
         )
