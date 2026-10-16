@@ -116,13 +116,21 @@ pub async fn leptos_routes_handler(
 }
 
 pub async fn robots_txt(State(app_state): State<AppState>) -> Result<String, (StatusCode, String)> {
-    let client = app_state.pool.clone().get().await.unwrap();
+    let client = app_state.pool.clone().get().await.map_err(|e| {
+        tracing::error!("robots.txt: failed to get db connection: {e}");
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "database unavailable".to_string(),
+        )
+    })?;
     let robots = queries::settings::settings_robots()
         .bind(&client)
         .opt()
         .await
-        .unwrap();
-    dbg!(&robots);
-    let robots = robots.unwrap();
+        .map_err(|e| {
+            tracing::error!("robots.txt: failed to load settings: {e}");
+            (StatusCode::INTERNAL_SERVER_ERROR, "database error".to_string())
+        })?
+        .ok_or((StatusCode::NOT_FOUND, "robots.txt not found".to_string()))?;
     Ok(robots)
 }
