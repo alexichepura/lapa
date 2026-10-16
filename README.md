@@ -173,6 +173,27 @@ Requires <https://github.com/ryanfowler/precompress>
 ./ops/cli-deploy.sh # upload cli to server
 ```
 
+### E2E tests
+
+Rust-native end-to-end harness (`playwright-rs` + `testcontainers`) that boots
+an ephemeral Postgres, applies `schema.sql`, seeds fixtures, starts the site and
+drives Chromium. See `e2e/README.md`.
+
+```sh
+cargo install cargo-leptos
+cargo run -p lapa-e2e -- install          # download Chromium (one-time)
+cargo run -p lapa-e2e -- test             # public site suite
+cargo run -p lapa-e2e -- test --app admin  # admin suite (auth + CRUD)
+cargo run -p lapa-e2e -- test --app integration  # cross-app: admin write -> site read
+cargo run -p lapa-e2e -- test --filter home
+cargo run -p lapa-e2e -- update           # regenerate screenshot baselines
+cargo run -p lapa-e2e -- serve            # keep the stack up for manual checks
+cargo run -p lapa-e2e -- test --features prod  # build with compression + ratelimit
+```
+
+The suites also run in CI (`.github/workflows/e2e.yml`); CI sets
+`LAPA_E2E_SKIP_SNAPSHOTS=1` since only macOS baselines are committed.
+
 ## Notes on CSS
 
 Modern CSS is quite cool. Nesting, custom media, container queries. All that was used here before, but required cargo-leptos fork. As well another cli step to bundle everything into one css. For now returning to SASS.

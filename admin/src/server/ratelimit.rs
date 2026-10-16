@@ -11,5 +11,5 @@ pub fn ratelimit(app: Router) -> Router {
             .finish()
             .unwrap(),
     );
-    app.layer(GovernorLayer { config })
+    app.layer(GovernorLayer::new(config))
 }

@@ -1,0 +1,56 @@
+name: e2e
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      # Baselines are committed per-OS and only macos/ exists, so CI runs the
+      # behavioural cases and skips the pixel comparisons.
+      LAPA_E2E_SKIP_SNAPSHOTS: "1"
+      RUST_BACKTRACE: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache cargo, binaries and target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+            target
+          key: e2e-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: e2e-${{ runner.os }}-
+
+      - name: Install cargo-leptos
+        run: cargo install cargo-leptos --locked
+
+      - name: Install Playwright Chromium
+        run: cargo run -p lapa-e2e -- install
+
+      - name: Site suite
+        run: cargo run -p lapa-e2e -- test
+
+      - name: Admin suite
+        run: cargo run -p lapa-e2e -- test --app admin
+
+      - name: Integration suite
+        run: cargo run -p lapa-e2e -- test --app integration

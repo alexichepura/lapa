@@ -35,7 +35,11 @@ opt-level = 'z'
 
 [workspace]
 resolver = "2"
-members = ["lib", "content", "image_config", "admin", "cli"]
+members = ["lib", "content", "image_config", "admin", "cli", "e2e"]
+# Keep `cargo build`/`test`/`clippy` at the root building only the root `site`
+# package (the previous behaviour); the heavy e2e harness is built explicitly
+# with `-p lapa-e2e` (see e2e/README.md).
+default-members = ["."]
 
 [workspace.dependencies]
 cornucopia = { path = "./cornucopia" }

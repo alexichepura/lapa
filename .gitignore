@@ -12,6 +12,10 @@ test-results/
 end2end/playwright-report/
 playwright/.cache/
 
+# playwright-rs screenshot diff artifacts (written next to the baselines)
+e2e/snapshots/**/*-actual.png
+e2e/snapshots/**/*-diff.png
+
 site.db
 site.db-journal
 ops/cert
