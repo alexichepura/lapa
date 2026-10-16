@@ -2,7 +2,7 @@
 //!
 //! Subcommands:
 //!   install  download the Chromium build bundled with the Playwright driver
-//!   serve    boot Postgres + a Leptos app, then sit idle
+//!   serve    boot Postgres + the selected app(s), then sit idle
 //!   test     boot the whole stack and run the smoke suite
 //!   update   like `test` but rewrites screenshot baselines
 //!   shot     screenshot an arbitrary URL with a throwaway browser
@@ -17,6 +17,7 @@ use clap::{Parser, Subcommand, ValueEnum};
 
 use apps::AppUnderTest;
 use apps::admin::AdminApp;
+use apps::integration::IntegrationApp;
 use apps::site::SiteApp;
 
 #[derive(Parser)]
@@ -26,25 +27,26 @@ struct Cli {
     command: Command,
 }
 
+/// Which suite to run. `integration` boots both apps and exercises cross-app
+/// behaviour; the others boot a single app.
 #[derive(Clone, Copy, Debug, ValueEnum)]
 enum AppName {
     Site,
     Admin,
+    Integration,
 }
 
 #[derive(Subcommand)]
 enum Command {
     /// Install the Chromium browser required by the bundled Playwright driver.
     Install,
-    /// Start Postgres + the app server and keep them running.
+    /// Start Postgres + the app server(s) and keep them running.
     Serve {
-        /// Which Leptos app to serve.
         #[arg(long, value_enum, default_value_t = AppName::Site)]
         app: AppName,
     },
     /// Run the end-to-end suite against a freshly booted stack.
     Test {
-        /// Which Leptos app to exercise.
         #[arg(long, value_enum, default_value_t = AppName::Site)]
         app: AppName,
         /// Only run cases whose name contains this substring.
@@ -62,6 +64,28 @@ enum Command {
     Shot { url: String, out: PathBuf },
 }
 
+const SITE: SiteApp = SiteApp;
+const ADMIN: AdminApp = AdminApp;
+const INTEGRATION: IntegrationApp = IntegrationApp;
+
+/// Servers to boot for a suite.
+fn servers_for(app: AppName) -> Vec<&'static dyn AppUnderTest> {
+    match app {
+        AppName::Site => vec![&SITE],
+        AppName::Admin => vec![&ADMIN],
+        AppName::Integration => vec![&SITE, &ADMIN],
+    }
+}
+
+/// The suite (case collection + snapshot namespace) for a selection.
+fn suite_for(app: AppName) -> &'static dyn AppUnderTest {
+    match app {
+        AppName::Site => &SITE,
+        AppName::Admin => &ADMIN,
+        AppName::Integration => &INTEGRATION,
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt()
@@ -77,18 +101,9 @@ async fn main() -> Result<()> {
             playwright_rs::install_browsers(Some(&["chromium"])).await?;
             println!("done");
         }
-        Command::Serve { app } => match app {
-            AppName::Site => run_serve(&SiteApp).await?,
-            AppName::Admin => run_serve(&AdminApp).await?,
-        },
-        Command::Test { app, filter } => match app {
-            AppName::Site => run_test(&SiteApp, filter.as_deref(), false).await?,
-            AppName::Admin => run_test(&AdminApp, filter.as_deref(), false).await?,
-        },
-        Command::Update { app, filter } => match app {
-            AppName::Site => run_test(&SiteApp, filter.as_deref(), true).await?,
-            AppName::Admin => run_test(&AdminApp, filter.as_deref(), true).await?,
-        },
+        Command::Serve { app } => run_serve(app).await?,
+        Command::Test { app, filter } => run_test(app, filter.as_deref(), false).await?,
+        Command::Update { app, filter } => run_test(app, filter.as_deref(), true).await?,
         Command::Shot { url, out } => {
             support::browser::shot(&url, &out).await?;
             println!("saved {}", out.display());
@@ -98,16 +113,18 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn run_serve<A: AppUnderTest>(app: &A) -> Result<()> {
-    let session = support::harness::Session::boot(app).await?;
+async fn run_serve(app: AppName) -> Result<()> {
+    let session = support::harness::Session::boot(&servers_for(app)).await?;
     session.run_until_interrupt().await
 }
 
-async fn run_test<A: AppUnderTest>(app: &A, filter: Option<&str>, update: bool) -> Result<()> {
-    let session = support::harness::Session::boot(app).await?;
-    let report = session.run(app, filter, update).await?;
+async fn run_test(app: AppName, filter: Option<&str>, update: bool) -> Result<()> {
+    let servers = servers_for(app);
+    let suite = suite_for(app);
+    let session = support::harness::Session::boot(&servers).await?;
+    let report = session.run(suite, filter, update).await?;
     let failed = report.failed();
-    // Drop the session (stops server, browser and containers) before exiting.
+    // Drop the session (stops servers, browser and containers) before exiting.
     drop(session);
     if failed {
         std::process::exit(1);

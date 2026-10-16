@@ -1,9 +1,12 @@
-//! Registry of the applications under test. Each frontend (`site` now, `admin`
-//! later) is one module implementing [`AppUnderTest`] and contributing cases.
+//! Registry of the applications under test. Each frontend (`site`, `admin`) is
+//! one module implementing [`AppUnderTest`] and contributing cases; a suite may
+//! span several apps (see `integration`).
 
 pub mod admin;
+pub mod integration;
 pub mod site;
 
+use std::collections::HashMap;
 use std::future::Future;
 use std::path::PathBuf;
 use std::pin::Pin;
@@ -11,7 +14,6 @@ use std::pin::Pin;
 use anyhow::Result;
 use playwright_rs::Page;
 
-use crate::support::server::ServerLog;
 use crate::support::snapshot;
 
 pub type CaseFuture<'a> = Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>>;
@@ -21,7 +23,7 @@ pub struct Case {
     pub run: for<'a> fn(&'a CaseCtx) -> CaseFuture<'a>,
 }
 
-/// A frontend that can be booted and exercised.
+/// A frontend that can be booted and exercised, or a suite that spans several.
 pub trait AppUnderTest {
     fn name(&self) -> &'static str;
     /// Directory passed to `cargo leptos` (contains the Leptos manifest).
@@ -29,25 +31,36 @@ pub trait AppUnderTest {
     fn cases(&self) -> Vec<Case>;
 }
 
-/// Everything a case needs: the live page, the base URL, artifact paths and the
-/// captured server log.
+/// Everything a case needs: the live page, the booted apps' base URLs, artifact
+/// paths and the update flag.
 pub struct CaseCtx {
+    /// Suite name; also the snapshot directory.
     pub app: &'static str,
-    pub base_url: String,
+    /// Server used by the app-less helpers (`goto`, `url`, `snapshot`-adjacent).
+    pub primary: &'static str,
+    /// Base URL per booted server, keyed by app name.
+    pub base_urls: HashMap<&'static str, String>,
     pub page: Page,
     pub artifacts_dir: PathBuf,
-    #[allow(dead_code)]
-    pub server_log: ServerLog,
     pub update: bool,
 }
 
 impl CaseCtx {
-    pub fn url(&self, path: &str) -> String {
-        format!("{}{}", self.base_url, path)
+    pub fn url_for(&self, app: &str, path: &str) -> String {
+        let base = self
+            .base_urls
+            .get(app)
+            .unwrap_or_else(|| panic!("no server booted for app `{app}`"));
+        format!("{base}{path}")
     }
 
     pub async fn goto(&self, path: &str) -> Result<()> {
-        self.page.goto(&self.url(path), None).await?;
+        self.goto_for(self.primary, path).await
+    }
+
+    /// Navigate on a specific app (for cross-app suites).
+    pub async fn goto_for(&self, app: &str, path: &str) -> Result<()> {
+        self.page.goto(&self.url_for(app, path), None).await?;
         self.page.wait_for_load_state(None).await?;
         // Let hydration settle (or fail) before asserting/screenshotting so the
         // captured DOM is stable.
@@ -58,7 +71,11 @@ impl CaseCtx {
     /// Like [`goto`](Self::goto) but also returns the HTTP status (e.g. to
     /// assert a 404 page).
     pub async fn goto_status(&self, path: &str) -> Result<u16> {
-        let response = self.page.goto(&self.url(path), None).await?;
+        self.goto_status_for(self.primary, path).await
+    }
+
+    pub async fn goto_status_for(&self, app: &str, path: &str) -> Result<u16> {
+        let response = self.page.goto(&self.url_for(app, path), None).await?;
         self.page.wait_for_load_state(None).await?;
         tokio::time::sleep(std::time::Duration::from_millis(500)).await;
         Ok(response.map(|r| r.status()).unwrap_or(0))

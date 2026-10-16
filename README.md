@@ -183,7 +183,8 @@ drives Chromium. See `e2e/README.md`.
 cargo install cargo-leptos
 cargo run -p lapa-e2e -- install          # download Chromium (one-time)
 cargo run -p lapa-e2e -- test             # public site suite
-cargo run -p lapa-e2e -- test --app admin  # admin suite (redirect + login flow)
+cargo run -p lapa-e2e -- test --app admin  # admin suite (auth + CRUD)
+cargo run -p lapa-e2e -- test --app integration  # cross-app: admin write -> site read
 cargo run -p lapa-e2e -- test --filter home
 cargo run -p lapa-e2e -- update           # regenerate screenshot baselines
 cargo run -p lapa-e2e -- serve            # keep the stack up for manual checks

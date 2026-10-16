@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use playwright_rs::expect;
+use playwright_rs::{SelectOption, expect};
 
 use crate::apps::{AppUnderTest, Case, CaseCtx, CaseFuture};
 use crate::support::seed;
@@ -34,15 +34,31 @@ impl AppUnderTest for AdminApp {
                 name: "pages-render",
                 run: case_pages_render,
             },
+            Case {
+                name: "logout",
+                run: case_logout,
+            },
+            Case {
+                name: "auth-negatives",
+                run: case_auth_negatives,
+            },
+            Case {
+                name: "product-crud",
+                run: case_product_crud,
+            },
+            Case {
+                name: "category-post-crud",
+                run: case_category_post_crud,
+            },
         ]
     }
 }
 
-/// Unauthenticated `/` must land on the login form (this case runs first, in a
-/// fresh browser context).
+/// Unauthenticated `/` must land on the login form.
 fn case_login_page<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     Box::pin(async move {
-        ctx.goto("/").await?;
+        logout_if_logged_in(ctx).await?;
+        ctx.goto_for("admin", "/").await?;
         anyhow::ensure!(
             !dashboard_visible(ctx).await?,
             "expected to be logged out, but the dashboard rendered"
@@ -90,7 +106,7 @@ fn case_pages_render<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
         let mut problems = Vec::new();
         for path in ["/", "/product", "/post-category", "/post", "/settings"] {
             ctx.clear_browser_errors();
-            ctx.goto(path).await?;
+            ctx.goto_for("admin", path).await?;
             let mut page_problems: Vec<String> = ctx
                 .console_errors()
                 .into_iter()
@@ -112,10 +128,197 @@ fn case_pages_render<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     })
 }
 
+/// Logging out returns to the login form.
+fn case_logout<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        login(ctx).await?;
+        ctx.page.locator("text=Log Out").click(None).await?;
+        wait_at_least(ctx, "text=Log in", 1, 15).await?;
+        anyhow::ensure!(
+            !dashboard_visible(ctx).await?,
+            "still authenticated after logging out"
+        );
+        Ok(())
+    })
+}
+
+/// Wrong credentials are rejected and protected routes/endpoints stay closed.
+fn case_auth_negatives<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        logout_if_logged_in(ctx).await?;
+
+        ctx.goto_for("admin", "/").await?;
+        ctx.page
+            .locator("input[name=username]")
+            .fill(seed::ADMIN_USERNAME, None)
+            .await?;
+        ctx.page
+            .locator("input[name=password]")
+            .fill("definitely-not-the-password", None)
+            .await?;
+        submit(ctx, "Login").await?;
+        wait_at_least(ctx, "text=Login-password pair not found", 1, 15).await?;
+
+        // A protected route bounces to the login form.
+        ctx.goto_for("admin", "/product").await?;
+        wait_url(ctx, 15, |url| url.ends_with("/login")).await?;
+
+        // The `/api` server-fn router is default-deny while logged out
+        // (`server_fn_private` returns 404 before dispatching).
+        let status: u16 = ctx
+            .page
+            .evaluate(
+                "async () => { const r = await fetch('/api/get_stats', { method: 'POST' }); \
+                 return r.status; }",
+                None::<&()>,
+            )
+            .await?;
+        anyhow::ensure!(
+            status == 404,
+            "unauthenticated /api call returned {status}, want 404"
+        );
+        Ok(())
+    })
+}
+
+/// Create a product, edit it and delete it through the admin UI.
+fn case_product_crud<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        login(ctx).await?;
+
+        ctx.goto_for("admin", "/product/new").await?;
+        ctx.page
+            .locator("input[name=slug]")
+            .fill("e2e-crud-product", None)
+            .await?;
+        ctx.page
+            .locator("input[name=meta_title]")
+            .fill("E2E CRUD Product", None)
+            .await?;
+        ctx.page
+            .locator("input[name=meta_description]")
+            .fill("E2E CRUD description", None)
+            .await?;
+        ctx.page
+            .locator("input[name=h1]")
+            .fill("E2E CRUD H1", None)
+            .await?;
+        submit(ctx, "Create product draft").await?;
+
+        // On success the create action navigates to `/product/{id}` and the
+        // edit form (its submit button) appears.
+        wait_at_least(
+            ctx,
+            "input[type=submit][value=\"Submit product data\"]",
+            1,
+            20,
+        )
+        .await?;
+        let id = ctx
+            .page
+            .url()
+            .rsplit('/')
+            .next()
+            .unwrap_or_default()
+            .to_string();
+        anyhow::ensure!(
+            !id.is_empty(),
+            "could not read the new product id from the URL"
+        );
+
+        // Edit.
+        ctx.page
+            .locator("input[name=h1]")
+            .fill("E2E CRUD H1 (edited)", None)
+            .await?;
+        submit(ctx, "Submit product data").await?;
+        wait_at_least(ctx, ".Alert.Success", 1, 20).await?;
+
+        ctx.goto_for("admin", "/product").await?;
+        expect(ctx.page.locator("text=E2E CRUD H1 (edited)"))
+            .to_be_visible()
+            .await?;
+
+        // Delete (the danger-zone input must match the slug to enable submit).
+        ctx.goto_for("admin", &format!("/product/{id}")).await?;
+        ctx.page
+            .locator(
+                "fieldset:has-text(\"Danger zone\") input:not([type=submit]):not([type=hidden])",
+            )
+            .fill("e2e-crud-product", None)
+            .await?;
+        submit(ctx, "Delete product").await?;
+        wait_url(ctx, 20, |url| url.ends_with("/product")).await?;
+
+        ctx.goto_for("admin", "/product").await?;
+        expect(ctx.page.locator("text=E2E CRUD H1 (edited)"))
+            .to_have_count(0)
+            .await?;
+        Ok(())
+    })
+}
+
+/// Create a category, then a post that references it, and see it listed.
+fn case_category_post_crud<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        login(ctx).await?;
+
+        ctx.goto_for("admin", "/post-category/new").await?;
+        ctx.page
+            .locator("input[name=slug]")
+            .fill("e2e-cat-crud", None)
+            .await?;
+        ctx.page
+            .locator("input[name=name]")
+            .fill("E2E Cat", None)
+            .await?;
+        submit(ctx, "Create category").await?;
+        wait_url(ctx, 20, |url| {
+            url.contains("/post-category/") && !url.ends_with("/new")
+        })
+        .await?;
+
+        ctx.goto_for("admin", "/post/create").await?;
+        ctx.page
+            .locator("select[name=category_id]")
+            .select_option(SelectOption::Label("E2E Cat".into()), None)
+            .await?;
+        ctx.page
+            .locator("input[name=slug]")
+            .fill("e2e-post-crud", None)
+            .await?;
+        ctx.page
+            .locator("input[name=meta_title]")
+            .fill("E2E CRUD Post", None)
+            .await?;
+        ctx.page
+            .locator("input[name=meta_description]")
+            .fill("E2E CRUD post description", None)
+            .await?;
+        ctx.page
+            .locator("input[name=h1]")
+            .fill("E2E CRUD Post H1", None)
+            .await?;
+        submit(ctx, "Create post draft").await?;
+        wait_url(ctx, 20, |url| {
+            url.contains("/post/") && !url.ends_with("/create")
+        })
+        .await?;
+
+        ctx.goto_for("admin", "/post").await?;
+        expect(ctx.page.locator("text=E2E CRUD Post H1"))
+            .to_be_visible()
+            .await?;
+        Ok(())
+    })
+}
+
+// --- helpers -------------------------------------------------------------
+
 /// Log in through the form, or no-op when the session is already established
 /// (cases share one browser context, so the cookie survives across cases).
-async fn login(ctx: &CaseCtx) -> anyhow::Result<()> {
-    ctx.goto("/").await?;
+pub(crate) async fn login(ctx: &CaseCtx) -> anyhow::Result<()> {
+    ctx.goto_for("admin", "/").await?;
     if dashboard_visible(ctx).await? {
         return Ok(());
     }
@@ -142,6 +345,22 @@ async fn login(ctx: &CaseCtx) -> anyhow::Result<()> {
     )
 }
 
+async fn logout_if_logged_in(ctx: &CaseCtx) -> anyhow::Result<()> {
+    ctx.goto_for("admin", "/").await?;
+    if dashboard_visible(ctx).await? {
+        ctx.page.locator("text=Log Out").click(None).await?;
+        wait_at_least(ctx, "text=Log in", 1, 15).await?;
+    }
+    Ok(())
+}
+
+/// Click a `<input type=submit>` by its `value`.
+async fn submit(ctx: &CaseCtx, value: &str) -> anyhow::Result<()> {
+    let selector = format!("input[type=submit][value={value:?}]");
+    ctx.page.locator(selector).click(None).await?;
+    Ok(())
+}
+
 /// The dashboard's own `<h1>` (the nav also has a "Dashboard" link).
 async fn dashboard_visible(ctx: &CaseCtx) -> anyhow::Result<bool> {
     let h1 = ctx.page.locator("h1");
@@ -151,6 +370,27 @@ async fn dashboard_visible(ctx: &CaseCtx) -> anyhow::Result<bool> {
         return Ok(false);
     }
     Ok(h1.inner_text().await?.trim() == "Dashboard")
+}
+
+/// Poll until `selector` matches at least `n` elements (`count` is not strict).
+async fn wait_at_least(ctx: &CaseCtx, selector: &str, n: usize, secs: u64) -> anyhow::Result<()> {
+    for _ in 0..secs * 4 {
+        if ctx.page.locator(selector).count().await.unwrap_or(0) >= n {
+            return Ok(());
+        }
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+    anyhow::bail!("{selector} never reached {n} element(s) within {secs}s")
+}
+
+async fn wait_url(ctx: &CaseCtx, secs: u64, pred: impl Fn(&str) -> bool) -> anyhow::Result<()> {
+    for _ in 0..secs * 4 {
+        if pred(&ctx.page.url()) {
+            return Ok(());
+        }
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+    anyhow::bail!("URL never matched (currently {})", ctx.page.url())
 }
 
 /// Poll until `selector` is no longer visible (best effort after `secs`).
