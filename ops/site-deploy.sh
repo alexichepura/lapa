@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 set -o allexport; source .env; set +o allexport
 
+stylance .
 LEPTOS_BIN_TARGET_TRIPLE=$TARGET cargo leptos build --release -p $SITE_BIN --features="prod"
 precompress --brotli --deflate --gzip --zstd target/site/pkg
 

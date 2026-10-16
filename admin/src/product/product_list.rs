@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::util::{AlertDanger, DateTimeStrings, Loading, datetime_to_strings};
 
+stylance::import_crate_style!(style, "src/listing.module.css");
+
 #[component]
 pub fn ProductList() -> impl IntoView {
     let products = Resource::new_blocking(|| (), move |_| get_products());
@@ -25,7 +27,7 @@ pub fn ProductList() -> impl IntoView {
                 <A href="/product/new">Create</A>
             </small>
         </h1>
-        <ul class="Card Listing">
+        <ul class=format!("{} {}", style::Card, style::Listing)>
             <Suspense fallback=move || {
                 view! { <Loading /> }
             }>{suspended}</Suspense>
@@ -56,8 +58,8 @@ pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
         None => DateTimeStrings::draft(),
     };
     let class = match product.is_published {
-        true => "published",
-        false => "not-published",
+        true => style::published,
+        false => style::not_published,
     };
     // let hero_view = match product.hero {
     //     Some(id) => {
@@ -66,13 +68,13 @@ pub fn ProductListItem(product: ProductListItem) -> impl IntoView {
     //     None => Either::Right(view! { <div title="No post hero">?</div> }),
     // };
     view! {
-        <li class="PostListItem">
+        <li class=style::PostListItem>
             <A href=format!("/product/{}", product.id)>
-                <div title="Publish at" class=format!("PostListItem-status {}", class)>
+                <div title="Publish at" class=format!("{} {}", style::PostListItem_status, class)>
                     {publish_at_view.utc}
                 </div>
                 <span title="Post title">{product.h1}</span>
-                <div title="Created at" class="PostListItem-created">
+                <div title="Created at" class=style::PostListItem_created>
                     {created.utc}
                 </div>
             </A>

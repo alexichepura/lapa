@@ -17,6 +17,8 @@ use crate::{
     settings::{Settings, SettingsCx},
 };
 
+stylance::import_crate_style!(style, "src/app.module.css");
+
 #[component]
 pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
     provide_meta_context();
@@ -33,7 +35,7 @@ pub fn App(user: Option<User>, settings: SettingsCx) -> impl IntoView {
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)
-            class:RoutingProgress
+            attr:class=style::RoutingProgress
         />
         <Router set_is_routing>
             <AdminRoutes user_signal />

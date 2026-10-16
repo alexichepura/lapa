@@ -10,6 +10,17 @@ use crate::{
     util::{AlertDanger, Loading},
 };
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    images,
+    "src/images.module.css"
+);
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    grid,
+    "src/grid.module.css"
+);
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProductImageData {
     pub id: String,
@@ -153,7 +164,7 @@ fn ProductImagesView(
 
                 <FormFooter action=order_action submit_text="Save order" />
             </ActionForm>
-            <div class="images">
+            <div class=images::images>
                 {no_images}
                 <For
                     each=move || images_sorted()
@@ -163,7 +174,7 @@ fn ProductImagesView(
 
             </div>
         </fieldset>
-        <dialog class="Grid-fluid-2" node_ref=dialog_element>
+        <dialog class=grid::Grid_fluid_2 node_ref=dialog_element>
             {edit_view}
         </dialog>
     }

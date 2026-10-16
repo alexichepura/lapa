@@ -5,6 +5,12 @@ use leptos_router::hooks::use_navigate;
 use super::ProductError;
 use crate::form::{FormFooter, Input};
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    page,
+    "src/page.module.css"
+);
+
 #[component]
 pub fn ProductNew() -> impl IntoView {
     let action = ServerAction::<ProductCreate>::new();
@@ -24,7 +30,7 @@ pub fn ProductNew() -> impl IntoView {
     });
     view! {
         <Title text=move || format!("Product create") />
-        <section class="PostPage">
+        <section class=page::PostPage>
             <ActionForm action=action>
                 <fieldset prop:disabled=move || pending()>
                     <legend>Data</legend>

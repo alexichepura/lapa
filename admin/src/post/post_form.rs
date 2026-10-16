@@ -12,6 +12,17 @@ use crate::{
     },
 };
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    page,
+    "src/page.module.css"
+);
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    grid,
+    "src/grid.module.css"
+);
+
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PostFormData {
     pub id: String,
@@ -57,7 +68,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
     let id_value = post.id.clone();
     view! {
         <Title text=move || format!("Post: {}", title()) />
-        <section class="PostPage">
+        <section class=page::PostPage>
             <header>
                 <div>
                     <h1>Post</h1>
@@ -80,7 +91,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
                 <input type="hidden" name="id" value=id_value />
                 <fieldset prop:disabled=move || pending()>
                     <legend>Data</legend>
-                    <div class="Grid-fluid-2">
+                    <div class=grid::Grid_fluid_2>
                         <div>
                             <label>
                                 <div>Slug</div>
@@ -154,7 +165,7 @@ pub fn PublishAt(
     });
 
     view! {
-        <div class="Grid-fluid-2">
+        <div class=grid::Grid_fluid_2>
             <Checkbox
                 label="Publish"
                 bind=publish_at_rw_signal

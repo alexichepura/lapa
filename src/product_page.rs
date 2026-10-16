@@ -14,6 +14,8 @@ use crate::{
     util::{AlertDanger, Loading},
 };
 
+stylance::import_crate_style!(style, "src/product_page.module.css");
+
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
 pub struct ProductParams {
     slug: String,
@@ -118,7 +120,7 @@ pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
         <Meta property="og:description" content=product.meta_description.clone() />
         {hero_og}
         <h1>{product.h1}</h1>
-        <div class="product-images">
+        <div class=style::product_images>
             <For
                 each=move || product.images.clone()
                 key=|image| image.id.clone()

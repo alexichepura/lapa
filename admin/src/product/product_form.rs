@@ -13,6 +13,17 @@ use crate::{
     },
 };
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    page,
+    "src/page.module.css"
+);
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    grid,
+    "src/grid.module.css"
+);
+
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProductFormData {
     pub id: String,
@@ -58,7 +69,7 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
     };
     view! {
         <Title text=move || format!("Product: {}", meta_title()) />
-        <section class="PostPage">
+        <section class=page::PostPage>
             <header>
                 <div>
                     <h1>Product</h1>
@@ -81,7 +92,7 @@ pub fn ProductForm(product: ProductFormData) -> impl IntoView {
                 <input type="hidden" name="id" value=id_value />
                 <fieldset prop:disabled=move || pending()>
                     <legend>Data</legend>
-                    <div class="Grid-fluid-2">
+                    <div class=grid::Grid_fluid_2>
                         <div>
                             <label>
                                 <div>Slug</div>
@@ -157,7 +168,7 @@ pub fn PublishAt(
     });
 
     view! {
-        <div class="Grid-fluid-2">
+        <div class=grid::Grid_fluid_2>
             <Checkbox
                 label="Publish"
                 bind=publish_at_rw_signal

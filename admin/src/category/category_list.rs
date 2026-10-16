@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::util::{AlertDanger, Loading, datetime_to_strings};
 
+stylance::import_crate_style!(#[allow(dead_code)] style, "src/listing.module.css");
+
 #[component]
 pub fn CategoryList() -> impl IntoView {
     let categories = Resource::new_blocking(|| (), move |_| get_categories());
@@ -37,7 +39,7 @@ pub fn CategoryListItems(categories: Vec<CategoryListItem>) -> impl IntoView {
         Either::Left(view! { <p>"0 categories"</p> })
     } else {
         Either::Right(view! {
-            <ul class="Card Listing">
+            <ul class=format!("{} {}", style::Card, style::Listing)>
                 {categories
                     .into_iter()
                     .map(|category| {

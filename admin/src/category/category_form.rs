@@ -3,6 +3,12 @@ use crate::form::{FormFooter, Input};
 use leptos::prelude::*;
 use serde::{Deserialize, Serialize};
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    grid,
+    "src/grid.module.css"
+);
+
 #[derive(Default, Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CategoryFormData {
     pub id: String,
@@ -19,7 +25,7 @@ pub fn CategoryForm(form: CategoryFormData) -> impl IntoView {
             <fieldset prop:disabled=move || pending()>
                 <legend>Data</legend>
                 <input type="hidden" name="id" value=form.id />
-                <div class="Grid-fluid-2">
+                <div class=grid::Grid_fluid_2>
                     <Input name="slug" label="Slug" value=form.slug />
                     <Input name="name" label="Name" value=form.name />
                 </div>

@@ -1,0 +1,7 @@
+.RoutingProgress {
+	position: fixed;
+	opacity: 0.5;
+	top: 0;
+	width: 100vw;
+	transform: translateY(-50%);
+}

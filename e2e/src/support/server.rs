@@ -119,6 +119,17 @@ impl Server {
         let addr = format!("127.0.0.1:{port}");
         let base_url = format!("http://{addr}");
 
+        // Regenerate the hashed CSS module bundle so the served stylesheet
+        // matches the class names `stylance::import_crate_style!` resolved at
+        // compile time. Best-effort: the bundle is committed, so a missing
+        // `stylance` binary is not fatal.
+        let stylance_target = if cfg.project == "admin" { "admin" } else { "." };
+        let _ = Command::new("stylance")
+            .arg(stylance_target)
+            .current_dir(cfg.server_dir)
+            .status()
+            .await;
+
         let mut cmd = Command::new("sh");
         // `--project <name>`: the workspace contains two Leptos apps (`site` and
         // `admin`), so cargo-leptos cannot pick one implicitly.

@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::util::{AlertDanger, Loading};
 
+stylance::import_crate_style!(style, "src/post/post_list.module.css");
+
 #[component]
 pub fn PostList() -> impl IntoView {
     let posts = Resource::new_blocking(|| (), move |_| get_posts());
@@ -37,7 +39,7 @@ pub fn PostListView(posts: Vec<PostListItem>) -> impl IntoView {
                 .collect_view(),
         )
     };
-    view! { <div class="ProductList">{list}</div> }
+    view! { <div class=style::ProductList>{list}</div> }
 }
 
 #[component]

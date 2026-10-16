@@ -1,6 +1,8 @@
 use chrono::{DateTime, Duration, FixedOffset, Local, ParseResult};
 use leptos::prelude::*;
 
+stylance::import_crate_style!(style, "src/util.module.css");
+
 #[component]
 pub fn Loading() -> impl IntoView {
     view! { <p>Loading...</p> }
@@ -8,11 +10,11 @@ pub fn Loading() -> impl IntoView {
 
 #[component]
 pub fn AlertDanger(text: String) -> impl IntoView {
-    view! { <div class="Alert Danger">{text}</div> }
+    view! { <div class=format!("{} {}", style::Alert, style::Danger)>{text}</div> }
 }
 #[component]
 pub fn AlertSuccess() -> impl IntoView {
-    view! { <div class="Alert Success">Success</div> }
+    view! { <div class=format!("{} {}", style::Alert, style::Success)>Success</div> }
 }
 
 pub fn datetime_to_string(datetime: DateTime<FixedOffset>) -> String {

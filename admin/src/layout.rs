@@ -3,6 +3,8 @@ use leptos_router::components::{A, Outlet};
 
 use crate::auth::{Logout, User};
 
+stylance::import_crate_style!(style, "src/layout.module.css");
+
 #[component]
 pub fn Layout(user: User) -> impl IntoView {
     let el_blur: NodeRef<Nav> = NodeRef::new();
@@ -11,14 +13,14 @@ pub fn Layout(user: User) -> impl IntoView {
         let _ = el_blur.get().expect("<nav> to exist").blur();
     };
     view! {
-        <div class="admin">
+        <div class=style::admin>
             <header>
-                <div class="logo">Admin</div>
+                <div class=style::logo>Admin</div>
                 <span>{user.username}</span>
                 <Logout />
             </header>
-            <div class="menu" tabindex="0">
-                <a class="toggle" href="#" tabindex="0">
+            <div class=style::menu tabindex="0">
+                <a class=style::toggle href="#" tabindex="0">
                     Menu
                 </a>
                 <nav tabindex="1" on:click=blur node_ref=el_blur>

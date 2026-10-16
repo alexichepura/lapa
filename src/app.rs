@@ -4,6 +4,8 @@ use leptos_router::components::{A, Router, RoutingProgress};
 
 use crate::{routes::FrontRoutes, settings::SettingsCx};
 
+stylance::import_crate_style!(style, "src/app.module.css");
+
 #[component]
 pub fn App(settings: SettingsCx) -> impl IntoView {
     provide_meta_context();
@@ -15,7 +17,7 @@ pub fn App(settings: SettingsCx) -> impl IntoView {
         <RoutingProgress
             is_routing
             max_time=std::time::Duration::from_millis(250)
-            class:RoutingProgress
+            attr:class=style::RoutingProgress
         />
         <Router set_is_routing>
             <header>

@@ -7,6 +7,12 @@ use crate::{
     util::{AlertDanger, Loading},
 };
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    grid,
+    "src/grid.module.css"
+);
+
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
 pub struct ProductParams {
     id: String,
@@ -98,7 +104,7 @@ pub fn ProductPageView(page: ProductPageData) -> impl IntoView {
     view! {
         <ProductForm product=page.form />
         {edit_view}
-        <div class="Grid-fluid-2">
+        <div class=grid::Grid_fluid_2>
             <ProductDeleteForm id=id.clone() slug />
         </div>
     }

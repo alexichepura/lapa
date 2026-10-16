@@ -4,6 +4,17 @@ use serde::{Deserialize, Serialize};
 use crate::content::ContentImageUploadAction;
 use crate::form::{FormFooter, Input};
 
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    grid,
+    "src/grid.module.css"
+);
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    images,
+    "src/images.module.css"
+);
+
 #[component]
 pub fn ContentImageEditor(
     content_id: String,
@@ -120,7 +131,7 @@ pub fn ContentImageUpload(content_id: String, set_image_id: WriteSignal<String>)
     view! {
         <fieldset prop:disabled=move || pending()>
             <legend>Image upload</legend>
-            <div class="Grid-fluid-2">
+            <div class=grid::Grid_fluid_2>
                 <div>
                     <label>
                         <div>Select image</div>
@@ -148,5 +159,5 @@ pub fn ImageUploadPreview(obj_url: ReadSignal<Option<String>>) -> impl IntoView 
         Some(url) => Either::Left(view! { <img src=url /> }),
         None => Either::Right(view! { <p>Upload preview</p> }),
     };
-    view! { <div class="ImageUploadPreview">{view}</div> }
+    view! { <div class=images::ImageUploadPreview>{view}</div> }
 }

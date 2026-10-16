@@ -1,5 +1,7 @@
 use leptos::prelude::*;
 
+stylance::import_crate_style!(style, "src/util.module.css");
+
 #[component]
 pub fn Loading() -> impl IntoView {
     view! { <p>Loading...</p> }
@@ -7,11 +9,11 @@ pub fn Loading() -> impl IntoView {
 
 #[component]
 pub fn AlertDanger(text: String) -> impl IntoView {
-    view! { <p class="AlertDanger">{text}</p> }
+    view! { <p class=style::AlertDanger>{text}</p> }
 }
 #[component]
 pub fn AlertSuccess() -> impl IntoView {
-    view! { <p class="AlertSuccess">Success</p> }
+    view! { <p class=style::AlertSuccess>Success</p> }
 }
 
 #[component]

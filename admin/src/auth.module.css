@@ -1,0 +1,5 @@
+.login-card {
+	width: min(100% - 1rem, 20rem);
+	margin-inline: auto;
+	margin-block-start: 1rem;
+}
