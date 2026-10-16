@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     form::UploadFooter,
-    upload::{ImageUploadError, InputImage, MAX_IMAGE_BYTES},
+    upload::{ImageUploadError, InputImage},
 };
 
 stylance::import_crate_style!(
@@ -95,6 +95,7 @@ type ImageUploadResult = Result<ImageResult, ImageUploadError>;
 #[server(ImageUpload, "/api", input = MultipartFormData)]
 pub async fn upload_img(data: MultipartData) -> Result<ImageUploadResult, ServerFnError> {
     use crate::server::{db, serverr_400, use_image_config};
+    use crate::upload::MAX_IMAGE_BYTES;
     let db = db::use_db().await?;
     let media_config = use_image_config()?;
 

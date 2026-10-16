@@ -4,7 +4,7 @@ use leptos::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::upload::{ImageUploadError, MAX_IMAGE_BYTES};
+use crate::upload::ImageUploadError;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ImageResult {
@@ -16,6 +16,7 @@ pub async fn content_image_upload(
     data: MultipartData,
 ) -> Result<Result<ImageResult, ImageUploadError>, ServerFnError> {
     use crate::server::{db, serverr_400, use_image_config};
+    use crate::upload::MAX_IMAGE_BYTES;
     let db = db::use_db().await?;
     let media_config = use_image_config()?;
 
