@@ -1,6 +1,7 @@
 //! Registry of the applications under test. Each frontend (`site` now, `admin`
 //! later) is one module implementing [`AppUnderTest`] and contributing cases.
 
+pub mod admin;
 pub mod site;
 
 use std::future::Future;
@@ -52,6 +53,36 @@ impl CaseCtx {
         // captured DOM is stable.
         tokio::time::sleep(std::time::Duration::from_millis(500)).await;
         Ok(())
+    }
+
+    /// Like [`goto`](Self::goto) but also returns the HTTP status (e.g. to
+    /// assert a 404 page).
+    pub async fn goto_status(&self, path: &str) -> Result<u16> {
+        let response = self.page.goto(&self.url(path), None).await?;
+        self.page.wait_for_load_state(None).await?;
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+        Ok(response.map(|r| r.status()).unwrap_or(0))
+    }
+
+    /// Poll until the first element matching `selector` is a loaded `<img>`
+    /// (the CDN resizes on first request, so it can take a moment).
+    pub async fn wait_for_image(&self, selector: &str, secs: u64) -> Result<()> {
+        let expr = format!(
+            "() => {{ const i = document.querySelector({selector:?}); \
+             return !!i && i.complete && i.naturalWidth > 0; }}"
+        );
+        for _ in 0..secs * 4 {
+            let ok: bool = self
+                .page
+                .evaluate(&expr, None::<&()>)
+                .await
+                .unwrap_or(false);
+            if ok {
+                return Ok(());
+            }
+            tokio::time::sleep(std::time::Duration::from_millis(250)).await;
+        }
+        anyhow::bail!("image {selector:?} never loaded within {secs}s")
     }
 
     pub async fn snapshot(&self, name: &str) -> Result<()> {

@@ -10,6 +10,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1"
+bcrypt = "0.19"
 clap = { version = "4", features = ["derive"] }
 libc = "0.2"
 playwright-rs = { version = "0.20", features = ["screenshot-diff", "trace"] }

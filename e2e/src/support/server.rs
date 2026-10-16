@@ -91,8 +91,14 @@ fn is_warning(line: &str) -> bool {
 }
 
 pub struct ServerConfig<'a> {
+    /// Directory passed to `cargo leptos` (the workspace root).
     pub server_dir: &'a Path,
+    /// Leptos project to serve (`site` or `admin`).
+    pub project: &'a str,
     pub database_url: &'a str,
+    /// Where uploaded originals / converted derivatives are read from.
+    pub image_upload_path: &'a str,
+    pub image_convert_path: &'a str,
     pub timeout: Duration,
     pub log_path: Option<&'a Path>,
 }
@@ -112,15 +118,18 @@ impl Server {
         let base_url = format!("http://{addr}");
 
         let mut cmd = Command::new("sh");
-        // `--project site`: the workspace also contains the `admin` Leptos app,
-        // so cargo-leptos cannot pick one implicitly.
-        cmd.arg("-c").arg("exec cargo leptos serve --project site");
+        // `--project <name>`: the workspace contains two Leptos apps (`site` and
+        // `admin`), so cargo-leptos cannot pick one implicitly.
+        cmd.arg("-c")
+            .arg(format!("exec cargo leptos serve --project {}", cfg.project));
         cmd.current_dir(cfg.server_dir);
         // Lapa reads `pg.url` through the `config` crate's `__`-separated env;
         // `dotenv()` does not override an existing variable, so this wins over
         // the repo's `.env`.
         cmd.env("PG__URL", cfg.database_url);
         cmd.env("LEPTOS_SITE_ADDR", &addr);
+        cmd.env("IMAGE_UPLOAD_PATH", cfg.image_upload_path);
+        cmd.env("IMAGE_CONVERT_PATH", cfg.image_convert_path);
         cmd.env(
             "RUST_LOG",
             std::env::var("RUST_LOG").unwrap_or_else(|_| "info".to_string()),

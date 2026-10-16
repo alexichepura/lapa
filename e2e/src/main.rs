@@ -2,7 +2,7 @@
 //!
 //! Subcommands:
 //!   install  download the Chromium build bundled with the Playwright driver
-//!   serve    boot Postgres + the Leptos site, then sit idle
+//!   serve    boot Postgres + a Leptos app, then sit idle
 //!   test     boot the whole stack and run the smoke suite
 //!   update   like `test` but rewrites screenshot baselines
 //!   shot     screenshot an arbitrary URL with a throwaway browser
@@ -13,8 +13,10 @@ mod support;
 use std::path::PathBuf;
 
 use anyhow::Result;
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 
+use apps::AppUnderTest;
+use apps::admin::AdminApp;
 use apps::site::SiteApp;
 
 #[derive(Parser)]
@@ -24,20 +26,35 @@ struct Cli {
     command: Command,
 }
 
+#[derive(Clone, Copy, Debug, ValueEnum)]
+enum AppName {
+    Site,
+    Admin,
+}
+
 #[derive(Subcommand)]
 enum Command {
     /// Install the Chromium browser required by the bundled Playwright driver.
     Install,
-    /// Start Postgres + the site server and keep them running.
-    Serve,
+    /// Start Postgres + the app server and keep them running.
+    Serve {
+        /// Which Leptos app to serve.
+        #[arg(long, value_enum, default_value_t = AppName::Site)]
+        app: AppName,
+    },
     /// Run the end-to-end suite against a freshly booted stack.
     Test {
+        /// Which Leptos app to exercise.
+        #[arg(long, value_enum, default_value_t = AppName::Site)]
+        app: AppName,
         /// Only run cases whose name contains this substring.
         #[arg(long)]
         filter: Option<String>,
     },
     /// Regenerate screenshot baselines.
     Update {
+        #[arg(long, value_enum, default_value_t = AppName::Site)]
+        app: AppName,
         #[arg(long)]
         filter: Option<String>,
     },
@@ -60,34 +77,40 @@ async fn main() -> Result<()> {
             playwright_rs::install_browsers(Some(&["chromium"])).await?;
             println!("done");
         }
-        Command::Serve => {
-            let session = support::harness::Session::boot(&SiteApp).await?;
-            session.run_until_interrupt().await?;
-        }
-        Command::Test { filter } => {
-            let session = support::harness::Session::boot(&SiteApp).await?;
-            let report = session.run(&SiteApp, filter.as_deref(), false).await?;
-            let failed = report.failed();
-            // Drop the session (stops server, browser and containers) before exiting.
-            drop(session);
-            if failed {
-                std::process::exit(1);
-            }
-        }
-        Command::Update { filter } => {
-            let session = support::harness::Session::boot(&SiteApp).await?;
-            let report = session.run(&SiteApp, filter.as_deref(), true).await?;
-            let failed = report.failed();
-            drop(session);
-            if failed {
-                std::process::exit(1);
-            }
-        }
+        Command::Serve { app } => match app {
+            AppName::Site => run_serve(&SiteApp).await?,
+            AppName::Admin => run_serve(&AdminApp).await?,
+        },
+        Command::Test { app, filter } => match app {
+            AppName::Site => run_test(&SiteApp, filter.as_deref(), false).await?,
+            AppName::Admin => run_test(&AdminApp, filter.as_deref(), false).await?,
+        },
+        Command::Update { app, filter } => match app {
+            AppName::Site => run_test(&SiteApp, filter.as_deref(), true).await?,
+            AppName::Admin => run_test(&AdminApp, filter.as_deref(), true).await?,
+        },
         Command::Shot { url, out } => {
             support::browser::shot(&url, &out).await?;
             println!("saved {}", out.display());
         }
     }
 
+    Ok(())
+}
+
+async fn run_serve<A: AppUnderTest>(app: &A) -> Result<()> {
+    let session = support::harness::Session::boot(app).await?;
+    session.run_until_interrupt().await
+}
+
+async fn run_test<A: AppUnderTest>(app: &A, filter: Option<&str>, update: bool) -> Result<()> {
+    let session = support::harness::Session::boot(app).await?;
+    let report = session.run(app, filter, update).await?;
+    let failed = report.failed();
+    // Drop the session (stops server, browser and containers) before exiting.
+    drop(session);
+    if failed {
+        std::process::exit(1);
+    }
     Ok(())
 }

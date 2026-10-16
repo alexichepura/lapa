@@ -54,10 +54,24 @@ impl Session {
         std::fs::create_dir_all(&artifacts).ok();
         let log_path = artifacts.join("server.log");
 
+        // Serve uploads/derivatives out of the artifacts dir instead of the
+        // repo's `image_upload/`/`image_convert/`, so runs do not litter the
+        // working tree.
+        let image_upload = artifacts.join("image_upload");
+        let image_convert = artifacts.join("image_convert");
+        for sub in ["content", "product"] {
+            std::fs::create_dir_all(image_convert.join(sub)).ok();
+        }
+        let image_upload_path = image_upload.to_string_lossy().to_string();
+        let image_convert_path = image_convert.to_string_lossy().to_string();
+
         let server_dir = app.server_dir();
         let server = Server::start(ServerConfig {
             server_dir: &server_dir,
+            project: app.name(),
             database_url: &infra.database_url,
+            image_upload_path: &image_upload_path,
+            image_convert_path: &image_convert_path,
             timeout: Duration::from_secs(900),
             log_path: Some(&log_path),
         })
@@ -66,7 +80,7 @@ impl Session {
 
         // The server only connects lazily; apply the schema + seed now so the
         // first request already sees the fixture rows.
-        seed::apply(&infra.database_url).await?;
+        seed::apply(&infra.database_url, &image_upload).await?;
         println!("seeded deterministic fixtures");
 
         let browser = browser::launch().await?;
