@@ -1,7 +1,8 @@
 //! Deterministic fixtures. Fixed ids and timestamps keep screenshots stable.
 //!
-//! Lapa has no migration runner: the production flow is `psql < schema.sql`
-//! (see the README), so the harness applies `schema.sql` and then a small seed.
+//! Production applies the refinery migrations in `db/migrations` via
+//! `cargo cli migrate` (see the README); the harness applies the equivalent
+//! `schema.sql` directly and then a small seed.
 
 use std::path::Path;
 

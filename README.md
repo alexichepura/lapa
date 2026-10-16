@@ -55,7 +55,7 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 - project
   - SEO site
   - admin dashboard
-  - CLI with clap: settings-init, user-add
+  - CLI with clap: migrate, settings-init, user-add
   - ops scripts: build, upload, run (site, admin, cli)
 - site
   - SSR + SPA hydrated
@@ -117,10 +117,22 @@ Simplified with postgres user.
 ```sh
 psql postgres
 # create database lapa;
-psql -h 127.0.0.1 -U postgres -p 5432 -d lapa < "schema.sql"
 # .env
 PG__URL="postgresql://postgres:postgres@localhost:5432/lapa"
 ```
+
+### Migrations
+
+The schema is managed with [refinery](https://docs.rs/refinery) migrations in
+`db/migrations/`, embedded in the `cli` binary. `db/migrations/V1__init.sql`
+mirrors `schema.sql` (kept for Cornucopia codegen, see above).
+
+```sh
+cargo cli migrate
+```
+
+Add a migration by creating the next file (e.g. `db/migrations/V2__add_thing.sql`)
+and running `cargo cli migrate` again.
 
 ### Init
 

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Database schema migrations with [refinery](https://docs.rs/refinery),
+  embedded in the `cli` binary and applied with `cargo cli migrate`
+  (`db/migrations/`, `db` crate). `V1__init.sql` mirrors `schema.sql`, which is
+  kept for Cornucopia codegen.
+
 ### Changed
 
 - Admin image uploads (product and content) now send the file as a real

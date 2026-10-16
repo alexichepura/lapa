@@ -35,7 +35,7 @@ opt-level = 'z'
 
 [workspace]
 resolver = "2"
-members = ["lib", "content", "image_config", "admin", "cli", "e2e"]
+members = ["lib", "content", "image_config", "admin", "cli", "db", "e2e"]
 # Keep `cargo build`/`test`/`clippy` at the root building only the root `site`
 # package (the previous behaviour); the heavy e2e harness is built explicitly
 # with `-p lapa-e2e` (see e2e/README.md).
@@ -46,6 +46,8 @@ cornucopia = { path = "./cornucopia" }
 lib = { path = "./lib" }
 content = { path = "./content" }
 image_config = { path = "./image_config" }
+db = { path = "./db" }
+refinery = { version = "0.9", features = ["tokio-postgres"] }
 axum = { version = "0.8", features = ["macros", "tracing"] }
 axum_session = { version = "0.21", default-features = false }
 axum_session_auth = { version = "0.21", default-features = false }
