@@ -188,7 +188,11 @@ cargo run -p lapa-e2e -- test --app integration  # cross-app: admin write -> sit
 cargo run -p lapa-e2e -- test --filter home
 cargo run -p lapa-e2e -- update           # regenerate screenshot baselines
 cargo run -p lapa-e2e -- serve            # keep the stack up for manual checks
+cargo run -p lapa-e2e -- test --features prod  # build with compression + ratelimit
 ```
+
+The suites also run in CI (`.github/workflows/e2e.yml`); CI sets
+`LAPA_E2E_SKIP_SNAPSHOTS=1` since only macOS baselines are committed.
 
 ## Notes on CSS
 

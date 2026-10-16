@@ -17,6 +17,7 @@ pub const HOME_TEXT: &str = "Welcome to the e2e home text.";
 
 /// Image ids (must not contain `_`: the CDN handler splits `<id>_<size>`).
 pub const PRODUCT_IMAGE_ID: &str = "e2e-product-image";
+pub const PRODUCT_IMAGE_ID_2: &str = "e2e-product-image-2";
 pub const CONTENT_IMAGE_ID: &str = "e2e-content-image";
 
 pub const ADMIN_USERNAME: &str = "e2e-admin";
@@ -67,7 +68,11 @@ fn write_image_fixtures(upload_dir: &Path) -> Result<()> {
     let fixture = Path::new(env!("CARGO_MANIFEST_DIR")).join("fixtures/tiny.png");
     let bytes = std::fs::read(&fixture)
         .with_context(|| format!("reading fixture {}", fixture.display()))?;
-    for (subdir, name) in [("product", PRODUCT_IMAGE_ID), ("content", CONTENT_IMAGE_ID)] {
+    for (subdir, name) in [
+        ("product", PRODUCT_IMAGE_ID),
+        ("product", PRODUCT_IMAGE_ID_2),
+        ("content", CONTENT_IMAGE_ID),
+    ] {
         let dir = upload_dir.join(subdir);
         std::fs::create_dir_all(&dir).with_context(|| format!("creating {}", dir.display()))?;
         std::fs::write(dir.join(format!("{name}.png")), &bytes)
@@ -92,7 +97,7 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "Content" (id, created_at, json) VALUES
     ('{PRODUCT_CONTENT_ID}', {TS},
-     '[{{"type":"p","children":[{{"text":"E2E product body."}}]}},{{"type":"img","id":"{CONTENT_IMAGE_ID}","alt":"E2E content image","caption":"E2E caption"}}]'),
+     '[{{"type":"p","children":[{{"text":"E2E product body."}}]}},{{"type":"img","id":"{CONTENT_IMAGE_ID}","alt":"E2E content image","caption":"E2E caption","children":[{{"text":""}}]}}]'),
     ('{POST_CONTENT_ID}', {TS},
      '[{{"type":"p","children":[{{"text":"E2E post body."}}]}}]'),
     ('{POST_DRAFT_CONTENT_ID}', {TS},
@@ -115,7 +120,8 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO "ProductImage"
     (id, created_at, alt, ext, is_hero, "order", product_id)
 VALUES
-    ('{PRODUCT_IMAGE_ID}', {TS}, 'E2E product image', 'png', true, 0, 'e2e-product')
+    ('{PRODUCT_IMAGE_ID}', {TS}, 'E2E product image', 'png', true, 0, 'e2e-product'),
+    ('{PRODUCT_IMAGE_ID_2}', {TS}, 'E2E product image 2', 'png', false, 1, 'e2e-product')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO "PostCategory"

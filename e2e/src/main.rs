@@ -44,6 +44,9 @@ enum Command {
     Serve {
         #[arg(long, value_enum, default_value_t = AppName::Site)]
         app: AppName,
+        /// Extra cargo features (e.g. `prod` for compression + ratelimit).
+        #[arg(long)]
+        features: Option<String>,
     },
     /// Run the end-to-end suite against a freshly booted stack.
     Test {
@@ -52,6 +55,9 @@ enum Command {
         /// Only run cases whose name contains this substring.
         #[arg(long)]
         filter: Option<String>,
+        /// Extra cargo features (e.g. `prod` for compression + ratelimit).
+        #[arg(long)]
+        features: Option<String>,
     },
     /// Regenerate screenshot baselines.
     Update {
@@ -59,6 +65,9 @@ enum Command {
         app: AppName,
         #[arg(long)]
         filter: Option<String>,
+        /// Extra cargo features (e.g. `prod` for compression + ratelimit).
+        #[arg(long)]
+        features: Option<String>,
     },
     /// Screenshot a URL with a throwaway browser (against an already running server).
     Shot { url: String, out: PathBuf },
@@ -101,9 +110,17 @@ async fn main() -> Result<()> {
             playwright_rs::install_browsers(Some(&["chromium"])).await?;
             println!("done");
         }
-        Command::Serve { app } => run_serve(app).await?,
-        Command::Test { app, filter } => run_test(app, filter.as_deref(), false).await?,
-        Command::Update { app, filter } => run_test(app, filter.as_deref(), true).await?,
+        Command::Serve { app, features } => run_serve(app, features.as_deref()).await?,
+        Command::Test {
+            app,
+            filter,
+            features,
+        } => run_test(app, filter.as_deref(), features.as_deref(), false).await?,
+        Command::Update {
+            app,
+            filter,
+            features,
+        } => run_test(app, filter.as_deref(), features.as_deref(), true).await?,
         Command::Shot { url, out } => {
             support::browser::shot(&url, &out).await?;
             println!("saved {}", out.display());
@@ -113,15 +130,20 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn run_serve(app: AppName) -> Result<()> {
-    let session = support::harness::Session::boot(&servers_for(app)).await?;
+async fn run_serve(app: AppName, features: Option<&str>) -> Result<()> {
+    let session = support::harness::Session::boot(&servers_for(app), features).await?;
     session.run_until_interrupt().await
 }
 
-async fn run_test(app: AppName, filter: Option<&str>, update: bool) -> Result<()> {
+async fn run_test(
+    app: AppName,
+    filter: Option<&str>,
+    features: Option<&str>,
+    update: bool,
+) -> Result<()> {
     let servers = servers_for(app);
     let suite = suite_for(app);
-    let session = support::harness::Session::boot(&servers).await?;
+    let session = support::harness::Session::boot(&servers, features).await?;
     let report = session.run(suite, filter, update).await?;
     let failed = report.failed();
     // Drop the session (stops servers, browser and containers) before exiting.

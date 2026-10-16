@@ -4,6 +4,8 @@
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
+use playwright_rs::expect;
+
 use crate::apps::{AppUnderTest, Case, CaseCtx, CaseFuture, admin};
 
 pub struct IntegrationApp;
@@ -18,10 +20,16 @@ impl AppUnderTest for IntegrationApp {
     }
 
     fn cases(&self) -> Vec<Case> {
-        vec![Case {
-            name: "settings-roundtrip",
-            run: case_settings_roundtrip,
-        }]
+        vec![
+            Case {
+                name: "settings-roundtrip",
+                run: case_settings_roundtrip,
+            },
+            Case {
+                name: "cli-user-add-login",
+                run: case_cli_user_add_login,
+            },
+        ]
     }
 }
 
@@ -72,4 +80,30 @@ async fn wait_for_site(ctx: &CaseCtx, path: &str, needle: &str, secs: u64) -> an
         tokio::time::sleep(Duration::from_millis(500)).await;
     }
     anyhow::bail!("site {path} never contained {needle:?}")
+}
+
+/// `cargo cli user-add` creates a user that can then log into the admin UI.
+fn case_cli_user_add_login<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        admin::logout_if_logged_in(ctx).await?;
+
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+        let user = "cli-e2e";
+        let password = "cli-password";
+        let status = tokio::process::Command::new("cargo")
+            .args(["run", "-q", "-p", "cli", "--", "user-add", user, password])
+            .current_dir(&repo)
+            .env("PG__URL", &ctx.database_url)
+            .env("RUST_LOG", "warn")
+            .status()
+            .await?;
+        anyhow::ensure!(status.success(), "`cli user-add` exited with {status}");
+
+        // The CLI wrote the user; the admin UI must accept it.
+        admin::login_as(ctx, user, password).await?;
+        expect(ctx.page.locator("h1"))
+            .to_contain_text("Dashboard")
+            .await?;
+        Ok(())
+    })
 }

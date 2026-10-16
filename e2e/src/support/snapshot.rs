@@ -10,6 +10,15 @@ pub fn snapshots_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("snapshots")
 }
 
+/// When set, `ctx.snapshot` becomes a no-op. Lets CI (or another OS without
+/// committed baselines) exercise the behavioural cases without pixel diffs.
+pub fn skipped() -> bool {
+    matches!(
+        std::env::var("LAPA_E2E_SKIP_SNAPSHOTS").as_deref(),
+        Ok(v) if !matches!(v.trim(), "" | "0" | "false" | "no")
+    )
+}
+
 pub async fn compare(
     page: &Page,
     app: &str,

@@ -49,7 +49,8 @@ pub struct Session {
 
 impl Session {
     /// Boot every app in `apps` against one shared database + browser.
-    pub async fn boot(apps: &[&dyn AppUnderTest]) -> Result<Self> {
+    /// `features` is passed through to `cargo leptos` (e.g. `prod`).
+    pub async fn boot(apps: &[&dyn AppUnderTest], features: Option<&str>) -> Result<Self> {
         let infra = Infra::start().await?;
         println!("infra ready (database)");
 
@@ -77,6 +78,7 @@ impl Session {
             let server = Server::start(ServerConfig {
                 server_dir: &server_dir,
                 project: name,
+                features,
                 database_url: &database_url,
                 image_upload_path: &image_upload_path,
                 image_convert_path: &image_convert_path,

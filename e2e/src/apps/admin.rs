@@ -51,8 +51,16 @@ impl AppUnderTest for AdminApp {
                 run: case_category_post_crud,
             },
             Case {
+                name: "image-hero-and-order",
+                run: case_image_hero_and_order,
+            },
+            Case {
                 name: "image-upload",
                 run: case_image_upload,
+            },
+            Case {
+                name: "content-editor",
+                run: case_content_editor,
             },
         ]
     }
@@ -317,6 +325,86 @@ fn case_category_post_crud<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     })
 }
 
+/// Make a non-hero image the hero, then reorder it and confirm both persist.
+fn case_image_hero_and_order<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        login(ctx).await?;
+        ctx.goto_for("admin", &format!("/product/{}", seed::PRODUCT_SLUG))
+            .await?;
+        wait_at_least(ctx, ".images figure", 2, 20).await?;
+
+        // Swap the hero to the second image.
+        ctx.page
+            .locator(
+                ".images figure:has-text(\"E2E product image 2\") button:has-text(\"Make hero\")",
+            )
+            .click(None)
+            .await?;
+        wait_at_least(
+            ctx,
+            ".images figure:has-text(\"E2E product image 2\") button:disabled:has-text(\"Hero\")",
+            1,
+            20,
+        )
+        .await?;
+
+        // Move the first image below the second, then persist the order.
+        ctx.page
+            .locator(".images figure")
+            .first()
+            .locator("button")
+            .last()
+            .click(None)
+            .await?;
+        submit(ctx, "Save order").await?;
+        wait_at_least(ctx, ".Alert.Success", 1, 20).await?;
+
+        // A fresh load reads the persisted order: image 2 is now first.
+        ctx.goto_for("admin", &format!("/product/{}", seed::PRODUCT_SLUG))
+            .await?;
+        expect(
+            ctx.page
+                .locator(".images figure")
+                .first()
+                .locator("figcaption"),
+        )
+        .to_contain_text("E2E product image 2")
+        .await?;
+        Ok(())
+    })
+}
+
+/// The Slate rich-text editor loads the seeded content in the product page.
+fn case_content_editor<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        login(ctx).await?;
+        ctx.clear_browser_errors();
+        ctx.goto_for("admin", &format!("/product/{}", seed::PRODUCT_SLUG))
+            .await?;
+        // Slate mounts a contenteditable inside `#app` once hydrated.
+        wait_at_least(ctx, "#app [contenteditable]", 1, 30).await?;
+        // The seeded product body is rendered into the editor.
+        wait_at_least(ctx, "text=E2E product body.", 1, 30).await?;
+
+        let problems: Vec<String> = ctx
+            .console_errors()
+            .into_iter()
+            .filter(|m| !CaseCtx::is_benign(m))
+            .chain(
+                ctx.page_errors()
+                    .into_iter()
+                    .map(|e| e.lines().next().unwrap_or_default().to_string()),
+            )
+            .collect();
+        anyhow::ensure!(
+            problems.is_empty(),
+            "the editor logged errors:\n  {}",
+            problems.join("\n  ")
+        );
+        Ok(())
+    })
+}
+
 /// Upload an image to a product through the admin file input.
 fn case_image_upload<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     Box::pin(async move {
@@ -344,9 +432,14 @@ fn case_image_upload<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
 }
 
 // --- helpers -------------------------------------------------------------
-/// Log in through the form, or no-op when the session is already established
-/// (cases share one browser context, so the cookie survives across cases).
+/// Log in through the form as the seeded admin, or no-op when already
+/// authenticated (cases share one browser context).
 pub(crate) async fn login(ctx: &CaseCtx) -> anyhow::Result<()> {
+    login_as(ctx, seed::ADMIN_USERNAME, seed::ADMIN_PASSWORD).await
+}
+
+/// Log in as a specific user, or no-op when already authenticated.
+pub(crate) async fn login_as(ctx: &CaseCtx, username: &str, password: &str) -> anyhow::Result<()> {
     ctx.goto_for("admin", "/").await?;
     if dashboard_visible(ctx).await? {
         return Ok(());
@@ -354,11 +447,11 @@ pub(crate) async fn login(ctx: &CaseCtx) -> anyhow::Result<()> {
 
     ctx.page
         .locator("input[name=username]")
-        .fill(seed::ADMIN_USERNAME, None)
+        .fill(username, None)
         .await?;
     ctx.page
         .locator("input[name=password]")
-        .fill(seed::ADMIN_PASSWORD, None)
+        .fill(password, None)
         .await?;
     ctx.page.locator("input[type=submit]").click(None).await?;
 
@@ -374,7 +467,7 @@ pub(crate) async fn login(ctx: &CaseCtx) -> anyhow::Result<()> {
     )
 }
 
-async fn logout_if_logged_in(ctx: &CaseCtx) -> anyhow::Result<()> {
+pub(crate) async fn logout_if_logged_in(ctx: &CaseCtx) -> anyhow::Result<()> {
     ctx.goto_for("admin", "/").await?;
     if dashboard_visible(ctx).await? {
         ctx.page.locator("text=Log Out").click(None).await?;

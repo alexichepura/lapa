@@ -211,7 +211,11 @@ fn case_product_image_dialog<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
         ctx.goto(&format!("/product/{}", seed::PRODUCT_SLUG))
             .await?;
         ctx.wait_for_image(".product-images img", 60).await?;
-        ctx.page.locator(".product-images img").click(None).await?;
+        ctx.page
+            .locator(".product-images img")
+            .first()
+            .click(None)
+            .await?;
         expect(ctx.page.locator("dialog[open]"))
             .to_be_visible()
             .await?;

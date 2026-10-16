@@ -95,6 +95,8 @@ pub struct ServerConfig<'a> {
     pub server_dir: &'a Path,
     /// Leptos project to serve (`site` or `admin`).
     pub project: &'a str,
+    /// Extra cargo features (e.g. `prod` for compression + ratelimit).
+    pub features: Option<&'a str>,
     pub database_url: &'a str,
     /// Where uploaded originals / converted derivatives are read from.
     pub image_upload_path: &'a str,
@@ -120,8 +122,14 @@ impl Server {
         let mut cmd = Command::new("sh");
         // `--project <name>`: the workspace contains two Leptos apps (`site` and
         // `admin`), so cargo-leptos cannot pick one implicitly.
-        cmd.arg("-c")
-            .arg(format!("exec cargo leptos serve --project {}", cfg.project));
+        let features = match cfg.features {
+            Some(features) => format!(" --features {features}"),
+            None => String::new(),
+        };
+        cmd.arg("-c").arg(format!(
+            "exec cargo leptos serve --project {}{features}",
+            cfg.project
+        ));
         cmd.current_dir(cfg.server_dir);
         // Lapa reads `pg.url` through the `config` crate's `__`-separated env;
         // `dotenv()` does not override an existing variable, so this wins over

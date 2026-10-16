@@ -25,6 +25,7 @@ cargo run -p lapa-e2e -- update                    # regenerate site screenshot 
 cargo run -p lapa-e2e -- update --app admin        # regenerate admin baselines
 cargo run -p lapa-e2e -- serve                     # infra + site server, waits for Ctrl-C
 cargo run -p lapa-e2e -- serve --app admin
+cargo run -p lapa-e2e -- test --features prod       # build with compression + ratelimit
 cargo run -p lapa-e2e -- shot http://127.0.0.1:<port>/ /tmp/page.png
 ```
 
@@ -32,6 +33,9 @@ cargo run -p lapa-e2e -- shot http://127.0.0.1:<port>/ /tmp/page.png
 opening a page manually or taking a screenshot with `shot`.
 
 The first run compiles the app's SSR + wasm bundles, so give it a few minutes.
+
+Set `LAPA_E2E_SKIP_SNAPSHOTS=1` to turn `ctx.snapshot` into a no-op — useful on
+an OS without committed baselines (see CI below).
 
 ## Coverage
 
@@ -43,12 +47,20 @@ snapshot, empty states and a console-error sweep.
 
 `admin`: unauthenticated redirect to the login form, the seeded-user login flow,
 logout, auth negatives (bad password, protected route, default-deny `/api`),
-product create/edit/delete, category+post create, image upload (through the
-file input + wasm reader), plus a console-error sweep across the
-dashboard/product/post/settings sections.
+product create/edit/delete, category+post create, product image upload, image
+make-hero + reorder, the Slate content editor mounting the seeded content, plus
+a console-error sweep across the dashboard/product/post/settings sections.
 
 `integration`: boots both servers and verifies an admin Settings write is read
-back by the public site (`/robots.txt` and the home text).
+back by the public site (`/robots.txt` and the home text), and that a user
+created with `cargo cli user-add` can log into the admin UI.
+
+## CI
+
+`.github/workflows/e2e.yml` runs all three suites on Ubuntu. Baselines are
+committed per-OS and only `macos/` exists, so CI sets
+`LAPA_E2E_SKIP_SNAPSHOTS=1` and exercises the behavioural cases. Regenerate a
+platform's baselines locally with `update` (and `update --app admin`).
 
 ## Layout
 

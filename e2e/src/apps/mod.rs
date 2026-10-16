@@ -105,6 +105,9 @@ impl CaseCtx {
     }
 
     pub async fn snapshot(&self, name: &str) -> Result<()> {
+        if snapshot::skipped() {
+            return Ok(());
+        }
         snapshot::compare(&self.page, self.app, name, &self.artifacts_dir, self.update).await
     }
 
