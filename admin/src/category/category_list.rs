@@ -6,7 +6,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::util::{AlertDanger, Loading, datetime_to_strings};
 
-stylance::import_crate_style!(#[allow(dead_code)] style, "src/listing.module.css");
+stylance::import_crate_style!(
+    #[allow(dead_code)]
+    style,
+    "src/listing.module.css"
+);
 
 #[component]
 pub fn CategoryList() -> impl IntoView {

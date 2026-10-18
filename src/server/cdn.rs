@@ -1,5 +1,8 @@
 // use super::{ArcPrisma, MediaConfig};
 // use crate::server::{serve_file, MAX_AGE_MONTH};
+use std::fs::File;
+use std::io::BufReader;
+
 use axum::response::IntoResponse;
 use axum::{
     extract::{Path, State},
@@ -10,8 +13,9 @@ use content::{CdnImageFormat, CdnImageSize};
 use http::HeaderValue;
 use http::header::VARY;
 use http::{HeaderMap, header::CACHE_CONTROL};
-use image::ImageFormat;
 use image::imageops::FilterType;
+use image::metadata::Orientation;
+use image::{DynamicImage, ImageDecoder, ImageError, ImageFormat, ImageReader};
 use image_config::ImageConfig;
 
 use super::{MAX_AGE_MONTH, serve_file};
@@ -29,6 +33,22 @@ impl ToImageFormat for CdnImageFormat {
             CdnImageFormat::Jpeg => ImageFormat::Jpeg,
         }
     }
+}
+
+/// Decode an image and bake in its EXIF orientation.
+///
+/// `image`'s decoder reports [`Orientation::NoTransforms`] for formats (or
+/// files) without orientation metadata, so EXIF-less images decode as-is rather
+/// than erroring — the previous `kamadak-exif` implementation propagated that
+/// "no EXIF" error and rejected such uploads.
+fn open_oriented(path: &str) -> Result<DynamicImage, ImageError> {
+    let reader = ImageReader::new(BufReader::new(File::open(path)?)).with_guessed_format()?;
+    let mut decoder = reader.into_decoder()?;
+    // A malformed Exif chunk must not fail the conversion.
+    let orientation = decoder.orientation().unwrap_or(Orientation::NoTransforms);
+    let mut image = DynamicImage::from_decoder(decoder)?;
+    image.apply_orientation(orientation);
+    Ok(image)
 }
 
 pub async fn content_image_handler(
@@ -78,7 +98,7 @@ pub async fn content_image_handler(
         let img_name = format!("/{image_name}.{}", db_image_ext);
         let path = format!("{}{}", image_config.content_image_upload_path(), img_name);
         tracing::trace!("upload_path={}", path);
-        let dynamic_image = image::open(&path).map_err(|e| {
+        let dynamic_image = open_oriented(&path).map_err(|e| {
             tracing::error!("cdn image error={e:?}");
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
@@ -150,7 +170,7 @@ pub async fn product_image_handler(
         let img_name = format!("/{image_name}.{}", db_image_ext);
         let path = format!("{}{}", image_config.product_image_upload_path(), img_name);
         tracing::trace!("upload_path={}", path);
-        let dynamic_image = image::open(&path).map_err(|e| {
+        let dynamic_image = open_oriented(&path).map_err(|e| {
             tracing::error!("cdn image error={e:?}");
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
@@ -173,5 +193,74 @@ pub async fn product_image_handler(
         } else {
             Err(StatusCode::INTERNAL_SERVER_ERROR)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use image::{ImageBuffer, Rgb};
+
+    fn jpeg_bytes(width: u32, height: u32) -> Vec<u8> {
+        let img =
+            DynamicImage::ImageRgb8(ImageBuffer::from_pixel(width, height, Rgb([200, 60, 60])));
+        let mut buf = std::io::Cursor::new(Vec::new());
+        img.write_to(&mut buf, ImageFormat::Jpeg)
+            .expect("encode jpeg");
+        buf.into_inner()
+    }
+
+    /// Splice an EXIF APP1 segment carrying `Orientation = orientation` in right
+    /// after the SOI marker, so `image`'s decoder reads it back.
+    fn with_exif_orientation(jpeg: &[u8], orientation: u16) -> Vec<u8> {
+        assert_eq!(&jpeg[..2], &[0xFF, 0xD8], "JPEG must start with SOI");
+
+        let mut tiff = Vec::new();
+        tiff.extend_from_slice(b"II\x2A\x00"); // little-endian TIFF magic
+        tiff.extend_from_slice(&8u32.to_le_bytes()); // IFD0 offset
+        tiff.extend_from_slice(&1u16.to_le_bytes()); // one IFD entry
+        tiff.extend_from_slice(&0x0112u16.to_le_bytes()); // Orientation tag
+        tiff.extend_from_slice(&3u16.to_le_bytes()); // type SHORT
+        tiff.extend_from_slice(&1u32.to_le_bytes()); // count
+        let mut value = [0u8; 4];
+        value[..2].copy_from_slice(&orientation.to_le_bytes());
+        tiff.extend_from_slice(&value);
+        tiff.extend_from_slice(&0u32.to_le_bytes()); // no next IFD
+
+        let mut payload = Vec::new();
+        payload.extend_from_slice(b"Exif\x00\x00");
+        payload.extend_from_slice(&tiff);
+
+        let mut out = Vec::new();
+        out.extend_from_slice(&jpeg[..2]); // SOI
+        out.push(0xFF);
+        out.push(0xE1); // APP1
+        out.extend_from_slice(&((payload.len() + 2) as u16).to_be_bytes());
+        out.extend_from_slice(&payload);
+        out.extend_from_slice(&jpeg[2..]);
+        out
+    }
+
+    fn temp_path(name: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("lapa-cdn-test-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("create temp dir");
+        dir.join(name)
+    }
+
+    #[test]
+    fn decodes_image_without_exif() {
+        let path = temp_path("no-exif.jpg");
+        std::fs::write(&path, jpeg_bytes(16, 8)).expect("write fixture");
+        let img = open_oriented(path.to_str().unwrap()).expect("EXIF-less image must decode");
+        assert_eq!((img.width(), img.height()), (16, 8));
+    }
+
+    #[test]
+    fn applies_exif_orientation() {
+        let path = temp_path("orientation-6.jpg");
+        std::fs::write(&path, with_exif_orientation(&jpeg_bytes(16, 8), 6)).expect("write fixture");
+        let img = open_oriented(path.to_str().unwrap()).expect("oriented image must decode");
+        // Orientation 6 is a 90° rotation, so the dimensions swap.
+        assert_eq!((img.width(), img.height()), (8, 16));
     }
 }
