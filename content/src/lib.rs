@@ -46,12 +46,11 @@ pub type SlateBlocks = Vec<SlateBlock>;
 impl SlateToHtml for SlateBlocks {
     fn to_html(&self) -> String {
         let is_single = self.len() == 1;
-        let html = self
-            .into_iter()
+
+        self.iter()
             .map(|block| block.to_html(is_single))
             .collect::<Vec<String>>()
-            .join("");
-        html
+            .join("")
     }
 }
 

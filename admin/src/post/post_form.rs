@@ -52,13 +52,13 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
     );
     let (publish_at, set_publish_at) = create_slice(
         post_rw,
-        |state| state.publish_at.clone(),
+        |state| state.publish_at,
         |state, publish_at| state.publish_at = publish_at,
     );
 
     let created = datetime_to_strings(post.created_at);
     let site_url = move || use_site_url();
-    let href = move || format!("{}/post/{}", &site_url(), &slug());
+    let href = move || format!("{}/post/{}", site_url(), slug());
     let publish_at_utc_string = move || match publish_at() {
         Some(publish_at) => Either::Left(datetime_to_string(publish_at)),
         None => Either::Right(()),
@@ -72,9 +72,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
             <header>
                 <div>
                     <h1>Post</h1>
-                    <a href=move || href() target="_blank">
-                        {move || href()}
-                    </a>
+                    <a href=href target="_blank">{href}</a>
                 </div>
                 <dl>
                     <dt>ID:</dt>
@@ -89,7 +87,7 @@ pub fn PostForm(post: PostFormData) -> impl IntoView {
             </header>
             <ActionForm action=action>
                 <input type="hidden" name="id" value=id_value />
-                <fieldset prop:disabled=move || pending()>
+                <fieldset prop:disabled=pending>
                     <legend>Data</legend>
                     <div class=grid::gridFluid2>
                         <div>
@@ -214,11 +212,11 @@ pub async fn post_update(
         .await
         .map_err(|e| lib::emsg(e, "Post by slug"))?;
 
-    if let Some(post_by_slug_id) = post_by_slug_id {
-        if id != post_by_slug_id {
-            tracing::warn!("Post exists for slug={}", slug);
-            return Ok(Err(PostError::CreateSlugExists));
-        }
+    if let Some(post_by_slug_id) = post_by_slug_id
+        && id != post_by_slug_id
+    {
+        tracing::warn!("Post exists for slug={}", slug);
+        return Ok(Err(PostError::CreateSlugExists));
     }
     queries::admin_post::update()
         .bind(
@@ -232,5 +230,5 @@ pub async fn post_update(
         )
         .await
         .map_err(|e| lib::emsg(e, "Post update"))?;
-    return Ok(Ok(()));
+    Ok(Ok(()))
 }

@@ -10,8 +10,8 @@ type PoolAuthSessionLayer = AuthSessionLayer<User, String, SessionPool, Pool>;
 
 pub fn auth_session_layer(pool: &Pool) -> PoolAuthSessionLayer {
     let auth_config = AuthConfig::<String>::default();
-    let layer = PoolAuthSessionLayer::new(Some(pool.clone())).with_config(auth_config);
-    layer
+
+    PoolAuthSessionLayer::new(Some(pool.clone())).with_config(auth_config)
 }
 
 pub type AuthSession = axum_session_auth::AuthSession<User, String, SessionPool, Pool>;

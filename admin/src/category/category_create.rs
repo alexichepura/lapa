@@ -32,7 +32,7 @@ pub fn CategoryNew() -> impl IntoView {
         <Title text="New category" />
         <h1>"New category"</h1>
         <ActionForm action=category_create>
-            <fieldset prop:disabled=move || pending()>
+            <fieldset prop:disabled=pending>
                 <legend>Data</legend>
                 <div class=grid::gridFluid2>
                     <Input name="slug" label="Slug" />
@@ -57,5 +57,5 @@ pub async fn category_create(
         .one()
         .await
         .map_err(|e| lib::emsg(e, "Post category create"))?;
-    return Ok(Ok(id));
+    Ok(Ok(id))
 }

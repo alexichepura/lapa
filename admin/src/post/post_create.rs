@@ -32,10 +32,10 @@ pub fn PostCreate() -> impl IntoView {
         }
     });
     view! {
-        <Title text=move || format!("Post create") />
+        <Title text=move || "Post create".to_string() />
         <section class=page::postPage>
             <ActionForm action=action>
-                <fieldset prop:disabled=move || pending()>
+                <fieldset prop:disabled=pending>
                     <legend>Data</legend>
                     <CategorySelect />
                     <Input name="slug" label="Slug" />
@@ -91,5 +91,5 @@ pub async fn post_create(
             .await
             .map_err(|e| lib::emsg(e, "Post create transaction"))?;
     };
-    return Ok(Ok(id));
+    Ok(Ok(id))
 }

@@ -22,7 +22,7 @@ pub fn CategoryForm(form: CategoryFormData) -> impl IntoView {
     let pending = category_update.pending();
     view! {
         <ActionForm action=category_update>
-            <fieldset prop:disabled=move || pending()>
+            <fieldset prop:disabled=pending>
                 <legend>Data</legend>
                 <input type="hidden" name="id" value=form.id />
                 <div class=grid::gridFluid2>
@@ -49,5 +49,5 @@ pub async fn category_update(
         .bind(&db, &slug, &name, &title, &description, &id)
         .await
         .map_err(|e| lib::emsg(e, "Post category update"))?;
-    return Ok(Ok(()));
+    Ok(Ok(()))
 }

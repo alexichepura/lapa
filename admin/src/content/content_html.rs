@@ -12,7 +12,7 @@ pub fn ContentHtml(content_id: String, content_json: String) -> impl IntoView {
     let (content, set_content) = signal(String::from(content_json.clone()));
 
     view! {
-        <fieldset prop:disabled=move || pending()>
+        <fieldset prop:disabled=pending>
             <legend>Content</legend>
             <ContentEditor content_id=content_id.clone() content_json set_content />
             <ActionForm action=action>

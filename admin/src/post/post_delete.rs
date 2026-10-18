@@ -20,7 +20,7 @@ pub fn PostDeleteForm(
             if let Ok(_post_result) = post_result {
                 tracing::info!("navigate post_result ok");
                 let navigate = use_navigate();
-                let to = format!("/posts");
+                let to = "/posts".to_string();
                 navigate(&to, Default::default());
             }
         }
@@ -29,7 +29,7 @@ pub fn PostDeleteForm(
     let (input_slug, set_input_slug) = signal::<String>("".to_string());
     let disabled = Memo::new(move |_| input_slug() != slug());
     view! {
-        <fieldset prop:disabled=move || pending()>
+        <fieldset prop:disabled=pending>
             <legend>Danger zone. Delete post.</legend>
             <ActionForm action=post_delete>
                 <input type="hidden" name="id" value=id.clone() />

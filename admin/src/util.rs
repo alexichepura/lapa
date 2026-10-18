@@ -34,8 +34,8 @@ pub fn html_local_to_datetime(datetime: &String) -> DateTime<FixedOffset> {
     let local = Local::now();
     let offset = local.offset();
     let offset_seconds: i32 = offset.local_minus_utc();
-    let fixed = fixed - Duration::seconds(offset_seconds as i64);
-    return fixed;
+
+    fixed - Duration::seconds(offset_seconds as i64)
 }
 
 pub struct DateTimeStrings {

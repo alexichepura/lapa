@@ -46,7 +46,7 @@ pub async fn content_image_handler(
         res.headers_mut().insert(CACHE_CONTROL, MAX_AGE_MONTH);
         Ok(res.into_response())
     } else {
-        return Err(StatusCode::NOT_FOUND);
+        Err(StatusCode::NOT_FOUND)
     }
 }
 pub async fn product_image_handler(
@@ -79,7 +79,7 @@ pub async fn product_image_handler(
         res.headers_mut().insert(CACHE_CONTROL, MAX_AGE_MONTH);
         Ok(res.into_response())
     } else {
-        return Err(StatusCode::NOT_FOUND);
+        Err(StatusCode::NOT_FOUND)
     }
 }
 
