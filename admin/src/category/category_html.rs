@@ -14,7 +14,7 @@ pub fn CategoryHtml(category_id: String, content_json: String) -> impl IntoView 
     let content = content_json.clone();
 
     view! {
-        <fieldset prop:disabled=move || pending()>
+        <fieldset prop:disabled=pending>
             <legend>Content</legend>
             <HtmlEditor content_json set_content />
             <ActionForm action=category_html_update>

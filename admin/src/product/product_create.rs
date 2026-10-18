@@ -29,10 +29,10 @@ pub fn ProductNew() -> impl IntoView {
         }
     });
     view! {
-        <Title text=move || format!("Product create") />
+        <Title text=move || "Product create".to_string() />
         <section class=page::postPage>
             <ActionForm action=action>
-                <fieldset prop:disabled=move || pending()>
+                <fieldset prop:disabled=pending>
                     <legend>Data</legend>
                     <Input name="slug" label="Slug" />
                     <Input name="meta_title" label="Meta title" />

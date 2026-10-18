@@ -90,7 +90,7 @@ pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
                 // calling ref reruns effect, so need to check old value
                 let el = dialog_element.get();
                 if let Some(el) = el {
-                    let _modal_result = el.close();
+                    el.close();
                 }
             }
         }
@@ -106,7 +106,7 @@ pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
 
     let hero_og = match product.hero {
         Some(hero) => {
-            let src = format!("/product-image/{}_l", &hero);
+            let src = format!("/product-image/{}_l", hero);
             let content = format!("{site_url}{src}");
             Either::Left(view! { <Meta property="og:image" content=content /> })
         }
@@ -164,7 +164,7 @@ pub fn Thumb(image: ImgData, set_dialog_open: WriteSignal<DialogSignal>) -> impl
         CdnImageSize::S.to_width(),
         CdnImageSize::S.to_width(),
     );
-    let src = format!("/product-image/{}_l", &image.id);
+    let src = format!("/product-image/{}_l", image.id);
     view! {
         <figure>
             <img on:click=on_edit src=src srcset=srcset sizes=sizes />

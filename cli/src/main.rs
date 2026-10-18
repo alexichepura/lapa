@@ -59,7 +59,7 @@ async fn main() {
         Commands::UserAdd(user) => {
             let username = user.username.clone();
             let password = user.password.clone();
-            println!("username is: {:?}", &username);
+            println!("username is: {:?}", username);
             let password_hashed = bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap();
             let db = pool.clone().get().await.unwrap();
             let res = queries::user::user_create()

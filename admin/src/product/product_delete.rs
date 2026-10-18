@@ -16,7 +16,7 @@ pub fn ProductDeleteForm(id: String, slug: String) -> impl IntoView {
             if let Ok(_product_result) = product_result {
                 tracing::info!("navigate product_result ok");
                 let navigate = use_navigate();
-                let to = format!("/product");
+                let to = "/product".to_string();
                 navigate(&to, Default::default());
             }
         }
@@ -25,7 +25,7 @@ pub fn ProductDeleteForm(id: String, slug: String) -> impl IntoView {
     let (input_slug, set_input_slug) = signal::<String>("".to_string());
     let disabled = Memo::new(move |_| input_slug() != slug);
     view! {
-        <fieldset prop:disabled=move || pending()>
+        <fieldset prop:disabled=pending>
             <legend>Danger zone. Delete product.</legend>
             <ActionForm action=action>
                 <input type="hidden" name="id" value=id.clone() />

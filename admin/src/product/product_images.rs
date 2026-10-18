@@ -101,7 +101,7 @@ fn ProductImagesView(
             let removed_item = mut_il.remove(from_index);
             mut_il.insert(to_index as usize, removed_item);
             let images = mut_il
-                .into_iter()
+                .iter_mut()
                 .enumerate()
                 .map(|(i, img)| ProductImageData {
                     order: i as i32,
@@ -119,7 +119,7 @@ fn ProductImagesView(
         } else {
             let el = dialog_element.get();
             if let Some(el) = el {
-                let _modal_result = el.close();
+                el.close();
             }
         }
     });
@@ -194,7 +194,7 @@ where
 {
     let id = image.id.clone();
     let alt_clone = image.alt.clone();
-    let src = format!("/product-image/{}", &id);
+    let src = format!("/product-image/{}", id);
 
     let on_edit = move |_| {
         set_editing(Some(ImageEditData {
@@ -296,7 +296,7 @@ pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFn
         .opt()
         .await
         .map_err(|e| lib::emsg(e, "Image find"))?;
-    if let None = current_img {
+    if current_img.is_none() {
         return Ok(Err(AppError::NotFound));
     }
     let current_img = current_img.unwrap();

@@ -27,10 +27,10 @@ pub fn PostImageModalForm(
         let id = id_effect.clone();
         let delete_result = delete_rw.get();
         // Some(old) to prevent initial run
-        if let (Some(_delete_value), Some(old)) = (delete_result, old) {
-            if id == old {
-                set_editing(None);
-            }
+        if let (Some(_delete_value), Some(old)) = (delete_result, old)
+            && id == old
+        {
+            set_editing(None);
         };
         id
     });
@@ -42,7 +42,7 @@ pub fn PostImageModalForm(
         });
     };
 
-    let src = format!("/product-image/{}", &image.id);
+    let src = format!("/product-image/{}", image.id);
 
     view! {
         <img src=src width=500 />
@@ -50,7 +50,7 @@ pub fn PostImageModalForm(
             <button on:click=on_delete>Delete</button>
             <hr />
             <ActionForm action=image_update>
-                <fieldset prop:disabled=move || pending()>
+                <fieldset prop:disabled=pending>
                     <input type="hidden" name="id" value=image.id.clone() />
                     <Input name="alt" label="Alt" value=image.alt.clone() />
                     <FormFooter action=image_update submit_text="Update image data" />

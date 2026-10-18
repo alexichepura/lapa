@@ -45,15 +45,12 @@ pub fn CategoryPage() -> impl IntoView {
         })
     });
 
-    let category = Resource::new_blocking(
-        move || id(),
-        move |id| async move {
-            match id {
-                Err(e) => Ok(Err(e)),
-                Ok(id) => get_category(id).await,
-            }
-        },
-    );
+    let category = Resource::new_blocking(id, move |id| async move {
+        match id {
+            Err(e) => Ok(Err(e)),
+            Ok(id) => get_category(id).await,
+        }
+    });
 
     view! {
         <Suspense fallback=move || {

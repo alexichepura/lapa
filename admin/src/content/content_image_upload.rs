@@ -65,7 +65,7 @@ pub async fn content_image_upload(
         .await
         .map_err(|e| lib::emsg(e, "Content image create"))?;
 
-    let file_path = media_config.content_image_upload_name_ext(&id, &ext.to_string());
+    let file_path = media_config.content_image_upload_name_ext(&id, ext.as_ref());
     std::fs::write(file_path, img_bytes).map_err(|e| lib::emsg(e, "Content image write"))?;
 
     Ok(Ok(ImageResult { id }))

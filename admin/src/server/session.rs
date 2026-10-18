@@ -13,8 +13,7 @@ pub async fn session_layer(pool: &Pool) -> SessionLayer<SessionPool> {
         .await
         .unwrap();
 
-    let layer = SessionLayer::new(store);
-    layer
+    SessionLayer::new(store)
 }
 
 /// Whether the session cookie carries the `Secure` flag.

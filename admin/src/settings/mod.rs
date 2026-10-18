@@ -63,7 +63,7 @@ impl From<&SettingsData> for SettingsSite {
 }
 
 pub fn create_settings_resource() -> Resource<SettingsResult> {
-    let settings = Resource::new_blocking(
+    Resource::new_blocking(
         || (),
         move |_| async move {
             get_settings()
@@ -71,8 +71,7 @@ pub fn create_settings_resource() -> Resource<SettingsResult> {
                 .map_err(|_| SettingsError::ServerError)
                 .flatten()
         },
-    );
-    settings
+    )
 }
 
 #[component]

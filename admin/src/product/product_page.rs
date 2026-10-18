@@ -52,15 +52,12 @@ pub fn ProductPage() -> impl IntoView {
             }
         })
     });
-    let page = Resource::new_blocking(
-        move || id(),
-        move |id| async move {
-            match id {
-                Err(e) => Ok(Err(e)),
-                Ok(id) => get_product(id).await,
-            }
-        },
-    );
+    let page = Resource::new_blocking(id, move |id| async move {
+        match id {
+            Err(e) => Ok(Err(e)),
+            Ok(id) => get_product(id).await,
+        }
+    });
     let suspended = move || {
         Suspend::new(async move {
             match page.await {
@@ -83,6 +80,9 @@ pub fn ProductPageView(page: ProductPageData) -> impl IntoView {
     Effect::new(move |_| {
         set_hydrated(true);
     });
+    // Under `ssr` the editor view is intentionally `view! {}`; clippy's
+    // `unit_arg`/`unused_unit` fixes would break `view!` lifetimes.
+    #[allow(clippy::unit_arg, clippy::unused_unit)]
     let edit_view = {
         move || match hydrated() {
             true => leptos::either::Either::Left(

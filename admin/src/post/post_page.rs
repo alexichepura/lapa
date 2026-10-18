@@ -53,15 +53,12 @@ pub fn PostPage() -> impl IntoView {
         })
     });
 
-    let post = Resource::new_blocking(
-        move || id(),
-        move |id| async move {
-            match id {
-                Err(e) => Ok(Err(e)),
-                Ok(id) => get_post(id).await,
-            }
-        },
-    );
+    let post = Resource::new_blocking(id, move |id| async move {
+        match id {
+            Err(e) => Ok(Err(e)),
+            Ok(id) => get_post(id).await,
+        }
+    });
 
     let suspended = move || {
         Suspend::new(async move {
@@ -85,6 +82,9 @@ pub fn PostPageView(page: PostPageData) -> impl IntoView {
     Effect::new(move |_| {
         set_hydrated(true);
     });
+    // Under `ssr` the editor view is intentionally `view! {}`; clippy's
+    // `unit_arg`/`unused_unit` fixes would break `view!` lifetimes.
+    #[allow(clippy::unit_arg, clippy::unused_unit)]
     let edit_view = {
         move || match hydrated() {
             true => leptos::either::Either::Left(

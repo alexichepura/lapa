@@ -141,6 +141,5 @@ pub async fn leptos_routes_handler(
         move || html_shell(leptos_options.clone(), user.clone(), settings.clone()),
     );
 
-    let leptos_res = handler(req).await.into_response();
-    leptos_res
+    handler(req).await.into_response()
 }

@@ -144,7 +144,7 @@ pub async fn upload_img(data: MultipartData) -> Result<ImageUploadResult, Server
         .await
         .map_err(|e| lib::emsg(e, "Product image create"))?;
 
-    let file_path = media_config.product_image_upload_name_ext(&id, &ext.to_string());
+    let file_path = media_config.product_image_upload_name_ext(&id, ext.as_ref());
     std::fs::write(file_path, img_bytes).map_err(|e| lib::emsg(e, "Product image write"))?;
     // let img_decoded = img_reader.decode().unwrap();
     // let buffered_read = std::io::BufReader::new(cursor);

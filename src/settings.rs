@@ -7,8 +7,7 @@ pub struct SettingsCx {
 }
 
 pub fn use_settings() -> SettingsCx {
-    let settings = use_context::<SettingsCx>().expect("SettingsCx");
-    settings
+    use_context::<SettingsCx>().expect("SettingsCx")
 }
 pub fn use_site_url() -> String {
     let settings = use_settings();

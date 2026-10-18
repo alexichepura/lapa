@@ -8,7 +8,7 @@ impl CdnImageFormat {
     pub const VALUES: [Self; 3] = [Self::Avif, Self::Webp, Self::Jpeg];
 
     pub fn from_accept_types(accept_types: &str) -> Self {
-        let cdn_format = if accept_types.contains("image/avif,") {
+        if accept_types.contains("image/avif,") {
             CdnImageFormat::Avif
         } else if accept_types.contains("image/webp,") {
             CdnImageFormat::Webp
@@ -17,8 +17,7 @@ impl CdnImageFormat {
         } else {
             //     Err(StatusCode::UNSUPPORTED_MEDIA_TYPE)
             CdnImageFormat::Jpeg
-        };
-        return cdn_format;
+        }
     }
 }
 impl std::fmt::Display for CdnImageFormat {
@@ -53,9 +52,9 @@ impl CdnImageSize {
         }
     }
 }
-impl TryFrom<&str> for CdnImageSize {
-    type Error = ();
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
+impl std::str::FromStr for CdnImageSize {
+    type Err = ();
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
         Ok(match value {
             "xl" => Self::XL,
             "l" => Self::L,

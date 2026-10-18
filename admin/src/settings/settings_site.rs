@@ -15,7 +15,7 @@ pub fn SettingsSiteForm(settings: SettingsSite) -> impl IntoView {
     let pending = settings_site_update.pending();
 
     view! {
-        <fieldset prop:disabled=move || pending()>
+        <fieldset prop:disabled=pending>
             <legend>Site</legend>
             <ActionForm action=settings_site_update>
                 <label>

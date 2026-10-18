@@ -15,8 +15,7 @@ pub struct User {
 
 type UserSignal = RwSignal<Option<User>>;
 pub fn use_user_signal() -> UserSignal {
-    let user = use_context::<UserSignal>().expect("UserSignal");
-    return user;
+    use_context::<UserSignal>().expect("UserSignal")
 }
 
 #[server(GetUser, "/api")]

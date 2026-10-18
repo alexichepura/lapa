@@ -15,10 +15,10 @@ pub async fn content_json_update(
         .into_iter()
         .filter_map(|block| {
             if let SlateBlock::Img(img) = block {
-                return Some(img.id);
+                Some(img.id)
             } else {
-                return None;
-            };
+                None
+            }
         })
         .collect();
     let _current_content = cornucopia::queries::admin_content::read() // TODO "exists" method?
@@ -77,7 +77,7 @@ pub async fn content_json_update(
             .transaction()
             .await
             .map_err(|e| lib::emsg(e, "Content update transaction init"))?;
-        if images_to_delete.len() > 0 {
+        if !images_to_delete.is_empty() {
             let ids_to_del: Vec<String> = images_to_delete.into_iter().map(|img| img.id).collect();
             let _deleted = cornucopia::queries::admin_content_image::delete_many_by_id()
                 .bind(&trx, &ids_to_del)
@@ -92,5 +92,5 @@ pub async fn content_json_update(
             .await
             .map_err(|e| lib::emsg(e, "Content update transaction"))?;
     };
-    return Ok(Ok(()));
+    Ok(Ok(()))
 }
