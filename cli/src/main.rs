@@ -1,10 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 use config::ConfigError;
-use cornucopia::{
-    deadpool_postgres::{self},
-    queries, tokio_postgres,
-};
-use deadpool_postgres::Runtime;
+use cornucopia::{deadpool_postgres, queries};
 use dotenvy::dotenv;
 use serde::Deserialize;
 
@@ -53,10 +49,7 @@ async fn main() {
 
     dotenv().expect(".env file not found");
     let config = Config::from_env().unwrap();
-    let pool = config
-        .pg
-        .create_pool(Some(Runtime::Tokio1), tokio_postgres::NoTls)
-        .unwrap();
+    let pool = lib::create_pool(&config.pg);
 
     match &cli.command {
         Commands::Migrate => {

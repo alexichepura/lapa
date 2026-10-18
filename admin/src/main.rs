@@ -19,13 +19,16 @@ async fn main() {
         routing::{get, post},
     };
     use config::ConfigError;
-    use cornucopia::{deadpool_postgres, tokio_postgres};
-    use deadpool_postgres::Runtime;
+    use cornucopia::deadpool_postgres;
     use dotenvy::dotenv;
     use image_config::ImageConfig;
     use leptos::prelude::*;
     use leptos_axum::{LeptosRoutes, generate_route_list};
     use serde::Deserialize;
+    use std::sync::Arc;
+    use tower_governor::{
+        GovernorLayer, governor::GovernorConfigBuilder, key_extractor::SmartIpKeyExtractor,
+    };
     use tracing::info;
 
     dotenv().expect(".env file not found");
@@ -47,10 +50,7 @@ async fn main() {
 
     let leptopts = get_configuration(None).unwrap().leptos_options;
     let routes = generate_route_list(|| view! { <AdminRouter /> });
-    let pool = config
-        .pg
-        .create_pool(Some(Runtime::Tokio1), tokio_postgres::NoTls)
-        .unwrap();
+    let pool = lib::create_pool(&config.pg);
 
     let image_upload_path =
         std::env::var("IMAGE_UPLOAD_PATH").unwrap_or("image_upload".to_string());
@@ -61,10 +61,34 @@ async fn main() {
         image_convert_path,
     };
 
+    // Always-on rate limit for the auth endpoints (`/auth/*`), independent of
+    // the optional `ratelimit`/`prod` feature, to slow credential brute force.
+    // `per_second` is the token replenish interval: `burst` attempts are allowed
+    // back-to-back, then one per period per client. Tunable via env.
+    let mut auth_governor = GovernorConfigBuilder::default().key_extractor(SmartIpKeyExtractor);
+    auth_governor.per_second(
+        std::env::var("AUTH_RATELIMIT_PERIOD_SECS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(1u64)
+            .max(1),
+    );
+    auth_governor.burst_size(
+        std::env::var("AUTH_RATELIMIT_BURST")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(10u32)
+            .max(1),
+    );
+    let auth_governor = Arc::new(auth_governor.finish().unwrap());
+
     let private_app = Router::new()
         .leptos_routes_with_handler(routes, get(leptos_routes_handler))
         .route("/api/{*fn_name}", post(server_fn_private))
-        .route("/auth/{*fn_name}", post(server_fn_public))
+        .route(
+            "/auth/{*fn_name}",
+            post(server_fn_public).layer(GovernorLayer::new(auth_governor)),
+        )
         .with_state(AppState {
             leptos_options: leptopts.clone(),
             pool: pool.clone(),
@@ -96,7 +120,12 @@ async fn main() {
         .await
         .unwrap();
     info!("binded TCP listener on http://{}", &leptopts.site_addr);
-    axum::serve(listener, app.into_make_service())
-        .await
-        .unwrap();
+    // ConnectInfo lets the auth rate limiter resolve the client IP when the
+    // proxy headers are absent (dev / e2e).
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<std::net::SocketAddr>(),
+    )
+    .await
+    .unwrap();
 }

@@ -121,6 +121,20 @@ psql postgres
 PG__URL="postgresql://postgres:postgres@localhost:5432/lapa"
 ```
 
+### Environment
+
+Runtime environment variables (all optional):
+
+- `PG__URL` — Postgres connection string (see above).
+- `PG_TLS` — set to `1`/`true` to connect to Postgres over TLS (rustls with
+  Mozilla roots). Leave unset for a local socket or trusted-network plaintext
+  connection.
+- `SESSION_SECURE` — force the admin session cookie `Secure` flag (`1`/`0`).
+  Defaults to on for release builds, off for debug.
+- `AUTH_RATELIMIT_BURST` / `AUTH_RATELIMIT_PERIOD_SECS` — admin `/auth/*` rate
+  limit (defaults: burst 10, then one token per second per client).
+- `IMAGE_UPLOAD_PATH` / `IMAGE_CONVERT_PATH` — image storage roots.
+
 ### Migrations
 
 The schema is managed with [refinery](https://docs.rs/refinery) migrations in

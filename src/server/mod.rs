@@ -103,8 +103,24 @@ pub async fn leptos_routes_handler(
         .get("user-agent")
         .and_then(|ua_header| ua_header.to_str().ok())
         .map(str::to_string);
-    tracing::trace!("ssr route path={path_uri} user_agent={user_agent:?}");
     let pool = app_state.pool.clone();
+    // Record the render for the admin dashboard stats. Fire-and-forget: a
+    // failed/ slow write must never delay or fail the response.
+    let stats_pool = app_state.pool.clone();
+    tokio::spawn(async move {
+        match stats_pool.get().await {
+            Ok(client) => {
+                let id = cuid2::create_id();
+                if let Err(e) = queries::ssr::create()
+                    .bind(&client, &id, &path_uri, &user_agent)
+                    .await
+                {
+                    tracing::error!("ssr stats insert error={e}");
+                }
+            }
+            Err(e) => tracing::error!("ssr stats pool error={e}"),
+        }
+    });
     let settings = settings_db(pool.clone()).await;
     let leptos_options = app_state.leptos_options;
     let handler = leptos_axum::render_app_async_with_context(
@@ -130,7 +146,10 @@ pub async fn robots_txt(State(app_state): State<AppState>) -> Result<String, (St
         .await
         .map_err(|e| {
             tracing::error!("robots.txt: failed to load settings: {e}");
-            (StatusCode::INTERNAL_SERVER_ERROR, "database error".to_string())
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "database error".to_string(),
+            )
         })?
         .ok_or((StatusCode::NOT_FOUND, "robots.txt not found".to_string()))?;
     Ok(robots)

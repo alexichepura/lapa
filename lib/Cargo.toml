@@ -9,15 +9,18 @@ all = ["leptos", "server"]
 default = []
 leptos = ["dep:leptos", "dep:http"]
 server = []
+pg = ["dep:deadpool-postgres", "dep:tokio-postgres-rustls"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 cfg-if = { workspace = true }
+deadpool-postgres = { workspace = true, optional = true }
 http = { workspace = true, optional = true }
 leptos = { workspace = true, optional = true }
 # serde = { workspace = true }
 thiserror = { workspace = true }
 # tokio = { workspace = true }
+tokio-postgres-rustls = { workspace = true, optional = true }
 tracing = { workspace = true }
