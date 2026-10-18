@@ -21,15 +21,14 @@ cfg-if = { workspace = true }
 chrono = { workspace = true }
 cornucopia = { workspace = true, optional = true }
 config = { workspace = true, optional = true }
-console_error_panic_hook = { workspace = true }
+console_error_panic_hook = { workspace = true, optional = true }
 cuid2 = { workspace = true, optional = true }
 deadpool-postgres = { workspace = true, optional = true }
 dotenvy = { workspace = true, optional = true }
-gloo-utils = { workspace = true }
+gloo-utils = { workspace = true, optional = true }
 http = { workspace = true }
 image = { workspace = true, optional = true }
 js-sys = { workspace = true, optional = true }
-kamadak-exif = { version = "0.6.1", optional = true }
 leptos = { workspace = true, features = ["multipart"] }
 leptos_axum = { workspace = true, optional = true }
 leptos_meta = { workspace = true }
@@ -37,7 +36,7 @@ leptos_router = { workspace = true }
 log = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-serde-wasm-bindgen = { workspace = true }
+serde-wasm-bindgen = { workspace = true, optional = true }
 stylance = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
@@ -46,7 +45,7 @@ tower_governor = { workspace = true, optional = true }
 tower-http = { workspace = true, optional = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, optional = true }
-tracing-wasm = { workspace = true }
+tracing-wasm = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 wasm-bindgen-futures = { version = "0.4" }
 web-sys = { workspace = true, optional = true }
@@ -62,6 +61,10 @@ hydrate = [
     "dep:log",
     "dep:wasm-bindgen",
     "dep:web-sys",
+    "dep:console_error_panic_hook",
+    "dep:gloo-utils",
+    "dep:serde-wasm-bindgen",
+    "dep:tracing-wasm",
     "leptos/hydrate",
 ]
 ssr = [
@@ -76,7 +79,6 @@ ssr = [
     "dep:dotenvy",
     "dep:deadpool-postgres",
     "dep:image",
-    "dep:kamadak-exif",
     "dep:leptos_axum",
     "dep:tower_governor",
     "dep:tower-http",
