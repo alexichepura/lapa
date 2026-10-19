@@ -33,6 +33,10 @@ impl AppUnderTest for IntegrationApp {
                 name: "cli-user-disable-enable",
                 run: case_cli_user_disable_enable,
             },
+            Case {
+                name: "cli-user-set-role",
+                run: case_cli_user_set_role,
+            },
         ]
     }
 }
@@ -163,6 +167,38 @@ fn case_cli_user_disable_enable<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
         );
 
         admin::logout_if_logged_in(ctx).await?;
+        Ok(())
+    })
+}
+
+/// `cargo cli user-set-role` sets a role, and rejects unknown users/roles.
+fn case_cli_user_set_role<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+        let user = "cli-role";
+        let password = "cli-role-password";
+        let status = run_cli(ctx, &repo, &["user-add", user, password]).await?;
+        anyhow::ensure!(status.success(), "`cli user-add` exited with {status}");
+
+        let status = run_cli(ctx, &repo, &["user-set-role", user, "editor"]).await?;
+        anyhow::ensure!(status.success(), "`cli user-set-role` exited with {status}");
+        ctx.exec_sql(&format!(
+            "DO $$ BEGIN \
+                 IF (SELECT role FROM \"User\" WHERE username = '{user}') <> 'editor' \
+                 THEN RAISE EXCEPTION 'role was not set'; \
+                 END IF; \
+             END $$;"
+        ))
+        .await?;
+
+        let status = run_cli(ctx, &repo, &["user-set-role", "cli-missing", "editor"]).await?;
+        anyhow::ensure!(
+            !status.success(),
+            "user-set-role on a missing user exited 0"
+        );
+        let status = run_cli(ctx, &repo, &["user-set-role", user, "superuser"]).await?;
+        anyhow::ensure!(!status.success(), "user-set-role accepted an invalid role");
+
         Ok(())
     })
 }

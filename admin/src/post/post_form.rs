@@ -204,6 +204,7 @@ pub async fn post_update(
     meta_description: String,
     h1: String,
 ) -> Result<Result<(), PostError>, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     use cornucopia::queries;
     let db = crate::server::db::use_db().await?;
     let post_by_slug_id = cornucopia::queries::admin_post::by_slug()

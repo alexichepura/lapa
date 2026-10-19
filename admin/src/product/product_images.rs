@@ -263,6 +263,7 @@ pub async fn get_images(post_id: String) -> Result<Vec<ProductImageData>, Server
 
 #[server(ImagesOrderUpdate, "/api")]
 pub async fn images_order_update(ids: Vec<String>) -> Result<Result<(), AppError>, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     let mut db_trx = crate::server::db::use_db().await?;
     let order_update = ids.into_iter().enumerate();
     let trx = db_trx
@@ -290,6 +291,7 @@ pub async fn images_order_update(ids: Vec<String>) -> Result<Result<(), AppError
 pub type ImageMakeHeroResult = Result<(), AppError>;
 #[server(ImageMakeHero, "/api")]
 pub async fn image_make_hero(id: String) -> Result<ImageMakeHeroResult, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     let db = crate::server::db::use_db().await?;
     let current_img = cornucopia::queries::product_image::select_product_id()
         .bind(&db, &id)

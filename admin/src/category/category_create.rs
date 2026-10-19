@@ -50,6 +50,7 @@ pub async fn category_create(
     slug: String,
     name: String,
 ) -> Result<Result<String, CategoryError>, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     let db = crate::server::db::use_db().await?;
     let id = cuid2::create_id();
     let _post_category_created_at = cornucopia::queries::admin_post_category::create()

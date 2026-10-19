@@ -79,6 +79,10 @@ impl AppUnderTest for AdminApp {
                 name: "db-error-500",
                 run: case_db_error_returns_500,
             },
+            Case {
+                name: "roles",
+                run: case_roles,
+            },
         ]
     }
 }
@@ -603,6 +607,111 @@ fn case_db_error_returns_500<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     })
 }
 
+/// Roles gate UI, routes and server functions: an editor can manage content but
+/// not settings, and a viewer is read-only.
+fn case_roles<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        logout_if_logged_in(ctx).await?;
+
+        let editor = ("e2e-editor", "e2e-editor-password");
+        let viewer = ("e2e-viewer", "e2e-viewer-password");
+        let editor_hash = bcrypt::hash(editor.1, 4)?;
+        let viewer_hash = bcrypt::hash(viewer.1, 4)?;
+        ctx.exec_sql(&format!(
+            "INSERT INTO \"User\" (id, username, password, role, deactivated_at) VALUES \
+             ('e2e-editor', '{}', '{}', 'editor', NULL), \
+             ('e2e-viewer', '{}', '{}', 'viewer', NULL) \
+             ON CONFLICT (id) DO UPDATE \
+             SET password = EXCLUDED.password, role = EXCLUDED.role, deactivated_at = NULL",
+            editor.0, editor_hash, viewer.0, viewer_hash
+        ))
+        .await?;
+
+        // --- editor: content yes, settings no ---
+        login_as(ctx, editor.0, editor.1).await?;
+        expect(ctx.page.locator("h1"))
+            .to_contain_text("Dashboard")
+            .await?;
+        ctx.goto_for("admin", "/product").await?;
+        expect(ctx.page.locator("a[href=\"/product/new\"]"))
+            .to_be_visible()
+            .await?;
+        // Settings is hidden from the nav and guarded on direct navigation.
+        expect(ctx.page.locator("a[href=\"/settings\"]"))
+            .to_have_count(0)
+            .await?;
+        ctx.goto_for("admin", "/settings").await?;
+        wait_at_least(ctx, "text=Forbidden", 1, 15).await?;
+        // Content write pages remain reachable.
+        ctx.goto_for("admin", "/product/new").await?;
+        expect(ctx.page.locator("input[name=slug]"))
+            .to_be_visible()
+            .await?;
+
+        // Server-side enforcement: the settings fn rejects the editor even when
+        // called directly, and the value is unchanged.
+        ctx.exec_sql("UPDATE \"Settings\" SET home_text = 'e2e-role-guard-before'")
+            .await?;
+        let status = post_form(ctx, "settings_home_update", "home_text=e2e-pwned").await?;
+        anyhow::ensure!(
+            status >= 400,
+            "editor's settings update returned {status}, want an error"
+        );
+        assert_settings_not_pwned(ctx).await?;
+        ctx.exec_sql(&format!(
+            "UPDATE \"Settings\" SET home_text = E'{}\\n\\nSecond paragraph.'",
+            seed::HOME_TEXT
+        ))
+        .await?;
+
+        // --- viewer: read-only ---
+        logout_if_logged_in(ctx).await?;
+        login_as(ctx, viewer.0, viewer.1).await?;
+        ctx.goto_for("admin", "/product").await?;
+        expect(ctx.page.locator("a[href=\"/product/new\"]"))
+            .to_have_count(0)
+            .await?;
+        ctx.goto_for("admin", "/product/new").await?;
+        wait_at_least(ctx, "text=Forbidden", 1, 15).await?;
+
+        // A direct create call is rejected too, and creates nothing.
+        let status = post_form(
+            ctx,
+            "product_create",
+            "slug=e2e-pwned&meta_title=x&meta_description=x&h1=x",
+        )
+        .await?;
+        anyhow::ensure!(
+            status >= 400,
+            "viewer's product create returned {status}, want an error"
+        );
+        ctx.exec_sql(
+            "DO $$ BEGIN \
+                 IF EXISTS (SELECT 1 FROM \"Product\" WHERE slug = 'e2e-pwned') \
+                 THEN RAISE EXCEPTION 'viewer created a product'; \
+                 END IF; \
+             END $$;",
+        )
+        .await?;
+
+        logout_if_logged_in(ctx).await?;
+        Ok(())
+    })
+}
+
+/// Assert no forbidden settings write landed (the current value is not the
+/// attacker-controlled marker).
+async fn assert_settings_not_pwned(ctx: &CaseCtx) -> anyhow::Result<()> {
+    ctx.exec_sql(
+        "DO $$ BEGIN \
+             IF EXISTS (SELECT 1 FROM \"Settings\" WHERE home_text = 'e2e-pwned') \
+             THEN RAISE EXCEPTION 'forbidden settings update was applied'; \
+             END IF; \
+         END $$;",
+    )
+    .await
+}
+
 // --- helpers -------------------------------------------------------------
 /// Log in through the form as the seeded admin, or no-op when already
 /// authenticated (cases share one browser context).
@@ -679,6 +788,17 @@ pub(crate) async fn logout_if_logged_in(ctx: &CaseCtx) -> anyhow::Result<()> {
 async fn api_status(ctx: &CaseCtx, fn_name: &str) -> anyhow::Result<u16> {
     let expr = format!(
         "async () => {{ const r = await fetch('/api/{fn_name}', {{ method: 'POST' }}); \
+         return r.status; }}"
+    );
+    Ok(ctx.page.evaluate(&expr, None::<&()>).await?)
+}
+
+/// POST a form-encoded body to a `/api` server function and return the status.
+/// Used to check server-side authorization directly, bypassing hidden UI.
+async fn post_form(ctx: &CaseCtx, fn_name: &str, body: &str) -> anyhow::Result<u16> {
+    let expr = format!(
+        "async () => {{ const r = await fetch('/api/{fn_name}', {{ method: 'POST', \
+         headers: {{ 'Content-Type': 'application/x-www-form-urlencoded' }}, body: {body:?} }}); \
          return r.status; }}"
     );
     Ok(ctx.page.evaluate(&expr, None::<&()>).await?)

@@ -1,9 +1,11 @@
-use axum_login::{AuthnBackend, UserId};
+use std::collections::HashSet;
+
+use axum_login::{AuthnBackend, AuthzBackend, UserId};
 use cornucopia::deadpool_postgres::Pool;
 use cornucopia::queries;
 use leptos::prelude::{ServerFnError, use_context};
 
-use crate::auth::User;
+use crate::auth::{Permission, Role, User};
 
 /// The backend user, as loaded from the database. Kept separate from the
 /// serializable [`User`] so the password hash never reaches the client.
@@ -12,6 +14,7 @@ pub struct AuthUser {
     pub id: String,
     pub username: String,
     pub password_hash: String,
+    pub role: Role,
 }
 
 impl axum_login::AuthUser for AuthUser {
@@ -35,6 +38,7 @@ impl From<&AuthUser> for User {
             id: user.id.clone(),
             username: user.username.clone(),
             active: true,
+            role: user.role,
         }
     }
 }
@@ -69,6 +73,14 @@ pub enum BackendError {
     Db(#[from] deadpool_postgres::tokio_postgres::Error),
     #[error("password verification error: {0}")]
     Bcrypt(#[from] bcrypt::BcryptError),
+}
+
+/// Parse the stored role, failing closed to `viewer` on an unknown value.
+fn parse_role(stored: &str) -> Role {
+    Role::parse(stored).unwrap_or_else(|| {
+        tracing::warn!(role = stored, "unknown user role; treating as viewer");
+        Role::Viewer
+    })
 }
 
 // `AuthnBackend` declares its methods as `fn ... -> impl Future` (late-bound
@@ -109,6 +121,7 @@ impl AuthnBackend for Backend {
                 id: user.id,
                 username: creds.username,
                 password_hash: user.password,
+                role: parse_role(&user.role),
             }))
         }
     }
@@ -140,8 +153,41 @@ impl AuthnBackend for Backend {
                 id: user_id,
                 username: user.username,
                 password_hash: user.password,
+                role: parse_role(&user.role),
             }))
         }
+    }
+}
+
+// Same rationale as `AuthnBackend`: the trait uses `fn ... -> impl Future`.
+#[allow(clippy::manual_async_fn)]
+impl AuthzBackend for Backend {
+    type Permission = Permission;
+
+    fn get_user_permissions(
+        &self,
+        user: &AuthUser,
+    ) -> impl std::future::Future<Output = Result<HashSet<Permission>, BackendError>> + Send {
+        let permissions: HashSet<Permission> = user.role.permissions().iter().copied().collect();
+        async move { Ok(permissions) }
+    }
+}
+
+/// Require the current session user to hold `permission`.
+///
+/// Server functions call this before mutating; UI and route guards are
+/// convenience only, this is the security boundary.
+pub async fn require_permission(permission: Permission) -> Result<(), ServerFnError> {
+    let auth = use_auth()?;
+    let Some(user) = auth.user.as_ref() else {
+        return Err(ServerFnError::new("Not authenticated."));
+    };
+    match auth.backend.has_perm(user, permission).await {
+        Ok(true) => Ok(()),
+        Ok(false) => Err(ServerFnError::new(
+            "Forbidden: your role does not allow this.",
+        )),
+        Err(e) => Err(ServerFnError::new(e.to_string())),
     }
 }
 

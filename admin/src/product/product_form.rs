@@ -207,6 +207,7 @@ pub async fn product_update(
     meta_description: String,
     h1: String,
 ) -> Result<Result<(), ProductError>, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     use cornucopia::queries;
     let db = crate::server::db::use_db().await?;
     queries::admin_product::update()

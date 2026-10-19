@@ -6,7 +6,8 @@ INSERT INTO "User" (id, username, password)
 SELECT
     id,
     password,
-    deactivated_at
+    deactivated_at,
+    role
 FROM "User"
 WHERE username = :username;
 
@@ -14,7 +15,8 @@ WHERE username = :username;
 SELECT
     username,
     password,
-    deactivated_at
+    deactivated_at,
+    role
 FROM "User"
 WHERE id = :id;
 
@@ -27,4 +29,9 @@ SET deactivated_at = CASE
         WHEN :active THEN NULL
         ELSE COALESCE(deactivated_at, now())
     END
+WHERE username = :username;
+
+--! user_set_role
+UPDATE "User"
+SET role = :role
 WHERE username = :username;

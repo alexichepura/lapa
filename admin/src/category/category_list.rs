@@ -4,6 +4,7 @@ use leptos_meta::Title;
 use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
+use crate::auth::{Permission, use_user_signal};
 use crate::util::{AlertDanger, Loading, datetime_to_strings};
 
 stylance::import_crate_style!(
@@ -14,6 +15,12 @@ stylance::import_crate_style!(
 
 #[component]
 pub fn CategoryList() -> impl IntoView {
+    let user_signal = use_user_signal();
+    let can_write = move || {
+        user_signal
+            .get()
+            .is_some_and(|user| user.can(Permission::ContentWrite))
+    };
     let categories = Resource::new_blocking(|| (), move |_| get_categories());
 
     view! {
@@ -21,7 +28,9 @@ pub fn CategoryList() -> impl IntoView {
         <h1>
             <span>"Categories"</span>
             <span>" "</span>
-            <A href="/post-category/new">"+1"</A>
+            <Show when=can_write fallback=|| ()>
+                <A href="/post-category/new">"+1"</A>
+            </Show>
         </h1>
 
         <Suspense fallback=move || {

@@ -55,7 +55,7 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 - project
   - SEO site
   - admin dashboard
-  - CLI with clap: migrate, settings-init, user-add, user-disable, user-enable
+  - CLI with clap: migrate, settings-init, user-add, user-disable, user-enable, user-set-role
   - ops scripts: build, upload, run (site, admin, cli)
 - site
   - SSR + SPA hydrated
@@ -170,6 +170,21 @@ cargo cli user-enable <username>    # restore access
 ```
 
 Both commands exit non-zero when no such user exists.
+
+Users also have a single `role` (migration `V4__user_role.sql`):
+
+| role     | can                                                        |
+| -------- | ---------------------------------------------------------- |
+| `admin`  | everything                                                 |
+| `editor` | product/post/category/content CRUD, but not site settings  |
+| `viewer` | read-only (dashboard and lists)                            |
+
+The same permissions are enforced by the server functions; the admin UI hides
+nav/buttons and renders a "Forbidden" page for gated routes. Set a role with:
+
+```sh
+cargo cli user-set-role <username> admin|editor|viewer
+```
 
 ### Dev
 

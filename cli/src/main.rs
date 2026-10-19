@@ -35,6 +35,8 @@ enum Commands {
     UserDisable(UserNameArgs),
     /// Re-enable a previously disabled user account.
     UserEnable(UserNameArgs),
+    /// Set a user's role (admin, editor or viewer).
+    UserSetRole(UserSetRoleArgs),
     SettingsInit,
     Migrate,
 }
@@ -48,6 +50,35 @@ struct UserAddArgs {
 #[derive(Args)]
 struct UserNameArgs {
     username: String,
+}
+
+#[derive(Args)]
+struct UserSetRoleArgs {
+    username: String,
+    /// One of: admin, editor, viewer.
+    role: String,
+}
+
+/// Set a user's role. Exits non-zero when the user does not exist and with
+/// status 2 for an invalid role.
+async fn set_role(pool: &deadpool_postgres::Pool, username: &str, role: &str) {
+    let role = match role {
+        "admin" | "editor" | "viewer" => role,
+        _ => {
+            eprintln!("Invalid role {role:?}; expected one of: admin, editor, viewer");
+            std::process::exit(2);
+        }
+    };
+    let db = pool.clone().get().await.unwrap();
+    let updated = queries::user::user_set_role()
+        .bind(&db, &role, &username)
+        .await
+        .unwrap();
+    if updated == 0 {
+        eprintln!("No user named {username:?}");
+        std::process::exit(1);
+    }
+    println!("User {username:?} is now {role}");
 }
 
 /// Enable or disable a user by username. Exits non-zero when no such user
@@ -113,6 +144,9 @@ async fn main() {
         }
         Commands::UserEnable(user) => {
             set_active(&pool, &user.username, true).await;
+        }
+        Commands::UserSetRole(user) => {
+            set_role(&pool, &user.username, &user.role).await;
         }
         Commands::SettingsInit => {
             let db = pool.clone().get().await.unwrap();

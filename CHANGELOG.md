@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- User roles (`"User"."role"`, migration `V4__user_role.sql`): `admin`,
+  `editor` and `viewer`, enforced by the admin server functions and reflected in
+  the UI (hidden nav/actions + a Forbidden page for gated routes). New
+  `cargo cli user-set-role <username> <role>` command (#78).
 - User `deactivated_at` timestamp (`db/migrations/V2__user_deactivated_at.sql`)
   and the `cargo cli user-disable <username>` /
   `cargo cli user-enable <username>` commands, so accounts can be revoked

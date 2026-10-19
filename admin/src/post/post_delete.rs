@@ -54,6 +54,7 @@ type PostDeleteResult = Result<(), PostError>;
 
 #[server(PostDelete, "/api")]
 pub async fn post_delete(id: String) -> Result<PostDeleteResult, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     let db = crate::server::db::use_db().await?;
     let content_id = cornucopia::queries::admin_post::read_content_id()
         .bind(&db, &id)

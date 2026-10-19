@@ -42,6 +42,7 @@ pub async fn category_update(
     // title: String,
     // description: String,
 ) -> Result<Result<(), CategoryError>, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     let db = crate::server::db::use_db().await?;
     let title = "";
     let description = "";
