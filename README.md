@@ -157,11 +157,12 @@ RUST_LOG="debug" cargo cli user-add <username> <password>
 
 ### User management
 
-Users carry an `active` flag (added in migration `V2__user_active.sql`). A
-disabled account cannot log in, and any session it already holds fails closed
-on the next request (`Authentication::load_user` errors for inactive users), so
-disabling takes effect immediately without purging the `Session` table and
-without deleting the account.
+Users carry a nullable `deactivated_at` timestamp (added in migration
+`V2__user_deactivated_at.sql`): `NULL` means active, a timestamp records when the
+account was disabled. A disabled account cannot log in, and any session it
+already holds fails closed on the next request (`Authentication::load_user`
+errors when `deactivated_at` is set), so disabling takes effect immediately
+without purging the `Session` table and without deleting the account.
 
 ```sh
 cargo cli user-disable <username>   # revoke access

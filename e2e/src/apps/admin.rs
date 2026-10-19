@@ -460,10 +460,10 @@ fn case_disabled_user<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
 
         let hash = bcrypt::hash(DEACTIVATABLE_PASSWORD, 4)?;
         ctx.exec_sql(&format!(
-            "INSERT INTO \"User\" (id, username, password, active) \
-             VALUES ('e2e-deactivatable', '{DEACTIVATABLE_USERNAME}', '{hash}', true) \
+            "INSERT INTO \"User\" (id, username, password, deactivated_at) \
+             VALUES ('e2e-deactivatable', '{DEACTIVATABLE_USERNAME}', '{hash}', NULL) \
              ON CONFLICT (id) DO UPDATE \
-             SET password = EXCLUDED.password, active = true"
+             SET password = EXCLUDED.password, deactivated_at = NULL"
         ))
         .await?;
 
@@ -476,7 +476,8 @@ fn case_disabled_user<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
         // Disable it; the already-issued session must be rejected on the next
         // request, so `/` bounces back to the login form.
         ctx.exec_sql(&format!(
-            "UPDATE \"User\" SET active = false WHERE username = '{DEACTIVATABLE_USERNAME}'"
+            "UPDATE \"User\" SET deactivated_at = now() \
+             WHERE username = '{DEACTIVATABLE_USERNAME}'"
         ))
         .await?;
         ctx.goto_for("admin", "/").await?;
@@ -507,7 +508,7 @@ fn case_disabled_user<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
 
         // Re-enabling restores access.
         ctx.exec_sql(&format!(
-            "UPDATE \"User\" SET active = true WHERE username = '{DEACTIVATABLE_USERNAME}'"
+            "UPDATE \"User\" SET deactivated_at = NULL WHERE username = '{DEACTIVATABLE_USERNAME}'"
         ))
         .await?;
         login_as(ctx, DEACTIVATABLE_USERNAME, DEACTIVATABLE_PASSWORD).await?;

@@ -70,7 +70,7 @@ pub async fn login(
         // Disabled accounts cannot authenticate; fail with the same opaque error
         // as a bad password (see `server::auth::load_user` for existing
         // sessions, which fail closed on the next request).
-        true if !user.active => Err(AuthError::NoMatch),
+        true if user.deactivated_at.is_some() => Err(AuthError::NoMatch),
         true => {
             auth.login_user(user.id.clone());
             auth.remember_user(remember.is_some());
@@ -80,7 +80,8 @@ pub async fn login(
             Ok(super::User {
                 id: user.id,
                 username,
-                active: user.active,
+                // `active` is derived: `deactivated_at IS NULL` is enabled.
+                active: user.deactivated_at.is_none(),
             })
         }
         false => Err(AuthError::NoMatch),

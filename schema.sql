@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS "User" (
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "active" BOOLEAN NOT NULL DEFAULT true
+    "deactivated_at" TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS "Session" (
     "id" TEXT NOT NULL PRIMARY KEY,

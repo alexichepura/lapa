@@ -45,14 +45,15 @@ impl Authentication<User, String, Pool> for User {
         // `AuthSession::current_user` at `None`, so an already-issued session
         // stops working on its next request (no bulk session revocation needed)
         // and every guard/predicate below observes a logged-out user.
-        if !user.active {
+        if user.deactivated_at.is_some() {
             return Err(anyhow::anyhow!("user is inactive"));
         }
 
         let user = User {
             id: userid,
             username: user.username,
-            active: user.active,
+            // `active` is derived: `deactivated_at IS NULL` is the enabled state.
+            active: user.deactivated_at.is_none(),
         };
         Ok(user)
     }

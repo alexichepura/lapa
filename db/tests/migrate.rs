@@ -48,8 +48,8 @@ async fn applies_embedded_migrations() {
         .get(0);
     assert_eq!(tables, 1, "Product table was not created");
 
-    // V2: `User.active` exists and defaults to true, so existing users stay
-    // enabled after the upgrade.
+    // V2: `User.deactivated_at` exists and defaults to NULL (active), so
+    // existing users stay enabled after the upgrade.
     client
         .execute(
             "INSERT INTO \"User\" (id, username, password) \
@@ -59,9 +59,15 @@ async fn applies_embedded_migrations() {
         .await
         .expect("inserting a user");
     let active: bool = client
-        .query_one("SELECT active FROM \"User\" WHERE id = 'migrate-user'", &[])
+        .query_one(
+            "SELECT deactivated_at IS NULL FROM \"User\" WHERE id = 'migrate-user'",
+            &[],
+        )
         .await
-        .expect("selecting active")
+        .expect("selecting deactivated_at")
         .get(0);
-    assert!(active, "new users should default to active");
+    assert!(
+        active,
+        "new users should be active (deactivated_at IS NULL)"
+    );
 }

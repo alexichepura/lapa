@@ -15,42 +15,47 @@ pub struct UserSetActiveParams<T1: crate::StringSql> {
 pub struct UserGetAuthByUsername {
     pub id: String,
     pub password: String,
-    pub active: bool,
+    pub deactivated_at: Option<chrono::NaiveDateTime>,
 }
 pub struct UserGetAuthByUsernameBorrowed<'a> {
     pub id: &'a str,
     pub password: &'a str,
-    pub active: bool,
+    pub deactivated_at: Option<chrono::NaiveDateTime>,
 }
 impl<'a> From<UserGetAuthByUsernameBorrowed<'a>> for UserGetAuthByUsername {
     fn from(
         UserGetAuthByUsernameBorrowed {
             id,
             password,
-            active,
+            deactivated_at,
         }: UserGetAuthByUsernameBorrowed<'a>,
     ) -> Self {
         Self {
             id: id.into(),
             password: password.into(),
-            active,
+            deactivated_at,
         }
     }
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct UserFindById {
     pub username: String,
-    pub active: bool,
+    pub deactivated_at: Option<chrono::NaiveDateTime>,
 }
 pub struct UserFindByIdBorrowed<'a> {
     pub username: &'a str,
-    pub active: bool,
+    pub deactivated_at: Option<chrono::NaiveDateTime>,
 }
 impl<'a> From<UserFindByIdBorrowed<'a>> for UserFindById {
-    fn from(UserFindByIdBorrowed { username, active }: UserFindByIdBorrowed<'a>) -> Self {
+    fn from(
+        UserFindByIdBorrowed {
+            username,
+            deactivated_at,
+        }: UserFindByIdBorrowed<'a>,
+    ) -> Self {
         Self {
             username: username.into(),
-            active,
+            deactivated_at,
         }
     }
 }
@@ -255,7 +260,7 @@ impl<
 pub struct UserGetAuthByUsernameStmt(&'static str, Option<tokio_postgres::Statement>);
 pub fn user_get_auth_by_username() -> UserGetAuthByUsernameStmt {
     UserGetAuthByUsernameStmt(
-        "SELECT id, password, active FROM \"User\" WHERE username = $1",
+        "SELECT id, password, deactivated_at FROM \"User\" WHERE username = $1",
         None,
     )
 }
@@ -283,7 +288,7 @@ impl UserGetAuthByUsernameStmt {
                 Ok(UserGetAuthByUsernameBorrowed {
                     id: row.try_get(0)?,
                     password: row.try_get(1)?,
-                    active: row.try_get(2)?,
+                    deactivated_at: row.try_get(2)?,
                 })
             },
             mapper: |it| UserGetAuthByUsername::from(it),
@@ -292,7 +297,10 @@ impl UserGetAuthByUsernameStmt {
 }
 pub struct UserFindByIdStmt(&'static str, Option<tokio_postgres::Statement>);
 pub fn user_find_by_id() -> UserFindByIdStmt {
-    UserFindByIdStmt("SELECT username, active FROM \"User\" WHERE id = $1", None)
+    UserFindByIdStmt(
+        "SELECT username, deactivated_at FROM \"User\" WHERE id = $1",
+        None,
+    )
 }
 impl UserFindByIdStmt {
     pub async fn prepare<'a, C: GenericClient>(
@@ -316,7 +324,7 @@ impl UserFindByIdStmt {
                 |row: &tokio_postgres::Row| -> Result<UserFindByIdBorrowed, tokio_postgres::Error> {
                     Ok(UserFindByIdBorrowed {
                         username: row.try_get(0)?,
-                        active: row.try_get(1)?,
+                        deactivated_at: row.try_get(1)?,
                     })
                 },
             mapper: |it| UserFindById::from(it),
@@ -325,7 +333,10 @@ impl UserFindByIdStmt {
 }
 pub struct UserSetActiveStmt(&'static str, Option<tokio_postgres::Statement>);
 pub fn user_set_active() -> UserSetActiveStmt {
-    UserSetActiveStmt("UPDATE \"User\" SET active = $1 WHERE username = $2", None)
+    UserSetActiveStmt(
+        "UPDATE \"User\" SET deactivated_at = CASE WHEN $1 THEN NULL ELSE COALESCE(deactivated_at, now()) END WHERE username = $2",
+        None,
+    )
 }
 impl UserSetActiveStmt {
     pub async fn prepare<'a, C: GenericClient>(
