@@ -16,11 +16,9 @@ playwright/.cache/
 e2e/snapshots/**/*-actual.png
 e2e/snapshots/**/*-diff.png
 
-site.db
-site.db-journal
-ops/cert
-ops/sozu.toml
 .env
+backups/
+**/.DS_Store
 
 image_upload/content/*
 image_upload/post_hero/*

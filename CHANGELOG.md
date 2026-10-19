@@ -26,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Ops scripts now target the systemd/ferron 3 layout (`/home/lapa-server`, units
+  `lapa-web`/`lapa-admin`, ports 8110/8111): `build-upload.sh`,
+  `services-deploy.sh`, `restart.sh`, `ferron-deploy.sh` + `ferron.conf`, and a
+  Postgres-aware `backup.sh` / `backup-upload.sh` (DB + `image_upload`, 30-day
+  retention). `.env.example` and the systemd units were updated
+  (`WorkingDirectory`, image paths, `LEPTOS_OUTPUT_NAME`).
 - Admin auth now honors the user `deactivated_at` timestamp (exposed as a
   derived `active` flag): a disabled user cannot log in, and existing sessions
   are rejected on their next request and purged by `user-disable` (#72). A
@@ -47,6 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in `*.module.css` files and are referenced through hashed class constants, the
   bundle is produced by `stylance` and inlined by cargo-leptos Lightning CSS
   bundling (`style-bundle = true`). No more `dart-sass` step.
+
+### Removed
+
+- Dead Prisma code (`admin/src/category/category_html.rs`,
+  `admin/src/auth/auth_signup.rs`), `ops/prisma-upload.sh`, the old SQLite
+  `site.db`, and the Ferron 2 `ops/ferron.kdl` (replaced by `ops/ferron.conf`).
 
 ### Fixed
 

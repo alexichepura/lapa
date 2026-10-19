@@ -56,7 +56,7 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
   - SEO site
   - admin dashboard
   - CLI with clap: migrate, settings-init, user-add, user-disable, user-enable, user-set-role
-  - ops scripts: build, upload, run (site, admin, cli)
+  - ops scripts: build/deploy, systemd units, ferron config, migrations, backups
 - site
   - SSR + SPA hydrated
   - open graph meta tags
@@ -203,8 +203,7 @@ RUST_LOG="info,tower_http=debug,site=debug" cargo leptos watch -p site
 
 ### Prod
 
-See relevant tutorial and demo project.
-<https://github.com/alexichepura/leptos_axum_prisma_sozu>
+See the tutorial/demo video.
 <https://www.youtube.com/watch?v=KLg8Hcd3K_U>
 
 ```sh
@@ -221,17 +220,40 @@ cargo leptos build --release --features="prod"
 
 ### Ops
 
-./ops folder contains example scripts to prepare production build and deploy it on server.
-Check .env.example
-Requires <https://github.com/ryanfowler/precompress>
+The `ops/` folder contains example scripts to build, deploy and operate the
+server. Copy `.env.example` to `.env` and adjust the host, paths and domains.
+Requires <https://github.com/ryanfowler/precompress>, `stylance` and
+`cargo-leptos`.
+
+Server layout assumed by the scripts and systemd units:
+
+- `/home/lapa-server` — `SERVER_DIR`, holds `.env`
+- `/home/lapa-server/{web,admin}/public` — `LEPTOS_SITE_ROOT`
+- `/home/lapa-server/image_upload`, `/home/lapa-server/image_convert`
+- `/usr/bin/lapa_web`, `/usr/bin/lapa_admin` — binaries
+- services `lapa-web` (8110) and `lapa-admin` (8111), fronted by ferron 3
+
+One-time setup: Postgres running, `/home/lapa-server/.env` with `PG__URL` (read
+by `dotenvy`; the units set `WorkingDirectory`), service users with access to
+`SERVER_DIR` and write access to the image dirs, then
+`./ops/services-deploy.sh` and `./ops/ferron-deploy.sh`.
 
 ```sh
-./ops/site-deploy.sh && ./ops/site-run.sh # build, deploy and run site
-./ops/admin-deploy.sh && ./ops/admin-run.sh # build, deploy and run admin
+./ops/build-upload.sh web    # build + upload site, restart lapa-web
+./ops/build-upload.sh admin  # build + upload admin, restart lapa-admin
+./ops/build-upload.sh cli    # upload the CLI binary
+./ops/cli-migrate.sh         # run migrations on the server
+./ops/restart.sh web|admin
+./ops/services-deploy.sh     # install/restart the systemd units
+./ops/ferron-deploy.sh       # validate + install ferron.conf and reload
 ```
 
+Backups (Postgres + `image_upload/`, 30-day retention by default):
+
 ```sh
-./ops/cli-deploy.sh # upload cli to server
+./ops/backup.sh                  # DB + originals into ./backups
+./ops/backup.sh --with-derived   # also image_convert/
+./ops/backup-upload.sh backups/lapa-<timestamp>.dump  # restore (destructive)
 ```
 
 ### E2E tests
@@ -272,7 +294,7 @@ bundling (cargo-leptos `style-bundle = true`).
 - Regenerate the bundle with `stylance .` (site) / `stylance admin` (admin), or
   keep `stylance --watch <crate>` running while editing. The generated
   `style/stylance.css` is committed so a plain `cargo leptos build` works
-  without the CLI; `ops/*-deploy.sh` and the e2e harness refresh it for you.
+  without the CLI; `ops/build-upload.sh` and the e2e harness refresh it for you.
 
 Native CSS nesting, `@media`, `@container` and `@layer` are all supported;
 Lightning CSS lowers them for the configured `browserquery`.
