@@ -36,6 +36,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rendering no longer panics on a non-UTF-8 `User-Agent` header.
 - Admin dashboard stats work again: each site page render is recorded in the
   `Ssr` table and the stats queries aggregate in SQL.
+- Uploaded product images now get `order = current image count` instead of the
+  column default `0`, so a new upload lands last in the product image grid
+  instead of tying with existing images (#26).
 
 ### Security
 
