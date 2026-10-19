@@ -11,6 +11,11 @@ use serde::{Deserialize, Serialize};
 pub struct User {
     pub id: String,
     pub username: String,
+    /// Whether the account is enabled, derived from `deactivated_at`
+    /// (`deactivated_at IS NULL` means enabled). Disabled users cannot
+    /// authenticate and their existing sessions fail closed (see
+    /// `server::auth::load_user`).
+    pub active: bool,
 }
 
 type UserSignal = RwSignal<Option<User>>;

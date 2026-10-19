@@ -67,6 +67,10 @@ pub async fn login(
     let res = match bcrypt::verify(password, &user.password)
         .map_err(|e| ServerFnError::new(e.to_string()))?
     {
+        // Disabled accounts cannot authenticate; fail with the same opaque error
+        // as a bad password (see `server::auth::load_user` for existing
+        // sessions, which fail closed on the next request).
+        true if user.deactivated_at.is_some() => Err(AuthError::NoMatch),
         true => {
             auth.login_user(user.id.clone());
             auth.remember_user(remember.is_some());
@@ -76,6 +80,8 @@ pub async fn login(
             Ok(super::User {
                 id: user.id,
                 username,
+                // `active` is derived: `deactivated_at IS NULL` is enabled.
+                active: user.deactivated_at.is_none(),
             })
         }
         false => Err(AuthError::NoMatch),

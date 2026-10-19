@@ -55,7 +55,7 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 - project
   - SEO site
   - admin dashboard
-  - CLI with clap: migrate, settings-init, user-add
+  - CLI with clap: migrate, settings-init, user-add, user-disable, user-enable
   - ops scripts: build, upload, run (site, admin, cli)
 - site
   - SSR + SPA hydrated
@@ -152,8 +152,24 @@ and running `cargo cli migrate` again.
 
 ```sh
 RUST_LOG="debug" cargo cli settings-init
-RUST_LOG="debug" cargo cli user-add
+RUST_LOG="debug" cargo cli user-add <username> <password>
 ```
+
+### User management
+
+Users carry a nullable `deactivated_at` timestamp (added in migration
+`V2__user_deactivated_at.sql`): `NULL` means active, a timestamp records when the
+account was disabled. A disabled account cannot log in, and any session it
+already holds fails closed on the next request (`Authentication::load_user`
+errors when `deactivated_at` is set), so disabling takes effect immediately
+without purging the `Session` table and without deleting the account.
+
+```sh
+cargo cli user-disable <username>   # revoke access
+cargo cli user-enable <username>    # restore access
+```
+
+Both commands exit non-zero when no such user exists.
 
 ### Dev
 

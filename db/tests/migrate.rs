@@ -35,7 +35,7 @@ async fn applies_embedded_migrations() {
         .await
         .expect("missing refinery_schema_history")
         .get(0);
-    assert!(count >= 1, "expected at least one applied migration");
+    assert!(count >= 2, "expected both migrations to be applied");
 
     let tables: i64 = client
         .query_one(
@@ -47,4 +47,27 @@ async fn applies_embedded_migrations() {
         .expect("query failed")
         .get(0);
     assert_eq!(tables, 1, "Product table was not created");
+
+    // V2: `User.deactivated_at` exists and defaults to NULL (active), so
+    // existing users stay enabled after the upgrade.
+    client
+        .execute(
+            "INSERT INTO \"User\" (id, username, password) \
+             VALUES ('migrate-user', 'migrate-user', 'x')",
+            &[],
+        )
+        .await
+        .expect("inserting a user");
+    let active: bool = client
+        .query_one(
+            "SELECT deactivated_at IS NULL FROM \"User\" WHERE id = 'migrate-user'",
+            &[],
+        )
+        .await
+        .expect("selecting deactivated_at")
+        .get(0);
+    assert!(
+        active,
+        "new users should be active (deactivated_at IS NULL)"
+    );
 }
