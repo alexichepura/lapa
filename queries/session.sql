@@ -1,34 +1,25 @@
---! delete_by_expiry
-DELETE
-FROM "Session"
-WHERE (expires IS NULL OR expires < NOW())
-RETURNING id;
+-- Queries for the tower-sessions `SessionStore`. The `session` column holds the
+-- JSON-encoded session data; `expires` is the record expiry; `user_id` is the
+-- axum-login user id extracted on save (used to purge a user's sessions).
 
---! count
-SELECT COUNT(*)
-FROM "Session";
-
---! store
-INSERT INTO "Session" (id, session, expires)
-    VALUES (:id, :session, :expires)
-ON CONFLICT(id) DO UPDATE SET
+--! store (user_id?)
+INSERT INTO "Session" (id, session, expires, user_id)
+    VALUES (:id, :session, :expires, :user_id)
+ON CONFLICT (id) DO UPDATE SET
+    session = EXCLUDED.session,
     expires = EXCLUDED.expires,
-    session = EXCLUDED.session;
+    user_id = EXCLUDED.user_id;
 
 --! load
-SELECT session FROM "Session"
-WHERE id = :id AND (expires IS NULL OR expires > NOW());
+SELECT session, expires FROM "Session"
+WHERE id = :id AND expires > NOW();
 
 --! delete_one_by_id
 DELETE FROM "Session" WHERE id = :id;
 
---! exists
-SELECT COUNT(*) FROM "Session"
-WHERE id = :id AND (expires IS NULL OR expires > NOW());
+--! delete_expired
+DELETE FROM "Session" WHERE expires IS NOT NULL AND expires < NOW();
 
---! delete_all
-TRUNCATE "Session";
-
---! get_ids
-SELECT id FROM "Session"
-WHERE (expires IS NULL OR expires > NOW());
+--! delete_by_username
+DELETE FROM "Session"
+WHERE user_id = (SELECT id FROM "User" WHERE username = :username);

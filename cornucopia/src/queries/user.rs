@@ -40,21 +40,25 @@ impl<'a> From<UserGetAuthByUsernameBorrowed<'a>> for UserGetAuthByUsername {
 #[derive(Debug, Clone, PartialEq)]
 pub struct UserFindById {
     pub username: String,
+    pub password: String,
     pub deactivated_at: Option<chrono::NaiveDateTime>,
 }
 pub struct UserFindByIdBorrowed<'a> {
     pub username: &'a str,
+    pub password: &'a str,
     pub deactivated_at: Option<chrono::NaiveDateTime>,
 }
 impl<'a> From<UserFindByIdBorrowed<'a>> for UserFindById {
     fn from(
         UserFindByIdBorrowed {
             username,
+            password,
             deactivated_at,
         }: UserFindByIdBorrowed<'a>,
     ) -> Self {
         Self {
             username: username.into(),
+            password: password.into(),
             deactivated_at,
         }
     }
@@ -298,7 +302,7 @@ impl UserGetAuthByUsernameStmt {
 pub struct UserFindByIdStmt(&'static str, Option<tokio_postgres::Statement>);
 pub fn user_find_by_id() -> UserFindByIdStmt {
     UserFindByIdStmt(
-        "SELECT username, deactivated_at FROM \"User\" WHERE id = $1",
+        "SELECT username, password, deactivated_at FROM \"User\" WHERE id = $1",
         None,
     )
 }
@@ -324,7 +328,8 @@ impl UserFindByIdStmt {
                 |row: &tokio_postgres::Row| -> Result<UserFindByIdBorrowed, tokio_postgres::Error> {
                     Ok(UserFindByIdBorrowed {
                         username: row.try_get(0)?,
-                        deactivated_at: row.try_get(1)?,
+                        password: row.try_get(1)?,
+                        deactivated_at: row.try_get(2)?,
                     })
                 },
             mapper: |it| UserFindById::from(it),

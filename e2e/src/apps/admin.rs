@@ -36,6 +36,10 @@ impl AppUnderTest for AdminApp {
                 run: case_login_flow,
             },
             Case {
+                name: "login-remember",
+                run: case_login_remember,
+            },
+            Case {
                 name: "pages-render",
                 run: case_pages_render,
             },
@@ -70,6 +74,10 @@ impl AppUnderTest for AdminApp {
             Case {
                 name: "disabled-user",
                 run: case_disabled_user,
+            },
+            Case {
+                name: "db-error-500",
+                run: case_db_error_returns_500,
             },
         ]
     }
@@ -117,6 +125,43 @@ fn case_login_flow<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
             .to_be_visible()
             .await?;
         ctx.snapshot("dashboard").await?;
+        Ok(())
+    })
+}
+
+/// "Remember me?" gives the session a long-lived expiry; the default is a
+/// browser-session cookie.
+fn case_login_remember<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        logout_if_logged_in(ctx).await?;
+
+        ctx.goto_for("admin", "/").await?;
+        ctx.page
+            .locator("input[name=username]")
+            .fill(seed::ADMIN_USERNAME, None)
+            .await?;
+        ctx.page
+            .locator("input[name=password]")
+            .fill(seed::ADMIN_PASSWORD, None)
+            .await?;
+        ctx.page.locator("input[name=remember]").click(None).await?;
+        submit(ctx, "Login").await?;
+
+        wait_dashboard(ctx).await?;
+
+        // `Remember me?` sets a ~30 day expiry; without it the record uses the
+        // 2-week default. Assert the persisted record is in the longer window.
+        ctx.exec_sql(
+            "DO $$ BEGIN \
+                 IF NOT EXISTS (SELECT 1 FROM \"Session\" \
+                     WHERE expires > now() + interval '29 days') \
+                 THEN RAISE EXCEPTION 'remember-me session did not get a long expiry'; \
+                 END IF; \
+             END $$;",
+        )
+        .await?;
+
+        logout_if_logged_in(ctx).await?;
         Ok(())
     })
 }
@@ -522,6 +567,42 @@ fn case_disabled_user<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     })
 }
 
+/// A database failure while loading the session yields a 500, not a silent
+/// logout (axum-login maps `AuthnBackend` errors to 500).
+fn case_db_error_returns_500<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        login(ctx).await?;
+
+        // The intentional failure is logged at ERROR level; allow those lines so
+        // the suite's fatal-log sweep does not flag them.
+        ctx.allow_server_error("could not create auth session from session");
+        ctx.allow_server_error("Status code: 500 Internal Server Error");
+
+        // Make `get_user` fail by hiding the table while the session loads.
+        ctx.exec_sql("ALTER TABLE \"User\" RENAME TO \"User_unavailable\"")
+            .await?;
+        let status = ctx.goto_status_for("admin", "/").await;
+        // Always restore before asserting so a failure cannot poison later runs.
+        let restored = ctx
+            .exec_sql("ALTER TABLE \"User_unavailable\" RENAME TO \"User\"")
+            .await;
+        restored.expect("restoring the User table");
+        let status = status?;
+        anyhow::ensure!(
+            status == 500,
+            "DB failure during session load returned {status}, want 500"
+        );
+
+        // The session survives the blip.
+        ctx.goto_for("admin", "/").await?;
+        expect(ctx.page.locator("h1"))
+            .to_contain_text("Dashboard")
+            .await?;
+        logout_if_logged_in(ctx).await?;
+        Ok(())
+    })
+}
+
 // --- helpers -------------------------------------------------------------
 /// Log in through the form as the seeded admin, or no-op when already
 /// authenticated (cases share one browser context).
@@ -608,6 +689,17 @@ async fn submit(ctx: &CaseCtx, value: &str) -> anyhow::Result<()> {
     let selector = format!("input[type=submit][value={value:?}]");
     ctx.page.locator(selector).click(None).await?;
     Ok(())
+}
+
+/// Poll until the dashboard heading is rendered.
+async fn wait_dashboard(ctx: &CaseCtx) -> anyhow::Result<()> {
+    for _ in 0..80 {
+        if dashboard_visible(ctx).await? {
+            return Ok(());
+        }
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+    anyhow::bail!("never reached the dashboard (url={})", ctx.page.url())
 }
 
 /// The dashboard's own `<h1>` (the nav also has a "Dashboard" link).

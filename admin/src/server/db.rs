@@ -8,6 +8,9 @@ pub fn use_pool() -> Result<Pool, ServerFnError> {
 }
 pub async fn use_db() -> Result<Object, ServerFnError> {
     let pool = use_pool()?;
-    let client = pool.clone().get().await.unwrap();
+    let client = pool
+        .get()
+        .await
+        .map_err(|e| ServerFnError::new(e.to_string()))?;
     Ok(client)
 }

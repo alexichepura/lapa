@@ -35,7 +35,7 @@ async fn applies_embedded_migrations() {
         .await
         .expect("missing refinery_schema_history")
         .get(0);
-    assert!(count >= 2, "expected both migrations to be applied");
+    assert!(count >= 3, "expected all migrations to be applied");
 
     let tables: i64 = client
         .query_one(
@@ -69,5 +69,20 @@ async fn applies_embedded_migrations() {
     assert!(
         active,
         "new users should be active (deactivated_at IS NULL)"
+    );
+
+    // V3: `Session.user_id` exists (used to purge a user's sessions).
+    let session_user_id_columns: i64 = client
+        .query_one(
+            "SELECT COUNT(*) FROM information_schema.columns \
+             WHERE table_name = 'Session' AND column_name = 'user_id'",
+            &[],
+        )
+        .await
+        .expect("query failed")
+        .get(0);
+    assert_eq!(
+        session_user_id_columns, 1,
+        "Session.user_id was not created"
     );
 }

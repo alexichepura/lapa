@@ -160,12 +160,12 @@ RUST_LOG="debug" cargo cli user-add <username> <password>
 Users carry a nullable `deactivated_at` timestamp (added in migration
 `V2__user_deactivated_at.sql`): `NULL` means active, a timestamp records when the
 account was disabled. A disabled account cannot log in, and any session it
-already holds fails closed on the next request (`Authentication::load_user`
-errors when `deactivated_at` is set), so disabling takes effect immediately
-without purging the `Session` table and without deleting the account.
+already holds is rejected on the next request (the `axum-login` backend returns
+no user for a disabled account), so disabling takes effect immediately without
+deleting the account.
 
 ```sh
-cargo cli user-disable <username>   # revoke access
+cargo cli user-disable <username>   # revoke access (also purges their sessions)
 cargo cli user-enable <username>    # restore access
 ```
 

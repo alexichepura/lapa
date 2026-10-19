@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS "Session" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "session" TEXT NOT NULL,
-    "expires" TIMESTAMP
+    "expires" TIMESTAMP,
+    "user_id" TEXT
 );
 CREATE TABLE IF NOT EXISTS "Settings" (
     "id" TEXT NOT NULL PRIMARY KEY,
@@ -80,6 +81,7 @@ CREATE TABLE IF NOT EXISTS "Post" (
     CONSTRAINT "Post_content_id_fkey" FOREIGN KEY ("content_id") REFERENCES "Content" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+CREATE INDEX "Session_user_id_idx" ON "Session"("user_id");
 CREATE UNIQUE INDEX "Product_slug_key" ON "Post"("slug");
 CREATE UNIQUE INDEX "Category_slug_key" ON "PostCategory"("slug");
 CREATE UNIQUE INDEX "Post_content_id_key" ON "Post"("content_id");

@@ -31,8 +31,10 @@ pub fn Logout() -> impl IntoView {
 
 #[server(Logout, "/auth")]
 pub async fn logout(skip_redirect: Option<String>) -> Result<(), ServerFnError> {
-    let auth = crate::server::use_auth()?;
-    auth.logout_user();
+    let mut auth = crate::server::use_auth()?;
+    auth.logout()
+        .await
+        .map_err(|e| ServerFnError::new(e.to_string()))?;
     if skip_redirect.is_none() {
         leptos_axum::redirect("/");
     }

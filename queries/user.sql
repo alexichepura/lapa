@@ -13,6 +13,7 @@ WHERE username = :username;
 --! user_find_by_id : (deactivated_at?)
 SELECT
     username,
+    password,
     deactivated_at
 FROM "User"
 WHERE id = :id;

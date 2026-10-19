@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use anyhow::Result;
@@ -125,6 +126,7 @@ impl Session {
         };
 
         println!("running `{}` cases…", suite.name());
+        let allowed_server_errors: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(Vec::new()));
         for case in suite.cases() {
             if let Some(filter) = filter
                 && !case.name.contains(filter)
@@ -139,6 +141,7 @@ impl Session {
                 artifacts_dir: artifacts.clone(),
                 database_url: self.database_url.clone(),
                 update,
+                allowed_server_errors: allowed_server_errors.clone(),
             };
             match (case.run)(&ctx).await {
                 Ok(()) => {
@@ -156,8 +159,18 @@ impl Session {
 
         // Give the log readers a moment to drain, then surface fatal server logs.
         tokio::time::sleep(Duration::from_millis(300)).await;
+        let allowed_server_errors = allowed_server_errors.lock().unwrap().clone();
         for (name, server) in &self.servers {
-            let fatal = server.log.errors();
+            let fatal: Vec<String> = server
+                .log
+                .errors()
+                .into_iter()
+                .filter(|line| {
+                    !allowed_server_errors
+                        .iter()
+                        .any(|allowed| line.contains(allowed.as_str()))
+                })
+                .collect();
             if !fatal.is_empty() {
                 let detail = fatal.join("\n  ");
                 println!("  FAIL  server-log[{name}]: {detail}");

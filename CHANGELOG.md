@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and the `cargo cli user-disable <username>` /
   `cargo cli user-enable <username>` commands, so accounts can be revoked
   without deleting them and losing history, and the disable time is recorded
-  (#72).
+  (#72). Disabling also purges the user's sessions (`Session.user_id`,
+  `db/migrations/V3__session_user_id.sql`).
 - Database schema migrations with [refinery](https://docs.rs/refinery),
   embedded in the `cli` binary and applied with `cargo cli migrate`
   (`db/migrations/`, `db` crate). `V1__init.sql` mirrors `schema.sql`, which is
@@ -22,10 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Admin auth now honors the user `deactivated_at` timestamp (exposed as a
-  derived `active` flag): `Authentication::is_active` reflects it and
-  `server_fn_private` requires both `is_authenticated()` and `is_active()`. A
-  disabled user cannot log in and any session they already hold is rejected on
-  the next request (fails closed), without touching the `Session` table (#72).
+  derived `active` flag): a disabled user cannot log in, and existing sessions
+  are rejected on their next request and purged by `user-disable` (#72). A
+  transient DB/pool error during session load now yields a logged 500 instead of
+  silently logging everyone out.
+- Admin session/auth stack migrated from `axum_session` + `axum_session_auth` to
+  [`axum-login`](https://github.com/maxcountryman/axum-login) +
+  [`tower-sessions`](https://github.com/maxcountryman/tower-sessions), with a
+  Postgres-backed `SessionStore` over the existing `Session` table
+  (`admin/src/server/{auth,session}.rs`). "Remember me?" is preserved via a
+  per-session expiry. Existing `Session` rows are cleared on migrate (one-time
+  re-login).
 - Admin image uploads (product and content) now send the file as a real
   `multipart/form-data` field through Leptos server functions
   (`input = MultipartFormData` / `MultipartData`), replacing the previous
