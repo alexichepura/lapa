@@ -15,6 +15,7 @@ pub struct ImageResult {
 pub async fn content_image_upload(
     data: MultipartData,
 ) -> Result<Result<ImageResult, ImageUploadError>, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     use crate::server::{db, serverr_400, use_image_config};
     use crate::upload::MAX_IMAGE_BYTES;
     let db = db::use_db().await?;

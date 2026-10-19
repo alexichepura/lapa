@@ -8,7 +8,7 @@ use leptos_meta::*;
 use leptos_router::*;
 
 use crate::{
-    auth::{Login, User, use_user_signal},
+    auth::{Login, Permission, RequirePermission, User, use_user_signal},
     category::{CategoryList, CategoryNew, CategoryPage},
     home::HomePage,
     layout::Layout,
@@ -77,21 +77,49 @@ pub fn AdminRoutes(user_signal: RwSignal<Option<User>>) -> impl IntoView {
                 view=LayoutWithUser
             >
                 <Route path=StaticSegment("/") view=HomePage />
-                <Route path=StaticSegment("settings") view=Settings />
+                <Route path=StaticSegment("settings") view=|| view! {
+                    <RequirePermission permission=Permission::SettingsManage>
+                        <Settings />
+                    </RequirePermission>
+                } />
                 <ParentRoute path=StaticSegment("product") view=|| view! { <Outlet /> }>
                     <Route path=StaticSegment("") view=ProductList />
-                    <Route path=StaticSegment("new") view=ProductNew />
-                    <Route path=ParamSegment("id") view=ProductPage />
+                    <Route path=StaticSegment("new") view=|| view! {
+                        <RequirePermission permission=Permission::ContentWrite>
+                            <ProductNew />
+                        </RequirePermission>
+                    } />
+                    <Route path=ParamSegment("id") view=|| view! {
+                        <RequirePermission permission=Permission::ContentWrite>
+                            <ProductPage />
+                        </RequirePermission>
+                    } />
                 </ParentRoute>
                 <ParentRoute path=StaticSegment("post-category") view=|| view! { <Outlet /> }>
                     <Route path=StaticSegment("") view=CategoryList />
-                    <Route path=StaticSegment("new") view=CategoryNew />
-                    <Route path=ParamSegment("id") view=CategoryPage />
+                    <Route path=StaticSegment("new") view=|| view! {
+                        <RequirePermission permission=Permission::ContentWrite>
+                            <CategoryNew />
+                        </RequirePermission>
+                    } />
+                    <Route path=ParamSegment("id") view=|| view! {
+                        <RequirePermission permission=Permission::ContentWrite>
+                            <CategoryPage />
+                        </RequirePermission>
+                    } />
                 </ParentRoute>
                 <ParentRoute path=StaticSegment("post") view=|| view! { <Outlet /> }>
                     <Route path=StaticSegment("") view=PostList />
-                    <Route path=StaticSegment("create") view=PostCreate />
-                    <Route path=ParamSegment("id") view=PostPage />
+                    <Route path=StaticSegment("create") view=|| view! {
+                        <RequirePermission permission=Permission::ContentWrite>
+                            <PostCreate />
+                        </RequirePermission>
+                    } />
+                    <Route path=ParamSegment("id") view=|| view! {
+                        <RequirePermission permission=Permission::ContentWrite>
+                            <PostPage />
+                        </RequirePermission>
+                    } />
                 </ParentRoute>
             // <ParentRoute path=StaticSegment("content") view=|| view! { <Outlet /> }>
             // <Route path=StaticSegment("") view=ContentList />

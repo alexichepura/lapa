@@ -7,6 +7,7 @@ pub async fn content_json_update(
     content_id: String,
     json: String,
 ) -> Result<Result<(), ContentError>, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     use content::{CdnImageFormat, CdnImageSize, SlateBlock, SlateBlocks};
     let mut db = crate::server::db::use_db().await?;
     let slate_model = serde_json::from_str::<SlateBlocks>(&json)

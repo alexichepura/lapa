@@ -45,6 +45,7 @@ pub async fn settings_site_update(
     robots_txt: String,
     site_url: String,
 ) -> Result<Result<(), SettingsError>, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::SettingsManage).await?;
     let db = crate::server::db::use_db().await?;
     let settings = cornucopia::queries::settings::settings()
         .bind(&db)

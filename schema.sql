@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS "User" (
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "deactivated_at" TIMESTAMP
+    "deactivated_at" TIMESTAMP,
+    "role" TEXT NOT NULL DEFAULT 'admin',
+    CONSTRAINT "User_role_check" CHECK ("role" IN ('admin', 'editor', 'viewer'))
 );
 CREATE TABLE IF NOT EXISTS "Session" (
     "id" TEXT NOT NULL PRIMARY KEY,

@@ -68,6 +68,7 @@ type ImageDeleteResult = Result<(), AppError>;
 
 #[server(ImageDelete, "/api")]
 pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     let db = crate::server::db::use_db().await?;
     let ext = cornucopia::queries::admin_product_image::read_ext()
         .bind(&db, &id)
@@ -109,6 +110,7 @@ pub async fn delete_image(id: String) -> Result<ImageDeleteResult, ServerFnError
 type ImageUpdateResult = Result<(), AppError>;
 #[server(ImageUpdate, "/api")]
 pub async fn image_update_alt(id: String, alt: String) -> Result<ImageUpdateResult, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     let db = crate::server::db::use_db().await?;
     let updated_count = cornucopia::queries::product_image::update_alt()
         .bind(&db, &alt, &id)

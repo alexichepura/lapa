@@ -56,6 +56,7 @@ pub async fn post_create(
     h1: String,
     category_id: String,
 ) -> Result<Result<String, PostError>, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     use cornucopia::queries;
     let mut db = crate::server::db::use_db().await?;
     let id = cuid2::create_id();

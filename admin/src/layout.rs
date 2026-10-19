@@ -1,13 +1,14 @@
 use leptos::{html::Nav, prelude::*};
 use leptos_router::components::{A, Outlet};
 
-use crate::auth::{Logout, User};
+use crate::auth::{Logout, Permission, User};
 
 stylance::import_crate_style!(style, "src/layout.module.css");
 
 #[component]
 pub fn Layout(user: User) -> impl IntoView {
     let el_blur: NodeRef<Nav> = NodeRef::new();
+    let can_manage_settings = user.can(Permission::SettingsManage);
 
     let blur = move |_| {
         let _ = el_blur.get().expect("<nav> to exist").blur();
@@ -30,7 +31,9 @@ pub fn Layout(user: User) -> impl IntoView {
                     <A href="/product">Product</A>
                     <A href="/post-category">Post Category</A>
                     <A href="/post">Post</A>
-                    <A href="/settings">Settings</A>
+                    <Show when=move || can_manage_settings fallback=|| ()>
+                        <A href="/settings">Settings</A>
+                    </Show>
                 </nav>
             </div>
             <main>

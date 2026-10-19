@@ -11,16 +11,23 @@ pub struct UserSetActiveParams<T1: crate::StringSql> {
     pub active: bool,
     pub username: T1,
 }
+#[derive(Debug)]
+pub struct UserSetRoleParams<T1: crate::StringSql, T2: crate::StringSql> {
+    pub role: T1,
+    pub username: T2,
+}
 #[derive(Debug, Clone, PartialEq)]
 pub struct UserGetAuthByUsername {
     pub id: String,
     pub password: String,
     pub deactivated_at: Option<chrono::NaiveDateTime>,
+    pub role: String,
 }
 pub struct UserGetAuthByUsernameBorrowed<'a> {
     pub id: &'a str,
     pub password: &'a str,
     pub deactivated_at: Option<chrono::NaiveDateTime>,
+    pub role: &'a str,
 }
 impl<'a> From<UserGetAuthByUsernameBorrowed<'a>> for UserGetAuthByUsername {
     fn from(
@@ -28,12 +35,14 @@ impl<'a> From<UserGetAuthByUsernameBorrowed<'a>> for UserGetAuthByUsername {
             id,
             password,
             deactivated_at,
+            role,
         }: UserGetAuthByUsernameBorrowed<'a>,
     ) -> Self {
         Self {
             id: id.into(),
             password: password.into(),
             deactivated_at,
+            role: role.into(),
         }
     }
 }
@@ -42,11 +51,13 @@ pub struct UserFindById {
     pub username: String,
     pub password: String,
     pub deactivated_at: Option<chrono::NaiveDateTime>,
+    pub role: String,
 }
 pub struct UserFindByIdBorrowed<'a> {
     pub username: &'a str,
     pub password: &'a str,
     pub deactivated_at: Option<chrono::NaiveDateTime>,
+    pub role: &'a str,
 }
 impl<'a> From<UserFindByIdBorrowed<'a>> for UserFindById {
     fn from(
@@ -54,12 +65,14 @@ impl<'a> From<UserFindByIdBorrowed<'a>> for UserFindById {
             username,
             password,
             deactivated_at,
+            role,
         }: UserFindByIdBorrowed<'a>,
     ) -> Self {
         Self {
             username: username.into(),
             password: password.into(),
             deactivated_at,
+            role: role.into(),
         }
     }
 }
@@ -264,7 +277,7 @@ impl<
 pub struct UserGetAuthByUsernameStmt(&'static str, Option<tokio_postgres::Statement>);
 pub fn user_get_auth_by_username() -> UserGetAuthByUsernameStmt {
     UserGetAuthByUsernameStmt(
-        "SELECT id, password, deactivated_at FROM \"User\" WHERE username = $1",
+        "SELECT id, password, deactivated_at, role FROM \"User\" WHERE username = $1",
         None,
     )
 }
@@ -293,6 +306,7 @@ impl UserGetAuthByUsernameStmt {
                     id: row.try_get(0)?,
                     password: row.try_get(1)?,
                     deactivated_at: row.try_get(2)?,
+                    role: row.try_get(3)?,
                 })
             },
             mapper: |it| UserGetAuthByUsername::from(it),
@@ -302,7 +316,7 @@ impl UserGetAuthByUsernameStmt {
 pub struct UserFindByIdStmt(&'static str, Option<tokio_postgres::Statement>);
 pub fn user_find_by_id() -> UserFindByIdStmt {
     UserFindByIdStmt(
-        "SELECT username, password, deactivated_at FROM \"User\" WHERE id = $1",
+        "SELECT username, password, deactivated_at, role FROM \"User\" WHERE id = $1",
         None,
     )
 }
@@ -330,6 +344,7 @@ impl UserFindByIdStmt {
                         username: row.try_get(0)?,
                         password: row.try_get(1)?,
                         deactivated_at: row.try_get(2)?,
+                        role: row.try_get(3)?,
                     })
                 },
             mapper: |it| UserFindById::from(it),
@@ -380,5 +395,48 @@ impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql>
         Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
     > {
         Box::pin(self.bind(client, &params.active, &params.username))
+    }
+}
+pub struct UserSetRoleStmt(&'static str, Option<tokio_postgres::Statement>);
+pub fn user_set_role() -> UserSetRoleStmt {
+    UserSetRoleStmt("UPDATE \"User\" SET role = $1 WHERE username = $2", None)
+}
+impl UserSetRoleStmt {
+    pub async fn prepare<'a, C: GenericClient>(
+        mut self,
+        client: &'a C,
+    ) -> Result<Self, tokio_postgres::Error> {
+        self.1 = Some(client.prepare(self.0).await?);
+        Ok(self)
+    }
+    pub async fn bind<'c, 'a, 's, C: GenericClient, T1: crate::StringSql, T2: crate::StringSql>(
+        &'s self,
+        client: &'c C,
+        role: &'a T1,
+        username: &'a T2,
+    ) -> Result<u64, tokio_postgres::Error> {
+        client.execute(self.0, &[role, username]).await
+    }
+}
+impl<'a, C: GenericClient + Send + Sync, T1: crate::StringSql, T2: crate::StringSql>
+    crate::client::async_::Params<
+        'a,
+        'a,
+        'a,
+        UserSetRoleParams<T1, T2>,
+        std::pin::Pin<
+            Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+        >,
+        C,
+    > for UserSetRoleStmt
+{
+    fn params(
+        &'a self,
+        client: &'a C,
+        params: &'a UserSetRoleParams<T1, T2>,
+    ) -> std::pin::Pin<
+        Box<dyn futures::Future<Output = Result<u64, tokio_postgres::Error>> + Send + 'a>,
+    > {
+        Box::pin(self.bind(client, &params.role, &params.username))
     }
 }

@@ -48,6 +48,7 @@ pub fn ProductDeleteForm(id: String, slug: String) -> impl IntoView {
 
 #[server(ProductDelete, "/api")]
 pub async fn product_delete(id: String) -> Result<Result<(), ProductError>, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
     let db = crate::server::db::use_db().await?;
     let content_id = cornucopia::queries::admin_product::read_content_id()
         .bind(&db, &id)

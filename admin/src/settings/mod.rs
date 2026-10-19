@@ -109,6 +109,7 @@ pub fn Settings() -> impl IntoView {
 type SettingsResult = Result<SettingsData, SettingsError>;
 #[server(GetSettings, "/api")]
 pub async fn get_settings() -> Result<SettingsResult, ServerFnError> {
+    crate::server::require_permission(crate::auth::Permission::SettingsManage).await?;
     let db = crate::server::db::use_db().await?;
     let settings = cornucopia::queries::settings::settings_page()
         .bind(&db)

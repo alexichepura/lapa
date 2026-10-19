@@ -4,12 +4,19 @@ use leptos_meta::Title;
 use leptos_router::components::A;
 use serde::{Deserialize, Serialize};
 
+use crate::auth::{Permission, use_user_signal};
 use crate::util::{AlertDanger, DateTimeStrings, Loading, datetime_to_strings};
 
 stylance::import_crate_style!(style, "src/listing.module.css");
 
 #[component]
 pub fn ProductList() -> impl IntoView {
+    let user_signal = use_user_signal();
+    let can_write = move || {
+        user_signal
+            .get()
+            .is_some_and(|user| user.can(Permission::ContentWrite))
+    };
     let products = Resource::new_blocking(|| (), move |_| get_products());
     let suspended = move || {
         Suspend::new(async move {
@@ -24,7 +31,9 @@ pub fn ProductList() -> impl IntoView {
         <h1>
             <span>Products</span>
             <small>
-                <A href="/product/new">Create</A>
+                <Show when=can_write fallback=|| ()>
+                    <A href="/product/new">Create</A>
+                </Show>
             </small>
         </h1>
         <ul class=format!("{} {}", style::card, style::listing)>
