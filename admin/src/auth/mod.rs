@@ -2,7 +2,6 @@ mod auth_data;
 mod auth_guard;
 mod auth_login;
 mod auth_logout;
-mod auth_signup;
 pub use auth_guard::{Forbidden, RequirePermission};
 pub use auth_login::Login;
 pub use auth_logout::Logout;
