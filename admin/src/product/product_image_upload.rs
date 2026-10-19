@@ -139,8 +139,15 @@ pub async fn upload_img(data: MultipartData) -> Result<ImageUploadResult, Server
     let ext = img_format.extensions_str().first().unwrap();
 
     let id = cuid2::create_id();
+    // New uploads land last: `order` is the current image count, matching the
+    // 0-based indices assigned by the reorder-on-save path.
+    let order = cornucopia::queries::admin_product_image::count_by_product()
+        .bind(&db, &post_id)
+        .one()
+        .await
+        .map_err(|e| lib::emsg(e, "Product image count"))?;
     let _created = cornucopia::queries::admin_product_image::create()
-        .bind(&db, &id, &alt, ext, &post_id)
+        .bind(&db, &id, &alt, ext, &(order as i32), &post_id)
         .await
         .map_err(|e| lib::emsg(e, "Product image create"))?;
 

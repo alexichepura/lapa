@@ -1,6 +1,11 @@
 --! create
-INSERT INTO "ProductImage" (id, alt, ext, product_id)
-  VALUES (:id, :alt, :ext, :product_id);
+INSERT INTO "ProductImage" (id, alt, ext, "order", product_id)
+  VALUES (:id, :alt, :ext, :order, :product_id);
+
+--! count_by_product
+SELECT COUNT(*)
+FROM "ProductImage"
+WHERE product_id = :product_id;
 
 --! read_ext
 SELECT

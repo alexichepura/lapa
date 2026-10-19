@@ -427,6 +427,16 @@ fn case_image_upload<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
 
         // The images list refetches on upload; the new alt shows up.
         wait_at_least(ctx, "text=Uploaded e2e image", 1, 20).await?;
+
+        // Issue #26: the upload gets `order = current count`, so after a fresh
+        // load it is the last image in the grid.
+        ctx.goto_for("admin", &format!("/product/{}", seed::PRODUCT_SLUG))
+            .await?;
+        let figures = "fieldset:has-text(\"Images\") figure";
+        wait_at_least(ctx, figures, 3, 20).await?;
+        expect(ctx.page.locator(figures).last().locator("figcaption"))
+            .to_contain_text("Uploaded e2e image")
+            .await?;
         Ok(())
     })
 }
