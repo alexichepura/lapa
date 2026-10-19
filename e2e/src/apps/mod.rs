@@ -10,6 +10,7 @@ use std::collections::HashMap;
 use std::future::Future;
 use std::path::PathBuf;
 use std::pin::Pin;
+use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 use playwright_rs::Page;
@@ -45,9 +46,21 @@ pub struct CaseCtx {
     /// Postgres URL, for cases that need to arrange DB state directly.
     pub database_url: String,
     pub update: bool,
+    /// Server log lines (substrings) the suite expects, e.g. an intentional
+    /// 500. The harness ignores matching fatal lines.
+    pub allowed_server_errors: Arc<Mutex<Vec<String>>>,
 }
 
 impl CaseCtx {
+    /// Declare a server-log line (substring) this case expects to produce. The
+    /// harness filters matching fatal lines instead of failing the suite.
+    pub fn allow_server_error(&self, needle: &str) {
+        self.allowed_server_errors
+            .lock()
+            .unwrap()
+            .push(needle.to_string());
+    }
+
     pub fn url_for(&self, app: &str, path: &str) -> String {
         let base = self
             .base_urls
