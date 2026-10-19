@@ -29,6 +29,10 @@ impl AppUnderTest for IntegrationApp {
                 name: "cli-user-add-login",
                 run: case_cli_user_add_login,
             },
+            Case {
+                name: "cli-user-disable-enable",
+                run: case_cli_user_disable_enable,
+            },
         ]
     }
 }
@@ -90,13 +94,7 @@ fn case_cli_user_add_login<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
         let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
         let user = "cli-e2e";
         let password = "cli-password";
-        let status = tokio::process::Command::new("cargo")
-            .args(["run", "-q", "-p", "cli", "--", "user-add", user, password])
-            .current_dir(&repo)
-            .env("PG__URL", &ctx.database_url)
-            .env("RUST_LOG", "warn")
-            .status()
-            .await?;
+        let status = run_cli(ctx, &repo, &["user-add", user, password]).await?;
         anyhow::ensure!(status.success(), "`cli user-add` exited with {status}");
 
         // The CLI wrote the user; the admin UI must accept it.
@@ -106,4 +104,82 @@ fn case_cli_user_add_login<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
             .await?;
         Ok(())
     })
+}
+
+/// `cargo cli user-disable` / `user-enable` take effect immediately: a disabled
+/// account can no longer log in and its live session is rejected on the next
+/// request, and re-enabling restores access.
+fn case_cli_user_disable_enable<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        admin::logout_if_logged_in(ctx).await?;
+
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
+        let user = "cli-flip";
+        let password = "cli-flip-password";
+        let status = run_cli(ctx, &repo, &["user-add", user, password]).await?;
+        anyhow::ensure!(status.success(), "`cli user-add` exited with {status}");
+
+        // Active to start with.
+        admin::login_as(ctx, user, password).await?;
+        expect(ctx.page.locator("h1"))
+            .to_contain_text("Dashboard")
+            .await?;
+
+        // Disable through the CLI; the live session must fail closed.
+        let status = run_cli(ctx, &repo, &["user-disable", user]).await?;
+        anyhow::ensure!(status.success(), "`cli user-disable` exited with {status}");
+        ctx.goto_for("admin", "/").await?;
+        wait_for_selector(ctx, "input[name=username]", 15).await?;
+        anyhow::ensure!(
+            ctx.page.url().ends_with("/login"),
+            "disabled user was not bounced to /login (url={})",
+            ctx.page.url()
+        );
+        admin::login_as_expect_failure(ctx, user, password).await?;
+
+        // Re-enable; access returns.
+        let status = run_cli(ctx, &repo, &["user-enable", user]).await?;
+        anyhow::ensure!(status.success(), "`cli user-enable` exited with {status}");
+        admin::login_as(ctx, user, password).await?;
+        expect(ctx.page.locator("h1"))
+            .to_contain_text("Dashboard")
+            .await?;
+
+        // Unknown users are reported with a non-zero exit.
+        let status = run_cli(ctx, &repo, &["user-disable", "cli-does-not-exist"]).await?;
+        anyhow::ensure!(
+            !status.success(),
+            "`cli user-disable` on a missing user exited 0"
+        );
+
+        admin::logout_if_logged_in(ctx).await?;
+        Ok(())
+    })
+}
+
+/// Run the `cli` binary against the ephemeral database and return its status.
+async fn run_cli(
+    ctx: &CaseCtx,
+    repo: &Path,
+    args: &[&str],
+) -> anyhow::Result<std::process::ExitStatus> {
+    Ok(tokio::process::Command::new("cargo")
+        .args(["run", "-q", "-p", "cli", "--"])
+        .args(args)
+        .current_dir(repo)
+        .env("PG__URL", &ctx.database_url)
+        .env("RUST_LOG", "warn")
+        .status()
+        .await?)
+}
+
+/// Poll until `selector` is present, for up to `secs` seconds.
+async fn wait_for_selector(ctx: &CaseCtx, selector: &str, secs: u64) -> anyhow::Result<()> {
+    for _ in 0..secs * 4 {
+        if ctx.page.locator(selector).count().await.unwrap_or(0) > 0 {
+            return Ok(());
+        }
+        tokio::time::sleep(Duration::from_millis(250)).await;
+    }
+    anyhow::bail!("{selector} never appeared within {secs}s")
 }

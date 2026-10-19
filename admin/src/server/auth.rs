@@ -9,7 +9,11 @@ use cornucopia::deadpool_postgres::Pool;
 type PoolAuthSessionLayer = AuthSessionLayer<User, String, SessionPool, Pool>;
 
 pub fn auth_session_layer(pool: &Pool) -> PoolAuthSessionLayer {
-    let auth_config = AuthConfig::<String>::default();
+    // Disable the in-memory user cache: `Authentication::load_user` must run on
+    // every request so that disabling an account takes effect on its very next
+    // request (fails closed) without bulk session revocation. The default cache
+    // would keep serving the stale, active `User` until it expired.
+    let auth_config = AuthConfig::<String>::default().set_cache(false);
 
     PoolAuthSessionLayer::new(Some(pool.clone())).with_config(auth_config)
 }
@@ -29,7 +33,7 @@ impl Authentication<User, String, Pool> for User {
             return Err(anyhow::anyhow!("no pool"));
         };
         let db = pool.clone().get().await.unwrap();
-        let username = cornucopia::queries::user::user_find_by_id()
+        let user = cornucopia::queries::user::user_find_by_id()
             .bind(&db, &userid)
             .opt()
             .await
@@ -37,19 +41,31 @@ impl Authentication<User, String, Pool> for User {
             .ok_or("User does not exist.")
             .map_err(|e| anyhow::anyhow!(e.to_string()))?;
 
+        // Disabled accounts fail closed: returning `Err` here keeps
+        // `AuthSession::current_user` at `None`, so an already-issued session
+        // stops working on its next request (no bulk session revocation needed)
+        // and every guard/predicate below observes a logged-out user.
+        if !user.active {
+            return Err(anyhow::anyhow!("user is inactive"));
+        }
+
         let user = User {
             id: userid,
-            username,
+            username: user.username,
+            active: user.active,
         };
         Ok(user)
     }
 
+    /// A loaded `User` is only ever constructed for an authenticated session, so
+    /// `is_authenticated` is `true` by construction. `is_active` reflects the
+    /// stored flag as defense-in-depth for any direct `User` construction.
     fn is_authenticated(&self) -> bool {
         true
     }
 
     fn is_active(&self) -> bool {
-        true
+        self.active
     }
 
     fn is_anonymous(&self) -> bool {

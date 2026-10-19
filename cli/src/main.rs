@@ -30,6 +30,11 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     UserAdd(UserAddArgs),
+    /// Disable a user account: it can no longer log in and existing sessions
+    /// fail closed on their next request.
+    UserDisable(UserNameArgs),
+    /// Re-enable a previously disabled user account.
+    UserEnable(UserNameArgs),
     SettingsInit,
     Migrate,
 }
@@ -38,6 +43,27 @@ enum Commands {
 struct UserAddArgs {
     username: String,
     password: String,
+}
+
+#[derive(Args)]
+struct UserNameArgs {
+    username: String,
+}
+
+/// Enable or disable a user by username. Exits non-zero when no such user
+/// exists so the command can be scripted.
+async fn set_active(pool: &deadpool_postgres::Pool, username: &str, active: bool) {
+    let db = pool.clone().get().await.unwrap();
+    let updated = queries::user::user_set_active()
+        .bind(&db, &active, &username)
+        .await
+        .unwrap();
+    if updated == 0 {
+        eprintln!("No user named {username:?}");
+        std::process::exit(1);
+    }
+    let state = if active { "active" } else { "disabled" };
+    println!("User {username:?} is now {state}");
 }
 
 #[tokio::main]
@@ -66,6 +92,12 @@ async fn main() {
                 .bind(&db, &cuid2::create_id(), &username, &password_hashed)
                 .await;
             println!("User created res={res:?}");
+        }
+        Commands::UserDisable(user) => {
+            set_active(&pool, &user.username, false).await;
+        }
+        Commands::UserEnable(user) => {
+            set_active(&pool, &user.username, true).await;
         }
         Commands::SettingsInit => {
             let db = pool.clone().get().await.unwrap();

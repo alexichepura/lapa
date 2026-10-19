@@ -108,7 +108,10 @@ pub async fn server_fn_private(
     auth_session: AuthSession,
     request: Request<AxumBody>,
 ) -> Response {
-    if auth_session.current_user.is_none() {
+    // Default-deny: require an authenticated, active user. `load_user` already
+    // fails closed for disabled accounts, so `is_active()` is defense-in-depth
+    // here; the 404 stays opaque.
+    if !(auth_session.is_authenticated() && auth_session.is_active()) {
         return (http::StatusCode::NOT_FOUND, "NOT FOUND").into_response();
     }
     let media_config = app_state.image_config.clone();

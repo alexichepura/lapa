@@ -8,6 +8,11 @@ use playwright_rs::{SelectOption, expect};
 use crate::apps::{AppUnderTest, Case, CaseCtx, CaseFuture};
 use crate::support::seed;
 
+/// A user dedicated to the disabled-account case (see `case_disabled_user`) so
+/// toggling `active` never touches the shared seeded admin.
+const DEACTIVATABLE_USERNAME: &str = "e2e-deactivatable";
+const DEACTIVATABLE_PASSWORD: &str = "e2e-deactivatable-password";
+
 pub struct AdminApp;
 
 impl AppUnderTest for AdminApp {
@@ -61,6 +66,10 @@ impl AppUnderTest for AdminApp {
             Case {
                 name: "content-editor",
                 run: case_content_editor,
+            },
+            Case {
+                name: "disabled-user",
+                run: case_disabled_user,
             },
         ]
     }
@@ -441,6 +450,77 @@ fn case_image_upload<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     })
 }
 
+/// A disabled account loses access: existing sessions fail closed, new logins
+/// are rejected, and re-enabling restores access.
+fn case_disabled_user<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
+    Box::pin(async move {
+        // A dedicated user keeps this case from touching the shared seed, and a
+        // clean slate avoids depending on the previous case's auth state.
+        logout_if_logged_in(ctx).await?;
+
+        let hash = bcrypt::hash(DEACTIVATABLE_PASSWORD, 4)?;
+        ctx.exec_sql(&format!(
+            "INSERT INTO \"User\" (id, username, password, active) \
+             VALUES ('e2e-deactivatable', '{DEACTIVATABLE_USERNAME}', '{hash}', true) \
+             ON CONFLICT (id) DO UPDATE \
+             SET password = EXCLUDED.password, active = true"
+        ))
+        .await?;
+
+        // While active the account behaves normally.
+        login_as(ctx, DEACTIVATABLE_USERNAME, DEACTIVATABLE_PASSWORD).await?;
+        expect(ctx.page.locator("h1"))
+            .to_contain_text("Dashboard")
+            .await?;
+
+        // Disable it; the already-issued session must be rejected on the next
+        // request, so `/` bounces back to the login form.
+        ctx.exec_sql(&format!(
+            "UPDATE \"User\" SET active = false WHERE username = '{DEACTIVATABLE_USERNAME}'"
+        ))
+        .await?;
+        ctx.goto_for("admin", "/").await?;
+        wait_url(ctx, 15, |url| url.ends_with("/login")).await?;
+        expect(ctx.page.locator("input[name=username]"))
+            .to_be_visible()
+            .await?;
+
+        // The `/api` router is default-deny for the stale session too.
+        let status = api_status(ctx, "get_stats").await?;
+        anyhow::ensure!(
+            status == 404,
+            "disabled user's /api call returned {status}, want 404"
+        );
+
+        // And it cannot obtain a fresh session: same opaque error as a bad
+        // password.
+        ctx.page
+            .locator("input[name=username]")
+            .fill(DEACTIVATABLE_USERNAME, None)
+            .await?;
+        ctx.page
+            .locator("input[name=password]")
+            .fill(DEACTIVATABLE_PASSWORD, None)
+            .await?;
+        submit(ctx, "Login").await?;
+        wait_at_least(ctx, "text=Login-password pair not found", 1, 15).await?;
+
+        // Re-enabling restores access.
+        ctx.exec_sql(&format!(
+            "UPDATE \"User\" SET active = true WHERE username = '{DEACTIVATABLE_USERNAME}'"
+        ))
+        .await?;
+        login_as(ctx, DEACTIVATABLE_USERNAME, DEACTIVATABLE_PASSWORD).await?;
+        expect(ctx.page.locator("h1"))
+            .to_contain_text("Dashboard")
+            .await?;
+
+        // Leave the shared context logged out for the cases that follow.
+        logout_if_logged_in(ctx).await?;
+        Ok(())
+    })
+}
+
 // --- helpers -------------------------------------------------------------
 /// Log in through the form as the seeded admin, or no-op when already
 /// authenticated (cases share one browser context).
@@ -477,6 +557,30 @@ pub(crate) async fn login_as(ctx: &CaseCtx, username: &str, password: &str) -> a
     )
 }
 
+/// Log in as a specific user expecting failure: asserts the opaque
+/// credentials error and that the dashboard stays out of reach.
+pub(crate) async fn login_as_expect_failure(
+    ctx: &CaseCtx,
+    username: &str,
+    password: &str,
+) -> anyhow::Result<()> {
+    ctx.goto_for("admin", "/").await?;
+    anyhow::ensure!(
+        !dashboard_visible(ctx).await?,
+        "unexpectedly authenticated as {username}"
+    );
+    ctx.page
+        .locator("input[name=username]")
+        .fill(username, None)
+        .await?;
+    ctx.page
+        .locator("input[name=password]")
+        .fill(password, None)
+        .await?;
+    submit(ctx, "Login").await?;
+    wait_at_least(ctx, "text=Login-password pair not found", 1, 15).await
+}
+
 pub(crate) async fn logout_if_logged_in(ctx: &CaseCtx) -> anyhow::Result<()> {
     ctx.goto_for("admin", "/").await?;
     if dashboard_visible(ctx).await? {
@@ -484,6 +588,18 @@ pub(crate) async fn logout_if_logged_in(ctx: &CaseCtx) -> anyhow::Result<()> {
         wait_at_least(ctx, "text=Log in", 1, 15).await?;
     }
     Ok(())
+}
+
+/// POST to a `/api` server function from the page and return the HTTP status.
+/// The body is intentionally empty: while logged out the `server_fn_private`
+/// guard rejects the request (404) before it is dispatched, so the body is
+/// never parsed. Only meaningful for the default-deny cases.
+async fn api_status(ctx: &CaseCtx, fn_name: &str) -> anyhow::Result<u16> {
+    let expr = format!(
+        "async () => {{ const r = await fetch('/api/{fn_name}', {{ method: 'POST' }}); \
+         return r.status; }}"
+    );
+    Ok(ctx.page.evaluate(&expr, None::<&()>).await?)
 }
 
 /// Click a `<input type=submit>` by its `value`.

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- User `active` flag (`db/migrations/V2__user_active.sql`) and the
+  `cargo cli user-disable <username>` / `cargo cli user-enable <username>`
+  commands, so accounts can be revoked without deleting them and losing history
+  (#72).
 - Database schema migrations with [refinery](https://docs.rs/refinery),
   embedded in the `cli` binary and applied with `cargo cli migrate`
   (`db/migrations/`, `db` crate). `V1__init.sql` mirrors `schema.sql`, which is
@@ -16,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Admin auth now honors the user `active` flag: `Authentication::is_active`
+  reflects the stored value and `server_fn_private` requires both
+  `is_authenticated()` and `is_active()`. A disabled user cannot log in and any
+  session they already hold is rejected on the next request (fails closed),
+  without touching the `Session` table (#72).
 - Admin image uploads (product and content) now send the file as a real
   `multipart/form-data` field through Leptos server functions
   (`input = MultipartFormData` / `MultipartData`), replacing the previous
