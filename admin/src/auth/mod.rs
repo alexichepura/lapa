@@ -13,8 +13,7 @@ pub struct User {
     pub username: String,
     /// Whether the account is enabled, derived from `deactivated_at`
     /// (`deactivated_at IS NULL` means enabled). Disabled users cannot
-    /// authenticate and their existing sessions fail closed (see
-    /// `server::auth::load_user`).
+    /// authenticate and their sessions are rejected (see `server::auth`).
     pub active: bool,
 }
 
@@ -26,5 +25,5 @@ pub fn use_user_signal() -> UserSignal {
 #[server(GetUser, "/api")]
 pub async fn get_user() -> Result<Option<User>, ServerFnError> {
     let auth = crate::server::use_auth()?;
-    Ok(auth.current_user)
+    Ok(auth.user.as_ref().map(User::from))
 }

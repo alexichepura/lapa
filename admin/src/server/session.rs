@@ -1,27 +1,33 @@
+use std::collections::HashMap;
+
 use async_trait::async_trait;
-use axum_session::{DatabaseError, DatabasePool, SessionConfig, SessionLayer, SessionStore};
 use chrono::DateTime;
-use cornucopia::{deadpool_postgres::Pool, queries};
+use cornucopia::deadpool_postgres::{Object, Pool};
+use cornucopia::queries;
+use time::OffsetDateTime;
+use tower_sessions::{
+    Expiry, SessionManagerLayer, SessionStore,
+    session::{Id, Record},
+    session_store::{self, ExpiredDeletion},
+};
 
-pub async fn session_layer(pool: &Pool) -> SessionLayer<SessionPool> {
-    let config = SessionConfig::default()
-        .with_table_name("Session")
-        .with_session_name("session")
-        .with_secure(session_cookie_secure());
+/// The `axum-login` session data key (the builder's default).
+const AUTH_DATA_KEY: &str = "axum-login.data";
 
-    let store = SessionStore::<SessionPool>::new(Some(pool.clone().into()), config)
-        .await
-        .unwrap();
-
-    SessionLayer::new(store)
+/// Build the Postgres-backed session middleware layer.
+pub fn session_layer(pool: &Pool) -> SessionManagerLayer<PostgresStore> {
+    SessionManagerLayer::new(PostgresStore::new(pool.clone()))
+        .with_name("session")
+        .with_secure(session_cookie_secure())
+        // Default to a browser-session cookie; the login flow extends this per
+        // session when "Remember me?" is checked (`Session::set_expiry`).
+        .with_expiry(Expiry::OnSessionEnd)
 }
 
 /// Whether the session cookie carries the `Secure` flag.
 ///
-/// `SessionConfig::default()` leaves it off, which means the auth cookie would
-/// also be sent over plaintext HTTP in production. Default to on for release
-/// builds and off for debug builds (local dev and the e2e harness serve over
-/// `http://127.0.0.1`). Override with `SESSION_SECURE=1` / `SESSION_SECURE=0`.
+/// Default to on for release builds and off for debug builds (local dev and the
+/// e2e harness serve over `http://127.0.0.1`). Override with `SESSION_SECURE`.
 fn session_cookie_secure() -> bool {
     match std::env::var("SESSION_SECURE") {
         Ok(v) => matches!(
@@ -33,109 +39,109 @@ fn session_cookie_secure() -> bool {
 }
 
 #[derive(Debug, Clone)]
-pub struct SessionPool {
+pub struct PostgresStore {
     pool: Pool,
 }
 
-impl From<Pool> for SessionPool {
-    fn from(pool: Pool) -> Self {
-        SessionPool { pool }
+impl PostgresStore {
+    pub fn new(pool: Pool) -> Self {
+        Self { pool }
+    }
+
+    async fn db(&self) -> session_store::Result<Object> {
+        self.pool
+            .get()
+            .await
+            .map_err(|e| session_store::Error::Backend(e.to_string()))
+    }
+}
+
+/// The `axum-login` user id embedded in the session data, if any.
+fn session_user_id(record: &Record) -> Option<String> {
+    record
+        .data
+        .get(AUTH_DATA_KEY)
+        .and_then(|data| data.get("user_id"))
+        .and_then(|id| id.as_str())
+        .map(str::to_owned)
+}
+
+/// `time::OffsetDateTime` (tower-sessions) -> the `TIMESTAMP` column (chrono).
+fn to_db_time(expiry: OffsetDateTime) -> chrono::NaiveDateTime {
+    DateTime::from_timestamp(expiry.unix_timestamp(), 0)
+        .unwrap_or_default()
+        .naive_utc()
+}
+
+/// The `TIMESTAMP` column (chrono) -> `time::OffsetDateTime` (tower-sessions).
+fn from_db_time(expires: chrono::NaiveDateTime) -> OffsetDateTime {
+    OffsetDateTime::from_unix_timestamp(expires.and_utc().timestamp())
+        .unwrap_or(OffsetDateTime::UNIX_EPOCH)
+}
+
+#[async_trait]
+impl SessionStore for PostgresStore {
+    async fn create(&self, record: &mut Record) -> session_store::Result<()> {
+        // IDs are random i128s, so collisions are not a practical concern; a
+        // unique violation would surface as a backend error via `save`.
+        self.save(record).await
+    }
+
+    async fn save(&self, record: &Record) -> session_store::Result<()> {
+        let db = self.db().await?;
+        let data = serde_json::to_string(&record.data)
+            .map_err(|e| session_store::Error::Encode(e.to_string()))?;
+        let user_id = session_user_id(record);
+        queries::session::store()
+            .bind(
+                &db,
+                &record.id.to_string(),
+                &data,
+                &to_db_time(record.expiry_date),
+                &user_id,
+            )
+            .await
+            .map_err(|e| session_store::Error::Backend(e.to_string()))?;
+        Ok(())
+    }
+
+    async fn load(&self, session_id: &Id) -> session_store::Result<Option<Record>> {
+        let db = self.db().await?;
+        let row = queries::session::load()
+            .bind(&db, &session_id.to_string())
+            .opt()
+            .await
+            .map_err(|e| session_store::Error::Backend(e.to_string()))?;
+        let Some(row) = row else {
+            return Ok(None);
+        };
+        let data: HashMap<String, serde_json::Value> = serde_json::from_str(&row.session)
+            .map_err(|e| session_store::Error::Decode(e.to_string()))?;
+        Ok(Some(Record {
+            id: *session_id,
+            data,
+            expiry_date: from_db_time(row.expires),
+        }))
+    }
+
+    async fn delete(&self, session_id: &Id) -> session_store::Result<()> {
+        let db = self.db().await?;
+        queries::session::delete_one_by_id()
+            .bind(&db, &session_id.to_string())
+            .await
+            .map_err(|e| session_store::Error::Backend(e.to_string()))?;
+        Ok(())
     }
 }
 
 #[async_trait]
-impl DatabasePool for SessionPool {
-    async fn initiate(&self, _table_name: &str) -> Result<(), DatabaseError> {
-        Ok(())
-    }
-
-    async fn delete_by_expiry(&self, _table_name: &str) -> Result<Vec<String>, DatabaseError> {
-        let db = self.pool.clone().get().await.unwrap();
-        let ids = queries::session::delete_by_expiry()
-            .bind(&db)
-            .all()
-            .await
-            .map_err(|e| DatabaseError::GenericDeleteError(e.to_string()))?;
-        Ok(ids)
-    }
-
-    async fn count(&self, _table_name: &str) -> Result<i64, DatabaseError> {
-        let db = self.pool.clone().get().await.unwrap();
-        let count = queries::session::count()
-            .bind(&db)
-            .one()
-            .await
-            .map_err(|e| DatabaseError::GenericSelectError(e.to_string()))?;
-        tracing::debug!("count_result={}", count);
-        return Ok(count);
-    }
-
-    async fn store(
-        &self,
-        id: &str,
-        session: &str,
-        expires: i64,
-        _table_name: &str,
-    ) -> Result<(), DatabaseError> {
-        let db = self.pool.clone().get().await.unwrap();
-        let expires_datetime = DateTime::from_timestamp(expires, 0).unwrap_or_default();
-        queries::session::store()
-            .bind(&db, &id, &session, &expires_datetime.naive_utc())
-            .await
-            .map_err(|e| DatabaseError::GenericCreateError(e.to_string()))?;
-        Ok(())
-    }
-
-    async fn load(&self, id: &str, _table_name: &str) -> Result<Option<String>, DatabaseError> {
-        let db = self.pool.clone().get().await.unwrap();
-        let id = queries::session::load()
-            .bind(&db, &id)
-            .opt()
-            .await
-            .map_err(|e| DatabaseError::GenericSelectError(e.to_string()))?;
-        return Ok(id);
-    }
-
-    async fn delete_one_by_id(&self, id: &str, _table_name: &str) -> Result<(), DatabaseError> {
-        let db = self.pool.clone().get().await.unwrap();
-        let _count = queries::session::delete_one_by_id()
-            .bind(&db, &id)
-            .await
-            .map_err(|e| DatabaseError::GenericDeleteError(e.to_string()))?;
-        Ok(())
-    }
-
-    async fn exists(&self, id: &str, _table_name: &str) -> Result<bool, DatabaseError> {
-        let db = self.pool.clone().get().await.unwrap();
-        let count = queries::session::exists()
-            .bind(&db, &id)
-            .one()
-            .await
-            .map_err(|e| DatabaseError::GenericSelectError(e.to_string()))?;
-        let exists = count > 0;
-        Ok(exists)
-    }
-
-    async fn delete_all(&self, _table_name: &str) -> Result<(), DatabaseError> {
-        let db = self.pool.clone().get().await.unwrap();
-        let _count = queries::session::delete_all()
+impl ExpiredDeletion for PostgresStore {
+    async fn delete_expired(&self) -> session_store::Result<()> {
+        let db = self.db().await?;
+        queries::session::delete_expired()
             .bind(&db)
             .await
-            .map_err(|e| DatabaseError::GenericDeleteError(e.to_string()))?;
+            .map_err(|e| session_store::Error::Backend(e.to_string()))?;
         Ok(())
-    }
-
-    async fn get_ids(&self, _table_name: &str) -> Result<Vec<String>, DatabaseError> {
-        let db = self.pool.clone().get().await.unwrap();
-        let ids = queries::session::get_ids()
-            .bind(&db)
-            .all()
-            .await
-            .map_err(|e| DatabaseError::GenericSelectError(e.to_string()))?;
-        Ok(ids)
-    }
-
-    fn auto_handles_expiry(&self) -> bool {
-        false
     }
 }

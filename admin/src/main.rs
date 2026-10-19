@@ -9,9 +9,8 @@ async fn main() {
     use admin::{
         app::AdminRouter,
         server::{
-            AppState, auth_session_layer, content_image_handler, file_and_error_handler,
+            AppState, auth_layer, content_image_handler, file_and_error_handler,
             leptos_routes_handler, product_image_handler, server_fn_private, server_fn_public,
-            session_layer,
         },
     };
     use axum::{
@@ -94,8 +93,7 @@ async fn main() {
             pool: pool.clone(),
             image_config: image_config.clone(),
         })
-        .layer(auth_session_layer(&pool))
-        .layer(session_layer(&pool).await)
+        .layer(auth_layer(&pool))
         .layer(tower_http::trace::TraceLayer::new_for_http());
 
     let app = Router::new()

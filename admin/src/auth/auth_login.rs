@@ -53,38 +53,39 @@ pub async fn login(
     remember: Option<String>,
     skip_redirect: Option<String>,
 ) -> Result<Result<super::User, AuthError>, ServerFnError> {
-    let db = crate::server::db::use_db().await?;
-    let user = cornucopia::queries::user::user_get_auth_by_username()
-        .bind(&db, &username)
-        .opt()
-        .await
-        .map_err(|e| lib::emsg(e, "user_get_auth_by_username"))?;
-    let Some(user) = user else {
-        crate::server::serverr_401();
-        return Ok(Err(AuthError::NoMatch));
+    let mut auth = crate::server::use_auth()?;
+    let creds = crate::server::auth::Credentials {
+        username: username.clone(),
+        password,
     };
-    let auth = crate::server::use_auth()?;
-    let res = match bcrypt::verify(password, &user.password)
-        .map_err(|e| ServerFnError::new(e.to_string()))?
-    {
-        // Disabled accounts cannot authenticate; fail with the same opaque error
-        // as a bad password (see `server::auth::load_user` for existing
-        // sessions, which fail closed on the next request).
-        true if user.deactivated_at.is_some() => Err(AuthError::NoMatch),
-        true => {
-            auth.login_user(user.id.clone());
-            auth.remember_user(remember.is_some());
-            if skip_redirect.is_none() {
-                leptos_axum::redirect("/");
-            }
-            Ok(super::User {
-                id: user.id,
-                username,
-                // `active` is derived: `deactivated_at IS NULL` is enabled.
-                active: user.deactivated_at.is_none(),
-            })
+
+    let user = match auth.authenticate(creds).await {
+        Ok(Some(user)) => user,
+        // Bad password or a deactivated account: the same opaque error.
+        Ok(None) => return Ok(Err(AuthError::NoMatch)),
+        // Infrastructure failure: surface it as a 500 rather than a login
+        // rejection.
+        Err(e) => {
+            tracing::error!(error = %e, "login backend error");
+            return Err(ServerFnError::new(e.to_string()));
         }
-        false => Err(AuthError::NoMatch),
     };
-    Ok(res)
+
+    auth.login(&user)
+        .await
+        .map_err(|e| ServerFnError::new(e.to_string()))?;
+
+    if remember.is_some() {
+        // A long-lived session; without "Remember me?" the layer's default
+        // browser-session cookie applies.
+        auth.session
+            .set_expiry(Some(tower_sessions::Expiry::OnInactivity(
+                time::Duration::days(30),
+            )));
+    }
+
+    if skip_redirect.is_none() {
+        leptos_axum::redirect("/");
+    }
+    Ok(Ok(super::User::from(&user)))
 }

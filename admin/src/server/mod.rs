@@ -88,6 +88,15 @@ pub fn use_image_config() -> Result<ImageConfig, ServerFnError> {
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
+/// Session + auth middleware: provides [`AuthSession`] as a request extension
+/// and persists sessions with the Postgres store.
+pub fn auth_layer(
+    pool: &cornucopia::deadpool_postgres::Pool,
+) -> axum_login::AuthManagerLayer<Backend, PostgresStore> {
+    axum_login::AuthManagerLayerBuilder::new(Backend::new(pool.clone()), session_layer(pool))
+        .build()
+}
+
 pub async fn server_fn_public(
     State(app_state): State<AppState>,
     auth_session: AuthSession,
@@ -108,10 +117,10 @@ pub async fn server_fn_private(
     auth_session: AuthSession,
     request: Request<AxumBody>,
 ) -> Response {
-    // Default-deny: require an authenticated, active user. `load_user` already
-    // fails closed for disabled accounts, so `is_active()` is defense-in-depth
-    // here; the 404 stays opaque.
-    if !(auth_session.is_authenticated() && auth_session.is_active()) {
+    // Default-deny: require an authenticated user. Infrastructure failures
+    // while loading the session are already turned into a 500 by the auth
+    // layer, so a logged-out user here is genuinely unauthenticated.
+    if auth_session.user.is_none() {
         return (http::StatusCode::NOT_FOUND, "NOT FOUND").into_response();
     }
     let media_config = app_state.image_config.clone();
@@ -132,7 +141,7 @@ pub async fn leptos_routes_handler(
     auth_session: AuthSession,
     req: Request<AxumBody>,
 ) -> Response {
-    let user: Option<User> = auth_session.current_user.clone();
+    let user: Option<User> = auth_session.user.as_ref().map(User::from);
     let pool = app_state.pool.clone();
     let settings = settings_db(pool.clone()).await;
     let leptos_options = app_state.leptos_options;

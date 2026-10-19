@@ -1,75 +1,154 @@
-use axum_session_auth::Authentication;
-use axum_session_auth::{AuthConfig, AuthSessionLayer};
+use axum_login::{AuthnBackend, UserId};
+use cornucopia::deadpool_postgres::Pool;
+use cornucopia::queries;
 use leptos::prelude::{ServerFnError, use_context};
 
-use super::SessionPool;
 use crate::auth::User;
-use cornucopia::deadpool_postgres::Pool;
 
-type PoolAuthSessionLayer = AuthSessionLayer<User, String, SessionPool, Pool>;
-
-pub fn auth_session_layer(pool: &Pool) -> PoolAuthSessionLayer {
-    // Disable the in-memory user cache: `Authentication::load_user` must run on
-    // every request so that disabling an account takes effect on its very next
-    // request (fails closed) without bulk session revocation. The default cache
-    // would keep serving the stale, active `User` until it expired.
-    let auth_config = AuthConfig::<String>::default().set_cache(false);
-
-    PoolAuthSessionLayer::new(Some(pool.clone())).with_config(auth_config)
+/// The backend user, as loaded from the database. Kept separate from the
+/// serializable [`User`] so the password hash never reaches the client.
+#[derive(Clone, Debug)]
+pub struct AuthUser {
+    pub id: String,
+    pub username: String,
+    pub password_hash: String,
 }
 
-pub type AuthSession = axum_session_auth::AuthSession<User, String, SessionPool, Pool>;
+impl axum_login::AuthUser for AuthUser {
+    type Id = String;
+
+    fn id(&self) -> Self::Id {
+        self.id.clone()
+    }
+
+    /// Binds the session to the current password hash: changing the password
+    /// invalidates existing sessions. Deactivation is handled by `get_user`
+    /// returning `None`.
+    fn session_auth_hash(&self) -> &[u8] {
+        self.password_hash.as_bytes()
+    }
+}
+
+impl From<&AuthUser> for User {
+    fn from(user: &AuthUser) -> Self {
+        User {
+            id: user.id.clone(),
+            username: user.username.clone(),
+            active: true,
+        }
+    }
+}
+
+/// The `axum-login` backend: authenticates credentials and loads users by id.
+#[derive(Clone)]
+pub struct Backend {
+    pool: Pool,
+}
+
+impl Backend {
+    pub fn new(pool: Pool) -> Self {
+        Self { pool }
+    }
+}
+
+#[derive(Clone, Debug, serde::Deserialize)]
+pub struct Credentials {
+    pub username: String,
+    pub password: String,
+}
+
+/// Backend failures are infrastructure errors (DB/pool/hashing), never
+/// "wrong credentials" or "deactivated" — those are `Ok(None)`. `axum-login`
+/// maps a backend error during session load to a 500, so a transient DB
+/// failure does not silently log everyone out.
+#[derive(Debug, thiserror::Error)]
+pub enum BackendError {
+    #[error("connection pool error: {0}")]
+    Pool(String),
+    #[error("database error: {0}")]
+    Db(#[from] deadpool_postgres::tokio_postgres::Error),
+    #[error("password verification error: {0}")]
+    Bcrypt(#[from] bcrypt::BcryptError),
+}
+
+// `AuthnBackend` declares its methods as `fn ... -> impl Future` (late-bound
+// `&self`), so implementing them as `async fn` (early-bound lifetimes) fails to
+// compile; the RPITIT form is required here.
+#[allow(clippy::manual_async_fn)]
+impl AuthnBackend for Backend {
+    type User = AuthUser;
+    type Credentials = Credentials;
+    type Error = BackendError;
+
+    fn authenticate(
+        &self,
+        creds: Self::Credentials,
+    ) -> impl std::future::Future<Output = Result<Option<AuthUser>, BackendError>> + Send {
+        async move {
+            let db = self
+                .pool
+                .get()
+                .await
+                .map_err(|e| BackendError::Pool(e.to_string()))?;
+            let found = queries::user::user_get_auth_by_username()
+                .bind(&db, &creds.username)
+                .opt()
+                .await?;
+            let Some(user) = found else {
+                return Ok(None);
+            };
+            // Disabled accounts cannot authenticate; fail closed with the same
+            // `None` as a bad password.
+            if user.deactivated_at.is_some() {
+                return Ok(None);
+            }
+            if !bcrypt::verify(creds.password, &user.password)? {
+                return Ok(None);
+            }
+            Ok(Some(AuthUser {
+                id: user.id,
+                username: creds.username,
+                password_hash: user.password,
+            }))
+        }
+    }
+
+    fn get_user(
+        &self,
+        user_id: &UserId<Self>,
+    ) -> impl std::future::Future<Output = Result<Option<AuthUser>, BackendError>> + Send {
+        let user_id = user_id.clone();
+        async move {
+            let db = self
+                .pool
+                .get()
+                .await
+                .map_err(|e| BackendError::Pool(e.to_string()))?;
+            let found = queries::user::user_find_by_id()
+                .bind(&db, &user_id)
+                .opt()
+                .await?;
+            let Some(user) = found else {
+                return Ok(None);
+            };
+            // A disabled account is treated as logged out; the session stops
+            // working on its next request.
+            if user.deactivated_at.is_some() {
+                return Ok(None);
+            }
+            Ok(Some(AuthUser {
+                id: user_id,
+                username: user.username,
+                password_hash: user.password,
+            }))
+        }
+    }
+}
+
+pub type AuthSession = axum_login::AuthSession<Backend>;
 
 pub fn use_auth() -> Result<AuthSession, ServerFnError> {
     use_context::<AuthSession>()
         .ok_or("Auth session missing.")
         .map_err(|e| ServerFnError::new(e.to_string()))
-}
-
-#[async_trait::async_trait]
-impl Authentication<User, String, Pool> for User {
-    async fn load_user(userid: String, pool: Option<&Pool>) -> Result<User, anyhow::Error> {
-        let Some(pool) = pool else {
-            return Err(anyhow::anyhow!("no pool"));
-        };
-        let db = pool.clone().get().await.unwrap();
-        let user = cornucopia::queries::user::user_find_by_id()
-            .bind(&db, &userid)
-            .opt()
-            .await
-            .map_err(|e| anyhow::anyhow!(e.to_string()))?
-            .ok_or("User does not exist.")
-            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
-
-        // Disabled accounts fail closed: returning `Err` here keeps
-        // `AuthSession::current_user` at `None`, so an already-issued session
-        // stops working on its next request (no bulk session revocation needed)
-        // and every guard/predicate below observes a logged-out user.
-        if user.deactivated_at.is_some() {
-            return Err(anyhow::anyhow!("user is inactive"));
-        }
-
-        let user = User {
-            id: userid,
-            username: user.username,
-            // `active` is derived: `deactivated_at IS NULL` is the enabled state.
-            active: user.deactivated_at.is_none(),
-        };
-        Ok(user)
-    }
-
-    /// A loaded `User` is only ever constructed for an authenticated session, so
-    /// `is_authenticated` is `true` by construction. `is_active` reflects the
-    /// stored flag as defense-in-depth for any direct `User` construction.
-    fn is_authenticated(&self) -> bool {
-        true
-    }
-
-    fn is_active(&self) -> bool {
-        self.active
-    }
-
-    fn is_anonymous(&self) -> bool {
-        false
-    }
 }

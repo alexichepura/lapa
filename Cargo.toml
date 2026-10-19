@@ -49,8 +49,8 @@ image_config = { path = "./image_config" }
 db = { path = "./db" }
 refinery = { version = "0.9", features = ["tokio-postgres"] }
 axum = { version = "0.8", features = ["macros", "tracing"] }
-axum_session = { version = "0.21", default-features = false }
-axum_session_auth = { version = "0.21", default-features = false }
+axum-login = { version = "0.18", default-features = false }
+tower-sessions = { version = "0.14", default-features = false }
 bcrypt = { version = "0.19" }
 cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
@@ -76,6 +76,7 @@ serde-wasm-bindgen = "0.6.5"
 stylance = "0.8"
 thiserror = "2"
 tokio = { version = "1.53", features = ["macros"] }
+time = "0.3"
 tokio-postgres-rustls = { version = "0.14", default-features = false, features = ["ring", "webpki-roots"] }
 tower = { version = "0.5" }
 tower_governor = { version = "0.8" }

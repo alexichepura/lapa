@@ -14,8 +14,9 @@ image_config.workspace = true
 anyhow = "1"
 async-trait = { version = "0.1", optional = true }
 axum = { workspace = true, optional = true }
-axum_session = { workspace = true, optional = true }
-axum_session_auth = { workspace = true, optional = true }
+axum-login = { workspace = true, optional = true }
+tower-sessions = { workspace = true, optional = true }
+time = { workspace = true, optional = true }
 bcrypt = { workspace = true, optional = true }
 cfg-if = { workspace = true }
 chrono = { workspace = true }
@@ -70,8 +71,9 @@ hydrate = [
 ssr = [
     "dep:cornucopia",
     "dep:async-trait",
-    "dep:axum_session_auth",
-    "dep:axum_session",
+    "dep:axum-login",
+    "dep:tower-sessions",
+    "dep:time",
     "dep:axum",
     "dep:bcrypt",
     "dep:config",
@@ -85,6 +87,7 @@ ssr = [
     "dep:tower",
     "dep:tracing-subscriber",
     "lib/pg",
+    "tokio/rt-multi-thread",
     "leptos_meta/ssr",
     "leptos_router/ssr",
     "leptos/ssr",

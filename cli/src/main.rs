@@ -64,6 +64,21 @@ async fn set_active(pool: &deadpool_postgres::Pool, username: &str, active: bool
     }
     let state = if active { "active" } else { "disabled" };
     println!("User {username:?} is now {state}");
+    if !active {
+        purge_sessions(pool, username).await;
+    }
+}
+
+/// Delete every session belonging to `username` (best effort, reported).
+async fn purge_sessions(pool: &deadpool_postgres::Pool, username: &str) {
+    let db = pool.clone().get().await.unwrap();
+    match queries::session::delete_by_username()
+        .bind(&db, &username)
+        .await
+    {
+        Ok(purged) => println!("Purged {purged} session(s) for {username:?}"),
+        Err(e) => eprintln!("Failed to purge sessions for {username:?}: {e}"),
+    }
 }
 
 #[tokio::main]

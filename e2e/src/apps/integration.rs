@@ -125,9 +125,19 @@ fn case_cli_user_disable_enable<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
             .to_contain_text("Dashboard")
             .await?;
 
-        // Disable through the CLI; the live session must fail closed.
+        // Disable through the CLI; the live session must fail closed and the
+        // user's session rows must be purged.
         let status = run_cli(ctx, &repo, &["user-disable", user]).await?;
         anyhow::ensure!(status.success(), "`cli user-disable` exited with {status}");
+        ctx.exec_sql(&format!(
+            "DO $$ BEGIN \
+                 IF (SELECT count(*) FROM \"Session\" WHERE user_id = \
+                     (SELECT id FROM \"User\" WHERE username = '{user}')) <> 0 \
+                 THEN RAISE EXCEPTION 'sessions for {user} were not purged'; \
+                 END IF; \
+             END $$;"
+        ))
+        .await?;
         ctx.goto_for("admin", "/").await?;
         wait_for_selector(ctx, "input[name=username]", 15).await?;
         anyhow::ensure!(
