@@ -296,8 +296,15 @@ bundling (cargo-leptos `style-bundle = true`).
   `style/stylance.css` is committed so a plain `cargo leptos build` works
   without the CLI; `ops/build-upload.sh` and the e2e harness refresh it for you.
 
-Native CSS nesting, `@media`, `@container` and `@layer` are all supported;
-Lightning CSS lowers them for the configured `browserquery`.
+Native CSS nesting, `@media`, `@container` and `@layer` are all supported. The
+`browserquery` in both crates targets browsers with native nesting support
+(Chrome/Edge 120+, Firefox 117+, Safari/iOS 17.2+, Opera 106+, Samsung 25+), so
+Lightning CSS keeps the nested source in the bundle instead of flattening it.
+Adding an older target there re-enables downleveling for it.
+
+`@custom-media` is not available: cargo-leptos always parses with
+`ParserOptions::default()` and gives no way to set Lightning CSS'
+`ParserFlags::CUSTOM_MEDIA`.
 
 Earlier experiments: Sass PR <https://github.com/alexichepura/lapa/pull/24>,
 Lightning CSS bundle with CLI proof of concept
