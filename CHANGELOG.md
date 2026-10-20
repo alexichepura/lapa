@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- CSS bundles now keep native nesting. Both crates pin `browserquery` to
+  browsers that support it (Chrome/Edge 120+, Firefox 117+, Safari/iOS 17.2+,
+  Opera 106+, Samsung 25+) instead of `defaults`, so Lightning CSS no longer
+  flattens nested rules.
 - Ops scripts now target the systemd/ferron 3 layout (`/home/lapa-server`, units
   `lapa-web`/`lapa-admin`, ports 8110/8111): `build-upload.sh`,
   `services-deploy.sh`, `restart.sh`, `ferron-deploy.sh` + `ferron.conf`, and a

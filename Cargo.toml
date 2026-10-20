@@ -182,7 +182,9 @@ site-addr = "127.0.0.1:4141"
 reload-port = 4142
 end2end-cmd = "npx playwright test"
 end2end-dir = "end2end"
-browserquery = "defaults"
+# Keep native CSS nesting in the bundle: every floor here supports it per
+# Lightning CSS' compat table. Lowering a target below these re-flattens the CSS.
+browserquery = "chrome >= 120, edge >= 120, firefox >= 117, safari >= 17.2, ios_saf >= 17.2, opera >= 106, samsung >= 25, and_chr >= 120"
 watch = false
 env = "DEV"
 bin-features = ["ssr"]
