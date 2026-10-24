@@ -60,7 +60,6 @@ cuid2 = "0.1.6"
 deadpool-postgres = { version = "0.14.2", features = ["serde"] }
 dotenvy = "0.15.7"
 gloo-utils = { version = "0.3" }
-html-escape = "0.3.0"
 http = "1.5"
 # image = { version = "0.25.6", features=["avif-native"] }
 image = { version = "0.25.10", features=[] }

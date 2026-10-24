@@ -3,6 +3,7 @@ cfg_if::cfg_if! {if #[cfg(feature = "ssr")] {
 }}
 
 pub mod app;
+pub mod content;
 pub mod err;
 pub mod home;
 pub mod post;

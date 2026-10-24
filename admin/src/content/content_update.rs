@@ -8,9 +8,9 @@ pub async fn content_json_update(
     json: String,
 ) -> Result<Result<(), ContentError>, ServerFnError> {
     crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
-    use content::{CdnImageFormat, CdnImageSize, SlateBlock, SlateBlocks};
+    use content::{CdnImageFormat, CdnImageSize, SlateBlock};
     let mut db = crate::server::db::use_db().await?;
-    let slate_model = serde_json::from_str::<SlateBlocks>(&json)
+    let slate_model = content::parse_content_json(&json)
         .map_err(|e| lib::emsg(e, "Content json is not sarialisable"))?;
     let images_ids: Vec<String> = slate_model
         .into_iter()

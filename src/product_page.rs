@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{
+    content::SlateContent,
     settings::use_site_url,
     util::{AlertDanger, Loading},
 };
@@ -38,7 +39,7 @@ pub struct ProductPageData {
     pub meta_title: String,
     pub meta_description: String,
     pub h1: String,
-    pub content_html: String,
+    pub blocks: content::SlateBlocks,
     pub images: Vec<ImgData>,
     pub hero: Option<String>,
 }
@@ -130,7 +131,9 @@ pub fn ProductPageView(product: ProductPageData) -> impl IntoView {
             />
 
         </div>
-        <article inner_html=product.content_html></article>
+        <article>
+            <SlateContent blocks=product.blocks />
+        </article>
         <dialog node_ref=dialog_element>{dialog_view}</dialog>
     }
 }
@@ -214,8 +217,7 @@ pub async fn get_product(
         .iter()
         .find(|img| img.is_hero)
         .map(|img| img.id.clone());
-    // let (html, headings) = content::content_json_to_html_with_headings(&page.content.json);
-    let content_html = content::content_json_to_html(&page.content_json);
+    let blocks = crate::content::content_blocks(&page.content_json);
 
     let page = ProductPageData {
         id: page.id,
@@ -223,7 +225,7 @@ pub async fn get_product(
         meta_title: page.meta_title,
         meta_description: page.meta_description,
         h1: page.h1,
-        content_html,
+        blocks,
         hero,
         images: images
             .into_iter()
