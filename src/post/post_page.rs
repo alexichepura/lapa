@@ -4,7 +4,10 @@ use leptos_router::{hooks::use_params, params::Params};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::util::{AlertDanger, Loading};
+use crate::{
+    content::SlateContent,
+    util::{AlertDanger, Loading},
+};
 
 #[derive(Params, Clone, Debug, PartialEq, Eq)]
 pub struct PostParams {
@@ -29,7 +32,7 @@ pub struct PostData {
     pub meta_title: String,
     pub meta_description: String,
     pub h1: String,
-    pub content_html: String,
+    pub blocks: content::SlateBlocks,
 }
 
 #[component]
@@ -74,7 +77,9 @@ pub fn PostView(post: PostData) -> impl IntoView {
         <Meta property="og:title" content=post.meta_title.clone() />
         <Meta property="og:description" content=post.meta_description.clone() />
         <h1>{post.h1}</h1>
-        <article inner_html=post.content_html></article>
+        <article>
+            <SlateContent blocks=post.blocks />
+        </article>
     }
 }
 
@@ -93,8 +98,7 @@ pub async fn get_post(
         crate::server::serverr_404();
         return Ok(Err(PostError::NotFound));
     };
-    // let (html, headings) = content::content_json_to_html_with_headings(&post.content.json);
-    let content_html = content::content_json_to_html(&page.content_json);
+    let blocks = crate::content::content_blocks(&page.content_json);
 
     let post_data = PostData {
         id: page.id,
@@ -102,7 +106,7 @@ pub async fn get_post(
         meta_title: page.meta_title,
         meta_description: page.meta_description,
         h1: page.h1,
-        content_html,
+        blocks,
     };
 
     Ok(Ok(post_data))

@@ -986,7 +986,6 @@ checksum = "f67855af358fcb20fac58f9d714c94e2b228fe5694c1c9b4ead4a366343eda1b"
 name = "content"
 version = "0.1.0"
 dependencies = [
- "html-escape 0.3.0",
  "serde",
  "serde_json",
 ]
@@ -2019,12 +2018,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c9356095b4b41197bba32173600e1582792cda618f65d12f68e2e77d273413c5"
 
 [[package]]
-name = "html-escape"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "491194d601b4fa9fac3c9571e014070a0ad1bc3392d1bc10419695196a8b3cc3"
-
-[[package]]
 name = "http"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2732,7 +2725,7 @@ dependencies = [
  "cfg-if",
  "convert_case 0.11.0",
  "convert_case_extras",
- "html-escape 0.2.15",
+ "html-escape",
  "itertools",
  "leptos_hot_reload",
  "prettyplease",
@@ -4922,7 +4915,7 @@ dependencies = [
  "either_of",
  "erased",
  "futures",
- "html-escape 0.2.15",
+ "html-escape",
  "indexmap 2.14.2",
  "itertools",
  "js-sys",

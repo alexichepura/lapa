@@ -26,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Rich-text (Slate) content is rendered with typed Leptos components instead of
+  a hand-written HTML string builder: `content::content_json_to_html` is gone
+  (model and helpers moved to `content/src/slate.rs`), the site has a recursive
+  `SlateContent` component, and internal links go through the router. Escaping
+  of text and attributes comes from `view!`, and the `html-escape` dependency
+  was dropped.
 - CSS bundles now keep native nesting. Both crates pin `browserquery` to
   browsers that support it (Chrome/Edge 120+, Firefox 117+, Safari/iOS 17.2+,
   Opera 106+, Samsung 25+) instead of `defaults`, so Lightning CSS no longer
@@ -69,8 +75,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Site/admin SSR no longer returns 500 when the `Settings` record is missing or
   a DB call fails; `settings_db` falls back to defaults and `robots.txt`
   returns proper 404/500 responses.
-- Rich-text rendering escapes link `href` (as a quoted attribute) and image
-  `alt`/`caption`, and drops `javascript:`/`vbscript:`/`data:` hrefs.
 - Rendering no longer panics on a non-UTF-8 `User-Agent` header.
 - Admin dashboard stats work again: each site page render is recorded in the
   `Ssr` table and the stats queries aggregate in SQL.
@@ -80,6 +84,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- Rich-text content is now escaped by Leptos `view!` rather than by a string
+  renderer, and `javascript:`/`vbscript:`/`data:` (or any unknown scheme) link
+  targets are rendered as plain text instead of an `<a>`.
 - Admin session cookie sets the `Secure` flag in release builds (tunable via
   `SESSION_SECURE`).
 - Admin `/auth/*` endpoints are always rate limited (burst + per-second

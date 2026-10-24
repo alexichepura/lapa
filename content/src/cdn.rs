@@ -78,3 +78,13 @@ impl std::fmt::Display for CdnImageSize {
         )
     }
 }
+
+/// One `srcset` candidate for a content image.
+pub fn cdn_img(id: &str, size: CdnImageSize) -> String {
+    format!("/cdn/{id}_{size} {}w", size.to_width())
+}
+
+/// The `src` fallback for a content image.
+pub fn cdn_img_src(id: &str, size: CdnImageSize) -> String {
+    format!("/cdn/{id}_{size}")
+}
