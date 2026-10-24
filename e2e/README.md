@@ -51,8 +51,8 @@ snapshot, empty states and a console-error sweep.
 `admin`: unauthenticated redirect to the login form, the seeded-user login flow,
 logout, auth negatives (bad password, protected route, default-deny `/api`),
 product create/edit/delete, category+post create, product image upload, image
-make-hero + reorder, the Slate content editor mounting the seeded content, plus
-a console-error sweep across the dashboard/product/post/settings sections.
+make-hero + reorder, the Leptos content editor editing, saving and reloading
+marks and links, plus a console-error sweep across the dashboard/product/post/settings sections.
 
 `integration`: boots both servers and verifies an admin Settings write is read
 back by the public site (`/robots.txt` and the home text), and that a user
