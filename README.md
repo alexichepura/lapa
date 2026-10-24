@@ -5,7 +5,7 @@
 ## Status
 This project is under active development.\
 Recently migrated from Prisma ORM to SQL first approach with [Cornucopia](https://github.com/cornucopia-rs/cornucopia).\
-Also added integration with Slate.js for rich text editor because we don't have a good one in Rust yet.\
+Also added rich text editing with [leptoslate](https://github.com/alexichepura/leptoslate), a Slate-compatible editor written in Rust for Leptos, so the whole stack stays Rust and the stored Slate JSON keeps working.\
 
 ---
 
@@ -67,7 +67,7 @@ Backend framework built with Tokio, Tower, and Hyper. Focuses on ergonomics and 
 - admin auth and session with
   - axum_session [AscendingCreations/AxumSessions](https://github.com/AscendingCreations/AxumSessions)
   - axum_session_auth [AscendingCreations/AxumSessionsAuth](https://github.com/AscendingCreations/AxumSessionsAuth)
-- rich text content editor integration with [ianstormtaylor/slatejs](https://github.com/ianstormtaylor/slate) 
+- rich text content editor integration with [alexichepura/leptoslate](https://github.com/alexichepura/leptoslate)
 - post
   - CRUDL
   - publish_at
@@ -107,9 +107,8 @@ cornucopia schema ./schema.sql
 
 ### Build rich text editor
 
-```sh
-cd slate && npm run build && cd -
-```
+The editor is a Rust dependency (`leptoslate`), so there is no separate
+JavaScript build step.
 
 ### Local DB
 

@@ -26,7 +26,6 @@ dependencies = [
  "cuid2",
  "deadpool-postgres",
  "dotenvy",
- "gloo-utils 0.3.0",
  "http",
  "image",
  "image_config",
@@ -35,6 +34,8 @@ dependencies = [
  "leptos_axum",
  "leptos_meta",
  "leptos_router",
+ "leptoslate",
+ "leptoslate-rich",
  "lib",
  "log",
  "serde",
@@ -1846,7 +1847,7 @@ dependencies = [
  "futures-channel",
  "futures-core",
  "futures-sink",
- "gloo-utils 0.2.0",
+ "gloo-utils",
  "http",
  "js-sys",
  "pin-project",
@@ -1863,19 +1864,6 @@ name = "gloo-utils"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b5555354113b18c547c1d3a98fbf7fb32a9ff4f6fa112ce823a21641a0ba3aa"
-dependencies = [
- "js-sys",
- "serde",
- "serde_json",
- "wasm-bindgen",
- "web-sys",
-]
-
-[[package]]
-name = "gloo-utils"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4202275d95a142fa209a1e35e91c250a710c5600731372cd3464a39ed01573d6"
 dependencies = [
  "js-sys",
  "serde",
@@ -2809,6 +2797,41 @@ dependencies = [
  "server_fn",
  "tachys",
  "tracing",
+]
+
+[[package]]
+name = "leptoslate"
+version = "0.1.0"
+source = "git+https://github.com/alexichepura/leptoslate?rev=ad7f8595a4a83da1fb33d499cfb98381fc87ee4c#ad7f8595a4a83da1fb33d499cfb98381fc87ee4c"
+dependencies = [
+ "console_error_panic_hook",
+ "leptos",
+ "leptoslate-core",
+ "send_wrapper",
+ "serde_json",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
+name = "leptoslate-core"
+version = "0.1.0"
+source = "git+https://github.com/alexichepura/leptoslate?rev=ad7f8595a4a83da1fb33d499cfb98381fc87ee4c#ad7f8595a4a83da1fb33d499cfb98381fc87ee4c"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "leptoslate-rich"
+version = "0.1.0"
+source = "git+https://github.com/alexichepura/leptoslate?rev=ad7f8595a4a83da1fb33d499cfb98381fc87ee4c#ad7f8595a4a83da1fb33d499cfb98381fc87ee4c"
+dependencies = [
+ "leptos",
+ "leptoslate",
+ "serde_json",
+ "tl",
+ "web-sys",
 ]
 
 [[package]]
@@ -5116,6 +5139,12 @@ name = "tinyvec"
 version = "1.13.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee"
+
+[[package]]
+name = "tl"
+version = "0.7.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b130bd8a58c163224b44e217b4239ca7b927d82bf6cc2fea1fc561d15056e3f7"
 
 [[package]]
 name = "tls_codec"

@@ -26,11 +26,12 @@ console_error_panic_hook = { workspace = true, optional = true }
 cuid2 = { workspace = true, optional = true }
 deadpool-postgres = { workspace = true, optional = true }
 dotenvy = { workspace = true, optional = true }
-gloo-utils = { workspace = true, optional = true }
 http = { workspace = true }
 image = { workspace = true, optional = true }
 js-sys = { workspace = true, optional = true }
 leptos = { workspace = true, features = ["multipart"] }
+leptoslate = { workspace = true, optional = true }
+leptoslate-rich = { workspace = true, optional = true }
 leptos_axum = { workspace = true, optional = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
@@ -63,7 +64,8 @@ hydrate = [
     "dep:wasm-bindgen",
     "dep:web-sys",
     "dep:console_error_panic_hook",
-    "dep:gloo-utils",
+    "dep:leptoslate",
+    "dep:leptoslate-rich",
     "dep:serde-wasm-bindgen",
     "dep:tracing-wasm",
     "leptos/hydrate",

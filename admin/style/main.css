@@ -148,3 +148,71 @@ dialog {
 		width: auto;
 	}
 }
+
+.content-editor {
+	border: var(--border-size-1) solid var(--surface-3);
+	border-radius: var(--radius-2);
+	padding: var(--size-2);
+	background: var(--surface-1);
+}
+
+.content-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-1);
+	margin-block-end: var(--size-2);
+	padding-block-end: var(--size-1);
+	border-block-end: var(--border-size-1) solid var(--surface-3);
+
+	>button {
+		min-inline-size: 2rem;
+		padding: var(--size-1) var(--size-2);
+
+		&.active {
+			background: var(--surface-4);
+		}
+
+		&:disabled {
+			opacity: 0.4;
+		}
+	}
+}
+
+.content-editor .ls-editor {
+	min-block-size: 12rem;
+}
+
+.content-editor .ls-media {
+	margin: 0;
+	padding: 0;
+	position: relative;
+
+	>img {
+		max-inline-size: 100%;
+		height: auto;
+	}
+
+	>figcaption {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--size-1);
+		font-size: var(--font-size-0);
+		color: var(--text-2);
+	}
+
+	&.ls-selected {
+		outline: var(--border-size-2) solid var(--blue-6);
+		outline-offset: 2px;
+	}
+}
+
+.ls-media-tools {
+	display: inline-flex;
+	gap: var(--size-1);
+
+	>button {
+		font-size: var(--font-size-0);
+		padding: 0 var(--size-1);
+	}
+}

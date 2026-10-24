@@ -433,17 +433,57 @@ fn case_image_hero_and_order<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     })
 }
 
-/// The Slate rich-text editor loads the seeded content in the product page.
+/// The rich-text editor mounts, edits and saves the seeded content.
 fn case_content_editor<'a>(ctx: &'a CaseCtx) -> CaseFuture<'a> {
     Box::pin(async move {
         login(ctx).await?;
         ctx.clear_browser_errors();
-        ctx.goto_for("admin", &format!("/product/{}", seed::PRODUCT_SLUG))
-            .await?;
-        // Slate mounts a contenteditable inside `#app` once hydrated.
-        wait_at_least(ctx, "#app [contenteditable]", 1, 30).await?;
+        let product_path = format!("/product/{}", seed::PRODUCT_SLUG);
+        ctx.goto_for("admin", &product_path).await?;
+        // The Leptos editor mounts a contenteditable once hydrated.
+        wait_at_least(ctx, ".ls-editor", 1, 30).await?;
         // The seeded product body is rendered into the editor.
         wait_at_least(ctx, "text=E2E product body.", 1, 30).await?;
+
+        // Append text, then switch on bold and keep typing through the toolbar.
+        ctx.page.locator(".ls-editor p").first().click(None).await?;
+        ctx.page.keyboard().press("End", None).await?;
+        ctx.page.keyboard().type_text(" E2E edit", None).await?;
+        ctx.page
+            .locator(".content-toolbar button[title=Bold]")
+            .click(None)
+            .await?;
+        ctx.page.keyboard().type_text(" bold", None).await?;
+
+        // Insert a link through the link dialog; the caret is collapsed, so
+        // this exercises the inline-node path and the nested href property.
+        ctx.page
+            .locator(".content-toolbar button[title=Link]")
+            .click(None)
+            .await?;
+        ctx.page
+            .locator(r#"dialog:has(input[name=href]) input[name=href]"#)
+            .fill("/e2e-link", None)
+            .await?;
+        ctx.page
+            .locator(r#"dialog:has(input[name=href]) input[name=text]"#)
+            .fill(" link", None)
+            .await?;
+        ctx.page
+            .locator(r#"dialog:has(input[name=href]) button[type=submit]"#)
+            .click(None)
+            .await?;
+
+        // Save, reload, and check that the document round-tripped through the
+        // server: the text is still there and the bold mark survived.
+        submit(ctx, "Save content").await?;
+        wait_at_least(ctx, "text=Success", 1, 20).await?;
+        ctx.goto_for("admin", &product_path).await?;
+        wait_at_least(ctx, ".ls-editor", 1, 30).await?;
+        wait_at_least(ctx, ".ls-editor [data-marks*=strong]", 1, 30).await?;
+        wait_at_least(ctx, "text=E2E edit bold", 1, 30).await?;
+        wait_at_least(ctx, r#".ls-editor a[href='/e2e-link']"#, 1, 30).await?;
+        wait_at_least(ctx, "text=link", 1, 30).await?;
 
         let problems: Vec<String> = ctx
             .console_errors()

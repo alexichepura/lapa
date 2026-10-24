@@ -9,42 +9,34 @@ stylance::import_crate_style!(
     "src/grid.module.css"
 );
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct LinkEditData {
     pub href: String,
     pub text: String,
 }
+
 #[component]
 pub fn ContentLinkEditor(
     editing: ReadSignal<Option<LinkEditData>>,
-    set_editing: WriteSignal<Option<LinkEditData>>,
-    updater: ReadSignal<Option<Box<dyn Fn(LinkEditData)>>, LocalStorage>,
+    on_save: Callback<LinkEditData>,
+    on_delete: Callback<()>,
+    on_close: Callback<()>,
 ) -> impl IntoView {
     let dialog_element: NodeRef<Dialog> = NodeRef::new();
-    let save = move |updated_link: LinkEditData| {
-        let binding = updater.read_untracked();
-        let updater = binding.as_ref().unwrap();
-        updater(updated_link);
-        set_editing(None);
-    };
-    let del = move || {
-        set_editing(None);
-    };
-    let close = move || {
-        set_editing(None);
-    };
     let edit_view = move || match editing() {
-        Some(link) => Either::Left(view! { <LinkEditModalForm link save del close /> }),
+        Some(link) => Either::Left(view! {
+            <LinkEditModalForm link on_save on_delete on_close />
+        }),
         None => Either::Right(()),
     };
     Effect::new(move |_| {
-        if let Some(_id) = editing() {
+        if editing().is_some() {
             let el = dialog_element.get().expect("<dialog> to exist");
             let _modal_result = el.show_modal();
         } else {
             let el = dialog_element.get();
             if let Some(el) = el {
-                let _modal_result = el.close();
+                el.close();
             }
         }
     });
@@ -54,26 +46,33 @@ pub fn ContentLinkEditor(
         </dialog>
     }
 }
+
 #[component]
-pub fn LinkEditModalForm(
+fn LinkEditModalForm(
     link: LinkEditData,
-    save: impl Fn(LinkEditData) + 'static,
-    del: impl Fn() + 'static,
-    close: impl Fn() + 'static,
+    on_save: Callback<LinkEditData>,
+    on_delete: Callback<()>,
+    on_close: Callback<()>,
 ) -> impl IntoView {
     let href = RwSignal::new(link.href.clone());
     let text = RwSignal::new(link.text.clone());
     let on_submit = move |ev: web_sys::SubmitEvent| {
         ev.prevent_default();
-        let updated_link = LinkEditData {
+        on_save.run(LinkEditData {
             href: href.get_untracked(),
             text: text.get_untracked(),
-        };
-        save(updated_link);
+        });
     };
     view! {
         <div>
-            <button on:click=move |_e| del()>Delete</button>
+            <button
+                on:click=move |ev| {
+                    ev.prevent_default();
+                    on_delete.run(());
+                }
+            >
+                Delete
+            </button>
             <hr />
             <form on:submit=on_submit>
                 <fieldset>
@@ -84,7 +83,7 @@ pub fn LinkEditModalForm(
             </form>
             <button on:click=move |ev| {
                 ev.prevent_default();
-                close();
+                on_close.run(());
             }>Cancel without saving</button>
         </div>
     }
