@@ -26,6 +26,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The admin rich-text editor now uses
+  [leptoslate](https://github.com/alexichepura/leptoslate) instead of the
+  Slate.js/React app in `slate/`. The editor stores the same document shape
+  (`strong`/`em`/`u` marks and `attributes.href` links) through
+  `MarkSet`/`PropertyPath`, so existing rows need no migration. The separate
+  rspack/Node build and the `wasm-bindgen` bridge are gone; the editor is a
+  regular Leptos component.
+- Rich-text rendering now supports the blocks a rich paste can produce:
+  structured tables, external and inline images, code blocks, `<hr>` and span
+  wrappers. Unknown node types render their children instead of blanking the
+  whole document.
 - Rich-text (Slate) content is rendered with typed Leptos components instead of
   a hand-written HTML string builder: `content::content_json_to_html` is gone
   (model and helpers moved to `content/src/slate.rs`), the site has a recursive

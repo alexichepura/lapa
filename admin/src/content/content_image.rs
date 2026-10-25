@@ -22,72 +22,67 @@ stylance::import_crate_style!(
 pub fn ContentImageEditor(
     content_id: String,
     editing: ReadSignal<Option<ImageEditData>>,
-    set_editing: WriteSignal<Option<ImageEditData>>,
-    updater: ReadSignal<Option<Box<dyn Fn(ImageEditData)>>, LocalStorage>,
+    on_save: Callback<ImageEditData>,
+    on_delete: Callback<()>,
+    on_close: Callback<()>,
 ) -> impl IntoView {
     let dialog_element: NodeRef<Dialog> = NodeRef::new();
-    let save = move |updated_image: ImageEditData| {
-        let binding = updater.read_untracked();
-        let updater = binding.as_ref().unwrap();
-        updater(updated_image);
-        set_editing(None);
-    };
-    let del = move || {
-        set_editing(None);
-    };
-    let close = move || {
-        set_editing(None);
-    };
     let edit_view = move || match editing() {
-        Some(image) => Either::Left(
-            view! { <ImageEditModalForm content_id=content_id.clone() image save del close /> },
-        ),
+        Some(image) => Either::Left(view! {
+            <ImageEditModalForm content_id=content_id.clone() image on_save on_delete on_close />
+        }),
         None => Either::Right(()),
     };
     Effect::new(move |_| {
-        if let Some(_id) = editing() {
+        if editing().is_some() {
             let el = dialog_element.get().expect("<dialog> to exist");
             let _modal_result = el.show_modal();
         } else {
             let el = dialog_element.get();
             if let Some(el) = el {
-                let _modal_result = el.close();
+                el.close();
             }
         }
     });
     view! { <dialog node_ref=dialog_element>{edit_view}</dialog> }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ImageEditData {
     pub id: String,
     pub alt: String,
     pub caption: String,
 }
+
 #[component]
-pub fn ImageEditModalForm(
+fn ImageEditModalForm(
     content_id: String,
     image: ImageEditData,
-    save: impl Fn(ImageEditData) + 'static,
-    del: impl Fn() + 'static,
-    close: impl Fn() + 'static,
+    on_save: Callback<ImageEditData>,
+    on_delete: Callback<()>,
+    on_close: Callback<()>,
 ) -> impl IntoView {
-    // let image_id = RwSignal::new(image.id.clone());
     let (image_id, set_image_id) = signal(image.id);
     let alt = RwSignal::new(image.alt.clone());
     let caption = RwSignal::new(image.caption.clone());
     let on_submit = move |ev: web_sys::SubmitEvent| {
         ev.prevent_default();
-        let updated_image = ImageEditData {
+        on_save.run(ImageEditData {
             id: image_id.get_untracked(),
             alt: alt.get_untracked(),
             caption: caption.get_untracked(),
-        };
-        save(updated_image);
+        });
     };
     view! {
         <div>
-            <button on:click=move |_e| del()>Delete</button>
+            <button
+                on:click=move |ev| {
+                    ev.prevent_default();
+                    on_delete.run(());
+                }
+            >
+                Delete
+            </button>
             <hr />
             <ContentImageUpload content_id set_image_id />
             <hr />
@@ -100,7 +95,7 @@ pub fn ImageEditModalForm(
             </form>
             <button on:click=move |ev| {
                 ev.prevent_default();
-                close();
+                on_close.run(());
             }>Cancel without saving</button>
         </div>
     }

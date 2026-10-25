@@ -8,20 +8,11 @@ pub async fn content_json_update(
     json: String,
 ) -> Result<Result<(), ContentError>, ServerFnError> {
     crate::server::require_permission(crate::auth::Permission::ContentWrite).await?;
-    use content::{CdnImageFormat, CdnImageSize, SlateBlock};
+    use content::{CdnImageFormat, CdnImageSize};
     let mut db = crate::server::db::use_db().await?;
-    let slate_model = content::parse_content_json(&json)
+    content::parse_content_json(&json)
         .map_err(|e| lib::emsg(e, "Content json is not sarialisable"))?;
-    let images_ids: Vec<String> = slate_model
-        .into_iter()
-        .filter_map(|block| {
-            if let SlateBlock::Img(img) = block {
-                Some(img.id)
-            } else {
-                None
-            }
-        })
-        .collect();
+    let images_ids = content::image_ids(&json);
     let _current_content = cornucopia::queries::admin_content::read() // TODO "exists" method?
         .bind(&db, &content_id)
         .opt()

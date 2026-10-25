@@ -9,7 +9,7 @@ use crate::{
 pub fn ContentHtml(content_id: String, content_json: String) -> impl IntoView {
     let action = ServerAction::<ContentJsonUpdate>::new();
     let pending = action.pending();
-    let (content, set_content) = signal(String::from(content_json.clone()));
+    let (content, set_content) = signal(content_json.clone());
 
     view! {
         <fieldset prop:disabled=pending>

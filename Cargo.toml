@@ -59,12 +59,13 @@ console_error_panic_hook = "0.1"
 cuid2 = "0.1.6"
 deadpool-postgres = { version = "0.14.2", features = ["serde"] }
 dotenvy = "0.15.7"
-gloo-utils = { version = "0.3" }
 http = "1.5"
 # image = { version = "0.25.6", features=["avif-native"] }
 image = { version = "0.25.10", features=[] }
 js-sys = { version = "0.3" }
 leptos = { version = "0.8", features = ["nightly", "tracing"] }
+leptoslate = { git = "https://github.com/alexichepura/leptoslate", rev = "ad7f8595a4a83da1fb33d499cfb98381fc87ee4c" }
+leptoslate-rich = { git = "https://github.com/alexichepura/leptoslate", rev = "ad7f8595a4a83da1fb33d499cfb98381fc87ee4c" }
 leptos_axum = { version = "0.8" }
 leptos_meta = { version = "0.8" }
 leptos_router = { version = "0.8", features = ["nightly"] }

@@ -13,7 +13,6 @@ pub mod layout;
 pub mod post;
 pub mod product;
 pub mod settings;
-pub mod slate;
 pub mod upload;
 pub mod util;
 
